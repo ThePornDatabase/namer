@@ -185,12 +185,12 @@ def metadata_api_lookup(name_parts: FileNameParts, authtoken) -> List[Comparison
     return results
 
 
-def match_percent(result: ComparisonResult) -> str:
+def match_percent(result: ComparisonResult) -> float:
     addvalue=0.00
-    if result.is_match:
+    if result.is_match() == True:
         addvalue=1000.00
-    value = "{0:.2f}".format(result.name_match + addvalue)
-    print("Name match was "+value+" for "+result.name)   
+    value = result.name_match + addvalue
+    print("Name match was {0:.2f} for {1}".format(value, result.name))
     return value
 
 
