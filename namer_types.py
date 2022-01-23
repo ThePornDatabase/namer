@@ -203,7 +203,8 @@ class NamerConfig():
             str += "  porndb_token: {}\n".format(re.sub(r'.', '*', self.porndb_token))
         else:
             str += "  porndb_token: None In Set, Go to https://metadatapi.net/ to get one!\n"   
-        str += "  output: {}\n".format(self.output)
+
+        str += "  inplace_name: {}\n".format(self.inplace_name)
         str += "  prefer_dir_name_if_available: {}\n".format(self.prefer_dir_name_if_available)
         str += "  set_uid: {}\n".format(self.set_uid)
         str += "  set_gid: {}\n".format(self.set_gid)
@@ -218,6 +219,7 @@ class NamerConfig():
         str += "Watchdog Config:\n"
         str += "  min_file_size: {}mb\n".format(self.min_file_size)
         str += "  del_other_files: {}\n".format(self.del_other_files)
+        str += "  new_relative_path_name: {}\n".format(self.new_relative_path_name)
         str += "  watch_dir: {}\n".format(self.watch_dir)
         str += "  work_dir: {}\n".format(self.work_dir)
         str += "  failed_dir: {}\n".format(self.failed_dir)
@@ -357,6 +359,11 @@ class Performer:
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo():
+    uuid: str = ""
+    """
+    porndb scene id, allowing lookup of more metadata, (tags)
+    """
+
     site: str = ""
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
@@ -405,11 +412,19 @@ class LookedUpFileInfo():
     """
     ID Used by the queried site to identify the video
     """
+
+    tags: List[str]
+    """
+    Tags associated with the video.   Noisy and long list.
+    """
+
     def __init__(self):
         self.performers = []
+        self.tags = []
     
     def asdict(self):
-        return {'date': self.date,
+        return {'uuid': self.uuid,
+                'date': self.date,
                 'description': self.description,
                 'name': self.name,
                 'site': self.site,

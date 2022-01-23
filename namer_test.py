@@ -81,7 +81,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         targetfile = os.path.join(tmpdir.name, "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
         os.rename(input, targetfile)
         copy_tree(targetfile, targetfile+"2")
-        mock_poster.return_value = os.path.join(targetfile,"poster.png")
+        mock_poster.side_effect = [os.path.join(targetfile,"poster.png"),os.path.join(targetfile+"2","poster.png")]
         main(['-d',os.path.dirname(targetfile),'-m'])
         output = MP4(os.path.join(targetfile, 'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
         self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])

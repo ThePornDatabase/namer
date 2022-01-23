@@ -54,10 +54,9 @@ def update_mp4_file(mp4: str, looked_up: LookedUpFileInfo, poster: str, config: 
     video["hdvd"] = [resolution_to_hdv_setting(getResolution(mp4))]
     video["ldes"] = [looked_up.description]
     video["----:com.apple.iTunes:iTunEXTC"] = 'mpaa|XXX|0|'.encode("UTF-8", errors="ignore")
-#    video["catg"] = looked_up.  #categories
-#    video["keyw"] = looked_up.  #keywords
+    #video["catg"] = looked_up.tags
+    video["keyw"] = looked_up.tags
     
-
     iTunMOVI = '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>'
     iTunMOVI += '<key>copy-warning</key><string>{}</string>'.format(escape(looked_up.source_url))
     iTunMOVI += '<key>studio</key> <string>{}</string>'.format(escape(looked_up.site))

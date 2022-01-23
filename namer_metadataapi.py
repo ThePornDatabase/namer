@@ -137,42 +137,60 @@ def get_poster(url: str, authtoken: str, video_file: str) -> str:
             binary_file.write(content)  
     return file         
 
+def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
+    fileInfo = LookedUpFileInfo()
+    fileInfo.uuid = data._id
+    fileInfo.name = data.title
+    fileInfo.description = data.description
+    fileInfo.date = data.date
+    fileInfo.source_url = data.url
+    fileInfo.poster_url = data.poster
+    fileInfo.site = data.site.name.replace(' ','')
+    fileInfo.look_up_site_id = data._id
+    for json_performer in data.performers:
+        performer = Performer()
+        if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
+            performer.role = json_performer.parent.extras.gender
+        performer.name = json_performer.name
+        fileInfo.performers.append(performer)
+    fileInfo.original_query=url
+    fileInfo.original_response=json_response
+    fileInfo.original_parsed_filename=name_parts
+    tags = []
+    if hasattr(data, "tags"):
+        for tag in data.tags:
+            tags.append(tag.name)
+        fileInfo.tags = tags    
+    return fileInfo
+
 
 def __metadataapi_response_to_data(json_object, url, json_response, name_parts) -> List[LookedUpFileInfo]:
     fileInfos = []
     if hasattr(json_object, "data"):
-        for data in json_object.data:
-            fileInfo = LookedUpFileInfo()
-            fileInfo.name = data.title
-            fileInfo.description = data.description
-            fileInfo.date = data.date
-            fileInfo.source_url = data.url
-            fileInfo.poster_url = data.poster
-            fileInfo.site = data.site.name.replace(' ','')
-            fileInfo.look_up_site_id = data._id
-            for json_performer in data.performers:
-                performer = Performer()
-                if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
-                    performer.role = json_performer.parent.extras.gender
-                performer.name = json_performer.name
-                fileInfo.performers.append(performer)
-            fileInfo.original_query=url
-            fileInfo.original_response=json_response
-            fileInfo.original_parsed_filename=name_parts
-            fileInfos.append(fileInfo)
+        if type(json_object.data) is list:
+            for data in json_object.data:
+                fileInfo = __jsondata_to_fileinfo(data, url, json_response, name_parts)
+                fileInfos.append(fileInfo)
+        else:
+            fileInfos.append(__jsondata_to_fileinfo(json_object.data, url, json_response, name_parts))
     return fileInfos
 
 
-def __buildUrl(site=None, date=None, name=None) -> str:
+def __buildUrl(site:str=None, date:str=None, name:str=None, uuid:str=None) -> str:
     #filename = ""
-    query = ""
-    if site != None:
-        query += urllib.parse.quote(re.sub(r' ', '.', site))+"."
-    if date != None:
-        query += date+"."
-    if name != None:
-        query += urllib.parse.quote(re.sub(r' ', '.', name))
-    return "https://api.metadataapi.net/scenes?parse={}&limit=1".format(query)
+    query = ""   
+    if uuid is not None:
+        query = "/"+uuid
+    else:
+        query="?parse="
+        if site != None:
+            query += urllib.parse.quote(re.sub(r' ', '.', site))+"."
+        if date != None:
+            query += date+"."
+        if name != None:
+            query += urllib.parse.quote(re.sub(r' ', '.', name))
+        query="&limit=1"
+    return "https://api.metadataapi.net/scenes".format(query)
     
 
 def __getMetadataApiNetFileInfo(name_parts: FileNameParts, authtoken: str, skipdate: bool, skipsite: bool, skipname: bool) -> List[LookedUpFileInfo]:
@@ -191,6 +209,20 @@ def __getMetadataApiNetFileInfo(name_parts: FileNameParts, authtoken: str, skipd
     return fileInfos
 
 
+def __getCompleteMetadataApiNetFileInfo(name_parts: FileNameParts, uuid: str, authtoken: str) -> LookedUpFileInfo:
+    url = __buildUrl(uuid=uuid)
+    logger.info("Querying: {}".format(url))
+    json_response = __get_response_json_object(url, authtoken)
+    fileInfos = []
+    if json_response != None and json_response.strip() != '':
+        logger.info("json_repsonse: ".format(json_response ))
+        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
+        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
+        fileInfos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
+    if len(fileInfos)>0:  
+        return fileInfos[0]    
+    return None
+
 def match(file_name_parts: FileNameParts, porndb_token: str) -> List[ComparisonResult]:
     """
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
@@ -198,6 +230,12 @@ def match(file_name_parts: FileNameParts, porndb_token: str) -> List[ComparisonR
     """
     comparison_results = __metadata_api_lookup(file_name_parts, porndb_token)
     comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
+    # Works around the porndb not returning all info on search queries by looking up the full data
+    # with the uuid of the best match.
+    if len(comparison_results) > 0 and comparison_results[0].is_match is True:
+       fileInfo =  __getCompleteMetadataApiNetFileInfo(file_name_parts, comparison_results[0].looked_up.uuid ,porndb_token)
+       if fileInfo != None:
+           comparison_results[0].looked_up = fileInfo
     return comparison_results
 
 

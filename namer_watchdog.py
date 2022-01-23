@@ -4,7 +4,7 @@ import time
 import os
 import sys
 import traceback
-from namer import process, dirWithSubdirsToProcess, setPermissions
+from namer import process
 from namer_types import NamerConfig, defaultConfig
 from pathlib import PurePath
 import logging
@@ -124,7 +124,8 @@ class MovieWatcher:
         )
 
 def watchForMovies(config: NamerConfig):
-    print("Porndb scene watcher....")
+    logger.info(str(config))
+    logger.info("Start porndb scene watcher.... watching: {}".format(config.watch_dir))
     if os.environ.get('BUILD_DATE'):
         build_date = os.environ.get('BUILD_DATE')
         print("Built on: {}".format(build_date))
@@ -133,7 +134,8 @@ def watchForMovies(config: NamerConfig):
         print("Git Hash: {}".format(git_hash))
     mw = MovieWatcher(config)
     mw.run()
-    print("exiting")
+    logger.info("exiting")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     watchForMovies(defaultConfig())

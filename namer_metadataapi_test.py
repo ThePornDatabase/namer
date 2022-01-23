@@ -76,6 +76,29 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertListEqual(info.performers, expected)
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
+    def test_call_full_metadataapi_net(self, mock_response):
+        mock_response.return_value = readfile(os.path.join(current,"test","full.json"))
+        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
+        results = match(name, "your_porndb_authkey")
+        self.assertEqual(len(results), 1)
+        result = results[0]
+        self.assertTrue(result.datematch)
+        self.assertTrue(result.sitematch)
+        self.assertGreaterEqual(result.name_match, 90.0)
+        info = results[0].looked_up
+        self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
+        self.assertEqual(info.date, "2022-01-03")
+        self.assertEqual(info.site, "EvilAngel")
+        self.assertRegex(info.description, r'brunette Carmela Clutch positions her big, juicy')
+        self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
+        self.assertRegexpMatches(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
+        expected = []
+        expected.append(Performer("Carmela Clutch", "Female"))
+        expected.append(Performer("Francesca Le","Female"))
+        expected.append(Performer("Mark Wood","Male"))     
+        self.assertListEqual(info.performers, expected)
+
+    @mock.patch("namer_metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_data(self, mock_response):
         mock_response.return_value = '{}'
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
