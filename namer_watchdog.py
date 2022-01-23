@@ -110,8 +110,8 @@ if __name__ == "__main__":
     namerConfig.successfuldir = config['namer']['dest_dir']
     namerConfig.porndb_token = config['namer']['porndb_token']
     namerConfig.min_file_size = int(config['namer']['min_file_size'])
-    namerConfig.use_dir_name = bool(config['namer']['use_dir_name'])
-    namerConfig.del_other_files = bool(config['namer']['del_other_files'])
+    namerConfig.use_dir_name = config['namer']['use_dir_name'].upper() == "TRUE"
+    namerConfig.del_other_files = config['namer']['del_other_files'].upper() == "TRUE"
     namerConfig.set_gid = int(config['namer']['set_gid'])
     namerConfig.set_dir_permissions = config['namer']['set_dir_permissions']
     namerConfig.set_file_permissions = config['namer']['set_file_permissions']
