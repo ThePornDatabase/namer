@@ -1,18 +1,19 @@
 import os
 import json
-from sys import stdout
 from types import SimpleNamespace
 from distutils.file_util import copy_file
 import subprocess
-from typing import Tuple
-import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
+import logging
+
+logger = logging.getLogger('ffmpeg')
 
 def getResolution(file: str) -> int:
     """
     Gets the vertical resolution of an mp4 file.  For example, 720, 1080, 2160...
     """
-    print("resolution stream of file {}".format(file))
+    logger.info("resolution stream of file {}".format(file))
 
     process = subprocess.Popen(['ffprobe',  
                                     '-v',
@@ -31,12 +32,13 @@ def getResolution(file: str) -> int:
     output = process.stdout.read()
     error_msg = process.stderr.read()
     if not success:
-        print("Error gettng resolution of file {}".format(file))
-        print("{}".format(error_msg))
+        logger.warning("Error gettng resolution of file {}".format(file))
+        logger.warning("{}".format(error_msg))
     process.stdout.close()
     process.stderr.close()
-    print("output {}".format(output))
+    logger.info("output {}".format(output))
     return int(output)
+
 
 def getAudioStreamForLang(input: str, language: str) -> int:
     """
@@ -62,12 +64,12 @@ def getAudioStreamForLang(input: str, language: str) -> int:
     audio_streams_str = process.stdout.read()
     audio_streams_err = process.stderr.read()
     if not success:
-        print("Error gettng audio streams of file {}".format(input))
-        print("{}".format(audio_streams_err))
+        logger.warning("Error gettng audio streams of file {}".format(input))
+        logger.warning("{}".format(audio_streams_err))
     process.stdout.close()
     process.stderr.close()
 
-    print("Target for audio: {}".format(input))
+    logger.info("Target for audio: {}".format(input))
 
     audio_streams = json.loads(audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
     lang_stream=None
@@ -88,7 +90,8 @@ def getAudioStreamForLang(input: str, language: str) -> int:
                 return lang_stream
     return None
 
-def copyAndUpdateAudioStreamIfNeeded(input: str, output: str, language: str) -> bool:
+
+def updateAudioStreamIfNeeded(input: str, language: str) -> bool:
     """
     Returns true if the file had to be edited to have a default audio stream equal to the desired language,
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
@@ -123,14 +126,16 @@ def copyAndUpdateAudioStreamIfNeeded(input: str, output: str, language: str) -> 
     #     if success:
     #         input=newinput
 
+    tempdir = TemporaryDirectory("", "namer_tag")
+    workfile = os.path.join(tempdir.name, os.path.basename(input))
     stream = getAudioStreamForLang(input, language)
     if stream != None:
         newinput = None
-        if input == output:
+        if input == workfile:
             newinput = os.path.join(Path(input).parent.absolute(), "temp_"+os.path.basename(input))
             os.rename(input, newinput)
             input = newinput
-        print("Attempt to alter default audio stream of {}".format(input))    
+        logger.info("Attempt to alter default audio stream of {}".format(input))    
         process = subprocess.Popen(['ffmpeg',  
                                     '-i',
                                     '{}'.format(input), #input file
@@ -142,45 +147,26 @@ def copyAndUpdateAudioStreamIfNeeded(input: str, output: str, language: str) -> 
                                     'default',
                                     '-c',
                                     'copy', #don't reencode anything.
-                                    '{}'.format(output)],
+                                    '{}'.format(workfile)],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     universal_newlines=True)
         output = process.stdout.read()
         error_msg = process.stderr.read()
         success = process.wait() == 0
-        if not success:
-            print("Could not update audio stream for {}".format(input))
-            print("{}".format(error_msg))
         process.stdout.close()
         process.stderr.close()
-        print('Return code: '.format(process.returncode))
-        if newinput != None:
-            os.remove(newinput)
+        if not success:
+            logger.info("Could not update audio stream for {}".format(input))
+            logger.info("{}".format(error_msg))
+        else:   
+            logger.warning('Return code: '.format(process.returncode))
+            if newinput != None:
+                os.remove(newinput)
+            else:
+                os.remove(input)
+            os.rename(workfile, input) 
+        tempdir.cleanup()   
         return success
     else:
-        return copy_file(input, output)[1]
-
-
-class UnitTestAsTheDefaultExecution(unittest.TestCase):
-    """
-    Always test first.
-    """
-
-    current=os.path.dirname(os.path.abspath(__file__))
-
-
-    def test_get_resolution(self):
-        file = os.path.join(os.path.join(self.current, "test"), "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4")
-        res = getResolution(file)
-        self.assertEqual(res, 240)
-
-    def test_get_audio_stream(self):
-        file = os.path.join(os.path.join(self.current, "test"), "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4")
-        id = getAudioStreamForLang(file, "und")
-        self.assertEqual(id, None)
-        id = getAudioStreamForLang(file, "eng")
-        self.assertEqual(id, None)
-
-if __name__ == '__main__':
-    unittest.main()
+        return True

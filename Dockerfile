@@ -19,11 +19,8 @@ RUN apt-get update \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
-RUN pip3 install setuptools \
-    && pip3 install numpy \
-    && pip3 install WatchDog \
-    && pip3 install mutagen rapidfuzz
 COPY . /opt/renamer/
+RUN pip3 install -r /opt/renamer/requirements.txt
 
 FROM APP as TEST
 RUN /usr/bin/python3 -m unittest discover -s /opt/renamer -p '*.py'

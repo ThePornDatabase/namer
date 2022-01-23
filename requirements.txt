@@ -1,0 +1,5 @@
+setuptools
+numpy
+WatchDog
+mutagen
+rapidfuzz

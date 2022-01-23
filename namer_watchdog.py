@@ -1,14 +1,17 @@
+import pathlib
+import shutil
 import time
 import os
-import configparser
 import sys
 import traceback
-from namer import process, NamerConfig
+from namer import process, dirWithSubdirsToProcess, setPermissions
+from namer_types import NamerConfig, defaultConfig
 from pathlib import PurePath
-
+import logging
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, FileSystemMovedEvent
 
+logger = logging.getLogger('watchdog')
 
 def doneCopying(file: str) -> bool:
     size_past = 0
@@ -22,12 +25,47 @@ def doneCopying(file: str) -> bool:
         else:
             size_past = size_now
 
+def handle(target_file: str, namerConfig: NamerConfig):
+    relative_path = os.path.relpath(target_file,namerConfig.watch_dir)
+    
+    #is in a dir:
+    detected = PurePath(relative_path).parts[0]
+    dir_path = os.path.join(namerConfig.watch_dir, detected)
+    
+    to_process=None
+    workingdir=None
+    workingfile=None
+    if os.path.isdir(dir_path):
+        workingdir = os.path.join(namerConfig.work_dir,detected)
+        os.rename(dir_path, workingdir)
+        to_process=workingdir
+    else:
+        workingfile = os.path.join(namerConfig.work_dir,relative_path)
+        os.rename(target_file,workingfile)
+        to_process=workingfile
+    result = process(to_process, namerConfig)
+    
+    if not result.found:
+        if workingdir is not None:
+            os.rename(workingdir, os.path.join(namerConfig.failed_dir,detected))
+        else:
+            newvideo = os.path.join(namerConfig.failed_dir,relative_path)
+            os.rename(workingfile, newvideo)
+            os.rename(result.namer_log_file, os.path.splitext(newvideo)[0]+"_namer.log")
+    else:        
+        newfile = os.path.join(namerConfig.dest_dir,relative_path)
+        if len(PurePath(relative_path).parts) > 1 and workingdir is not None and namerConfig.del_other_files == False: 
+            shutil.move(workingdir, os.path.dirname(newfile))
+        else:
+            shutil.move(result.video_file, newfile)
+            shutil.move(result.namer_log_file, os.path.splitext(newfile)[0]+"_namer.log")
+
 
 class MovieEventHandler(PatternMatchingEventHandler):
     namerConfig: NamerConfig
    
     def __init__(self, namerConfig: NamerConfig):
-        super().__init__(patterns=["**/*.mp4"],case_sensitive=False,ignore_directories=True,ignore_patterns=None )
+        super().__init__(patterns=["**/*.mp4","**/*.mkv","**/*.MP4","**/*.MKV"],case_sensitive=True,ignore_directories=True,ignore_patterns=None )
         self.namerConfig = namerConfig
 
     def on_moved(self, event: FileSystemMovedEvent):
@@ -40,29 +78,25 @@ class MovieEventHandler(PatternMatchingEventHandler):
         self.process(event.src_path)    
 
     def process(self, path: str):
-        print("called")
-        detected = PurePath(os.path.relpath(path,self.namerConfig.watchdir)).parts[0]
-        dir = os.path.join(self.namerConfig.watchdir, detected)
-        print("detected: {}".format(detected))
-        print("dir: {}".format(dir))
-        try:
-            if doneCopying(path) and (os.path.getsize(path) / (1024*1024) > self.namerConfig.min_file_size): #more than 300 megs.
-                process(path, self.namerConfig)
-        except Exception as ex:
+        logger.info("watchdog process called")
+        if doneCopying(path) and (os.path.getsize(path) / (1024*1024) > self.namerConfig.min_file_size):           
             try:
-                exc_info = sys.exc_info()
+                handle(path, self.namerConfig)
+            except Exception as ex:
                 try:
-                    print("Error handling {}: \n {}".format(dir, ex))
-                except:
-                    pass
-            finally:
-                # Display the *original* exception
-                traceback.print_exception(*exc_info)
-                del exc_info            
+                    exc_info = sys.exc_info()
+                    try:
+                        print("Error handling {}: \n {}".format(dir, ex))
+                    except:
+                        pass
+                finally:
+                    # Display the *original* exception
+                    traceback.print_exception(*exc_info)
+                    del exc_info            
 
 class MovieWatcher:
     def __init__(self, namerConfig: NamerConfig):
-        self.__src_path = namerConfig.watchdir
+        self.__src_path = namerConfig.watch_dir
         self.__event_handler = MovieEventHandler(namerConfig)
         self.__event_observer = PollingObserver()
 
@@ -89,7 +123,7 @@ class MovieWatcher:
             recursive=True
         )
 
-if __name__ == "__main__":
+def watchForMovies(config: NamerConfig):
     print("Porndb scene watcher....")
     if os.environ.get('BUILD_DATE'):
         build_date = os.environ.get('BUILD_DATE')
@@ -97,26 +131,9 @@ if __name__ == "__main__":
     if os.environ.get('GIT_HASH'):
         git_hash = os.environ.get('GIT_HASH')
         print("Git Hash: {}".format(git_hash))
-        
-    namer_cfg = './namer.cfg'
-    if os.environ.get('NAMER_CONFIG'):
-        namer_cfg = os.environ.get('NAMER_CONFIG')
-    config = configparser.ConfigParser()
-    config.read(namer_cfg)
-    namerConfig = NamerConfig()
-    namerConfig.language = config['namer']['language']
-    namerConfig.watchdir = config['namer']['watch_dir']
-    namerConfig.workingdir = config['namer']['work_dir']
-    namerConfig.successfuldir = config['namer']['dest_dir']
-    namerConfig.porndb_token = config['namer']['porndb_token']
-    namerConfig.min_file_size = int(config['namer']['min_file_size'])
-    namerConfig.use_dir_name = config['namer']['use_dir_name'].upper() == "TRUE"
-    namerConfig.del_other_files = config['namer']['del_other_files'].upper() == "TRUE"
-    namerConfig.set_gid = int(config['namer']['set_gid'])
-    namerConfig.set_dir_permissions = config['namer']['set_dir_permissions']
-    namerConfig.set_file_permissions = config['namer']['set_file_permissions']
-    print(namerConfig)
-    mw = MovieWatcher(namerConfig)
+    mw = MovieWatcher(config)
     mw.run()
     print("exiting")
 
+if __name__ == "__main__":
+    watchForMovies(defaultConfig())
