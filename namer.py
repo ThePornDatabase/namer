@@ -141,11 +141,11 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
             result = comparison_results[0]
             output.found = True
             output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
-            finalfile = os.path.join(dir, result.looked_up.new_file_name(config.inplace_name))
-            os.rename(file, finalfile)
-            setPermissions(finalfile, config)
-            tagInPlace(finalfile, config, comparison_results)
-            logger.info("Done processing file: {}".format(file_to_process))
+            output.video_file = os.path.join(dir, result.looked_up.new_file_name(config.inplace_name))
+            os.rename(file, output.video_file)
+            setPermissions(output.video_file, config)
+            tagInPlace(output.video_file, config, comparison_results)
+            logger.info("Done processing file: {}, moved to {}".format(file_to_process,output.video_file))
         else:
             output.final_name_relative=os.path.relpath(file, dir)
     return output

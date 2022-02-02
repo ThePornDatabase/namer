@@ -57,8 +57,10 @@ def handle(target_file: str, namerConfig: NamerConfig):
         if len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namerConfig.del_other_files == False: 
             shutil.move(workingdir, os.path.dirname(newfile))
         else:
+            os.makedirs(os.path.dirname(newfile), exist_ok=True)
             shutil.move(result.video_file, newfile)
             shutil.move(result.namer_log_file, os.path.splitext(newfile)[0]+"_namer.log")
+            shutil.rmtree(workingdir, ignore_errors=True)
 
 
 class MovieEventHandler(PatternMatchingEventHandler):
