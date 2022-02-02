@@ -40,7 +40,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         info = result.looked_up  
         self.assertEqual(info.name, "Peeping Tom")
         self.assertEqual(info.date, "2021-12-23")
-        self.assertEqual(info.site, "DorcelClub")
+        self.assertEqual(info.site, "Dorcel Club")
         self.assertRegex(info.description, r'kissing in a parking lot')
         self.assertEqual(info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom")
         self.assertEqual(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg")
@@ -65,7 +65,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         info = results[0].looked_up
         self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
         self.assertEqual(info.date, "2022-01-03")
-        self.assertEqual(info.site, "EvilAngel")
+        self.assertEqual(info.site, "Evil Angel")
         self.assertRegex(info.description, r'brunette Carmela Clutch positions her big, juicy')
         self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
         self.assertEqual(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Fe6%2Fb9%2F5b%2F066589730107dcfd6b656a398a584b5%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
@@ -88,7 +88,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         info = results[0].looked_up
         self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
         self.assertEqual(info.date, "2022-01-03")
-        self.assertEqual(info.site, "EvilAngel")
+        self.assertEqual(info.site, "Evil Angel")
         self.assertRegex(info.description, r'brunette Carmela Clutch positions her big, juicy')
         self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
         self.assertRegexpMatches(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")

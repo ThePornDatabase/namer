@@ -56,6 +56,7 @@ def update_mp4_file(mp4: str, looked_up: LookedUpFileInfo, poster: str, config: 
     video["----:com.apple.iTunes:iTunEXTC"] = 'mpaa|XXX|0|'.encode("UTF-8", errors="ignore")
     #video["catg"] = looked_up.tags
     video["keyw"] = looked_up.tags
+    video["\xa9alb"] = [looked_up.site]
     
     iTunMOVI = '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>'
     iTunMOVI += '<key>copy-warning</key><string>{}</string>'.format(escape(looked_up.source_url))
@@ -74,6 +75,7 @@ def update_mp4_file(mp4: str, looked_up: LookedUpFileInfo, poster: str, config: 
     iTunMOVI += '<key>screenwriters</key><array></array>'
     iTunMOVI += '</dict></plist>'
     video["----:com.apple.iTunes:iTunMOVI"] = iTunMOVI.encode("UTF-8", errors="ignore")
+
     if poster is not None:
         with open(poster, "rb") as f:
             ext = os.path.splitext(poster)[1].upper()

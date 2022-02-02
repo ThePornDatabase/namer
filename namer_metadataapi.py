@@ -145,7 +145,7 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
     fileInfo.date = data.date
     fileInfo.source_url = data.url
     fileInfo.poster_url = data.poster
-    fileInfo.site = data.site.name.replace(' ','')
+    fileInfo.site = data.site.name
     fileInfo.look_up_site_id = data._id
     for json_performer in data.performers:
         performer = Performer()
