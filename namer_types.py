@@ -12,8 +12,12 @@ import logging
 logger = logging.getLogger('types')
 
 class PartialFormatter(string.Formatter):
+    """
+    Used for format
+    
+    """
 
-    supported_keys = ['date','description','name','site','performers','all_performers','act','ext','trans']
+    supported_keys = ['date','description','name','site','full_site','performers','all_performers','act','ext','trans']
 
     def __init__(self, missing='~~', bad_fmt='!!'):
         self.missing, self.bad_fmt=missing, bad_fmt
@@ -81,7 +85,8 @@ class NamerConfig():
     * 'date' - in the format of YYYY-MM-DD.
     * 'description' - too long, don't use in a name.
     * 'name' - the scene name
-    * 'site' - the site name, Brazzers, Deeper, etc
+    * 'site' - the site name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
+    * 'full_site' - the site name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
     * 'performers' - space seperated list of female performers
     * 'all_performers' - space seperated list of all performers
     * 'act' - an act, parsed from original file name, don't use.
@@ -445,10 +450,33 @@ class LookedUpFileInfo():
 class ComparisonResult:
     name: str
     name_match: float
+    """
+    How closely did the name found in FileNameParts match (via RapidFuzz string comparison)
+    The performers and scene name found in LookedUpFileInfo.  Various combinations of performers 
+    and scene namer are used for attempted matching.
+    """
+
     sitematch: bool
+    """
+    Did the studios match between filenameparts and lookedup
+    """
+
+
     datematch: bool
+    """
+    Did the dates match between filenameparts and lookedup
+    """
+
     name_parts: FileNameParts
+    """
+    Parts of the file name that were parsed and used as search parameters.
+    """
+
     looked_up: LookedUpFileInfo
+    """
+    Info pulled from the porndb.  When doing searchs it will not include tags, only included when
+    performing a lookup by id (which is done only after a match is made.)
+    """
 
     def is_match(self) -> bool:
         return self.sitematch and self.datematch and self.name_match >= 89.9
@@ -458,7 +486,28 @@ class ComparisonResult:
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ProcessingResults:
     found: bool = False
+    """
+    True if a match was found in the porndb.
+    """
+
     dirfile: str = None
+    """
+    True if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
+    or all files can be moved to a destination specified in the field final_name_relative.
+    """ 
+
     video_file: str = None
+    """
+    The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}.extensions
+    """
+
+
     namer_log_file: str = None
+    """
+    The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}_namer.log
+    """
+
     final_name_relative: str = None
+    """
+    This is the full NamerConfig.new_relative_path_name string with all substitutions made.
+    """

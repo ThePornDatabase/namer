@@ -140,6 +140,7 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
         if len(comparison_results) > 0 and comparison_results[0].is_match() == True:
             result = comparison_results[0]
             output.found = True
+            output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
             finalfile = os.path.join(dir, result.looked_up.new_file_name(config.inplace_name))
             os.rename(file, finalfile)
             setPermissions(finalfile, config)

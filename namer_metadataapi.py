@@ -182,15 +182,15 @@ def __buildUrl(site:str=None, date:str=None, name:str=None, uuid:str=None) -> st
     if uuid is not None:
         query = "/"+uuid
     else:
-        query="?parse="
+        query="?q="
         if site != None:
             query += urllib.parse.quote(re.sub(r' ', '.', site))+"."
         if date != None:
             query += date+"."
         if name != None:
             query += urllib.parse.quote(re.sub(r' ', '.', name))
-        query="&limit=1"
-    return "https://api.metadataapi.net/scenes".format(query)
+        query+="&limit=1"
+    return "https://api.metadataapi.net/scenes{}".format(query)
     
 
 def __getMetadataApiNetFileInfo(name_parts: FileNameParts, authtoken: str, skipdate: bool, skipsite: bool, skipname: bool) -> List[LookedUpFileInfo]:

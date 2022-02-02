@@ -53,8 +53,8 @@ def handle(target_file: str, namerConfig: NamerConfig):
             os.rename(workingfile, newvideo)
             os.rename(result.namer_log_file, os.path.splitext(newvideo)[0]+"_namer.log")
     else:        
-        newfile = os.path.join(namerConfig.dest_dir,relative_path)
-        if len(PurePath(relative_path).parts) > 1 and workingdir is not None and namerConfig.del_other_files == False: 
+        newfile = os.path.join(namerConfig.dest_dir, result.final_name_relative)
+        if len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namerConfig.del_other_files == False: 
             shutil.move(workingdir, os.path.dirname(newfile))
         else:
             shutil.move(result.video_file, newfile)
@@ -79,7 +79,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     def process(self, path: str):
         logger.info("watchdog process called")
-        if doneCopying(path) and (os.path.getsize(path) / (1024*1024) > self.namerConfig.min_file_size):           
+        if doneCopying(path): # and (os.path.getsize(path)/ (1024*1024) > self.namerConfig.min_file_size):           
             try:
                 handle(path, self.namerConfig)
             except Exception as ex:
