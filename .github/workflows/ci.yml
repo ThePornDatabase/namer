@@ -26,4 +26,4 @@ jobs:
           architecture: x64
           cache: 'pip'
       - run: pip install -r requirements.txt
-      - run: python -m unittest discover -s /opt/renamer -p '*.py'
+      - run: python -m unittest discover -s ./ -p '*.py'
