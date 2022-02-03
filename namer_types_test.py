@@ -4,7 +4,7 @@ Test namer_types.py
 import os
 import sys
 import unittest
-from namer_types import NamerConfig, defaultConfig, PartialFormatter
+from namer_types import NamerConfig, default_config, PartialFormatter
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -15,7 +15,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     current=os.path.dirname(os.path.abspath(__file__))
 
     def test_local_config(self):
-        config = defaultConfig()
+        """
+        Verify the namer.cfg exmple in this directory is loaded.
+        """
+        config = default_config()
         self.assertEqual(config.del_other_files , False)
         self.assertEqual(config.inplace_name, '{site} - {date} - {name}.{ext}')
         self.assertEqual(config.new_relative_path_name, '{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
@@ -25,6 +28,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(config.language, 'eng')
 
     def test_default_no_config(self):
+        """
+        verify the default values of NamerConfig
+        """
         config = NamerConfig()
         self.assertEqual(config.del_other_files , False)
         self.assertEqual(config.inplace_name, '{site} - {date} - {name}.{ext}')
@@ -42,6 +48,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(config.set_file_permissions, 664)
 
     def test_formatter(self):
+        """
+        Verify that partial formatter can handle missing fields gracefully,
+        and it's prefix, postfix, and infix capabilities work.
+        """
         fmt = PartialFormatter(missing='',bad_fmt='---')
         name = fmt.format("{name}{act: 1p}", name='scene1', act='act1')
         self.assertEqual(name, 'scene1 act1')

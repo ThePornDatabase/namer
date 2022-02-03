@@ -35,7 +35,9 @@ def parse_file_name(filename: str) -> FileNameParts:
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.
     """
-    match = re.search(r'(?P<site>[a-zA-Z0-9]+)[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$',filename)
+    match = re.search(r'(?P<site>[a-zA-Z0-9]+)[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+' +
+                      r'(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+' +
+                      r'((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$',filename)
     file_name_parts = FileNameParts()
     if match:
         prefix = "20" if len(match.group('year'))==2 else ""
@@ -45,7 +47,7 @@ def parse_file_name(filename: str) -> FileNameParts:
         file_name_parts.act = name_act_tuple[1]
         file_name_parts.site = match.group('site')
         trans = match.group('trans')
-        file_name_parts.trans = (not trans == None) and (trans.strip().upper() == 'TS')
+        file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
         return file_name_parts

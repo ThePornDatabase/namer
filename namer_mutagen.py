@@ -10,6 +10,9 @@ from namer_ffmpeg import get_resolution, update_audio_stream_if_needed
 logger = logging.getLogger('metadata')
 
 def resolution_to_hdv_setting(resolution: int) -> int:
+    """
+    Using the resolution (height) of an video stream return the atom value for hdvideo
+    """
     if resolution >= 2160:
         return 3
     if resolution >= 1080:

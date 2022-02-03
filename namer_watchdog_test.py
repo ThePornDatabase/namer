@@ -5,9 +5,10 @@ import os
 import unittest
 from unittest.mock import patch
 import logging
+import tempfile
 from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
-from namer_types import defaultConfig
+from namer_types import default_config
 from namer_watchdog import handle
 from namer_metadataapi_test import readfile
 
@@ -21,8 +22,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
-    def test_writing_metadata_all_dirs(self, mock_poster, mock_response):
-        with prepare_workdir() as tmpdir:
+    def test_handler(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            prepare_workdir(tmpdir)
             path = os.path.join(tmpdir, 'test', "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
             response = readfile(path)
             mock_response.return_value = response
@@ -35,7 +40,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             os.mkdir(os.path.join(tmpdir, 'watch'))
             os.rename(input_dir, targetfile)
             mock_poster.return_value = os.path.join(tmpdir, 'poster.png')
-            config = defaultConfig()
+            config = default_config()
             os.mkdir(os.path.join(tmpdir, 'work'))
 
             config.watch_dir = os.path.join(tmpdir, 'watch')
@@ -46,8 +51,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             os.mkdir(os.path.join(tmpdir, 'failed'))
 
             handle(targetfile, config)
-            outputfile = os.path.join(tmpdir, 'dest','DorcelClub - 2021-12-23 - Peeping Tom','DorcelClub - 2021-12-23 - Peeping Tom.mp4')
-                
+            outputfile = os.path.join(tmpdir, 'dest',
+                'DorcelClub - 2021-12-23 - Peeping Tom','DorcelClub - 2021-12-23 - Peeping Tom.mp4')
+
             output = MP4(outputfile)
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 

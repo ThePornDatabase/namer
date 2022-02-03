@@ -5,6 +5,7 @@ import unittest
 from distutils.dir_util import copy_tree
 from unittest.mock import patch
 import os
+import tempfile
 from mutagen.mp4 import MP4
 from namer_metadataapi_test import readfile
 from namer import main
@@ -22,26 +23,32 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
     def test_writing_metadata_file(self, mock_poster, mock_response):
-        with prepare_workdir() as tmpdir:
+        """
+        test namer main method renames and tags in place when -f (video file) is passed
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            prepare_workdir(tmpdir)
             path = os.path.join(tmpdir,'test',"DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
-            print("path"+path)
             response  = readfile(path)
             mock_response.return_value = response
             mock_poster.return_value = os.path.join(tmpdir,'test',"poster.png")
             mp4_file = os.path.join(tmpdir, 'test', "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4")
-            targetfile = os.path.join(tmpdir, 'test', 
+            targetfile = os.path.join(tmpdir, 'test',
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
             os.rename(mp4_file, targetfile)
-            main(['-f',targetfile])    
+            main(['-f',targetfile])
             output = MP4(os.path.join(os.path.dirname(targetfile), 'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
     def test_writing_metadata_dir(self, mock_poster, mock_response):
-        with prepare_workdir() as tmpdir:
+        """
+        test namer main method renames and tags in place when -d (directory) is passed
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            prepare_workdir(tmpdir)
             path = os.path.join(tmpdir,'test',"DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
-            print("path"+path)
             response  = readfile(path)
             mock_response.return_value = response
             input_dir = os.path.join(tmpdir, 'test')
@@ -51,13 +58,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
             main(['-d',targetfile])
 
-            output = MP4(os.path.join(tmpdir, "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p",'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
+            output = MP4(os.path.join(tmpdir, "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p",
+                    'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
-    def test_writing_metadata_all_dirs(self, mock_poster, mock_response) :
-        with prepare_workdir() as tmpdir:
+    def test_writing_metadata_all_dirs(self, mock_poster, mock_response):
+        """
+        Test multiple directories are processed when -d (directory) and -m are passed.
+        Process all subdirs of -d.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            prepare_workdir(tmpdir)
             path = os.path.join(tmpdir,'test',"DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
             response  = readfile(path)
             mock_response.return_value = response

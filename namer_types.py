@@ -1,3 +1,7 @@
+"""
+Types shared by all the files in this project, used as interfaces for moving data.
+"""
+
 from configparser import ConfigParser
 from dataclasses import dataclass
 from typing import List
@@ -55,6 +59,8 @@ class NamerConfig():
     """
     Configuration for namer and namer_watchdog
     """
+
+    # pylint: disable=too-many-instance-attributes
 
     porndb_token: str = None
     """
@@ -233,7 +239,10 @@ class NamerConfig():
         return output
 
 
-def fromConfig(config : ConfigParser) -> NamerConfig:
+def from_config(config : ConfigParser) -> NamerConfig:
+    """
+    Given a config parser pointed at a namer.cfg file, return a NamerConfig with the file's parameters.
+    """
     namer_config = NamerConfig()
     namer_config.porndb_token = config.get('namer','porndb_token', fallback=None)
     namer_config.inplace_name = config.get('namer','output',fallback='{site} - {date} - {name}.{ext}')
@@ -258,7 +267,10 @@ def fromConfig(config : ConfigParser) -> NamerConfig:
     return namer_config
 
 
-def defaultConfig() -> NamerConfig:
+def default_config() -> NamerConfig:
+    """
+    Attempts reading various locations to fine a namer.cfg file.
+    """
     found_config = None
     if os.environ.get('NAMER_CONFIG'):
         namer_cfg = os.environ.get('NAMER_CONFIG')
@@ -279,12 +291,12 @@ def defaultConfig() -> NamerConfig:
         namer_cfg = os.path.join(os.path.dirname(os.path.abspath(__file__)),'namer.cfg')
         if os.path.isfile(namer_cfg):
             logger.info("Using local executable config: %s",namer_cfg)
-            found_config = namer_cfg   
+            found_config = namer_cfg
 
 
     config = configparser.ConfigParser()
     config.read(namer_cfg)
-    return fromConfig(config)
+    return from_config(config)
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FileNameParts:
@@ -294,6 +306,9 @@ class FileNameParts:
     or
     'DorcelClub.20.12..Aya.Benetti.Megane.Lopez.And.Bella.Tina.2160p.MP4-GAYME-xpost'
     """
+
+    # pylint: disable=too-many-instance-attributes
+
     site: str = ""
     """
     Site the file originated from, "DorcelClub", "EvilAngel", etc.
@@ -365,6 +380,12 @@ class Performer:
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo():
+    """
+    Information from a call to the porndb about a specific scene.
+    """
+
+    # pylint: disable=too-many-instance-attributes
+
     uuid: str = ""
     """
     porndb scene id, allowing lookup of more metadata, (tags)
@@ -376,7 +397,7 @@ class LookedUpFileInfo():
     """
     date: str = ""
     """
-    date of initial release, formated YYYY-mm-dd 
+    date of initial release, formated YYYY-mm-dd
     """
     name: str = ""
     """
@@ -429,6 +450,10 @@ class LookedUpFileInfo():
         self.tags = []
 
     def asdict(self):
+        """
+        Converts the info in to a dict that can be used
+        by PartialFormatter to return a new path for a file.
+        """
         return {'uuid': self.uuid,
                 'date': self.date,
                 'description': self.description,
@@ -442,6 +467,9 @@ class LookedUpFileInfo():
                 'trans': self.original_parsed_filename.trans}
 
     def new_file_name(self, template: str):
+        """
+        Constructs a new file name based on a template (describe in NamerConfig)
+        """
         dictionary = self.asdict()
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **dictionary)
@@ -449,11 +477,18 @@ class LookedUpFileInfo():
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ComparisonResult:
+    """
+    Represents the comparison from a FileNameParts and a LookedUpFileInfo, it will be
+    consider a match if the creation dates match, the studio matches, and the original
+    scene/perform part of a the file name can match any combination of the metadata about
+    actor names and/or scene name.   RapidFuzz is used to make the comparison.
+    """
+
     name: str
     name_match: float
     """
     How closely did the name found in FileNameParts match (via RapidFuzz string comparison)
-    The performers and scene name found in LookedUpFileInfo.  Various combinations of performers 
+    The performers and scene name found in LookedUpFileInfo.  Various combinations of performers
     and scene namer are used for attempted matching.
     """
 
@@ -480,12 +515,23 @@ class ComparisonResult:
     """
 
     def is_match(self) -> bool:
+        """
+        Returns true if site and creation data match exactly, and if the name fuzzes against
+        the metadate to 90% or more (via RapidFuzz, and various concatinations of metadata about
+        actors and scene name).
+        """
         return self.sitematch and self.datematch and self.name_match >= 89.9
 
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ProcessingResults:
+    """
+    Returned from the namer.py's process() function.   It contains information about if a match
+    was found, and of so, where files were placed.  It also tracks if a directory was inputed
+    to namer (rather than the exact movie file.)  That knowledge can be used to move directories
+    and preserve relative files, or to delete left over artifacts.
+    """
     found: bool = False
     """
     True if a match was found in the porndb.
@@ -495,13 +541,12 @@ class ProcessingResults:
     """
     True if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
     or all files can be moved to a destination specified in the field final_name_relative.
-    """ 
+    """
 
     video_file: str = None
     """
     The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}.extensions
     """
-
 
     namer_log_file: str = None
     """
