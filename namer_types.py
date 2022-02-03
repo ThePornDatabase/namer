@@ -263,22 +263,22 @@ def defaultConfig() -> NamerConfig:
     if os.environ.get('NAMER_CONFIG'):
         namer_cfg = os.environ.get('NAMER_CONFIG')
         if os.path.isfile(namer_cfg):
-            logger.info("Using config file from NAMER_CONFIG environment {namer_cfg}")
+            logger.info("Using config file from NAMER_CONFIG environment %s",namer_cfg)
             found_config = namer_cfg
     if found_config is None:
         namer_cfg = './namer.cfg'
         if os.path.isfile(namer_cfg):
-            logger.info("Using local executable config: {namer_cfg}")
+            logger.info("Using local executable config: %s",namer_cfg)
             found_config = namer_cfg
     if found_config is None:
         namer_cfg = os.path.join(Path.home(), ".namer.cfg")
         if os.path.isfile(namer_cfg):
-            logger.info("Using homer dir config: {namer_cfg}")
+            logger.info("Using homer dir config: %s",namer_cfg)
             found_config = namer_cfg
     if found_config is None:
         namer_cfg = os.path.join(os.path.dirname(os.path.abspath(__file__)),'namer.cfg')
         if os.path.isfile(namer_cfg):
-            logger.info("Using local executable config: {namer_cfg}")
+            logger.info("Using local executable config: %s",namer_cfg)
             found_config = namer_cfg        
 
 
@@ -327,7 +327,7 @@ class FileNameParts:
     """
 
     def __str__(self) -> str:
-        return """site: {self.site}
+        return f"""site: {self.site}
         date: {self.date}
         trans: {self.trans}
         name: {self.name}
@@ -360,7 +360,7 @@ class Performer:
         return self.name
 
     def __repr__(self):
-        return 'Performer[name={self.name}, role={self.role}]'
+        return f'Performer[name={self.name}, role={self.role}]'
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
