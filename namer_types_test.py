@@ -1,9 +1,11 @@
+"""
+Test namer_types.py
+"""
 import os
-from sys import stdout
-import unittest
-from pathlib import Path
-from namer_types import NamerConfig, defaultConfig, PartialFormatter
 import sys
+import unittest
+from namer_types import NamerConfig, defaultConfig, PartialFormatter
+
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -41,11 +43,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     def test_formatter(self):
         fmt = PartialFormatter(missing='',bad_fmt='---')
-        name = fmt.format('{name}{act: 1p}', name='scene1', act='act1')
+        name = fmt.format("{name}{act: 1p}", name='scene1', act='act1')
         self.assertEqual(name, 'scene1 act1')
         name = fmt.format('{name}{act: 1p}', name='scene1', act=None)
         self.assertEqual(name, 'scene1')
-        
+
         name = fmt.format('{name}{act: 1s}', name='scene1', act='act1')
         self.assertEqual(name, 'scene1act1 ')
         name = fmt.format('{name}{act: 1s}', name='scene1', act=None)
@@ -70,4 +72,4 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()        
+    unittest.main()

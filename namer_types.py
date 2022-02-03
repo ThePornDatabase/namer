@@ -13,8 +13,7 @@ logger = logging.getLogger('types')
 
 class PartialFormatter(string.Formatter):
     """
-    Used for format
-    
+    Used for formating NamerConfig.inplace_name and NamerConfig.
     """
 
     supported_keys = ['date','description','name','site','full_site','performers','all_performers','act','ext','trans']
@@ -25,34 +24,37 @@ class PartialFormatter(string.Formatter):
     def get_field(self, field_name, args, kwargs):
         # Handle a key not found
         try:
-            val=super(PartialFormatter, self).get_field(field_name, args, kwargs)
-            # Python 3, 'super().get_field(field_name, args, kwargs)' works
-        except (KeyError, AttributeError):
-            val=None,field_name 
+            val=super().get_field(field_name, args, kwargs)
+        except (KeyError, AttributeError) as err:
+            val=None,field_name
             if not field_name in self.supported_keys:
-                raise KeyError("Key {} not in support keys: {}".format(field_name, self.supported_keys))
-        return val 
+                raise KeyError(f"Key {field_name} not in support keys: {self.supported_keys}") from err
+        return val
 
-    def format_field(self, value, spec):
-        # handle an invalid format
-        if value==None: return self.missing
+    def format_field(self, value, format_spec):
+        if value is None:
+            return self.missing
         try:
-            if re.match(r'.\d+s', spec):
-                value = value + spec[0] * int(spec[1:-1])
-                spec = ''
-            if re.match(r'.\d+p', spec):
-                value = spec[0] * int(spec[1:-1]) + value
-                spec = ''
-            if re.match(r'.\d+i', spec):
-                value = spec[0] * int(spec[1:-1]) + value + spec[0] * int(spec[1:-1]) 
-                spec = ''      
-            return super(PartialFormatter, self).format_field(value, spec)
+            if re.match(r'.\d+s', format_spec):
+                value = value + format_spec[0] * int(format_spec[1:-1])
+                format_spec = ''
+            if re.match(r'.\d+p', format_spec):
+                value = format_spec[0] * int(format_spec[1:-1]) + value
+                format_spec = ''
+            if re.match(r'.\d+i', format_spec):
+                value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
+                format_spec = ''
+            return super().format_field(value, format_spec)
         except ValueError:
-            if self.bad_fmt is not None: return self.bad_fmt   
-            else: raise
+            if self.bad_fmt is not None:
+                return self.bad_fmt
+            raise
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class NamerConfig():
+    """
+    Configuration for namer and namer_watchdog
+    """
 
     porndb_token: str = None
     """
@@ -62,11 +64,11 @@ class NamerConfig():
 
     inplace_name: str = '{site} - {date} - {name}.{ext}'
     """
-    How to write output file name.  When namer.py is run this is applied in place 
+    How to write output file name.  When namer.py is run this is applied in place
     (next to the file to be processed).
     When run from namer_watchdog.py this will be written in to the successdir.
- 
-    Supports stand python 3 formating, as well as: 
+
+    Supports stand python 3 formating, as well as:
     * a prefix:
     {site: 1p} - in this case put one space in front of the 'site', so ' Vixen'
     * a suffix:
@@ -74,12 +76,12 @@ class NamerConfig():
     * an infix:
     {date:_2i} - in this case put two underscore before and after the 'date', so '__2020-01-01__'
 
-    Examples: 
+    Examples:
     * {site} - {date} - {scene}.{ext}
     * {site}/{date}.{scene}.{ext}
 
     Missing values will be ignored.
-    
+
     Allowed replacements:
 
     * 'date' - in the format of YYYY-MM-DD.
@@ -203,80 +205,80 @@ class NamerConfig():
 
 
     def __str__(self):
-        str = "Namer Config:\n"
-        if self.porndb_token != None:
-            str += "  porndb_token: {}\n".format(re.sub(r'.', '*', self.porndb_token))
-        else:
-            str += "  porndb_token: None In Set, Go to https://metadatapi.net/ to get one!\n"   
-
-        str += "  inplace_name: {}\n".format(self.inplace_name)
-        str += "  prefer_dir_name_if_available: {}\n".format(self.prefer_dir_name_if_available)
-        str += "  set_uid: {}\n".format(self.set_uid)
-        str += "  set_gid: {}\n".format(self.set_gid)
-        str += "  set_dir_permissions: {}\n".format(self.set_dir_permissions)
-        str += "  set_file_permissions: {}\n".format(self.set_file_permissions)
-        str += "Tagging Config:\n"
-        str += "  enabled_tagging: {}\n".format(self.enabled_tagging)
-        str += "  enabled_poster: {}\n".format(self.enabled_poster)
-        str += "  enable_metadataapi_genres: {}\n".format(self.enable_metadataapi_genres)
-        str += "  default_genre: {}\n".format(self.default_genre)
-        str += "  language: {}\n".format(self.language)
-        str += "Watchdog Config:\n"
-        str += "  min_file_size: {}mb\n".format(self.min_file_size)
-        str += "  del_other_files: {}\n".format(self.del_other_files)
-        str += "  new_relative_path_name: {}\n".format(self.new_relative_path_name)
-        str += "  watch_dir: {}\n".format(self.watch_dir)
-        str += "  work_dir: {}\n".format(self.work_dir)
-        str += "  failed_dir: {}\n".format(self.failed_dir)
-        str += "  dest_dir: {}\n".format(self.dest_dir)
-        return str
+        token = "None In Set, Go to https://metadatapi.net/ to get one!"
+        if self.porndb_token is not None:
+            token = re.sub(r'.', '*', self.porndb_token)
+        output = 'Namer Config:\n'
+        output += f'porndb_token: {token}\n'
+        output += f"  inplace_name: {self.inplace_name}\n"
+        output += f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
+        output += f"  set_uid: {self.set_uid}\n"
+        output += f"  set_gid: {self.set_gid}\n"
+        output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
+        output += f"  set_file_permissions: {self.set_file_permissions}\n"
+        output += "Tagging Config:\n"
+        output += f"  enabled_tagging: {self.enabled_tagging}\n"
+        output += f"  enabled_poster: {self.enabled_poster}\n"
+        output += f"  enable_metadataapi_genres: {self.enable_metadataapi_genres}\n"
+        output += f"  default_genre: {self.default_genre}\n"
+        output += f"  language: {self.language}\n"
+        output += "Watchdog Config:\n"
+        output += f"  min_file_size: {self.min_file_size}mb\n"
+        output += f"  del_other_files: {self.del_other_files}\n"
+        output += f"  new_relative_path_name: {self.new_relative_path_name}\n"
+        output += f"  watch_dir: {self.watch_dir}\n"
+        output += f"  work_dir: {self.work_dir}\n"
+        output += f"  failed_dir: {self.failed_dir}\n"
+        output += f"  dest_dir: {self.dest_dir}\n"
+        return output
 
 
 def fromConfig(config : ConfigParser) -> NamerConfig:
-    namerConfig = NamerConfig()
-    namerConfig.porndb_token = config.get('namer','porndb_token', fallback=None)
-    namerConfig.inplace_name = config.get('namer','output',fallback='{site} - {date} - {name}.{ext}')
-    namerConfig.prefer_dir_name_if_available = config.getboolean('namer','prefer_dir_name_if_available',fallback=False)
-    namerConfig.min_file_size = config.getint('namer','min_file_size',fallback=100)
-    namerConfig.set_uid = config.getint('namer','set_uid',fallback=None)
-    namerConfig.set_gid = config.getint('namer','set_gid',fallback=None)
-    namerConfig.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
-    namerConfig.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
-    namerConfig.enabled_tagging = config.getboolean('metadata','enabled_tagging',fallback=True)
-    namerConfig.enabled_poster = config.getboolean('metadata','enabled_poster',fallback=True)
-    namerConfig.enable_metadataapi_genres = config.getboolean('metadata','enable_metadataapi_genres',fallback=False)
-    namerConfig.default_genre = config.get('metadata','default_genre',fallback='Adult')
-    namerConfig.language = config.get('metadata','language',fallback=None)
-    namerConfig.new_relative_path_name = config.get('metadata','new_relative_path_name',fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
-    namerConfig.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)
-    namerConfig.watch_dir = config.get('watchdog','watch_dir',fallback=None)
-    namerConfig.work_dir = config.get('watchdog','work_dir',fallback=None)
-    namerConfig.failed_dir = config.get('watchdog','failed_dir',fallback=None)
-    namerConfig.dest_dir = config.get('watchdog','dest_dir',fallback=None)
-    return namerConfig
+    namer_config = NamerConfig()
+    namer_config.porndb_token = config.get('namer','porndb_token', fallback=None)
+    namer_config.inplace_name = config.get('namer','output',fallback='{site} - {date} - {name}.{ext}')
+    namer_config.prefer_dir_name_if_available = config.getboolean('namer','prefer_dir_name_if_available',fallback=False)
+    namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
+    namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
+    namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
+    namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
+    namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
+    namer_config.enabled_tagging = config.getboolean('metadata','enabled_tagging',fallback=True)
+    namer_config.enabled_poster = config.getboolean('metadata','enabled_poster',fallback=True)
+    namer_config.enable_metadataapi_genres = config.getboolean('metadata','enable_metadataapi_genres',fallback=False)
+    namer_config.default_genre = config.get('metadata','default_genre',fallback='Adult')
+    namer_config.language = config.get('metadata','language',fallback=None)
+    namer_config.new_relative_path_name = config.get('metadata','new_relative_path_name',
+        fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
+    namer_config.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)
+    namer_config.watch_dir = config.get('watchdog','watch_dir',fallback=None)
+    namer_config.work_dir = config.get('watchdog','work_dir',fallback=None)
+    namer_config.failed_dir = config.get('watchdog','failed_dir',fallback=None)
+    namer_config.dest_dir = config.get('watchdog','dest_dir',fallback=None)
+    return namer_config
 
 
 def defaultConfig() -> NamerConfig:
     found_config = None
     if os.environ.get('NAMER_CONFIG'):
         namer_cfg = os.environ.get('NAMER_CONFIG')
-        if (os.path.isfile(namer_cfg)):
-            logger.info("Using config file from NAMER_CONFIG environment {}".format(namer_cfg))
+        if os.path.isfile(namer_cfg):
+            logger.info("Using config file from NAMER_CONFIG environment {namer_cfg}")
             found_config = namer_cfg
-    if found_config == None:
+    if found_config is None:
         namer_cfg = './namer.cfg'
         if os.path.isfile(namer_cfg):
-            logger.info("Using local executable config: {}".format(namer_cfg))
+            logger.info("Using local executable config: {namer_cfg}")
             found_config = namer_cfg
-    if found_config == None:
+    if found_config is None:
         namer_cfg = os.path.join(Path.home(), ".namer.cfg")
         if os.path.isfile(namer_cfg):
-            logger.info("Using homer dir config: {}".format(namer_cfg))
+            logger.info("Using homer dir config: {namer_cfg}")
             found_config = namer_cfg
-    if found_config == None:
+    if found_config is None:
         namer_cfg = os.path.join(os.path.dirname(os.path.abspath(__file__)),'namer.cfg')
         if os.path.isfile(namer_cfg):
-            logger.info("Using local executable config: {}".format(namer_cfg))
+            logger.info("Using local executable config: {namer_cfg}")
             found_config = namer_cfg        
 
 
@@ -298,7 +300,7 @@ class FileNameParts:
     """
     date: str = ""
     """
-    formated: YYYY-mm-dd 
+    formated: YYYY-mm-dd
     """
     trans: bool = False
     """
@@ -325,14 +327,14 @@ class FileNameParts:
     """
 
     def __str__(self) -> str:
-       return "site: {}\ndate: {}\ntrans: {}\nname: {}\nact: {}\nextension: {}\noriginal full name: {}\n".format( 
-       self.site,
-       self.date,
-       self.trans,
-       self.name,
-       self.act,
-       self.extension,
-       self.source_file_name)
+        return """site: {self.site}
+        date: {self.date}
+        trans: {self.trans}
+        name: {self.name}
+        act: {self.act}
+        extension: {self.extension}
+        original full name: {self.source_file_name}
+        """
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class Performer:
@@ -353,13 +355,12 @@ class Performer:
         self.role = role
 
     def __str__(self):
-        if self.role != None:
-            return self.name + " (" + self.role + ")" 
-        else:
-            return self.name 
+        if self.role is not None:
+            return self.name + " (" + self.role + ")"
+        return self.name
 
     def __repr__(self):
-        return 'Performer[name=' + self.name + ', role=%s' % self.role +']'
+        return 'Performer[name={self.name}, role={self.role}]'
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -426,7 +427,7 @@ class LookedUpFileInfo():
     def __init__(self):
         self.performers = []
         self.tags = []
-    
+
     def asdict(self):
         return {'uuid': self.uuid,
                 'date': self.date,
@@ -441,9 +442,9 @@ class LookedUpFileInfo():
                 'trans': self.original_parsed_filename.trans}
 
     def new_file_name(self, template: str):
-        dict = self.asdict()
+        dictionary = self.asdict()
         fmt = PartialFormatter(missing="", bad_fmt="---")
-        name = fmt.format(template, **dict)
+        name = fmt.format(template, **dictionary)
         return name
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

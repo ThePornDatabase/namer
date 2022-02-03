@@ -1,34 +1,30 @@
+"""
+Test namer_metadataapi_test.py
+"""
 import os
 import unittest
 from unittest import mock
-import tempfile
-from distutils.dir_util import copy_tree
 from namer_metadataapi import match, main
 from namer_types import Performer
 from namer_file_parser import parse_file_name
 
 current=os.path.dirname(os.path.abspath(__file__))
 
-def readfile(file: str) -> str: 
+def readfile(file: str) -> str:
+    """
+    Utility function to read the contents of a file.
+    """
     if os.path.isfile(file):
-        text_file = open(file, "r")
-        data = text_file.read()
-        text_file.close()
-        return data
+        with open(file, "r", encoding='utf_8') as text_file:
+            data = text_file.read()
+            text_file.close()
+            return data
     return None
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-
-    def prepare_workdir():
-        current=os.path.dirname(os.path.abspath(__file__))
-        test_fixture="test"
-        tmpdir = tempfile.TemporaryDirectory()
-        test_root = os.path.join(tmpdir.name,test_fixture)
-        copy_tree(os.path.join(current, test_fixture), tmpdir.name)
-        return tmpdir
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
     def test_parse_response_metadataapi_net_dorcel(self, mock_response):
@@ -91,11 +87,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.site, "Evil Angel")
         self.assertRegex(info.description, r'brunette Carmela Clutch positions her big, juicy')
         self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
-        self.assertRegexpMatches(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
+        self.assertRegex(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
         expected = []
         expected.append(Performer("Carmela Clutch", "Female"))
         expected.append(Performer("Francesca Le","Female"))
-        expected.append(Performer("Mark Wood","Male"))     
+        expected.append(Performer("Mark Wood","Male"))
         self.assertListEqual(info.performers, expected)
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
@@ -117,13 +113,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         mock_response.return_value = None
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
         results = match(name, "your_porndb_authkey")
-        self.assertEqual(len(results), 0)             
+        self.assertEqual(len(results), 0)
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
     def test_call_main(self, mock_response):
         mock_response.return_value = readfile(os.path.join("test","response.json"))
         main(['-f','EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4','-t','your_porndb_authkey','-q'])
         # verify we got here.
-        
+
 if __name__ == '__main__':
     unittest.main()
