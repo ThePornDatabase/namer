@@ -279,7 +279,7 @@ def defaultConfig() -> NamerConfig:
         namer_cfg = os.path.join(os.path.dirname(os.path.abspath(__file__)),'namer.cfg')
         if os.path.isfile(namer_cfg):
             logger.info("Using local executable config: %s",namer_cfg)
-            found_config = namer_cfg        
+            found_config = namer_cfg   
 
 
     config = configparser.ConfigParser()
