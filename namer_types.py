@@ -12,6 +12,7 @@ import sys
 import string
 from pathlib import Path
 import logging
+import random
 
 logger = logging.getLogger('types')
 
@@ -204,6 +205,11 @@ class NamerConfig():
     If running in watchdog mode, dir where finalized files get written.
     """
 
+    retry_time: str = None
+    """
+    Time to retry failed items every day.
+    """
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -236,6 +242,7 @@ class NamerConfig():
         output += f"  work_dir: {self.work_dir}\n"
         output += f"  failed_dir: {self.failed_dir}\n"
         output += f"  dest_dir: {self.dest_dir}\n"
+        output += f"  retry_time: {self.retry_time}\n"
         return output
 
 
@@ -264,6 +271,9 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.work_dir = config.get('watchdog','work_dir',fallback=None)
     namer_config.failed_dir = config.get('watchdog','failed_dir',fallback=None)
     namer_config.dest_dir = config.get('watchdog','dest_dir',fallback=None)
+    namer_config.retry_time = config.get('watchdog','retry_time',fallback=None)
+    if namer_config.retry_time is None:
+        namer_config.retry_time = "03:"+random.choice(["01", "11" ,"21", "31", "41", "51"])
     return namer_config
 
 

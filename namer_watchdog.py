@@ -12,6 +12,7 @@ from pathlib import PurePath
 import logging
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, FileSystemMovedEvent
+import schedule
 from namer import process
 from namer_types import NamerConfig, default_config
 
@@ -82,6 +83,13 @@ def handle(target_file: str, namer_config: NamerConfig):
                         os.path.splitext(newfile)[0]+"_namer.log")
             shutil.rmtree(workingdir, ignore_errors=True)
 
+def retry_failed(namer_config: NamerConfig):
+    """
+    Moves the contents from the failed dir to the watch dir to attempt reprocessing.
+    """
+    logger.info("Retry failed items:")
+    for file in os.listdir(namer_config.failed_dir):
+        shutil.move(os.path.join(namer_config.failed_dir, file), os.path.join(namer_config.watch_dir,file))
 
 class MovieEventHandler(PatternMatchingEventHandler):
     """
@@ -147,6 +155,7 @@ class MovieWatcher:
         self.start()
         try:
             while True:
+                schedule.run_pending()
                 time.sleep(3)
         except KeyboardInterrupt:
             self.stop()
@@ -192,5 +201,9 @@ def watch_for_movies(config: NamerConfig):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    watch_for_movies(default_config())
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    namer_watchdog_config = default_config()
+    if namer_watchdog_config.retry_time is not None:
+        schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
+    watch_for_movies(namer_watchdog_config)

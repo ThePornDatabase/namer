@@ -4,3 +4,4 @@ WatchDog
 mutagen
 rapidfuzz
 pylint
+schedule
