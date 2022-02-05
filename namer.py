@@ -33,11 +33,11 @@ def write_log_file(movie_file: str, match_attempts: List[ComparisonResult]) -> s
             log_file.write(f"Match               : {attempt.is_match()}\n")
             log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
             log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"+
-                " {attempt.name_parts.site:50.50}\n")
+                f" {attempt.name_parts.site:50.50}\n")
             log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"+
-                " {attempt.name_parts.date:50.50}\n")
-            log_file.write(f"{attempt.name_match:5} Found Name    : {attempt.name:50.50} Parsed Name    :"+
-                " {attempt.name_parts.name:50.50}\n")
+                f" {attempt.name_parts.date:50.50}\n")
+            log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"+
+                f" {attempt.name_parts.name:50.50}\n")
     return logname
 
 
