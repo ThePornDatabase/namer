@@ -6,5 +6,4 @@ rapidfuzz
 schedule
 lxml
 requests
-beautifulsoup
 pylint
