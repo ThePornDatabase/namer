@@ -1,4 +1,4 @@
-![workflow](https://github.com/4c0d3r/namer/actions/workflows/ci.yml/badge.svg)
+[![workflow](https://github.com/4c0d3r/namer/actions/workflows/ci.yml/badge.svg)](https://github.com/4c0d3r/namer/actions/workflows/ci.yml/)
 
 ### Namer
 
