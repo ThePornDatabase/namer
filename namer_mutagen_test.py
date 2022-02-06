@@ -5,6 +5,7 @@ import unittest
 from unittest import mock
 import os
 import tempfile
+import shutil
 from mutagen.mp4 import MP4
 from namer_mutagen import update_mp4_file
 from namer_metadataapi import match
@@ -32,15 +33,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             mp4_file = os.path.join(tmpdir,"test","Site.22.01.01.painful.pun.XXX.720p.xpost.mp4")
             targetfile = os.path.join(tmpdir,"test",
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
-            os.rename(mp4_file, targetfile)
+            shutil.move(mp4_file, targetfile)
             poster = os.path.join(tmpdir,"test","poster.png")
             name_parts = parse_file_name(targetfile)
             info = match(name_parts, "")
             update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
             output = MP4(targetfile)
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
-
-
 
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
@@ -54,7 +53,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             mock_response.return_value = readfile(os.path.join(tmpdir,"test","full.json"))
             mp4_file = os.path.join(tmpdir,"test","Site.22.01.01.painful.pun.XXX.720p.xpost.mp4")
             targetfile = os.path.join(tmpdir,"test","EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-            os.rename(mp4_file, targetfile)
+            shutil.move(mp4_file, targetfile)
             poster = os.path.join(tmpdir,"test","poster.png")
             name_parts = parse_file_name(targetfile)
             info = match(name_parts, "")

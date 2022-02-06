@@ -67,12 +67,13 @@ def set_permissions(file: str, config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process.
     """
-    if os.path.isdir(file) and not config.set_dir_permissions is None:
-        os.chmod(file, int(str(config.set_dir_permissions), 8))
-    elif config.set_file_permissions is not None:
-        os.chmod(file, int(str(config.set_file_permissions), 8))
-    if config.set_uid is not None and config.set_gid is not None:
-        os.chown(file, uid=config.set_uid, gid=config.set_gid)
+    if hasattr(os, "chmod"):
+        if os.path.isdir(file) and not config.set_dir_permissions is None:
+            os.chmod(file, int(str(config.set_dir_permissions), 8))
+        elif config.set_file_permissions is not None:
+            os.chmod(file, int(str(config.set_file_permissions), 8))
+        if config.set_uid is not None and config.set_gid is not None:
+            os.chown(file, uid=config.set_uid, gid=config.set_gid)
 
 def dir_with_subdirs_to_process(dir_to_scan: str, config: NamerConfig):
     """
@@ -146,10 +147,16 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
     output = ProcessingResults()
     output.dirfile = containing_dir
     output.video_file = file
-    output.final_name_relative=os.path.relpath(file, containing_dir)
 
     if containing_dir is None:
         containing_dir = os.path.dirname(file)
+
+
+    logger.info("file: %s",file)
+    logger.info("dir : %s",containing_dir)
+
+
+    output.final_name_relative=os.path.relpath(file, containing_dir)
 
     if containing_dir is not None and file is not None:
         #remove sample files

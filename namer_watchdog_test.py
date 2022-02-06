@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 import logging
 import tempfile
+import shutil
 from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
 from namer_types import default_config
@@ -33,12 +34,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             mock_response.return_value = response
             input_dir = os.path.join(tmpdir, 'test')
             poster = os.path.join(tmpdir, 'test', 'poster.png')
-            os.rename(poster,  os.path.join(tmpdir, 'poster.png'))
+            shutil.move(poster,  os.path.join(tmpdir, 'poster.png'))
 
             targetfile = os.path.join(tmpdir, 'watch',
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
             os.mkdir(os.path.join(tmpdir, 'watch'))
-            os.rename(input_dir, targetfile)
+            shutil.move(input_dir, targetfile)
             mock_poster.return_value = os.path.join(tmpdir, 'poster.png')
             config = default_config()
             os.mkdir(os.path.join(tmpdir, 'work'))
@@ -68,12 +69,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             mock_response.return_value = "{}"
             input_dir = os.path.join(tmpdir, 'test')
             poster = os.path.join(tmpdir, 'test', 'poster.png')
-            os.rename(poster,  os.path.join(tmpdir, 'poster.png'))
+            shutil.move(poster,  os.path.join(tmpdir, 'poster.png'))
 
             targetfile = os.path.join(tmpdir, 'watch',
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
             os.mkdir(os.path.join(tmpdir, 'watch'))
-            os.rename(input_dir, targetfile)
+            shutil.move(input_dir, targetfile)
             mock_poster.return_value = os.path.join(tmpdir, 'poster.png')
             config = default_config()
             os.mkdir(os.path.join(tmpdir, 'work'))
