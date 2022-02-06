@@ -32,11 +32,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.uuid, '1678283')
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
             self.assertIn('Deep Throat',info.tags)
-            expected = []
-            expected.append(Performer("Carmela Clutch", "Female"))
-            expected.append(Performer("Francesca Le","Female"))
-            expected.append(Performer("Mark Wood","Male"))
-            self.assertListEqual(info.performers, expected)
+            expected_performers = []
+            expected_performers.append(Performer("Carmela Clutch", "Female"))
+            expected_performers.append(Performer("Francesca Le","Female"))
+            expected_performers.append(Performer("Mark Wood","Male"))
+            self.assertListEqual(info.performers, expected_performers)
 
 
 if __name__ == '__main__':

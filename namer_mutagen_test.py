@@ -8,7 +8,7 @@ import tempfile
 from mutagen.mp4 import MP4
 from namer_mutagen import update_mp4_file
 from namer_metadataapi import match
-from namer_metadataapi_test import readfile
+from namer_moviexml import readfile
 from namer_file_parser import parse_file_name
 from namer_types import NamerConfig
 from namer_dirscanner_test import prepare_workdir

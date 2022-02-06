@@ -10,7 +10,7 @@ from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
 from namer_types import default_config
 from namer_watchdog import handle
-from namer_metadataapi_test import readfile
+from namer_moviexml import readfile
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

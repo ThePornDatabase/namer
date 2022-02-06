@@ -7,19 +7,9 @@ from unittest import mock
 from namer_metadataapi import match
 from namer_types import Performer
 from namer_file_parser import parse_file_name
+from namer_moviexml import readfile
 
 current=os.path.dirname(os.path.abspath(__file__))
-
-def readfile(file: str) -> str:
-    """
-    Utility function to read the contents of a file.
-    """
-    if os.path.isfile(file):
-        with open(file, "r", encoding='utf_8') as text_file:
-            data = text_file.read()
-            text_file.close()
-            return data
-    return None
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
