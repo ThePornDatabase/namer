@@ -18,6 +18,7 @@ from types import SimpleNamespace
 import urllib
 import urllib.request
 import rapidfuzz
+import requests
 from namer_types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, default_config
 from namer_file_parser import parse_file_name
 
@@ -87,36 +88,37 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
     """
     returns json object with info
     """
-    req = urllib.request.Request(url)
-    req.add_header("Authorization", f"Bearer {authtoken}")
-    req.add_header("Content-Type", "application/json")
-    req.add_header("Accept", "application/json")
-    req.add_header('User-Agent', 'namer-1')
-
+    headers = {"Authorization": f"Bearer {authtoken}",
+               "Content-Type": "application/json",
+               "Accept": "application/json",
+               'User-Agent': 'namer-1'}
     try:
-        with urllib.request.urlopen(req) as response:
-            html = response.read()
-            return html
-    except urllib.error.HTTPError as ex:
+        with requests.get(url, headers=headers) as response:
+            response.raise_for_status()
+            return response.text
+    except requests.exceptions.RequestException as ex:
         logger.warning(ex)
         return None
-
 
 def get_poster(url: str, authtoken: str, video_file: str) -> str:
     """
     returns json object with info
     """
-    req = urllib.request.Request(url)
-    req.add_header("Authorization", f"Bearer {authtoken}")
-    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)')
+    headers = {"Authorization": f"Bearer {authtoken}",
+            'User-Agent': 'namer-1'}
     random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
     file = os.path.splitext(video_file)[0]+"_"+random+"_poster"+pathlib.Path(url).suffix
-    with urllib.request.urlopen(req) as response:
-        content = response.read()
-        with open(file, "wb") as binary_file:
-            # Write bytes to file
-            binary_file.write(content)
-    return file
+    try:
+        with requests.get(url, headers=headers) as response:
+            response.raise_for_status()
+            with open(file, "wb") as binary_file:
+                # Write bytes to file
+                binary_file.write(response.content)
+                return file
+    except requests.exceptions.RequestException as ex:
+        logger.warning(ex)
+        return None
+
 
 def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()

@@ -3,5 +3,8 @@ numpy
 WatchDog
 mutagen
 rapidfuzz
-pylint
 schedule
+lxml
+requests
+beautifulsoup
+pylint
