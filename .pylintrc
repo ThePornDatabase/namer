@@ -1,3 +1,4 @@
 [FORMAT]
 max-line-length=130
 extension-pkg-whitelist=lxml
+generated-members=os.chmod,os.chown

@@ -35,7 +35,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             prepare_workdir(tmpdir)
             targetdir = os.path.join(tmpdir, "test", "nzb_dir")
             file = find_largest_file_in_glob(targetdir, "**/*.txt")
-            self.assertRegex(text=file, expected_regex="real_file/bigger_file.txt")
+            self.assertRegex(text=file, expected_regex="real_file.*bigger_file.txt")
 
     def test_to_process(self):
         """

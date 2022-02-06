@@ -23,7 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             prepare_workdir(tmpdir)
-            xmlfile = os.path.join(tmpdir,"test","EvilAngel - 2022-01-03 - Carmela Clutch: Fabulous Anal 3-Way!.nfo")
+            xmlfile = os.path.join(tmpdir,"test","EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.nfo")
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")
             self.assertEqual(info.date, "2022-01-02")
