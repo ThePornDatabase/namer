@@ -110,7 +110,8 @@ def get_poster(url: str, authtoken: str, video_file: str) -> str:
     file = os.path.splitext(video_file)[0]+"_"+random+"_poster"+pathlib.Path(url).suffix
     try:
         with requests.get(url, headers=headers) as response:
-            response.raise_for_status()
+            #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
+            #response.raise_for_status()
             with open(file, "wb") as binary_file:
                 # Write bytes to file
                 binary_file.write(response.content)
