@@ -222,6 +222,35 @@ def get_opts(argv) -> Tuple[int, str, str, str, bool]:
             many = True
     return (logger_level, config_overide, file_to_process, dir_to_process, many)
 
+def check_arguments(file_to_process: str, dir_to_process: str, config_overide: str):
+    """
+    check arguments.
+    """
+    error = False
+    if file_to_process is not None:
+        print("File to process "+file_to_process)
+        if not os.path.isfile(file_to_process):
+            print("Error not a file!")
+            error = True
+
+    if dir_to_process is not None:
+        print("Directory to process "+dir_to_process)
+        if not os.path.isdir(dir_to_process):
+            print("Error not a directory!")
+            error = True
+
+    if config_overide is not None:
+        print("Config override specified "+config_overide)
+        if not os.path.isfile(config_overide):
+            logger.info("Config override specified, but file does not exit: %s",config_overide)
+            error = True
+
+    if error:
+        usage()
+        sys.exit(2)
+
+
+
 def main(argv):
     """
     Used to tag and rename files from the command line.
@@ -230,15 +259,19 @@ def main(argv):
 
     logger_level, config_overide, file_to_process, dir_to_process, many = get_opts(argv)
 
+    check_arguments(file_to_process, dir_to_process, config_overide)
+
     config = default_config()
     logging.basicConfig(level=logger_level)
-    if  config_overide is not None:
-        if os.path.isfile(config_overide):
+    if config_overide is not None:
+        print("Config override specified "+config_overide)
+        if not os.path.isfile(config_overide):
             logger.info("Config override specified, but file does not exit: %s",config_overide)
             usage()
             sys.exit(2)
         else:
             config = from_config(config_overide)
+    config.verify_config()
     if file_to_process is not None and dir_to_process is not None:
         print("set -f or -d, but not both.")
         sys.exit(2)

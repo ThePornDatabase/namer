@@ -1,6 +1,7 @@
 """
 Test namer_types.py
 """
+import logging
 import os
 import sys
 import unittest
@@ -80,6 +81,39 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertTrue('name1' in str(context.exception))
         self.assertTrue('all_performers' in str(context.exception) )
 
+    def test_config_verification(self):
+        """
+        Verify config verification.
+        """
+        logging.basicConfig(level=logging.INFO)
+        config = NamerConfig()
+        success = config.verify_config()
+        self.assertEqual(success, True)
+
+        config = NamerConfig()
+        config.watch_dir="/not/a/real/path"
+        success = config.verify_config()
+        self.assertEqual(success, False)
+
+        config = NamerConfig()
+        config.work_dir="/not/a/real/path"
+        success = config.verify_config()
+        self.assertEqual(success, False)
+
+        config = NamerConfig()
+        config.failed_dir="/not/a/real/path"
+        success = config.verify_config()
+        self.assertEqual(success, False)
+
+        config = NamerConfig()
+        config.inplace_name="{sitesadf} - {date}"
+        success = config.verify_config()
+        self.assertEqual(success, False)
+
+        config1 = NamerConfig()
+        config1.new_relative_path_name='{whahha}/{site} - {date}'
+        success = config1.verify_config()
+        self.assertEqual(success, False)
 
 if __name__ == '__main__':
     unittest.main()

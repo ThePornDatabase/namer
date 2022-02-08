@@ -16,6 +16,29 @@ import random
 
 logger = logging.getLogger('types')
 
+def _verify_dir(name: str, file_name: str) -> bool:
+    """
+    verify a config directory exist. return false if verification fails
+    """
+    if file_name is not None and not os.path.isdir(file_name):
+        logger.error("Configured directory %s: %s is not a directory or not accessible", name, file_name)
+        return False
+    return True
+
+def _verify_name_string(name: str, name_string: str) -> bool:
+    """
+    Verify the name format string.
+    """
+    info = LookedUpFileInfo()
+    try:
+        formatter = PartialFormatter()
+        formatter.format(name_string, **info.asdict())
+        return True
+    except KeyError as key_error:
+        logger.error("Configuration %s is not a valid file name format, please check %s", name, name_string)
+        logger.error("Error message: %s", key_error)
+        return False
+
 class PartialFormatter(string.Formatter):
     """
     Used for formating NamerConfig.inplace_name and NamerConfig.
@@ -246,6 +269,23 @@ class NamerConfig():
         return output
 
 
+    def verify_config(self) -> bool:
+        """
+        Verifies the contents of your config file. Returns False if configuration failed.
+        """
+        success = True
+        if self.enable_metadataapi_genres is not True and self.default_genre is None:
+            logger.error("Sinse enable_metadataapi_genres is not True, you must specify a default_genre")
+            success = False
+        success = _verify_dir("watch_dir", self.watch_dir) and success
+        success = _verify_dir("work_dir", self.work_dir) and success
+        success = _verify_dir("failed_dir", self.failed_dir) and success
+        success = _verify_dir("dest_dir", self.dest_dir) and success
+        success = _verify_name_string("inplace_name", self.inplace_name) and success
+        success = _verify_name_string("new_relative_path_name", self.new_relative_path_name) and success
+        return success
+
+
 def from_config(config : ConfigParser) -> NamerConfig:
     """
     Given a config parser pointed at a namer.cfg file, return a NamerConfig with the file's parameters.
@@ -458,6 +498,7 @@ class LookedUpFileInfo():
     def __init__(self):
         self.performers = []
         self.tags = []
+        self.original_parsed_filename = FileNameParts()
 
     def asdict(self):
         """
