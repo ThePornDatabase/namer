@@ -85,7 +85,7 @@ def dir_with_subdirs_to_process(dir_to_scan: str, config: NamerConfig):
         logger.info("Scanning dir %s for subdirs/files to process",dir_to_scan)
         for file in os.listdir(dir_to_scan):
             fullpath_file = os.path.join(dir_to_scan, file)
-            if os.path.isdir(fullpath_file) or os.path.splitext(fullpath_file)[1].upper in ["MP4","MKV"]:
+            if os.path.isdir(fullpath_file) or os.path.splitext(fullpath_file)[1].upper() in ["MP4","MKV"]:
                 process(fullpath_file, config)
 
 def tag_in_place(video: str, config: NamerConfig, comparison_results: List[ComparisonResult]):
