@@ -12,8 +12,6 @@ from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
 from namer_types import default_config
 from namer_watchdog import handle
-from namer_moviexml import readfile
-
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -29,9 +27,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test the handle function works for a directory.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            prepare_workdir(tmpdir)
-            path = os.path.join(tmpdir, 'test', "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
-            response = readfile(path)
+            tempdir = Path(prepare_workdir(tmpdir))
+            path = tempdir / 'test' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
+            response = path.read_text()
             mock_response.return_value = response
             input_dir = os.path.join(tmpdir, 'test')
             poster = os.path.join(tmpdir, 'test', 'poster.png')
@@ -41,7 +39,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
             os.mkdir(os.path.join(tmpdir, 'watch'))
             shutil.move(input_dir, targetfile)
-            mock_poster.return_value = os.path.join(tmpdir, 'poster.png')
+            mock_poster.return_value = Path(tmpdir) / 'poster.png'
             config = default_config()
             os.mkdir(os.path.join(tmpdir, 'work'))
 

@@ -1,7 +1,6 @@
 """
 Updates mp4 files with metadata tags readable by Plex and Apple TV App.
 """
-import os
 import logging
 from pathlib import Path
 from mutagen.mp4 import MP4, MP4Cover
@@ -22,7 +21,7 @@ def resolution_to_hdv_setting(resolution: int) -> int:
         return 1
     return 0
 
-def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: str, config: NamerConfig):
+def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig):
     """
     us-tv|TV-MA|600|
     us-tv|TV-14|500|
@@ -83,7 +82,7 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: str, config:
 
     if poster is not None:
         with open(poster, "rb") as file:
-            ext = os.path.splitext(poster)[1].upper()
+            ext = poster.suffix.upper()
             imageformat = None
             if ext in ['.JPEG', '.JPG']:
                 imageformat=MP4Cover.FORMAT_JPEG

@@ -7,7 +7,6 @@ code their are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/
 """
 
-import os
 import json
 from types import SimpleNamespace
 import subprocess
@@ -143,9 +142,9 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
                 else:
                     logger.warning("Return code: %s", process.returncode)
                     if newinput is not None:
-                        os.remove(newinput)
+                        newinput.unlink()
                     else:
-                        os.remove(mp4_file)
-                    os.rename(workfile, mp4_file)
+                        mp4_file.unlink()
+                    workfile.rename(mp4_file)
                 return success
     return True

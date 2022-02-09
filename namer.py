@@ -19,12 +19,12 @@ from namer_metadataapi import get_poster, match
 
 logger = logging.getLogger('namer')
 
-def write_log_file(movie_file: str, match_attempts: List[ComparisonResult]) -> str:
+def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> str:
     """
     Given porndb scene results sorted by how closely they match a file,  write the contents
     of the result matches to a log file.
     """
-    logname = os.path.splitext(movie_file)[0]+"_namer.log"
+    logname = movie_file.with_name(movie_file.stem+"_namer.log")
     logger.info("Writing log to %s",logname)
     with open(logname, "wt", encoding='utf-8') as log_file:
         for attempt in match_attempts:
@@ -41,16 +41,16 @@ def write_log_file(movie_file: str, match_attempts: List[ComparisonResult]) -> s
                 f" {attempt.name_parts.name:50.50}\n")
     return logname
 
-def set_permissions(file: str, config: NamerConfig):
+def set_permissions(file: Path, config: NamerConfig):
     """
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process.
     """
     if hasattr(os, "chmod"):
-        if os.path.isdir(file) and not config.set_dir_permissions is None:
-            os.chmod(file, int(str(config.set_dir_permissions), 8))
+        if file.is_dir() and not config.set_dir_permissions is None:
+            file.chmod(int(str(config.set_dir_permissions), 8))
         elif config.set_file_permissions is not None:
-            os.chmod(file, int(str(config.set_file_permissions), 8))
+            file.chmod(int(str(config.set_file_permissions), 8))
         if config.set_uid is not None and config.set_gid is not None:
             os.chown(file, uid=config.set_uid, gid=config.set_gid)
 
@@ -89,7 +89,7 @@ def tag_in_place(video: Path, config: NamerConfig, comparison_results: List[Comp
             update_mp4_file(video, result.looked_up, poster, config)
         logger.info("Done tagging file: %s",video)
         if poster is not None:
-            os.remove(poster)
+            poster.unlink()
 
 
 def process(file_to_process: Path, config: NamerConfig) -> ProcessingResults:

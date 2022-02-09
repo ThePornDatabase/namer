@@ -4,6 +4,7 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 """
 
 import os
+from pathlib import Path
 import json
 from random import choices
 import string
@@ -100,14 +101,14 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
         logger.warning(ex)
         return None
 
-def get_poster(url: str, authtoken: str, video_file: str) -> str:
+def get_poster(url: str, authtoken: str, video_file: Path) -> Path:
     """
     returns json object with info
     """
     headers = {"Authorization": f"Bearer {authtoken}",
             'User-Agent': 'namer-1'}
     random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    file = os.path.splitext(video_file)[0]+"_"+random+"_poster"+pathlib.Path(url).suffix
+    file =  video_file.parent / ( video_file.stem + "_" + random+"_poster" + pathlib.Path(url).suffix )
     try:
         with requests.get(url, headers=headers) as response:
             #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...

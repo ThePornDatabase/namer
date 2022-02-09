@@ -2,28 +2,15 @@
 Reads movie.xml of Emby/Jellyfin format in to a LookedUpFileInfo, allowing the metadata to be written in to video
 files, or used in renaming the video file (currently only mp4s).
 """
-import os
+from pathlib import Path
 from lxml import objectify
 from namer_types import LookedUpFileInfo, Performer
 
-
-def readfile(file: str) -> str:
-    """
-    Utility function to read the contents of a file.
-    """
-    if os.path.isfile(file):
-        with open(file, "r", encoding='utf_8') as text_file:
-            data = text_file.read()
-            text_file.close()
-            return data
-    return None
-
-
-def parse_movie_xml_file(xmlfile: str) -> LookedUpFileInfo:
+def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
     Parse an Emby/Jellyfin xml file and creates a LookedUpFileInfo from the data.
     """
-    string = readfile(xmlfile)
+    string = xmlfile.read_text()
     movie = objectify.fromstring(string)
     info = LookedUpFileInfo()
     info.name = str(movie.title)
