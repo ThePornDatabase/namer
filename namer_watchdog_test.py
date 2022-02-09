@@ -1,7 +1,6 @@
 """
 Test namer_watchdog.py
 """
-import os
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -11,14 +10,12 @@ import shutil
 from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
 from namer_types import default_config
-from namer_watchdog import handle
+from namer_watchdog import MovieEventHandler, handle
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-
-    current = os.path.dirname(os.path.abspath(__file__))
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -31,28 +28,26 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             path = tempdir / 'test' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
             response = path.read_text()
             mock_response.return_value = response
-            input_dir = os.path.join(tmpdir, 'test')
-            poster = os.path.join(tmpdir, 'test', 'poster.png')
-            shutil.move(poster,  os.path.join(tmpdir, 'poster.png'))
+            input_dir = tempdir / 'test'
+            poster = input_dir / 'poster.png'
+            shutil.move(poster,  tempdir / 'poster.png')
 
-            targetfile = os.path.join(tmpdir, 'watch',
-                "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
-            os.mkdir(os.path.join(tmpdir, 'watch'))
+            targetfile = tempdir / 'watch' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p"
+            targetfile.parent.mkdir()
             shutil.move(input_dir, targetfile)
             mock_poster.return_value = Path(tmpdir) / 'poster.png'
             config = default_config()
-            os.mkdir(os.path.join(tmpdir, 'work'))
-
-            config.watch_dir = os.path.join(tmpdir, 'watch')
-            config.work_dir = os.path.join(tmpdir, 'work')
-            config.dest_dir = os.path.join(tmpdir, 'dest')
-            os.mkdir(os.path.join(tmpdir, 'dest'))
-            config.failed_dir = os.path.join(tmpdir, 'failed')
-            os.mkdir(os.path.join(tmpdir, 'failed'))
+            config.watch_dir = tempdir / 'watch'
+            config.work_dir = tempdir / 'work'
+            config.work_dir.mkdir()
+            config.dest_dir = tempdir / 'dest'
+            config.dest_dir.mkdir()
+            config.failed_dir = tempdir / 'failed'
+            config.failed_dir.mkdir()
 
             handle(Path(targetfile), config)
-            outputfile = os.path.join(tmpdir, 'dest',
-                'DorcelClub - 2021-12-23 - Peeping Tom','DorcelClub - 2021-12-23 - Peeping Tom.mp4')
+            outputfile = ( config.dest_dir / 'DorcelClub - 2021-12-23 - Peeping Tom' /
+                'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
 
             output = MP4(outputfile)
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
@@ -64,32 +59,34 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test the handle function works for a directory.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            prepare_workdir(tmpdir)
+            tempdir = Path(prepare_workdir(tmpdir))
             mock_response.return_value = "{}"
-            input_dir = os.path.join(tmpdir, 'test')
-            poster = os.path.join(tmpdir, 'test', 'poster.png')
-            shutil.move(poster,  os.path.join(tmpdir, 'poster.png'))
+            input_dir = tempdir / 'test'
+            poster = tempdir / 'test' / 'poster.png'
+            shutil.move(poster, poster)
 
-            targetfile = os.path.join(tmpdir, 'watch',
-                "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
-            os.mkdir(os.path.join(tmpdir, 'watch'))
-            shutil.move(input_dir, targetfile)
-            mock_poster.return_value = os.path.join(tmpdir, 'poster.png')
+
+            mock_poster.return_value = tempdir / 'poster.png'
             config = default_config()
-            os.mkdir(os.path.join(tmpdir, 'work'))
+            config.watch_dir = tempdir / 'watch'
+            config.watch_dir.mkdir()
+            config.work_dir = tempdir / 'work'
+            config.work_dir.mkdir()
+            config.dest_dir = tempdir / 'dest'
+            config.dest_dir.mkdir()
+            config.failed_dir = tempdir / 'failed'
+            config.failed_dir.mkdir()
+            config.min_file_size = 0
+            targetfile = (tempdir / 'watch' /
+                "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
+            input_dir.rename(targetfile)
 
-            config.watch_dir = os.path.join(tmpdir, 'watch')
-            config.work_dir = os.path.join(tmpdir, 'work')
-            config.dest_dir = os.path.join(tmpdir, 'dest')
-            os.mkdir(os.path.join(tmpdir, 'dest'))
-            config.failed_dir = os.path.join(tmpdir, 'failed')
-            os.mkdir(os.path.join(tmpdir, 'failed'))
+            handler = MovieEventHandler(config)
+            handler.process(targetfile)
 
-            handle(Path(targetfile), config)
-            outputfile = os.path.join(tmpdir, 'failed',
+            outputfile = (tempdir / 'failed' /
                 'DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p')
-
-            self.assertTrue(os.path.isdir(outputfile))
+            self.assertTrue(outputfile.is_dir())
 
 
 if __name__ == '__main__':

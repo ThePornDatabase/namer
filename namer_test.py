@@ -99,7 +99,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             path2 = tempdir / 'test' / 'response.json'
             response2 = path2.read_text()
             mock_response.side_effect = [response1, response2]
-            os.makedirs(tempdir / 'targetpath')
+            (tempdir / 'targetpath').mkdir()
             input_file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
             targetfile1 = ( tempdir / 'targetpath' /
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")

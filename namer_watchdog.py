@@ -19,20 +19,20 @@ from namer_types import NamerConfig, default_config
 logger = logging.getLogger('watchdog')
 
 
-def done_copying(file: str) -> bool:
+def done_copying(file: Path) -> bool:
     """
     Determines if a file is being copied by checking it's size in 2 second
     increments and seeing if the size has stayed the same.
     """
     size_past = 0
     while True:
-        time.sleep(2)
-        if not os.path.exists(file):
+        if not file.exists():
             return False
-        size_now = os.path.getsize(file)
+        size_now = file.stat().st_size
         if size_now == size_past:
             return True
         size_past = size_now
+        time.sleep(.2)
 
 
 def handle(target_file: Path, namer_config: NamerConfig):
@@ -43,44 +43,41 @@ def handle(target_file: Path, namer_config: NamerConfig):
 
     # is in a dir:
     detected = PurePath(relative_path).parts[0]
-    dir_path = os.path.join(namer_config.watch_dir, detected)
+    dir_path = namer_config.watch_dir / detected
 
     to_process = None
     workingdir = None
     workingfile = None
-    if os.path.isdir(dir_path):
+    if dir_path.is_dir():
         workingdir = Path(namer_config.work_dir) / detected
-        os.rename(dir_path, workingdir)
+        dir_path.rename(workingdir)
         to_process = workingdir
     else:
         workingfile = Path(namer_config.work_dir) / relative_path
-        os.rename(target_file, workingfile)
+        target_file.rename(workingfile)
         to_process = workingfile
     result = process(to_process, namer_config)
 
     if not result.found:
         if workingdir is not None:
-            os.rename(workingdir, os.path.join(
-                namer_config.failed_dir, detected))
+            workingdir.rename(namer_config.failed_dir/ detected)
         else:
-            newvideo = os.path.join(namer_config.failed_dir, relative_path)
-            os.rename(workingfile, newvideo)
-            os.rename(result.namer_log_file, os.path.splitext(
-                newvideo)[0]+"_namer.log")
+            newvideo = namer_config.failed_dir / relative_path
+            workingfile.rename(newvideo)
+            result.namer_log_file.rename( result.namer_log_file.parent /
+                result.namer_log_file.stem+"_namer.log")
     else:
-        newfile = os.path.join(namer_config.dest_dir,
-                               result.final_name_relative)
+        newfile = namer_config.dest_dir / result.final_name_relative
         if (
             len(PurePath(result.final_name_relative).parts) > 1
             and workingdir is not None
             and namer_config.del_other_files is False
         ):
-            shutil.move(workingdir, os.path.dirname(newfile))
+            shutil.move(workingdir, newfile.parent)
         else:
-            os.makedirs(os.path.dirname(newfile), exist_ok=True)
+            newfile.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(result.video_file, newfile)
-            shutil.move(result.namer_log_file,
-                        os.path.splitext(newfile)[0]+"_namer.log")
+            shutil.move(result.namer_log_file, newfile.parent / newfile.stem+"_namer.log")
             shutil.rmtree(workingdir, ignore_errors=True)
 
 def retry_failed(namer_config: NamerConfig):
@@ -88,8 +85,8 @@ def retry_failed(namer_config: NamerConfig):
     Moves the contents from the failed dir to the watch dir to attempt reprocessing.
     """
     logger.info("Retry failed items:")
-    for file in os.listdir(namer_config.failed_dir):
-        shutil.move(os.path.join(namer_config.failed_dir, file), os.path.join(namer_config.watch_dir,file))
+    for file in list(namer_config.failed_dir.iterdir()):
+        shutil.move( namer_config.failed_dir / file, namer_config.watch_dir / file )
 
 class MovieEventHandler(PatternMatchingEventHandler):
     """
@@ -118,7 +115,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         """
         path = Path(path_in)
         logger.info("watchdog process called")
-        if done_copying(path) and (os.path.getsize(path)/ (1024*1024) > self.namer_config.min_file_size):
+        if done_copying(path) and (path.stat().st_size / (1024*1024) > self.namer_config.min_file_size):
             try:
                 handle(path, self.namer_config)
             except Exception as ex:  # pylint: disable=broad-except

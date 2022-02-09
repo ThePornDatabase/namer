@@ -17,11 +17,11 @@ from pathvalidate import sanitize_filename
 
 logger = logging.getLogger('types')
 
-def _verify_dir(name: str, file_name: str) -> bool:
+def _verify_dir(name: str, file_name: Path) -> bool:
     """
     verify a config directory exist. return false if verification fails
     """
-    if file_name is not None and not os.path.isdir(file_name):
+    if file_name is not None and not file_name.is_dir():
         logger.error("Configured directory %s: %s is not a directory or not accessible", name, file_name)
         return False
     return True
@@ -207,24 +207,24 @@ class NamerConfig():
     or attempt to move them to a subdirectory specified in new_relative_path_name, if one exist.
     """
 
-    watch_dir: str = None
+    watch_dir: Path = None
     """
     If running in watchdog mode, director where new downloads go.
     """
 
-    work_dir: str = None
+    work_dir: Path = None
     """
     If running in watchdog mode, temporary directory where work is done.
     a log file shows attempted matchs and match closeness.
     """
 
-    failed_dir: str = None
+    failed_dir: Path = None
     """
     If running in watchdog mode, Should processing fail the file or directory is moved here.
     Files can be manually moved to watchdir to force reprocessing.
     """
 
-    dest_dir: str = None
+    dest_dir: Path = None
     """
     If running in watchdog mode, dir where finalized files get written.
     """
@@ -308,10 +308,19 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.new_relative_path_name = config.get('metadata','new_relative_path_name',
         fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
     namer_config.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)
-    namer_config.watch_dir = config.get('watchdog','watch_dir',fallback=None)
-    namer_config.work_dir = config.get('watchdog','work_dir',fallback=None)
-    namer_config.failed_dir = config.get('watchdog','failed_dir',fallback=None)
-    namer_config.dest_dir = config.get('watchdog','dest_dir',fallback=None)
+    watch_dir = config.get('watchdog','watch_dir',fallback=None)
+    if watch_dir is not None:
+        namer_config.watch_dir = Path(watch_dir)
+    work_dir = config.get('watchdog','work_dir',fallback=None)
+    if work_dir is not None:
+        namer_config.work_dir = Path(work_dir)
+    failed_dir = config.get('watchdog','failed_dir',fallback=None)
+    if failed_dir is not None:
+        namer_config.failed_dir = Path(failed_dir)
+    dest_dir = config.get('watchdog','dest_dir',fallback=None)
+    if dest_dir is not None:
+        namer_config.dest_dir = Path(dest_dir)
+
     namer_config.retry_time = config.get('watchdog','retry_time',fallback=None)
     if namer_config.retry_time is None:
         namer_config.retry_time = "03:"+random.choice(["01", "11" ,"21", "31", "41", "51"])
@@ -335,7 +344,7 @@ def default_config() -> NamerConfig:
             found_config = namer_cfg
     if found_config is None:
         namer_cfg = Path.home() / ".namer.cfg"
-        if os.path.isfile(namer_cfg):
+        if namer_cfg.is_file():
             logger.info("Using homer dir config: %s",namer_cfg)
             found_config = namer_cfg
     if found_config is None:

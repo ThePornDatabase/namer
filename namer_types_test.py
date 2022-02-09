@@ -3,6 +3,7 @@ Test namer_types.py
 """
 import logging
 import os
+from pathlib import Path
 import sys
 import unittest
 from namer_types import NamerConfig, default_config, PartialFormatter
@@ -23,8 +24,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(config.del_other_files , False)
         self.assertEqual(config.inplace_name, '{site} - {date} - {name}.{ext}')
         self.assertEqual(config.new_relative_path_name, '{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
-        self.assertEqual(config.dest_dir, './test/dest')
-        self.assertEqual(config.failed_dir, './test/failed')
+        self.assertEqual(config.dest_dir.parts, ('test','dest'))
+        self.assertEqual(config.failed_dir.parts , ('test','failed'))
         self.assertEqual(config.min_file_size, 300)
         self.assertEqual(config.language, 'eng')
 
@@ -91,17 +92,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(success, True)
 
         config = NamerConfig()
-        config.watch_dir="/not/a/real/path"
+        config.watch_dir=Path("/not/a/real/path")
         success = config.verify_config()
         self.assertEqual(success, False)
 
         config = NamerConfig()
-        config.work_dir="/not/a/real/path"
+        config.work_dir=Path("/not/a/real/path")
         success = config.verify_config()
         self.assertEqual(success, False)
 
         config = NamerConfig()
-        config.failed_dir="/not/a/real/path"
+        config.failed_dir=Path("/not/a/real/path")
         success = config.verify_config()
         self.assertEqual(success, False)
 
