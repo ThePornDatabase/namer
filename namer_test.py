@@ -101,7 +101,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             mock_response.side_effect = [response1, response2]
             os.makedirs(tempdir / 'targetpath')
             input_file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
-            targetfile1 = ( tempdir / 'targetpath' / 
+            targetfile1 = ( tempdir / 'targetpath' /
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
             input_file.rename(targetfile1)
             targetfile2 = tempdir / 'targetpath' / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.mp4"
@@ -113,7 +113,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             main(['-d',os.path.dirname(targetfile1),'-m'])
             output = MP4(tempdir / 'targetpath' / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
-            output = MP4(tempdir / 'targetpath'/ 'EvilAngel - 2022-01-03 - Carmela Clutch: Fabulous Anal 3-Way!.mp4')
+            output = MP4(tempdir / 'targetpath'/ 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
 if __name__ == '__main__':

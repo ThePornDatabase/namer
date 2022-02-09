@@ -2,7 +2,6 @@
 Responsible for finding the larges file with an extension in a directory
 """
 import os
-import glob
 from pathlib import Path
 from typing import List, Tuple
 import unittest
@@ -15,7 +14,7 @@ def find_largest_file_in_glob(rootdir: Path, globstr: str) -> Path:
     """
     returns largest matching file
     """
-    list_of_files = [ f for f in rootdir.rglob(globstr) ]
+    list_of_files = list(rootdir.rglob(globstr))
     logger.info("found files %s", list_of_files)
     file = None
     if len(list_of_files) > 0:
@@ -31,7 +30,7 @@ def find_targets_for_naming(rootdir: Path) -> List[Tuple[str, str]]:
     used for identifaction, and the file should be processed on it's own.
     """
     to_process: List[(str, str, str)] = []
-    files = [f for f in Path(rootdir).iterdir()]
+    files = list(Path(rootdir).iterdir())
     files.sort()
     for file_name in files:
         target_file = rootdir / file_name

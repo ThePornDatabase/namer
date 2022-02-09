@@ -13,6 +13,7 @@ import string
 from pathlib import Path
 import logging
 import random
+from pathvalidate import sanitize_filename
 
 logger = logging.getLogger('types')
 
@@ -517,14 +518,17 @@ class LookedUpFileInfo():
                 'ext': self.original_parsed_filename.extension,
                 'trans': self.original_parsed_filename.trans}
 
-    def new_file_name(self, template: str):
+    def new_file_name(self, template: str) -> str:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
         dictionary = self.asdict()
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **dictionary)
-        return name
+        output = Path()
+        for part in name.split('/'):
+            output = output / sanitize_filename(part)
+        return str(output)
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ComparisonResult:

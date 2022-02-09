@@ -11,7 +11,6 @@ import getopt
 import logging
 from typing import List, Tuple
 
-from numpy import sort
 from namer_types import NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
 from namer_dirscanner import find_largest_file_in_glob
 from namer_file_parser import parse_file_name
@@ -63,7 +62,7 @@ def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig):
     """
     if dir_to_scan is not None and dir_to_scan.is_dir():
         logger.info("Scanning dir %s for subdirs/files to process",dir_to_scan)
-        files = [f for f in dir_to_scan.iterdir()]
+        files = list(dir_to_scan.iterdir())
         files.sort()
         for file in files:
             fullpath_file = dir_to_scan / file

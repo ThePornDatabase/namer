@@ -3,7 +3,6 @@ Test of namer_dirscanner.py
 """
 from pathlib import Path
 import unittest
-import os
 from distutils.dir_util import copy_tree
 import tempfile
 from namer_dirscanner import find_largest_file_in_glob, find_targets_for_naming

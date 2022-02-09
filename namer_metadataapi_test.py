@@ -18,7 +18,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "test" / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
+        response = ( Path(__file__).resolve().parent / "test" /
+            "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
         mock_response.return_value = response.read_text()
         name = parse_file_name('DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4')
         results = match(name, "your_porndb_authkey")

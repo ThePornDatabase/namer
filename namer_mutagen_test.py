@@ -4,7 +4,6 @@ Test for namer_mutagen.py
 from pathlib import Path
 import unittest
 from unittest import mock
-import os
 import tempfile
 import shutil
 from mutagen.mp4 import MP4
