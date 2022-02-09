@@ -19,8 +19,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         verify tag in place functions.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            prepare_workdir(tmpdir)
-            xmlfile = Path(tmpdir) / "test" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.nfo"
+            tempdir = Path(prepare_workdir(tmpdir))
+            xmlfile = tempdir / "test" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.nfo"
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")
             self.assertEqual(info.date, "2022-01-02")
