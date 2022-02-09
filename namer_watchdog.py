@@ -112,10 +112,11 @@ class MovieEventHandler(PatternMatchingEventHandler):
     def on_created(self, event: FileSystemEvent):
         self.process(event.src_path)
 
-    def process(self, path: str):
+    def process(self, path_in: str):
         """
         Watch for and process new files, after ensuring the file is fully moved in to place.
         """
+        path = Path(path_in)
         logger.info("watchdog process called")
         if done_copying(path) and (os.path.getsize(path)/ (1024*1024) > self.namer_config.min_file_size):
             try:
@@ -124,7 +125,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 try:
                     exc_info = sys.exc_info()
                     try:
-                        print(f"Error handling {dir}: \n {ex}")
+                        logger.error("Error handling %s: \n %s", path, ex)
                     except Exception: # pylint: disable=broad-except
                         pass
                 finally:
