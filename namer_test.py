@@ -85,6 +85,31 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output = MP4(os.path.join(targetfile+"2", 'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 
+    @patch('namer_metadataapi.__get_response_json_object')
+    @patch('namer.get_poster')
+    def test_writing_metadata_all_dirs_files(self, mock_poster, mock_response):
+        """
+        Test multiple directories are processed when -d (directory) and -m are passed.
+        Process all subdirs of -d.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            prepare_workdir(tmpdir)
+            path = os.path.join(tmpdir,'test',"DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json")
+            response1 = readfile(path)
+            path2 = os.path.join(tmpdir,'test',"response.json")
+            response2 = readfile(path2)
+            mock_response.side_effect = [response1, response2]
+            input_directory = os.path.join(tmpdir, 'test')
+            targetfile1 = os.path.join(tmpdir, "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
+            os.rename(input_directory, targetfile1)
+            targetfile2 = os.path.join(tmpdir, "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way")
+            copy_tree(targetfile1, targetfile2)
+            mock_poster.side_effect = [os.path.join(targetfile1,"poster.png"),os.path.join(targetfile2,"poster.png")]
+            main(['-d',os.path.dirname(targetfile1),'-m'])
+            output = MP4(os.path.join(targetfile1, 'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
+            self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
+            output = MP4(os.path.join(targetfile2, 'EvilAngel - 2022-01-03 - Carmela Clutch: Fabulous Anal 3-Way!.mp4'))
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
 if __name__ == '__main__':
     unittest.main()
