@@ -2,6 +2,7 @@
 Test namer_watchdog.py
 """
 import os
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 import logging
@@ -51,7 +52,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.failed_dir = os.path.join(tmpdir, 'failed')
             os.mkdir(os.path.join(tmpdir, 'failed'))
 
-            handle(targetfile, config)
+            handle(Path(targetfile), config)
             outputfile = os.path.join(tmpdir, 'dest',
                 'DorcelClub - 2021-12-23 - Peeping Tom','DorcelClub - 2021-12-23 - Peeping Tom.mp4')
 
@@ -86,7 +87,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.failed_dir = os.path.join(tmpdir, 'failed')
             os.mkdir(os.path.join(tmpdir, 'failed'))
 
-            handle(targetfile, config)
+            handle(Path(targetfile), config)
             outputfile = os.path.join(tmpdir, 'failed',
                 'DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p')
 

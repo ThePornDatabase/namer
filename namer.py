@@ -10,6 +10,8 @@ import sys
 import getopt
 import logging
 from typing import List, Tuple
+
+from numpy import sort
 from namer_types import NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
 from namer_dirscanner import find_largest_file_in_glob
 from namer_file_parser import parse_file_name
@@ -40,28 +42,6 @@ def write_log_file(movie_file: str, match_attempts: List[ComparisonResult]) -> s
                 f" {attempt.name_parts.name:50.50}\n")
     return logname
 
-
-def determine_file(file_to_process: str, config: NamerConfig) -> Tuple[str, str]:
-    """
-    find the movie file we want to process, and the declared containing directory.
-    """
-    containing_dir = None
-    file = None
-    if os.path.isdir(file_to_process):
-        logger.info("Target dir: %s",file_to_process)
-        containing_dir = file_to_process
-        file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
-        if file is None:
-            file = find_largest_file_in_glob(file_to_process, "**/*.mkv")
-    else:
-        logger.info("Target file: %s",file_to_process)
-        relpath = os.path.relpath(file_to_process, config.watchdir)
-        logger.info("Relpath: %s",relpath)
-        containing_dir = os.path.join(config.watchdir, Path(relpath).parts[0])
-        file = file_to_process
-    return (containing_dir, file)
-
-
 def set_permissions(file: str, config: NamerConfig):
     """
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
@@ -75,22 +55,22 @@ def set_permissions(file: str, config: NamerConfig):
         if config.set_uid is not None and config.set_gid is not None:
             os.chown(file, uid=config.set_uid, gid=config.set_gid)
 
-def dir_with_subdirs_to_process(dir_to_scan: str, config: NamerConfig):
+def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig):
     """
     Used to find subdirs of a directory to be individually processed.
     The directories will be scanned for media and named/tagged in place
     based on config settings.
     """
-    if os.path.isdir(dir_to_scan):
+    if dir_to_scan is not None and dir_to_scan.is_dir():
         logger.info("Scanning dir %s for subdirs/files to process",dir_to_scan)
-        files = os.listdir(dir_to_scan)
+        files = [f for f in dir_to_scan.iterdir()]
         files.sort()
         for file in files:
-            fullpath_file = os.path.join(dir_to_scan, file)
-            if os.path.isdir(fullpath_file) or os.path.splitext(fullpath_file)[1].upper() in [".MP4",".MKV"]:
+            fullpath_file = dir_to_scan / file
+            if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4",".MKV"]:
                 process(fullpath_file, config)
 
-def tag_in_place(video: str, config: NamerConfig, comparison_results: List[ComparisonResult]):
+def tag_in_place(video: Path, config: NamerConfig, comparison_results: List[ComparisonResult]):
     """
     Uses ComparisonResults to update an mp4 file's metadata based on a match in
     ComparisonResults.   Expects the first item of list to be the match if there is one.
@@ -101,7 +81,7 @@ def tag_in_place(video: str, config: NamerConfig, comparison_results: List[Compa
         logfile = write_log_file(video, comparison_results)
         set_permissions(logfile, config)
         poster = None
-        if config.enabled_tagging is True and os.path.splitext(video)[1].lower() == ".mp4":
+        if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
             if config.enabled_poster is True:
                 logger.info("Downloading poster: %s",result.looked_up.poster_url)
                 poster = get_poster(result.looked_up.poster_url, config.porndb_token, video)
@@ -113,7 +93,7 @@ def tag_in_place(video: str, config: NamerConfig, comparison_results: List[Compa
             os.remove(poster)
 
 
-def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
+def process(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -132,7 +112,7 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
     """
     logger.info("Analyzing: %s",file_to_process)
     containing_dir = None
-    if os.path.isdir(file_to_process):
+    if file_to_process.is_dir():
         logger.info("Target dir: %s",file_to_process)
         containing_dir = file_to_process
         file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
@@ -142,16 +122,16 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
         file = file_to_process
 
     if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = os.path.basename(containing_dir)+os.path.splitext(file)[1]
+        name = containing_dir.stem+file.suffix
     else:
-        name = os.path.basename(file)
+        name = file.name
 
     output = ProcessingResults()
     output.dirfile = containing_dir
     output.video_file = file
 
     if containing_dir is None:
-        containing_dir = os.path.dirname(file)
+        containing_dir = file.parent
 
 
     logger.info("file: %s",file)
@@ -173,8 +153,8 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
                 result = comparison_results[0]
                 output.found = True
                 output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
-                output.video_file = os.path.join(containing_dir, result.looked_up.new_file_name(config.inplace_name))
-                os.rename(file, output.video_file)
+                output.video_file = containing_dir / result.looked_up.new_file_name(config.inplace_name)
+                file.rename(output.video_file)
                 set_permissions(output.video_file, config)
                 tag_in_place(output.video_file, config, comparison_results)
                 logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
@@ -197,7 +177,7 @@ def usage():
     print("-m, --many  : if set, a directory have all it's sub directories processed."+
         " Files move only within sub dirs, or are renamed in place, if in the root dir to scan")
 
-def get_opts(argv) -> Tuple[int, str, str, str, bool]:
+def get_opts(argv) -> Tuple[int, Path, Path, Path, bool]:
     """
     Read command line args are return them as a tuple.
     """
@@ -218,35 +198,35 @@ def get_opts(argv) -> Tuple[int, str, str, str, bool]:
         elif opt == '-q':
             logger_level=logging.ERROR
         elif opt in ("-c", "--configfile"):
-            config_overide = arg
+            config_overide = Path(arg)
         elif opt in ("-f", "--file"):
-            file_to_process = arg
+            file_to_process = Path(arg)
         elif opt in ("-d", "--dir"):
-            dir_to_process = arg
+            dir_to_process = Path(arg)
         elif opt in ("-m", "--many"):
             many = True
     return (logger_level, config_overide, file_to_process, dir_to_process, many)
 
-def check_arguments(file_to_process: str, dir_to_process: str, config_overide: str):
+def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """
     check arguments.
     """
     error = False
     if file_to_process is not None:
-        print("File to process "+file_to_process)
-        if not os.path.isfile(file_to_process):
-            print("Error not a file!")
+        logger.info("File to process: %s", file_to_process)
+        if not file_to_process.is_file():
+            logger.error("Error not a file! %s", file_to_process)
             error = True
 
     if dir_to_process is not None:
-        print("Directory to process "+dir_to_process)
-        if not os.path.isdir(dir_to_process):
-            print("Error not a directory!")
+        logger.info("Directory to process: %s",dir_to_process)
+        if not dir_to_process.is_dir():
+            logger.info("Error not a directory! %s", dir_to_process)
             error = True
 
     if config_overide is not None:
-        print("Config override specified "+config_overide)
-        if not os.path.isfile(config_overide):
+        logger.info("Config override specified: %s",config_overide)
+        if not config_overide.is_file():
             logger.info("Config override specified, but file does not exit: %s",config_overide)
             error = True
 
@@ -268,14 +248,9 @@ def main(argv):
 
     config = default_config()
     logging.basicConfig(level=logger_level)
-    if config_overide is not None:
-        print("Config override specified "+config_overide)
-        if not os.path.isfile(config_overide):
-            logger.info("Config override specified, but file does not exit: %s",config_overide)
-            usage()
-            sys.exit(2)
-        else:
-            config = from_config(config_overide)
+    if config_overide is not None and config_overide.is_file:
+        logger.info("Config override specified %s",config_overide)
+        config = from_config(config_overide)
     config.verify_config()
     if file_to_process is not None and dir_to_process is not None:
         print("set -f or -d, but not both.")

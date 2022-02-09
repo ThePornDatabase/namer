@@ -98,7 +98,7 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
     return None
 
 
-def update_audio_stream_if_needed(mp4_file: str, language: str) -> bool:
+def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
     """
     Returns true if the file had to be edited to have a default audio stream equal to the desired language,
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
@@ -107,14 +107,13 @@ def update_audio_stream_if_needed(mp4_file: str, language: str) -> bool:
     """
 
     with TemporaryDirectory() as tempdir:
-        workfile = os.path.join(tempdir, os.path.basename(mp4_file))
+        workfile = Path(tempdir) / mp4_file.name
         stream = get_audio_stream_for_lang(mp4_file, language)
         if stream is not None:
             newinput = None
             if mp4_file == workfile:
-                newinput = os.path.join(
-                    Path(mp4_file).parent.absolute(), "temp_"+os.path.basename(mp4_file))
-                os.rename(mp4_file, newinput)
+                newinput = Path(mp4_file).parent.absolute() / "temp_" + mp4_file.name
+                mp4_file.rename(newinput)
                 mp4_file = newinput
             logger.info(
                 "Attempt to alter default audio stream of %s", mp4_file)

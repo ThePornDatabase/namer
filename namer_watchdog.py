@@ -8,7 +8,7 @@ import time
 import os
 import sys
 import traceback
-from pathlib import PurePath
+from pathlib import Path, PurePath
 import logging
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, FileSystemMovedEvent
@@ -35,11 +35,11 @@ def done_copying(file: str) -> bool:
         size_past = size_now
 
 
-def handle(target_file: str, namer_config: NamerConfig):
+def handle(target_file: Path, namer_config: NamerConfig):
     """
     Responsible for processing and moving new movie files.
     """
-    relative_path = os.path.relpath(target_file, namer_config.watch_dir)
+    relative_path = target_file.relative_to(namer_config.watch_dir)
 
     # is in a dir:
     detected = PurePath(relative_path).parts[0]
@@ -49,11 +49,11 @@ def handle(target_file: str, namer_config: NamerConfig):
     workingdir = None
     workingfile = None
     if os.path.isdir(dir_path):
-        workingdir = os.path.join(namer_config.work_dir, detected)
+        workingdir = Path(namer_config.work_dir) / detected
         os.rename(dir_path, workingdir)
         to_process = workingdir
     else:
-        workingfile = os.path.join(namer_config.work_dir, relative_path)
+        workingfile = Path(namer_config.work_dir) / relative_path
         os.rename(target_file, workingfile)
         to_process = workingfile
     result = process(to_process, namer_config)

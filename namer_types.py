@@ -324,22 +324,22 @@ def default_config() -> NamerConfig:
     found_config = None
     if os.environ.get('NAMER_CONFIG'):
         namer_cfg = os.environ.get('NAMER_CONFIG')
-        if os.path.isfile(namer_cfg):
+        if Path(namer_cfg).is_file():
             logger.info("Using config file from NAMER_CONFIG environment %s",namer_cfg)
             found_config = namer_cfg
     if found_config is None:
-        namer_cfg = './namer.cfg'
-        if os.path.isfile(namer_cfg):
-            logger.info("Using local executable config: %s",namer_cfg)
+        namer_cfg = Path('./namer.cfg')
+        if namer_cfg.is_file():
+            logger.info("Using local executable config: %s",namer_cfg.absolute())
             found_config = namer_cfg
     if found_config is None:
-        namer_cfg = os.path.join(Path.home(), ".namer.cfg")
+        namer_cfg = Path.home() / ".namer.cfg"
         if os.path.isfile(namer_cfg):
             logger.info("Using homer dir config: %s",namer_cfg)
             found_config = namer_cfg
     if found_config is None:
-        namer_cfg = os.path.join(os.path.dirname(os.path.abspath(__file__)),'namer.cfg')
-        if os.path.isfile(namer_cfg):
+        namer_cfg = Path(__file__).absolute().parent / 'namer.cfg'
+        if namer_cfg.is_file():
             logger.info("Using local executable config: %s",namer_cfg)
             found_config = namer_cfg
 
@@ -588,18 +588,18 @@ class ProcessingResults:
     True if a match was found in the porndb.
     """
 
-    dirfile: str = None
+    dirfile: Path = None
     """
     True if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
     or all files can be moved to a destination specified in the field final_name_relative.
     """
 
-    video_file: str = None
+    video_file: Path = None
     """
     The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}.extensions
     """
 
-    namer_log_file: str = None
+    namer_log_file: Path = None
     """
     The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}_namer.log
     """

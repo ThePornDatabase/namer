@@ -1,15 +1,12 @@
 """
 Test namer_metadataapi_test.py
 """
-import os
+from pathlib import Path
 import unittest
 from unittest import mock
 from namer_metadataapi import match
 from namer_types import Performer
 from namer_file_parser import parse_file_name
-from namer_moviexml import readfile
-
-current=os.path.dirname(os.path.abspath(__file__))
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -21,8 +18,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        mock_response.return_value = readfile(os.path.join(current,
-            "test","DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"))
+        response = Path(__file__).resolve().parent / "test" / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
+        mock_response.return_value = response.read_text()
         name = parse_file_name('DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4')
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 1)
@@ -50,7 +47,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        mock_response.return_value = readfile(os.path.join(current,"test","response.json"))
+        response = Path(__file__).resolve().parent / "test" / "response.json"
+        mock_response.return_value = response.read_text()
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 1)
@@ -78,7 +76,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
-        mock_response.return_value = readfile(os.path.join(current,"test","full.json"))
+        response = Path(__file__).resolve().parent / "test" / "full.json"
+        mock_response.return_value = response.read_text()
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 1)
