@@ -109,7 +109,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(targetfile1, targetfile2)
             shutil.copy(os.path.join(tmpdir,'test', "poster.png"), os.path.splitext(targetfile1)[0]+"_poster_in.png")
             shutil.copy(os.path.join(tmpdir,'test', "poster.png"), os.path.splitext(targetfile2)[0]+"_poster_in.png")
-            mock_poster.side_effect = [os.path.splitext(targetfile1)[0]+"_poster_in.png",os.path.splitext(targetfile2)[0]+"_poster_in.png"]
+            mock_poster.side_effect = [os.path.splitext(targetfile1)[0]+"_poster_in.png",
+                os.path.splitext(targetfile2)[0]+"_poster_in.png"]
             main(['-d',os.path.dirname(targetfile1),'-m'])
             output = MP4(os.path.join(tmpdir, 'targetpath', 'DorcelClub - 2021-12-23 - Peeping Tom.mp4'))
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])

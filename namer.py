@@ -181,7 +181,7 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
             else:
                 output.final_name_relative=os.path.relpath(file, containing_dir)
         else:
-            logger.warning("Could not parse file/dir for name to look up: %s", name)        
+            logger.warning("Could not parse file/dir for name to look up: %s", name)
     return output
 
 def usage():
