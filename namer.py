@@ -154,9 +154,9 @@ def process(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
                 output.found = True
                 output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
                 output.video_file = containing_dir / result.looked_up.new_file_name(config.inplace_name)
-                file.rename(output.video_file)
-                set_permissions(output.video_file, config)
-                tag_in_place(output.video_file, config, comparison_results)
+                file.rename(output.video_file.resolve())
+                set_permissions(output.video_file.resolve(), config)
+                tag_in_place(output.video_file.resolve(), config, comparison_results)
                 logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
             else:
                 output.final_name_relative=os.path.relpath(file, containing_dir)
