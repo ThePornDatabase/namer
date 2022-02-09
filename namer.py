@@ -83,9 +83,11 @@ def dir_with_subdirs_to_process(dir_to_scan: str, config: NamerConfig):
     """
     if os.path.isdir(dir_to_scan):
         logger.info("Scanning dir %s for subdirs/files to process",dir_to_scan)
-        for file in os.listdir(dir_to_scan):
+        files = os.listdir(dir_to_scan)
+        files.sort()
+        for file in files:
             fullpath_file = os.path.join(dir_to_scan, file)
-            if os.path.isdir(fullpath_file) or os.path.splitext(fullpath_file)[1].upper() in ["MP4","MKV"]:
+            if os.path.isdir(fullpath_file) or os.path.splitext(fullpath_file)[1].upper() in [".MP4",".MKV"]:
                 process(fullpath_file, config)
 
 def tag_in_place(video: str, config: NamerConfig, comparison_results: List[ComparisonResult]):
@@ -162,21 +164,24 @@ def process(file_to_process: str, config: NamerConfig) -> ProcessingResults:
         #remove sample files
         logger.info("Processing: %s",name)
         file_name_parts = parse_file_name(name)
-        comparison_results = match(file_name_parts, config.porndb_token)
-        logfile = write_log_file(file, comparison_results)
-        set_permissions(logfile, config)
-        output.namer_log_file=logfile
-        if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
-            result = comparison_results[0]
-            output.found = True
-            output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
-            output.video_file = os.path.join(containing_dir, result.looked_up.new_file_name(config.inplace_name))
-            os.rename(file, output.video_file)
-            set_permissions(output.video_file, config)
-            tag_in_place(output.video_file, config, comparison_results)
-            logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
+        if file_name_parts is not None:
+            comparison_results = match(file_name_parts, config.porndb_token)
+            logfile = write_log_file(file, comparison_results)
+            set_permissions(logfile, config)
+            output.namer_log_file=logfile
+            if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
+                result = comparison_results[0]
+                output.found = True
+                output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
+                output.video_file = os.path.join(containing_dir, result.looked_up.new_file_name(config.inplace_name))
+                os.rename(file, output.video_file)
+                set_permissions(output.video_file, config)
+                tag_in_place(output.video_file, config, comparison_results)
+                logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
+            else:
+                output.final_name_relative=os.path.relpath(file, containing_dir)
         else:
-            output.final_name_relative=os.path.relpath(file, containing_dir)
+            logger.warning("Could not parse file/dir for name to look up: %s", name)        
     return output
 
 def usage():
