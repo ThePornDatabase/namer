@@ -6,4 +6,5 @@ rapidfuzz
 schedule
 lxml
 requests
+pathvalidate
 pylint
