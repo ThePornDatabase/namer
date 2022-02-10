@@ -77,7 +77,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
         else:
             newfile.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(result.video_file, newfile)
-            shutil.move(result.namer_log_file, newfile.parent / newfile.stem+"_namer.log")
+            shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
             shutil.rmtree(workingdir, ignore_errors=True)
 
 def retry_failed(namer_config: NamerConfig):
