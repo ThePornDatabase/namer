@@ -10,8 +10,9 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
     Parse an Emby/Jellyfin xml file and creates a LookedUpFileInfo from the data.
     """
-    string = xmlfile.read_text()
-    movie = objectify.fromstring(string)
+    content = xmlfile.read_text()
+    print(content)
+    movie = objectify.fromstring(content)
     info = LookedUpFileInfo()
     info.name = str(movie.title)
     info.site = str(movie.studio[0])
