@@ -10,27 +10,27 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
     Parse an Emby/Jellyfin xml file and creates a LookedUpFileInfo from the data.
     """
-    with xmlfile.open() as file:
-        movie = objectify.parse(file).getroot()
-        info = LookedUpFileInfo()
-        info.name = str(movie.title)
-        info.site = str(movie.studio[0])
-        info.date = str(movie.releasedate)
-        info.description = str(movie.plot)
-        info.poster_url = str(movie.art.poster)
-        info.performers = []
-        for actor in movie.actor:
-            performer = Performer()
-            performer.name = str(actor.name)
-            performer.role = str(actor.role)
-            info.performers.append(performer)
-        info.look_up_site_id = str(movie.phoenixadulturlid)
-        info.uuid = str(movie.theporndbid)
-        info.tags = []
-        for genre in movie.genre:
-            info.tags.append(str(genre))
-        info.original_parsed_filename = None
-        info.original_query = None
-        info.origninal_response = None
-        return info
-    return None
+    content = xmlfile.read_text(encoding="utf_8")
+
+    movie = objectify.fromstring(content)
+    info = LookedUpFileInfo()
+    info.name = str(movie.title)
+    info.site = str(movie.studio[0])
+    info.date = str(movie.releasedate)
+    info.description = str(movie.plot)
+    info.poster_url = str(movie.art.poster)
+    info.performers = []
+    for actor in movie.actor:
+        performer = Performer()
+        performer.name = str(actor.name)
+        performer.role = str(actor.role)
+        info.performers.append(performer)
+    info.look_up_site_id = str(movie.phoenixadulturlid)
+    info.uuid = str(movie.theporndbid)
+    info.tags = []
+    for genre in movie.genre:
+        info.tags.append(str(genre))
+    info.original_parsed_filename = None
+    info.original_query = None
+    info.origninal_response = None
+    return info
