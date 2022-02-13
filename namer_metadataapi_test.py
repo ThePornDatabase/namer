@@ -4,6 +4,7 @@ Test namer_metadataapi_test.py
 from pathlib import Path
 import unittest
 from unittest import mock
+
 from namer_metadataapi import match
 from namer_types import Performer
 from namer_file_parser import parse_file_name
@@ -71,6 +72,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected.append(Performer("Francesca Le","Female"))
         expected.append(Performer("Mark Wood","Male"))
         self.assertListEqual(info.performers, expected)
+        self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
     def test_call_full_metadataapi_net(self, mock_response):
