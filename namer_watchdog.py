@@ -64,8 +64,9 @@ def handle(target_file: Path, namer_config: NamerConfig):
         else:
             newvideo = namer_config.failed_dir / relative_path
             workingfile.rename(newvideo)
-            result.namer_log_file.rename( result.namer_log_file.parent /
-                result.namer_log_file.stem+"_namer.log")
+            if result.namer_log_file is not None:
+                result.namer_log_file.rename( result.namer_log_file.parent /
+                    result.namer_log_file.stem+"_namer.log")
     else:
         newfile = namer_config.dest_dir / result.final_name_relative
         if (
@@ -77,7 +78,8 @@ def handle(target_file: Path, namer_config: NamerConfig):
         else:
             newfile.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(result.video_file, newfile)
-            shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
+            if result.namer_log_file is not None:
+                shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
             shutil.rmtree(workingdir, ignore_errors=True)
 
 def retry_failed(namer_config: NamerConfig):

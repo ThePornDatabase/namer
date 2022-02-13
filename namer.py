@@ -77,8 +77,6 @@ def tag_in_place(video: Path, config: NamerConfig, comparison_results: List[Comp
     """
     if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
         result = comparison_results[0]
-        logfile = write_log_file(video, comparison_results)
-        set_permissions(logfile, config)
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
             if config.enabled_poster is True:
@@ -145,9 +143,10 @@ def process(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
         file_name_parts = parse_file_name(name)
         if file_name_parts is not None:
             comparison_results = match(file_name_parts, config.porndb_token)
-            logfile = write_log_file(file, comparison_results)
-            set_permissions(logfile, config)
-            output.namer_log_file=logfile
+            if config.write_namer_log is True:
+                logfile = write_log_file(file, comparison_results)
+                set_permissions(logfile, config)
+                output.namer_log_file=logfile
             if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
                 result = comparison_results[0]
                 output.found = True

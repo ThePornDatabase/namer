@@ -148,6 +148,11 @@ class NamerConfig():
     GID Settings for new/moved files/dirs.
     """
 
+    write_namer_log = False
+    """
+    Should a log of comparisons be written next to processed video files.
+    """
+
     set_dir_permissions = 775
     """
     Permissions Settings for new/moved dirs.
@@ -250,6 +255,7 @@ class NamerConfig():
         output += f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
         output += f"  set_uid: {self.set_uid}\n"
         output += f"  set_gid: {self.set_gid}\n"
+        output += f"  write_namer_log: {self.write_namer_log}\n"
         output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
         output += f"  set_file_permissions: {self.set_file_permissions}\n"
         output += "Tagging Config:\n"
@@ -298,6 +304,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
+    namer_config.write_namer_log = config.getboolean('namer','write_namer_log',fallback=False)
     namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
     namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
     namer_config.enabled_tagging = config.getboolean('metadata','enabled_tagging',fallback=True)
