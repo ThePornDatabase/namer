@@ -601,28 +601,42 @@ class ProcessingResults:
     to namer (rather than the exact movie file.)  That knowledge can be used to move directories
     and preserve relative files, or to delete left over artifacts.
     """
-    found: bool = False
+
+    search_results: List[ComparisonResult] = None
     """
     True if a match was found in the porndb.
     """
 
+    new_metadata = LookedUpFileInfo = None
+    """
+    New metadata found for the file being processed.
+    Sourced including queries against the porndb, which would be stored in search_results,
+    or reading a .nfo xml file next to the video, with the file name identical exept for
+    the extension, which would be .nfo instead of .mkv, or .mp4.
+    """
+
     dirfile: Path = None
     """
-    True if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
+    Set if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
     or all files can be moved to a destination specified in the field final_name_relative.
     """
 
     video_file: Path = None
     """
-    The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}.extensions
+    The location of the found video file.
     """
 
-    namer_log_file: Path = None
+    parsed_file: FileNameParts = None
     """
-    The location of the namer log file after processing.   {dir}/{NamerConfig.inplace_name - with completions}_namer.log
+    The parsed file name.
     """
 
     final_name_relative: str = None
     """
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
+    """
+
+    namer_log_file: str = None
+    """
+    If a log file was written, where it was stored.
     """

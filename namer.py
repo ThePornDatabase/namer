@@ -11,7 +11,7 @@ import getopt
 import logging
 from typing import List, Tuple
 
-from namer_types import NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
+from namer_types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
 from namer_dirscanner import find_largest_file_in_glob
 from namer_file_parser import parse_file_name
 from namer_mutagen import update_mp4_file
@@ -54,7 +54,7 @@ def set_permissions(file: Path, config: NamerConfig):
         if config.set_uid is not None and config.set_gid is not None:
             os.chown(file, uid=config.set_uid, gid=config.set_gid)
 
-def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig):
+def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: bool = False):
     """
     Used to find subdirs of a directory to be individually processed.
     The directories will be scanned for media and named/tagged in place
@@ -67,30 +67,66 @@ def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig):
         for file in files:
             fullpath_file = dir_to_scan / file
             if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4",".MKV"]:
-                process(fullpath_file, config)
+                process(fullpath_file, config, infos)
 
-def tag_in_place(video: Path, config: NamerConfig, comparison_results: List[ComparisonResult]):
+def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInfo):
     """
     Uses ComparisonResults to update an mp4 file's metadata based on a match in
     ComparisonResults.   Expects the first item of list to be the match if there is one.
     Will download a poster as well depending on NamerConfig config setting.
     """
-    if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
-        result = comparison_results[0]
+    if new_metadata is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
             if config.enabled_poster is True:
-                logger.info("Downloading poster: %s",result.looked_up.poster_url)
-                poster = get_poster(result.looked_up.poster_url, config.porndb_token, video)
+                logger.info("Downloading poster: %s",new_metadata.poster_url)
+                poster = get_poster(new_metadata.poster_url, config.porndb_token, video)
                 set_permissions(poster, config)
             logger.info("Updating file metadata (atoms): %s",video)
-            update_mp4_file(video, result.looked_up, poster, config)
+            update_mp4_file(video, new_metadata, poster, config)
         logger.info("Done tagging file: %s",video)
         if poster is not None:
             poster.unlink()
 
+def determine_target_file(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
+    """
+    Base on the file to process - which may be a file or a dir, and configuration, determine
+    the file if needed (largest mp4, or mkv in a directory), or the directory (parent dir of file),
+    as well as determine which should be used for attempted naming.
 
-def process(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
+    If config.prefer_dir_name_if_available is set to True and a directory was passed as file_to_process
+    then the dirctory's name will be returned as name, else the found file's name is used.
+    """
+    results = ProcessingResults()
+
+    containing_dir = None
+    if file_to_process.is_dir():
+        logger.info("Target dir: %s",file_to_process)
+        containing_dir = file_to_process
+        file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
+        if file is None:
+            file = find_largest_file_in_glob(file_to_process, "**/*.mkv")
+    else:
+        file = file_to_process
+
+    if config.prefer_dir_name_if_available and containing_dir is not None:
+        name = containing_dir.stem+file.suffix
+    else:
+        name = file.name
+
+    logger.info("file: %s",file)
+    logger.info("dir : %s",containing_dir)
+
+    results.dirfile = containing_dir
+    results.video_file = file
+    results.parsed_file = parse_file_name(name)
+    if containing_dir is True:
+        results.final_name_relative = file.relative_to(containing_dir)
+    else:
+        results.final_name_relative = file.parent
+    return results
+
+def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -108,58 +144,34 @@ def process(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
     The file is then update based on the metadata from the porndb if an mp4.
     """
     logger.info("Analyzing: %s",file_to_process)
-    containing_dir = None
-    if file_to_process.is_dir():
-        logger.info("Target dir: %s",file_to_process)
-        containing_dir = file_to_process
-        file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
-        if file is None:
-            file = find_largest_file_in_glob(file_to_process, "**/*.mkv")
-    else:
-        file = file_to_process
-
-    if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.stem+file.suffix
-    else:
-        name = file.name
-
-    output = ProcessingResults()
-    output.dirfile = containing_dir
-    output.video_file = file
-
-    if containing_dir is None:
-        containing_dir = file.parent
-
-
-    logger.info("file: %s",file)
-    logger.info("dir : %s",containing_dir)
-
-
-    output.final_name_relative=os.path.relpath(file, containing_dir)
-
-    if containing_dir is not None and file is not None:
-        #remove sample files
-        logger.info("Processing: %s",name)
-        file_name_parts = parse_file_name(name)
-        if file_name_parts is not None:
-            comparison_results = match(file_name_parts, config.porndb_token)
-            if config.write_namer_log is True:
-                logfile = write_log_file(file, comparison_results)
-                set_permissions(logfile, config)
-                output.namer_log_file=logfile
-            if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
-                result = comparison_results[0]
-                output.found = True
-                output.final_name_relative = result.looked_up.new_file_name(config.new_relative_path_name)
-                output.video_file = containing_dir / result.looked_up.new_file_name(config.inplace_name)
-                file.rename(output.video_file.resolve())
-                set_permissions(output.video_file.resolve(), config)
-                tag_in_place(output.video_file.resolve(), config, comparison_results)
-                logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
-            else:
-                output.final_name_relative=os.path.relpath(file, containing_dir)
+    output: ProcessingResults = determine_target_file(file_to_process, config)
+    if output.video_file is not None:
+        logger.info("Processing: %s", output.video_file)
+        # Match to nfo files, if enabled and found.
+        if infos is True:
+            output.new_metadata = get_local_metadata_if_requested(output.video_file)
+        elif output.parsed_file is not None:
+            output.search_results = match(output.parsed_file, config.porndb_token)
+            if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
+                output.new_metadata = output.search_results[0].looked_up
+        target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent   
+        if output.new_metadata is not None:
+            newname = target_dir / output.new_metadata.new_file_name(config.inplace_name)
+            output.video_file.rename(newname.resolve())
+            output.video_file = newname.resolve()
+            output.final_name_relative = output.new_metadata.new_file_name(config.new_relative_path_name)
+            set_permissions(output.video_file, config)
+            tag_in_place(output.video_file, config, output.new_metadata)
+            logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
         else:
-            logger.warning("Could not parse file/dir for name to look up: %s", name)
+            #not matched.
+            output.final_name_relative=os.path.relpath(output.video_file, target_dir)
+
+        # Write log file if needed.
+        if config.write_namer_log is True and output.search_results is not None:
+            logfile = write_log_file(output.video_file, output.search_results)
+            set_permissions(logfile, config)
+            output.namer_log_file=logfile
     return output
 
 def usage():
@@ -174,8 +186,11 @@ def usage():
     print("-d, --dif   : a directory to process.")
     print("-m, --many  : if set, a directory have all it's sub directories processed."+
         " Files move only within sub dirs, or are renamed in place, if in the root dir to scan")
+    print("-i, --infos  : if set, .nfo files will attempt to be accessed next to movie files" +
+        ", if info files are found and parsed success, that metadata will be used rather than " +
+        "porndb matching")
 
-def get_opts(argv) -> Tuple[int, Path, Path, Path, bool]:
+def get_opts(argv) -> Tuple[int, Path, Path, Path, bool, bool]:
     """
     Read command line args are return them as a tuple.
     """
@@ -183,9 +198,10 @@ def get_opts(argv) -> Tuple[int, Path, Path, Path, bool]:
     file_to_process = None
     dir_to_process = None
     many = False
+    infos = False
     logger_level = logging.INFO
     try:
-        opts, __args = getopt.getopt(argv,"hc:f:d:m",["help","configfile=","file=","dir=","many"])
+        opts, __args = getopt.getopt(argv,"hc:f:d:mi",["help","configfile=","file=","dir=","many","infos"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -203,7 +219,9 @@ def get_opts(argv) -> Tuple[int, Path, Path, Path, bool]:
             dir_to_process = Path(arg)
         elif opt in ("-m", "--many"):
             many = True
-    return (logger_level, config_overide, file_to_process, dir_to_process, many)
+        elif opt in ("-i", "--infos"):
+            infos = True    
+    return (logger_level, config_overide, file_to_process, dir_to_process, many, infos)
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """
@@ -240,7 +258,7 @@ def main(argv):
     See usage function above.
     """
 
-    logger_level, config_overide, file_to_process, dir_to_process, many = get_opts(argv)
+    logger_level, config_overide, file_to_process, dir_to_process, many, infos = get_opts(argv)
 
     check_arguments(file_to_process, dir_to_process, config_overide)
 
@@ -260,9 +278,9 @@ def main(argv):
         if target is None:
             print("set target file or directory, -f or -d")
             sys.exit(2)
-        process(target, config)
+        process(target, config, infos)
     elif dir_to_process is not None and many is True:
-        dir_with_subdirs_to_process(dir_to_process, config)
+        dir_with_subdirs_to_process(dir_to_process, config, infos)
     else:
         usage()
         sys.exit(2)

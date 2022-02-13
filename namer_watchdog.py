@@ -58,14 +58,14 @@ def handle(target_file: Path, namer_config: NamerConfig):
         to_process = workingfile
     result = process(to_process, namer_config)
 
-    if not result.found:
+    if result.new_metadata is None:
         if workingdir is not None:
             workingdir.rename(namer_config.failed_dir/ detected)
         else:
             newvideo = namer_config.failed_dir / relative_path
             workingfile.rename(newvideo)
             if result.namer_log_file is not None:
-                result.namer_log_file.rename( result.namer_log_file.parent /
+                result.namer_log_file.rename( result.video_file.parent /
                     result.namer_log_file.stem+"_namer.log")
     else:
         newfile = namer_config.dest_dir / result.final_name_relative

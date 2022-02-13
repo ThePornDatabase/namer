@@ -1,6 +1,7 @@
 """
 Parse string in to FileNamePart define in namer_types.
 """
+import logging
 import re
 import sys
 from namer_types import FileNameParts
@@ -51,7 +52,9 @@ def parse_file_name(filename: str) -> FileNameParts:
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
         return file_name_parts
-    return None
+    else:
+        logging.warning("Could not parse file name: %s", filename)
+        return None
 
 
 def usage():
