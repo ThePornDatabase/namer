@@ -47,7 +47,7 @@ def set_permissions(file: Path, config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process.
     """
-    if hasattr(os, "chmod"):
+    if hasattr(os, "chmod") and file.exists():
         if file.is_dir() and not config.set_dir_permissions is None:
             file.chmod(int(str(config.set_dir_permissions), 8))
         elif config.set_file_permissions is not None:
@@ -86,7 +86,7 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
             logger.info("Updating file metadata (atoms): %s",video)
             update_mp4_file(video, new_metadata, poster, config)
         logger.info("Done tagging file: %s",video)
-        if poster is not None:
+        if poster is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
 
 def determine_target_file(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
