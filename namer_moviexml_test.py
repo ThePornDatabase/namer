@@ -23,7 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             xmlfile = tempdir / "test" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.nfo"
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")
-            self.assertEqual(info.date, "2022-01-02")
+            self.assertEqual(info.date, "2022-01-03")
             self.assertIn('Cute brunette Carmela Clutch positions her', info.description)
             self.assertEqual(info.look_up_site_id, "https://www.evilangel.com/en/video/0/198543/")
             self.assertEqual(info.uuid, '1678283')

@@ -10,6 +10,7 @@ import sys
 import getopt
 import logging
 from typing import List, Tuple
+from namer_moviexml import parse_movie_xml_file
 
 from namer_types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
 from namer_dirscanner import find_largest_file_in_glob
@@ -126,6 +127,16 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
         results.final_name_relative = file.parent
     return results
 
+def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
+    """
+    If there is an .nfo file next to the video_file, attempt to read it as
+    a Emby/Jellyfin style movie xml file.
+    """
+    nfo_file = video_file.parent / (video_file.stem + ".nfo")
+    if nfo_file.is_file() and nfo_file.exists():
+        return parse_movie_xml_file(nfo_file)
+    return None
+
 def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
     """
     Bread and butter method.
@@ -150,11 +161,12 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
         # Match to nfo files, if enabled and found.
         if infos is True:
             output.new_metadata = get_local_metadata_if_requested(output.video_file)
-        elif output.parsed_file is not None:
+            output.new_metadata.original_parsed_filename = output.parsed_file
+        if output.new_metadata is None:
             output.search_results = match(output.parsed_file, config.porndb_token)
             if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
                 output.new_metadata = output.search_results[0].looked_up
-        target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent   
+        target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
         if output.new_metadata is not None:
             newname = target_dir / output.new_metadata.new_file_name(config.inplace_name)
             output.video_file.rename(newname.resolve())
@@ -188,7 +200,9 @@ def usage():
         " Files move only within sub dirs, or are renamed in place, if in the root dir to scan")
     print("-i, --infos  : if set, .nfo files will attempt to be accessed next to movie files" +
         ", if info files are found and parsed success, that metadata will be used rather than " +
-        "porndb matching")
+        "porndb matching.  If using jellyfin .nfo files, please bump your release date by one day "+
+        "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.")
+
 
 def get_opts(argv) -> Tuple[int, Path, Path, Path, bool, bool]:
     """
@@ -220,7 +234,7 @@ def get_opts(argv) -> Tuple[int, Path, Path, Path, bool, bool]:
         elif opt in ("-m", "--many"):
             many = True
         elif opt in ("-i", "--infos"):
-            infos = True    
+            infos = True
     return (logger_level, config_overide, file_to_process, dir_to_process, many, infos)
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):

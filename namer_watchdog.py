@@ -66,7 +66,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
             workingfile.rename(newvideo)
             if result.namer_log_file is not None:
                 result.namer_log_file.rename( result.video_file.parent /
-                    result.namer_log_file.stem+"_namer.log")
+                    (result.namer_log_file.stem+"_namer.log"))
     else:
         newfile = namer_config.dest_dir / result.final_name_relative
         if (

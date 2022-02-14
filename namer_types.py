@@ -636,7 +636,7 @@ class ProcessingResults:
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
 
-    namer_log_file: str = None
+    namer_log_file: Path = None
     """
     If a log file was written, where it was stored.
     """

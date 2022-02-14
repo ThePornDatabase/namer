@@ -1,5 +1,5 @@
 """
-Reads movie.xml (your.movie.name.nfo) of Emby/Jellyfin format in to a LookedUpFileInfo, 
+Reads movie.xml (your.movie.name.nfo) of Emby/Jellyfin format in to a LookedUpFileInfo,
 allowing the metadata to be written in to video files (currently only mp4s),
 or used in renaming the video file.
 """

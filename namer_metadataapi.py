@@ -105,21 +105,25 @@ def get_poster(url: str, authtoken: str, video_file: Path) -> Path:
     """
     returns json object with info
     """
-    headers = {"Authorization": f"Bearer {authtoken}",
-            'User-Agent': 'namer-1'}
-    random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    file =  video_file.parent / ( video_file.stem + "_" + random+"_poster" + pathlib.Path(url).suffix )
-    try:
-        with requests.get(url, headers=headers) as response:
-            #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
-            #response.raise_for_status()
-            with open(file, "wb") as binary_file:
-                # Write bytes to file
-                binary_file.write(response.content)
-                return file
-    except requests.exceptions.RequestException as ex:
-        logger.warning(ex)
-        return None
+    if url.startswith("http"):
+        headers = {"Authorization": f"Bearer {authtoken}",
+                'User-Agent': 'namer-1'}
+        random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        file =  video_file.parent / ( video_file.stem + "_" + random+"_poster" + pathlib.Path(url).suffix )
+        try:
+            with requests.get(url, headers=headers) as response:
+                #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
+                #response.raise_for_status()
+                with open(file, "wb") as binary_file:
+                    # Write bytes to file
+                    binary_file.write(response.content)
+                    return file
+        except requests.exceptions.RequestException as ex:
+            logger.warning(ex)
+            return None
+    else:
+        poster = (video_file.parent / url).resolve()
+        return poster if poster.exists() and poster.is_file() else None
 
 
 def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
@@ -139,7 +143,7 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
         performer.name = json_performer.name
         file_info.performers.append(performer)
     file_info.original_query=url
-    file_info.original_response=json_response
+    file_info.origninal_response=json_response
     file_info.original_parsed_filename=name_parts
     tags = []
     if hasattr(data, "tags"):
@@ -164,7 +168,7 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
 def __build_url(site:str=None, release_date:str=None, name:str=None, uuid:str=None) -> str:
     query = ""
     if uuid is not None:
-        query = "/"+uuid
+        query = "/"+str(uuid)
     else:
         query="?q="
         if site is not None:
@@ -216,7 +220,7 @@ def match(file_name_parts: FileNameParts, porndb_token: str) -> List[ComparisonR
     comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.
-    if len(comparison_results) > 0 and comparison_results[0].is_match is True:
+    if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
         file_infos =  __get_complete_metadatapi_net_fileinfo(file_name_parts, comparison_results[0].looked_up.uuid ,porndb_token)
         if file_infos is not None:
             comparison_results[0].looked_up = file_infos
@@ -241,8 +245,9 @@ def main(argv):
     porndb_token = None
     filetoprocess = None
     logger_level = logging.DEBUG
+    jsonfile = None
     try:
-        opts, __args = getopt.getopt(argv,"hqf:t:",["configfile=","file=","porndb_token="])
+        opts, __args = getopt.getopt(argv,"hqf:t:o:",["configfile=","file=","porndb_token=","output="])
     except getopt.GetoptError:
         metadataapi_usage()
         sys.exit(2)
@@ -256,6 +261,8 @@ def main(argv):
             filetoprocess = arg
         elif opt in ("-t", "--token"):
             porndb_token = arg
+        elif opt in ("-o", "--output"):
+            jsonfile = arg
     if filetoprocess is None or porndb_token is None:
         metadataapi_usage()
         sys.exit(2)
@@ -265,6 +272,8 @@ def main(argv):
         results = match(name, porndb_token)
         if len(results) > 0 and results[0].is_match() is True:
             print(results[0].looked_up.new_file_name(default_config().inplace_name))
+            if jsonfile is not None:
+                Path(jsonfile).write_text(results[0].looked_up.origninal_response, encoding="UTF-8")
 
 
 if __name__ == "__main__":

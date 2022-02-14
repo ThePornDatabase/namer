@@ -52,9 +52,8 @@ def parse_file_name(filename: str) -> FileNameParts:
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
         return file_name_parts
-    else:
-        logging.warning("Could not parse file name: %s", filename)
-        return None
+    logging.warning("Could not parse file name: %s", filename)
+    return None
 
 
 def usage():

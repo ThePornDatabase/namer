@@ -85,6 +85,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output = MP4(target2 / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 
+
+    def test_writing_metadata_from_nfo(self):
+        """
+        Test renaming and writing a movie's metadata from an nfo file.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(prepare_workdir(tmpdir))
+            # nfo_file = tempdir / 'test' / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.nfo"
+            mp4_file = tempdir / 'test' / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
+            targetfile = tempdir / 'test' / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.mp4"
+            mp4_file.rename(targetfile)
+            main(['-f',targetfile,"-i"])
+            output = MP4(targetfile.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
     def test_writing_metadata_all_dirs_files(self, mock_poster, mock_response):
@@ -98,7 +113,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             response1 = path.read_text()
             path2 = tempdir / 'test' / 'response.json'
             response2 = path2.read_text()
-            mock_response.side_effect = [response1, response2]
+            mock_response.side_effect = [response1, response1, response2, response2]
             (tempdir / 'targetpath').mkdir()
             input_file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
             targetfile1 = ( tempdir / 'targetpath' /
