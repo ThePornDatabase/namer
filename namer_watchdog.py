@@ -50,36 +50,43 @@ def handle(target_file: Path, namer_config: NamerConfig):
     workingfile = None
     if dir_path.is_dir():
         workingdir = Path(namer_config.work_dir) / detected
-        dir_path.rename(workingdir)
+        logger.info("Moving %s to %s for processing", dir_path, workingdir)
+        shutil.move(dir_path,workingdir)
         to_process = workingdir
     else:
         workingfile = Path(namer_config.work_dir) / relative_path
         target_file.rename(workingfile)
+        logger.info("Moving %s to %s for processing", target_file, workingfile)
         to_process = workingfile
     result = process(to_process, namer_config)
 
     if result.new_metadata is None:
         if workingdir is not None:
             workingdir.rename(namer_config.failed_dir/ detected)
+            logger.info("Moving failed processing %s to %s to retry later", workingdir, namer_config.failed_dir/ detected)
         else:
             newvideo = namer_config.failed_dir / relative_path
             workingfile.rename(newvideo)
+            logger.info("Moving failed processing %s to %s to retry later", workingdir, newvideo)
             if result.namer_log_file is not None:
                 result.namer_log_file.rename( result.video_file.parent /
                     (result.namer_log_file.stem+"_namer.log"))
     else:
-        newfile = namer_config.dest_dir / result.final_name_relative
         if (
             len(PurePath(result.final_name_relative).parts) > 1
             and workingdir is not None
             and namer_config.del_other_files is False
         ):
-            shutil.move(workingdir, newfile.parent)
+            target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
+            shutil.move(workingdir, target)
+            logger.info("Moving success processed dir %s to %s", workingdir, target)
         else:
+            newfile = namer_config.dest_dir / result.final_name_relative
             newfile.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(result.video_file, newfile)
             if result.namer_log_file is not None:
                 shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
+            logger.info("Moving success processed file %s to %s", workingdir, target)
             shutil.rmtree(workingdir, ignore_errors=True)
 
 def retry_failed(namer_config: NamerConfig):
