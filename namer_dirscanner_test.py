@@ -32,11 +32,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Testing find_largest_file_in_glob happy path
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            prepare_workdir(tmpdir)
-            targetdir = Path(tmpdir) / "test" / "nzb_dir"
-            file = find_largest_file_in_glob(targetdir, "**/*.txt")
-            self.assertEqual(file.parent.name, "real_file")
-            self.assertEqual(file.name, "bigger_file.txt")
+            tempdir = Path(tmpdir)
+            subdir = tempdir / "subdir"
+            subdir.mkdir()
+            sub_sub_dir = tempdir / "subdir" / "subdir"
+            sub_sub_dir.mkdir()
+            file = subdir / "file.txt"
+            file.write_text("small file")
+            bigger_file = sub_sub_dir / "bigger_file.txt"
+            bigger_file.write_text("a bigger file")
+            found_file = find_largest_file_in_glob(subdir, "**/*.txt")
+            self.assertEqual(str(found_file), str(bigger_file))
 
     def test_to_process(self):
         """

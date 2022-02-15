@@ -522,6 +522,8 @@ class LookedUpFileInfo():
         Converts the info in to a dict that can be used
         by PartialFormatter to return a new path for a file.
         """
+        if self.original_parsed_filename is None:
+            self.original_parsed_filename = FileNameParts()
         return {'uuid': self.uuid,
                 'date': self.date,
                 'description': self.description,

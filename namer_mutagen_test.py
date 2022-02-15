@@ -25,7 +25,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(prepare_workdir(tmpdir))
-            message = tempdir / "test" / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
+            message = tempdir / "test" / "dc.json"
             mock_response.return_value = message.read_text()
             mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
             targetfile = tempdir / "test" / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
@@ -46,7 +46,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(prepare_workdir(tmpdir))
-            response = tempdir / "test" / "full.json"
+            response = tempdir / "test" / "ea.full.json"
             mock_response.return_value = response.read_text()
             mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
             targetfile = tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"

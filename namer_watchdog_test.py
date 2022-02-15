@@ -25,7 +25,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(prepare_workdir(tmpdir))
-            path = tempdir / 'test' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
+            path = tempdir / 'test' / "dc.json"
             response = path.read_text()
             mock_response.return_value = response
             input_dir = tempdir / 'test'
@@ -64,7 +64,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(prepare_workdir(tmpdir))
-            path = tempdir / 'test' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
+            path = tempdir / 'test' / "dc.json"
             response = path.read_text()
             mock_response.return_value = response
             input_dir = tempdir / 'test'

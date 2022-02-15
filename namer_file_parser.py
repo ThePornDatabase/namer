@@ -2,6 +2,7 @@
 Parse string in to FileNamePart define in namer_types.
 """
 import logging
+from pathlib import PurePath
 import re
 import sys
 from namer_types import FileNameParts
@@ -36,10 +37,12 @@ def parse_file_name(filename: str) -> FileNameParts:
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.
     """
+    file_name_parts = FileNameParts()
+    file_name_parts.extension = PurePath(filename).suffix[1:]
+    file_name_parts.name = PurePath(filename).stem
     match = re.search(r'(?P<site>[a-zA-Z0-9]+)[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+' +
                       r'(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+' +
                       r'((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$',filename)
-    file_name_parts = FileNameParts()
     if match:
         prefix = "20" if len(match.group('year'))==2 else ""
         file_name_parts.date = prefix+match.group('year')+"-"+match.group('month')+"-"+match.group('day')
@@ -51,9 +54,8 @@ def parse_file_name(filename: str) -> FileNameParts:
         file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
-        return file_name_parts
-    logging.warning("Could not parse file name: %s", filename)
-    return None
+    logging.warning("Could not fully parse file name: %s", filename)
+    return file_name_parts
 
 
 def usage():
