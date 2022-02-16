@@ -48,31 +48,30 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> 
 
 def __update_results(results: List[ComparisonResult], name_parts: FileNameParts, authtoken: str,
         skipdate: bool=False, skipname: bool=False):
-    if len(results) == 0 or not results[-1].is_match():
+    if len(results) == 0 or not results[0].is_match():
         for match_attempt in __get_metadataapi_net_fileinfo(name_parts, authtoken, skipdate, skipname):
             result = __evaluate_match(name_parts, match_attempt)
             results.append(result)
-            if result.is_match():
-                break
+        results = sorted(results, key=__match_percent, reverse=True)
 
 def __metadata_api_lookup(name_parts: FileNameParts, authtoken: str) -> List[ComparisonResult]:
     results = []
+    __update_results(results, name_parts, authtoken)
     __update_results(results, name_parts, authtoken, skipdate=True)
     __update_results(results, name_parts, authtoken, skipdate=True, skipname=True)
-    __update_results(results, name_parts, authtoken)
     __update_results(results, name_parts, authtoken, skipname=True)
 
     if len(results) == 0 or not results[-1].is_match():
         name_parts.date =  (date.fromisoformat(name_parts.date)+timedelta(days=-1)).isoformat()
         logger.info("Not found, trying 1 day before: %s",name_parts)
         __update_results(results, name_parts, authtoken)
-        __update_results(results, name_parts, authtoken, False, True)
+        __update_results(results, name_parts, authtoken, skipdate=False, skipname=True)
 
     if len(results) == 0 or not results[-1].is_match():
         name_parts.date = (date.fromisoformat(name_parts.date)+timedelta(days=2)).isoformat()
         logger.info("Not found, trying 1 day after: %s",name_parts)
         __update_results(results, name_parts, authtoken)
-        __update_results(results, name_parts, authtoken, False, True)
+        __update_results(results, name_parts, authtoken, skipdate=False, skipname=True)
     return results
 
 
