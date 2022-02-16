@@ -4,8 +4,8 @@ Fully test namer.py
 from dataclasses import dataclass
 from pathlib import Path
 import shutil
+from typing import List
 import unittest
-from distutils.dir_util import copy_tree
 from unittest.mock import patch
 import os
 import tempfile
@@ -15,29 +15,61 @@ from namer_dirscanner_test import prepare_workdir
 
 ROOT_DIR = './test/'
 
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+@dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ProcessingTarget:
     """
     Test data.
     """
     file: Path
-    json: str
+    json_search: str
+    json_exact: str
     poster: Path
     expect_match: bool
+
+def new_ea(targetdir: Path, use_dir: bool = True, post_stem: str = "", match: bool = True):
+    """
+    Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
+    optionally, names the dir and not the mp4 file to match.
+    optionally, inserts a string between the file stem and suffix.
+    optionally, will ensure a match doesn't occure.
+    """
+    current = Path(__file__).resolve().parent
+    test_mp4 = current / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
+    search_json_file = current / 'test' / 'ea.json'
+    exact_json_file = current / 'test' / 'ea.full.json'
+    test_poster = current / 'test' / 'poster.png'
+    name = 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' + post_stem
+    target_file =  targetdir / (name+'.mp4')
+    if use_dir is True:
+        target_file = targetdir / name / 'qwerty.mp4'
+    os.makedirs(target_file.parent, exist_ok=True)
+    shutil.copy(test_mp4, target_file)
+    poster = Path(tempfile.mktemp(suffix=".png"))
+    shutil.copy(test_poster, poster)
+    return ProcessingTarget(target_file, search_json_file.read_text(), exact_json_file.read_text(), poster, match)
+
+def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):
+    """
+    Prepares mocks for responses based on targets input.
+    """
+    targets.sort(key= lambda x: str(x.file))
+    posters = []
+    responses = []
+    for target in targets:
+        posters.append(target.poster)
+        if target.expect_match is True:
+            responses.append(target.json_search)
+            responses.append(target.json_exact)
+        else:
+            responses.append('{}')
+            responses.append('{}')
+    mock_poster.side_effect = posters
+    mock_response.side_effect = responses
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-
-    current=os.path.dirname(os.path.abspath(__file__))
-
-    def prep_dc_match(tempdir: Path, forMatching: Path, mock_poster, mock_response, success:bool = True):
-        jsonfile = tempdir / 'test' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.json"
-        jsontext = jsonfile.read_text()
-        mp4_file = tempdir / 'test' / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-        shutil.copy(mp4_file, tempdir)
-
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -46,16 +78,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         test namer main method renames and tags in place when -f (video file) is passed
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
-            path = tempdir / 'test' / "dc.json"
-            mock_response.return_value = path.read_text()
-            mock_poster.return_value = tempdir / 'test' / "poster.png"
-            mp4_file = tempdir / 'test' / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            targetfile = tempdir / 'test' / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
-            mp4_file.rename(targetfile)
-            main(['-f',targetfile])
-            output = MP4(targetfile.parent / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
-            self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
+            tempdir = Path(tmpdir)
+            targets = [new_ea(tempdir, use_dir=False)]
+            prepare(targets, mock_poster, mock_response)
+            main(['-f',targets[0].file])
+            output = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -64,20 +92,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         test namer main method renames and tags in place when -d (directory) is passed
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
-            path = tempdir / 'test' / "dc.json"
-            response  = path.read_text()
-            mock_response.return_value = response
-            input_dir = tempdir / 'test'
-            targetfile = tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p"
-            input_dir.rename(targetfile)
-            mock_poster.return_value = targetfile / "poster.png"
-
-            main(['-d',targetfile])
-
-            output = MP4(tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p" /
-                    'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
-            self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
+            tempdir = Path(tmpdir)
+            targets = [new_ea(tempdir, use_dir=True)]
+            prepare(targets, mock_poster, mock_response)
+            main(['-d',targets[0].file.parent])
+            output = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -87,21 +107,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Process all subdirs of -d.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
-            path = tempdir / 'test' / "dc.json"
-            response  = path.read_text()
-            mock_response.return_value = response
-            input_directory = tempdir / 'test'
-            targetfile = tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p"
-            input_directory.rename(targetfile)
-            target2 = targetfile.parent / (targetfile.name+"2")
-            copy_tree(str(targetfile), str(target2) )
-            mock_poster.side_effect = [ targetfile / "poster.png" , target2 / "poster.png"]
-            main(['-d',targetfile.parent,'-m'])
-            output = MP4(targetfile / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
-            self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
-            output = MP4(target2 / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
-            self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
+            tempdir = Path(tmpdir)
+            targets = [new_ea(tempdir, use_dir=True, post_stem='1'),
+                    new_ea(tempdir, use_dir=True, post_stem='2')]
+            prepare(targets, mock_poster, mock_response)
+            main(['-d',targets[0].file.parent.parent, '-m'])
+            output = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            output = MP4(targets[1].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -131,13 +145,20 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test renaming and writing a movie's metadata from an nfo file.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
-            #nfo_file = tempdir / 'test' / "ea.nfo"
-            mp4_file = tempdir / 'test' / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            targetfile = tempdir / 'test' / "ea.mp4"
-            mp4_file.rename(targetfile)
-            main(['-f',targetfile,"-i"])
-            output = MP4(targetfile.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            current = Path(__file__).resolve().parent
+            tempdir = Path(tmpdir)
+            nfo_file = current / 'test' / "ea.nfo"
+            mp4_file = current / 'test' / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
+            poster_file =  current / 'test' / "poster.png"
+            target_nfo_file = tempdir / "ea.nfo"
+            target_mp4_file = tempdir / "ea.mp4"
+            target_poster_file = tempdir / "poster.png"
+            shutil.copy(mp4_file, target_mp4_file)
+            shutil.copy(nfo_file, target_nfo_file)
+            shutil.copy(poster_file, target_poster_file)
+
+            main(['-f',target_mp4_file,"-i"])
+            output = MP4(target_mp4_file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer_metadataapi.__get_response_json_object')
@@ -148,28 +169,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Process all subdirs of -d.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
-            path =  tempdir / 'test' / 'dc.json'
-            response1 = path.read_text()
-            path2 = tempdir / 'test' / 'ea.json'
-            response2 = path2.read_text()
-            mock_response.side_effect = [response1, response1, response2, response2]
-            (tempdir / 'targetpath').mkdir()
-            input_file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
-            targetfile1 = ( tempdir / 'targetpath' /
-                "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
-            input_file.rename(targetfile1)
-            targetfile2 = tempdir / 'targetpath' / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.mp4"
-            shutil.copy(targetfile1, targetfile2)
-            shutil.copy(str (tempdir / 'test' / "poster.png" ) , str( targetfile1.parent / (targetfile1.stem+"_poster_in.png" )))
-            shutil.copy(str (tempdir / 'test' / "poster.png" ) , str( targetfile2.parent / (targetfile2.stem+"_poster_in.png" )))
-            mock_poster.side_effect = [targetfile1.parent / (targetfile1.stem+"_poster_in.png" ),
-                targetfile2.parent / (targetfile2.stem+"_poster_in.png" )]
-            main(['-d',os.path.dirname(targetfile1),'-m'])
-            output = MP4(tempdir / 'targetpath' / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
-            self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
-            output = MP4(tempdir / 'targetpath'/ 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
-            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            tempdir = Path(tmpdir)
+            targets = [new_ea(tempdir, use_dir=False, post_stem='1'),
+                    new_ea(tempdir, use_dir=False, post_stem='2')]
+            prepare(targets, mock_poster, mock_response)
+            main(['-d',targets[0].file.parent, '-m'])
+            output1 = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            self.assertEqual(output1.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            output2 = MP4(targets[1].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
+            self.assertEqual(output2.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
 if __name__ == '__main__':
     unittest.main()

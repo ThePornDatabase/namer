@@ -13,7 +13,7 @@ import logging
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, FileSystemMovedEvent
 import schedule
-from namer import process
+from namer import move_to_final_location, process
 from namer_types import NamerConfig, default_config
 
 logger = logging.getLogger('watchdog')
@@ -72,18 +72,25 @@ def handle(target_file: Path, namer_config: NamerConfig):
                 result.namer_log_file.rename( result.video_file.parent /
                     (result.namer_log_file.stem+"_namer.log"))
     else:
+        # See if we should, and can, move the whole dir.
+        moved = False
         if (
             len(PurePath(result.final_name_relative).parts) > 1
             and workingdir is not None
             and namer_config.del_other_files is False
         ):
             target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
-            shutil.move(workingdir, target)
-            logger.info("Moving success processed dir %s to %s", workingdir, target)
-        else:
-            newfile = namer_config.dest_dir / result.final_name_relative
-            newfile.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(result.video_file, newfile)
+            if not target.exists():
+                shutil.move(workingdir, target)
+                moved = True
+                logger.info("Moving success processed dir %s to %s", workingdir, target)
+        # else just moved the tagged video file and logs.
+        if not moved:
+            newfile = move_to_final_location(
+                result.video_file,
+                namer_config.dest_dir,
+                namer_config.new_relative_path_name,
+                result.new_metadata)
             if result.namer_log_file is not None:
                 shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
             logger.info("Moving success processed file %s to %s", workingfile, newfile)
@@ -210,7 +217,7 @@ def watch_for_movies(config: NamerConfig):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-    namer_watchdog_config = default_config()
+    namer_watchdog_config=default_config()
     namer_watchdog_config.verify_config()
     if namer_watchdog_config.retry_time is not None:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))

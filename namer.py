@@ -137,6 +137,24 @@ def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
         return parse_movie_xml_file(nfo_file)
     return None
 
+def move_to_final_location(to_move: Path, target_dir: Path, template: str, new_metadata: LookedUpFileInfo) -> Path:
+    """
+    Moves a file or directory to it's final location after verifying there is no collision.
+    Should a collision occur, the file is appropriately renamed to avoid collision.
+    """
+    infix = 0
+    while True:
+        relative_path = new_metadata.new_file_name(template, f"({infix})")
+        newname = target_dir / relative_path
+        newname = newname.resolve()
+        infix += 1
+        if not newname.exists() or to_move.samefile(newname):
+            break
+    os.makedirs(newname.parent,exist_ok=True)
+    to_move.rename(newname)
+    return newname
+
+
 def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
     """
     Bread and butter method.
@@ -168,10 +186,11 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
                 output.new_metadata = output.search_results[0].looked_up
         target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
         if output.new_metadata is not None:
-            newname = target_dir / output.new_metadata.new_file_name(config.inplace_name)
-            output.video_file.rename(newname.resolve())
-            output.video_file = newname.resolve()
-            output.final_name_relative = output.new_metadata.new_file_name(config.new_relative_path_name)
+            output.video_file = move_to_final_location(
+                to_move=output.video_file,
+                target_dir=output.video_file.parent,
+                template=config.inplace_name,
+                new_metadata=output.new_metadata)
             set_permissions(output.video_file, config)
             tag_in_place(output.video_file, config, output.new_metadata)
             logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)

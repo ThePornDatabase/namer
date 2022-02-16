@@ -10,7 +10,7 @@ import configparser
 import re
 import sys
 import string
-from pathlib import Path
+from pathlib import Path, PurePath
 import logging
 import random
 from pathvalidate import Platform, sanitize_filename
@@ -536,7 +536,7 @@ class LookedUpFileInfo():
                 'ext': self.original_parsed_filename.extension,
                 'trans': self.original_parsed_filename.trans}
 
-    def new_file_name(self, template: str) -> str:
+    def new_file_name(self, template: str, infix: str = "(0)") -> str:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
@@ -544,6 +544,14 @@ class LookedUpFileInfo():
         clean_dic = { k: str(sanitize_filename(str(v), platform=Platform.UNIVERSAL))  for k, v in dictionary.items() }
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
+        if infix != str("(0)"):
+            # will apply the infix before the file extension if just a file name, if a path, with apply
+            #the infix after the fist part (first directory name) of the (sub)path
+            path = PurePath(name)
+            if len(path.parts) > 1:
+                name = str(path.parent / ( path.stem + infix + path.suffix ))
+            else:
+                name = path.stem + infix + path.suffix
         return name
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -609,7 +617,7 @@ class ProcessingResults:
     True if a match was found in the porndb.
     """
 
-    new_metadata = LookedUpFileInfo = None
+    new_metadata: LookedUpFileInfo = None
     """
     New metadata found for the file being processed.
     Sourced including queries against the porndb, which would be stored in search_results,
