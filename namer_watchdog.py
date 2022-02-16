@@ -94,7 +94,8 @@ def handle(target_file: Path, namer_config: NamerConfig):
             if result.namer_log_file is not None:
                 shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
             logger.info("Moving success processed file %s to %s", workingfile, newfile)
-            shutil.rmtree(workingdir, ignore_errors=True)
+            if workingdir is not None:
+                shutil.rmtree(workingdir, ignore_errors=True)
 
 def retry_failed(namer_config: NamerConfig):
     """
