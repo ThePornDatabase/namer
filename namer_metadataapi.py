@@ -169,14 +169,14 @@ def __build_url(site:str=None, release_date:str=None, name:str=None, uuid:str=No
     if uuid is not None:
         query = "/"+str(uuid)
     else:
-        query="?q="
+        query="?parse="
         if site is not None:
             query += urllib.parse.quote(re.sub(r' ', '.', site))+"."
         if release_date is not None:
             query += release_date+"."
         if name is not None:
             query += urllib.parse.quote(re.sub(r' ', '.', name))
-        query+="&limit=1"
+        query+="&limit=25"
     return f"https://api.metadataapi.net/scenes{query}"
 
 
