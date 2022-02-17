@@ -390,7 +390,7 @@ class FileNameParts:
     it will be stripped out and placed in a seperate location, aids in matching, useable to genre mark content.
     """
     name: str = ""
-    act: str = ""
+    act: str = None
     """
     If the name originally ended with an "act ###" or "part ###"
     it will be stripped out and placed in a seperate location, aids in matching.

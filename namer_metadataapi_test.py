@@ -131,16 +131,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 0)
 
-    # Breaks in docker, even with the same python version 3.10.2.  Not sure why.
+    #Breaks in docker, even with the same python version 3.10.2.  Not sure why.
     #@mock.patch("builtins.print")
     #@mock.patch("namer_metadataapi.__get_response_json_object")
-    #def test_call_main(self, mock_response, fake_print):
-    #    """
-    #    verify main method doesn't fail, need to verify command line output.
-    #    """
-    #    mock_response.return_value = readfile(os.path.join("test","response.json"))
-    #    main(['-f','EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4','-t','your_porndb_authkey','-q'])
-    #    fake_print.assert_called_with("EvilAngel - 2022-01-03 - Carmela Clutch: Fabulous Anal 3-Way!.mp4")
+    #def test_call_main(self):
+        #"""
+        #verify main method doesn't fail, need to verify command line output.
+        #"""
+        #mock_response.return_value = readfile(os.path.join("test","response.json"))
+        #main(['-f','Twistys Feature Film.16.04.07.aidra.fox.the.getaway.part.1.mp4','-t','yourkeyhere','-q'])
+        #fake_print.assert_called_with("EvilAngel - 2022-01-03 - Carmela Clutch: Fabulous Anal 3-Way!.mp4")
 
 
 if __name__ == '__main__':

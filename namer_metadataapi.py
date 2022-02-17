@@ -28,7 +28,7 @@ logger = logging.getLogger('metadata')
 
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> ComparisonResult:
     release_date = name_parts.date == looked_up.date
-    site = re.sub(r' ', '', name_parts.site.capitalize()) == re.sub( r' ', '', looked_up.site.capitalize())
+    site = re.sub(r' ', '', name_parts.site.capitalize()) in re.sub( r' ', '', looked_up.site.capitalize())
     found_words = looked_up.name
     list_of_options = []
     list_of_options.append(found_words)
@@ -44,7 +44,13 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> 
         list_of_options.append(found_words)
         list_of_options.append(performers)
     ratios = rapidfuzz.process.extractOne(name_parts.name,list_of_options)
-    return ComparisonResult(ratios[0], ratios[1], release_date, site, name_parts, looked_up)
+    return ComparisonResult(
+        name=ratios[0],
+        name_match=ratios[1],
+        datematch=release_date,
+        sitematch=site,
+        name_parts=name_parts,
+        looked_up=looked_up)
 
 def __update_results(results: List[ComparisonResult], name_parts: FileNameParts, authtoken: str,
         skipdate: bool=False, skipname: bool=False):

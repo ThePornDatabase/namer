@@ -8,7 +8,7 @@ import sys
 from namer_types import FileNameParts
 
 
-def name_cleaner(name: str):
+def name_cleaner(name: str) -> str:
     """
     Given the name parts, following a date, but preceding the file extension, attempt to glean
     extra information and discard useless information for matching with the porndb.
@@ -19,17 +19,18 @@ def name_cleaner(name: str):
     # remove trailing ".XXX."
     name = re.sub(r"[\.\- ]{0,1}XXX[\.\- ]{0,1}.*$", "", name)
     name = re.sub(r'\.', ' ', name)
-    match = re.search(r'(?P<name>.+)[\.\- ](?P<part>[p|P][a|A][r|R][t|T][\.\- ]{0,1}[0-9]+){0,1}' +
-        r'(?P<act>[a|A][c|C][t|T][\.\- ]{0,1}[0-9]+){0,1}[\.\- ]*$',name)
-    act = None
-    if match:
-        if match.group('act') is not None:
-            act = match.group('act')
-        if match.group('part') is not None:
-            act = match.group('part')
-        if act is not None:
-            name = match.group('name')
-    return (name, act)
+    # Leave act/part in as a test.
+    #match = re.search(r'(?P<name>.+)[\.\- ](?P<part>[p|P][a|A][r|R][t|T][\.\- ]{0,1}[0-9]+){0,1}' +
+    #    r'(?P<act>[a|A][c|C][t|T][\.\- ]{0,1}[0-9]+){0,1}[\.\- ]*$',name)
+    #act = None
+    #if match:
+    #    if match.group('act') is not None:
+    #        act = match.group('act')
+    #    if match.group('part') is not None:
+    #        act = match.group('part')
+    #    if act is not None:
+    #        name = match.group('name')
+    return name
 
 
 def parse_file_name(filename: str) -> FileNameParts:
@@ -40,16 +41,16 @@ def parse_file_name(filename: str) -> FileNameParts:
     file_name_parts = FileNameParts()
     file_name_parts.extension = PurePath(filename).suffix[1:]
     file_name_parts.name = PurePath(filename).stem
-    match = re.search(r'(?P<site>[a-zA-Z0-9]+)[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+' +
+    match = re.search(r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+' +
                       r'(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+' +
                       r'((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$',filename)
     if match:
         prefix = "20" if len(match.group('year'))==2 else ""
         file_name_parts.date = prefix+match.group('year')+"-"+match.group('month')+"-"+match.group('day')
-        name_act_tuple = name_cleaner(match.group('name'))
-        file_name_parts.name = name_act_tuple[0]
-        file_name_parts.act = name_act_tuple[1]
-        file_name_parts.site = match.group('site')
+        file_name_parts.name = name_cleaner(match.group('name'))
+        #file_name_parts.name = name_act_tuple[0]
+        #file_name_parts.act = name_act_tuple[1]
+        file_name_parts.site = re.sub(r'[\.\-\ ]','',match.group('site'))
         trans = match.group('trans')
         file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
         file_name_parts.extension = match.group('ext')
