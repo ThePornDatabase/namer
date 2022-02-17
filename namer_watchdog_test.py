@@ -9,6 +9,7 @@ import tempfile
 import shutil
 from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
+from namer_mutagen_test import validate_mp4_tags
 from namer_test import new_ea, prepare
 from namer_types import default_config
 from namer_watchdog import MovieEventHandler, handle
@@ -85,13 +86,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.work_dir.iterdir())),0)
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
-            output = MP4(outputfile)
-            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
-
+            validate_mp4_tags(self, outputfile)
             outputfile2 = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
-            output2 = MP4(outputfile2)
-            self.assertEqual(output2.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            validate_mp4_tags(self, outputfile2)
 
 
 

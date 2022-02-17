@@ -178,6 +178,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output1.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             output2 = MP4(targets[1].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
             self.assertEqual(output2.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            self.assertEqual(output2.get('\xa9day'), ['2022-01-03T09:00:00Z'])
+            self.assertEqual(output2.get('\xa9alb'), ['Evil Angel']) # plex collection
+            self.assertEqual(output2.get('tvnn'), ['Evil Angel'])
+            self.assertEqual(output2.get("\xa9gen"), ['Adult'])
+            self.assertEqual(['Anal', 'Ass', 'Ass to mouth', 'Big Dick', 'Blowjob', 'Blowjob - Double', 'Brunette', 'Bubble Butt',
+                              'Cum swallow', 'Deepthroat', 'FaceSitting', 'Facial', 'Gonzo / No Story', 'HD Porn', 'Hairy Pussy',
+                              'Handjob', 'Hardcore', 'Latina', 'MILF', 'Pussy to mouth', 'Rimming', 'Sex', 'Tattoo', 'Threesome',
+                              'Toys / Dildos'], output2.get('keyw'))
 
 if __name__ == '__main__':
     unittest.main()

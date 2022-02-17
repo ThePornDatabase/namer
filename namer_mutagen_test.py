@@ -13,6 +13,22 @@ from namer_file_parser import parse_file_name
 from namer_types import NamerConfig
 from namer_dirscanner_test import prepare_workdir
 
+
+def validate_mp4_tags(test_self, file):
+    """
+    Validates the tags of the standard mp4 file.
+    """
+    output2 = MP4(file)
+    test_self.assertEqual(output2.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+    test_self.assertEqual(output2.get('\xa9day'), ['2022-01-03T09:00:00Z'])
+    test_self.assertEqual(output2.get('\xa9alb'), ['Evil Angel']) # plex collection
+    test_self.assertEqual(output2.get('tvnn'), ['Evil Angel'])
+    test_self.assertEqual(output2.get("\xa9gen"), ['Adult'])
+    test_self.assertEqual(['Anal', 'Ass', 'Ass to mouth', 'Big Dick', 'Blowjob', 'Blowjob - Double', 'Brunette', 'Bubble Butt',
+        'Cum swallow', 'Deepthroat', 'FaceSitting', 'Facial', 'Gonzo / No Story', 'HD Porn', 'Hairy Pussy',
+        'Handjob', 'Hardcore', 'Latina', 'MILF', 'Pussy to mouth', 'Rimming', 'Sex', 'Tattoo', 'Threesome',
+        'Toys / Dildos'], output2.get('keyw'))
+
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
@@ -55,12 +71,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, "")
             update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
-            output = MP4(targetfile)
-            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
-            self.assertEqual(['Anal', 'Ass', 'Ass to mouth', 'Big Dick', 'Blowjob', 'Blowjob - Double', 'Brunette', 'Bubble Butt',
-                              'Cum swallow', 'Deepthroat', 'FaceSitting', 'Facial', 'Gonzo / No Story', 'HD Porn', 'Hairy Pussy',
-                              'Handjob', 'Hardcore', 'Latina', 'MILF', 'Pussy to mouth', 'Rimming', 'Sex', 'Tattoo', 'Threesome',
-                              'Toys / Dildos'], output.get('keyw'))
+            validate_mp4_tags(self, targetfile)
 
 
 if __name__ == '__main__':
