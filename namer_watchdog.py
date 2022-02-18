@@ -4,6 +4,7 @@ to revelant locations after match the file against the porndb.
 """
 
 import shutil
+import tempfile
 import time
 import os
 import sys
@@ -105,6 +106,13 @@ def retry_failed(namer_config: NamerConfig):
     for file in list(namer_config.failed_dir.iterdir()):
         shutil.move( namer_config.failed_dir / file, namer_config.watch_dir / file )
 
+def is_fs_case_sensitive():
+    """
+    Create a temporary file to determine if a filesystem is case sensitive, or not.
+    """
+    with tempfile.NamedTemporaryFile(prefix='TmP') as tmp_file:
+        return(not os.path.exists(tmp_file.name.lower()))
+
 class MovieEventHandler(PatternMatchingEventHandler):
     """
     When a new movie file is detected, this class handles the event,
@@ -114,7 +122,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     def __init__(self, namer_config: NamerConfig):
         super().__init__(patterns=["**/*.mp4", "**/*.mkv", "**/*.MP4", "**/*.MKV"],
-                         case_sensitive=True, ignore_directories=True, ignore_patterns=None)
+                         case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.namer_config = namer_config
 
     def on_moved(self, event: FileSystemMovedEvent):
