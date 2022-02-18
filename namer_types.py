@@ -299,7 +299,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     """
     namer_config = NamerConfig()
     namer_config.porndb_token = config.get('namer','porndb_token', fallback=None)
-    namer_config.inplace_name = config.get('namer','output',fallback='{site} - {date} - {name}.{ext}')
+    namer_config.inplace_name = config.get('namer','inplace_name',fallback='{site} - {date} - {name}.{ext}')
     namer_config.prefer_dir_name_if_available = config.getboolean('namer','prefer_dir_name_if_available',fallback=False)
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
@@ -312,7 +312,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.enable_metadataapi_genres = config.getboolean('metadata','enable_metadataapi_genres',fallback=False)
     namer_config.default_genre = config.get('metadata','default_genre',fallback='Adult')
     namer_config.language = config.get('metadata','language',fallback=None)
-    namer_config.new_relative_path_name = config.get('metadata','new_relative_path_name',
+    namer_config.new_relative_path_name = config.get('watchdog','new_relative_path_name',
         fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
     namer_config.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)
     watch_dir = config.get('watchdog','watch_dir',fallback=None)

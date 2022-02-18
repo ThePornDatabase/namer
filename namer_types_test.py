@@ -1,12 +1,13 @@
 """
 Test namer_types.py
 """
+from configparser import ConfigParser
 import logging
 import os
 from pathlib import Path
 import sys
 import unittest
-from namer_types import NamerConfig, default_config, PartialFormatter
+from namer_types import NamerConfig, default_config, PartialFormatter, from_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -116,6 +117,59 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config1.new_relative_path_name='{whahha}/{site} - {date}'
         success = config1.verify_config()
         self.assertEqual(success, False)
+
+    def test_from_config(self):
+        """
+        Verify config reader does it's job.
+        """
+        config = ConfigParser()
+        non_default_all_config = """
+        [namer]
+            porndb_token = mytoken
+            inplace_name={site} - {name}.{ext}
+            prefer_dir_name_if_available = False
+            min_file_size = 69
+            write_namer_log = True
+            set_dir_permissions = 700
+            set_file_permissions = 700
+
+        [metadata]
+            enabled_tagging = False
+            enabled_poster = False
+            enable_metadataapi_genres = True
+            default_genre = Pron
+            language = rus
+
+        [watchdog]
+            del_other_files = True
+            new_relative_path_name={site} - {name}/{site} - {name}.{ext}
+            watch_dir = /notarealplace/watch
+            work_dir = /notarealplace/work
+            failed_dir = /notarealplace/failed
+            dest_dir = /notarealplace/dest
+            retry_time = 02:16
+        """
+        config.read_string(non_default_all_config)
+        namer_config = from_config(config)
+        self.assertEqual(namer_config.porndb_token, "mytoken")
+        self.assertEqual(namer_config.inplace_name, "{site} - {name}.{ext}")
+        self.assertEqual(namer_config.prefer_dir_name_if_available, False)
+        self.assertEqual(namer_config.min_file_size, 69)
+        self.assertEqual(namer_config.write_namer_log, True)
+        self.assertEqual(namer_config.set_dir_permissions, "700")
+        self.assertEqual(namer_config.set_file_permissions, "700")
+        self.assertEqual(namer_config.enabled_tagging, False)
+        self.assertEqual(namer_config.enabled_poster, False)
+        self.assertEqual(namer_config.enable_metadataapi_genres, True)
+        self.assertEqual(namer_config.default_genre, "Pron")
+        self.assertEqual(namer_config.language, "rus")
+        self.assertEqual(namer_config.del_other_files, True)
+        self.assertEqual(namer_config.new_relative_path_name, "{site} - {name}/{site} - {name}.{ext}")
+        self.assertEqual(str(namer_config.watch_dir), "/notarealplace/watch")
+        self.assertEqual(str(namer_config.work_dir), "/notarealplace/work")
+        self.assertEqual(str(namer_config.dest_dir), "/notarealplace/dest")
+        self.assertEqual(str(namer_config.failed_dir), "/notarealplace/failed")
+        self.assertEqual(namer_config.retry_time, "02:16")
 
 if __name__ == '__main__':
     unittest.main()
