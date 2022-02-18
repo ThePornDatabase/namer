@@ -7,7 +7,7 @@ from unittest.mock import patch
 import logging
 import tempfile
 import shutil
-from watchdog.events import FileSystemEvent, FileSystemMovedEvent
+from watchdog.events import FileSystemEvent
 from mutagen.mp4 import MP4
 from namer_dirscanner_test import prepare_workdir
 from namer_mutagen_test import validate_mp4_tags
