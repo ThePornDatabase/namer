@@ -165,10 +165,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(namer_config.language, "rus")
         self.assertEqual(namer_config.del_other_files, True)
         self.assertEqual(namer_config.new_relative_path_name, "{site} - {name}/{site} - {name}.{ext}")
-        self.assertEqual(str(namer_config.watch_dir), "/notarealplace/watch")
-        self.assertEqual(str(namer_config.work_dir), "/notarealplace/work")
-        self.assertEqual(str(namer_config.dest_dir), "/notarealplace/dest")
-        self.assertEqual(str(namer_config.failed_dir), "/notarealplace/failed")
+        self.assertEqual(namer_config.watch_dir, Path("/notarealplace/watch"))
+        self.assertEqual(namer_config.work_dir, Path("/notarealplace/work"))
+        self.assertEqual(namer_config.dest_dir, Path("/notarealplace/dest"))
+        self.assertEqual(namer_config.failed_dir, Path("/notarealplace/failed"))
         self.assertEqual(namer_config.retry_time, "02:16")
 
 if __name__ == '__main__':
