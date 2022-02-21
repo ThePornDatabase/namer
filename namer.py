@@ -4,16 +4,16 @@ There name, or directory name, will be analyzed, matched against
 the porndb, and used for renaming (in place), and updating an mp4
 file's metadata (poster, artists, etc.)
 """
+import argparse
 import os
 from pathlib import Path
+import pathlib
 import sys
-import getopt
 import logging
-from typing import List, Tuple
+from typing import List
 from namer_moviexml import parse_movie_xml_file
 
 from namer_types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
-from namer_dirscanner import find_largest_file_in_glob
 from namer_file_parser import parse_file_name
 from namer_mutagen import update_mp4_file
 from namer_metadataapi import get_poster, match
@@ -88,6 +88,19 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
         logger.info("Done tagging file: %s",video)
         if poster is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
+
+
+def find_largest_file_in_glob(rootdir: Path, globstr: str) -> Path:
+    """
+    returns largest matching file
+    """
+    list_of_files = list(rootdir.rglob(globstr))
+    logger.info("found files %s", list_of_files)
+    file = None
+    if len(list_of_files) > 0:
+        file = max( list_of_files, key =  lambda x: x.stat().st_size)
+    return file
+
 
 def determine_target_file(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
     """
@@ -179,7 +192,8 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
         # Match to nfo files, if enabled and found.
         if infos is True:
             output.new_metadata = get_local_metadata_if_requested(output.video_file)
-            output.new_metadata.original_parsed_filename = output.parsed_file
+            if output.new_metadata is not None:
+                output.new_metadata.original_parsed_filename = output.parsed_file
         if output.new_metadata is None:
             output.search_results = match(output.parsed_file, config.porndb_token)
             if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
@@ -205,57 +219,6 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
             output.namer_log_file=logfile
     return output
 
-def usage():
-    """
-    Displays usage info for the main method of this file which will rename a
-    file in it's current directory, and optionally update it's metadata tags as well.
-    """
-    print("-h, --help  : this message.")
-    print("-c, --config: config file, defaults first to env var NAMER_CONFIG,"
-        +" then local path namer.cfg, and finally ~/.namer.cfg.")
-    print("-f, --file  : a single file to process, and rename.")
-    print("-d, --dif   : a directory to process.")
-    print("-m, --many  : if set, a directory have all it's sub directories processed."+
-        " Files move only within sub dirs, or are renamed in place, if in the root dir to scan")
-    print("-i, --infos  : if set, .nfo files will attempt to be accessed next to movie files" +
-        ", if info files are found and parsed success, that metadata will be used rather than " +
-        "porndb matching.  If using jellyfin .nfo files, please bump your release date by one day "+
-        "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.")
-
-
-def get_opts(argv) -> Tuple[int, Path, Path, Path, bool, bool]:
-    """
-    Read command line args are return them as a tuple.
-    """
-    config_overide = None
-    file_to_process = None
-    dir_to_process = None
-    many = False
-    infos = False
-    logger_level = logging.INFO
-    try:
-        opts, __args = getopt.getopt(argv,"hc:f:d:mi",["help","configfile=","file=","dir=","many","infos"])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            usage()
-            sys.exit()
-        elif opt == '-q':
-            logger_level=logging.ERROR
-        elif opt in ("-c", "--configfile"):
-            config_overide = Path(arg)
-        elif opt in ("-f", "--file"):
-            file_to_process = Path(arg)
-        elif opt in ("-d", "--dir"):
-            dir_to_process = Path(arg)
-        elif opt in ("-m", "--many"):
-            many = True
-        elif opt in ("-i", "--infos"):
-            infos = True
-    return (logger_level, config_overide, file_to_process, dir_to_process, many, infos)
-
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """
     check arguments.
@@ -278,47 +241,49 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide:
         if not config_overide.is_file():
             logger.info("Config override specified, but file does not exit: %s",config_overide)
             error = True
+    return error
 
-    if error:
-        usage()
-        sys.exit(2)
-
-
-
-def main(argv):
+def main(arglist: List[str]):
     """
     Used to tag and rename files from the command line.
     See usage function above.
     """
-
-    logger_level, config_overide, file_to_process, dir_to_process, many, infos = get_opts(argv)
-
-    check_arguments(file_to_process, dir_to_process, config_overide)
+    description="""
+    Names a file or directories largest mp4 or mkv file based on a lookup against metadataapi.net.
+    """
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("-c", "--configfile", help="config file, defaults first to env var NAMER_CONFIG,"
+        +" then local path namer.cfg, and finally ~/.namer.cfg.", type=pathlib.Path)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-f", "--file", help="a single file to process, and rename.", type=pathlib.Path)
+    group.add_argument("-d", "--dir", help="a directory to process.", type=pathlib.Path)
+    parser.add_argument("-m", "--many", help="if set, a directory have all it's sub directories processed."+
+        " Files move only within sub dirs, or are renamed in place, if in the root dir to scan", action="store_true")
+    parser.add_argument("-i", "--infos", help="if set, .nfo files will attempt to be accessed next to movie files" +
+        ", if info files are found and parsed successfully, that metadata will be used rather than " +
+        "porndb matching.  If using jellyfin .nfo files, please bump your release date by one day "+
+        "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.", action="store_true")
+    parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
+    args = parser.parse_args(arglist)
+    logger_level = logging.ERROR
+    if args.verbose:
+        logger_level=logging.DEBUG
+    logging.basicConfig(level=logger_level)
+    check_arguments(args.file, args.dir, args.configfile)
 
     config = default_config()
-    logging.basicConfig(level=logger_level)
-    if config_overide is not None and config_overide.is_file:
-        logger.info("Config override specified %s",config_overide)
-        config = from_config(config_overide)
-    config.verify_config()
-    if file_to_process is not None and dir_to_process is not None:
-        print("set -f or -d, but not both.")
-        sys.exit(2)
-    elif (file_to_process is not None or dir_to_process is not None) and many is False:
-        target = file_to_process
-        if dir_to_process is not None:
-            target = dir_to_process
-        if target is None:
-            print("set target file or directory, -f or -d")
-            sys.exit(2)
-        process(target, config, infos)
-    elif dir_to_process is not None and many is True:
-        dir_with_subdirs_to_process(dir_to_process, config, infos)
+    if args.configfile is not None and args.configfile.is_file():
+        logger.info("Config override specified %s",args.configfile)
+        config = from_config(args.configfile)
+    config.verify_naming_config()
+    target = args.file
+    if args.dir is not None:
+        target = args.dir
+    if args.many is True:
+        dir_with_subdirs_to_process(args.dir, config, args.infos)
     else:
-        usage()
-        sys.exit(2)
+        process(target, config, args.infos)
 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-    sys.exit(0)

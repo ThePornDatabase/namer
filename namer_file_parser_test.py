@@ -1,8 +1,10 @@
 """
 Tests for namer_file_parser.py
 """
+import io
 import unittest
-from namer_file_parser import parse_file_name
+from unittest.mock import patch
+from namer_file_parser import main, parse_file_name
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -57,14 +59,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
 
-    #@unittest.skipIf(os.name == 'nt', "StringIO breaks in Windows")
-    #@patch('sys.stdout', new_callable=io.StringIO)
-    #def test_main_method(self, mock_stdout):
-    #    """
-    #    Test the main method.
-    #    """
-    #    main(arglist=['-f','EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'])
-    #    self.assertIn("site: EvilAngel", mock_stdout.getvalue())
+    @patch('sys.stdout', new_callable=io.StringIO)
+    def test_main_method(self, mock_stdout):
+        """
+        Test the main method.
+        """
+        main(arglist=['-f','EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'])
+        self.assertIn("site: EvilAngel", mock_stdout.getvalue())
 
 if __name__ == '__main__':
     unittest.main()

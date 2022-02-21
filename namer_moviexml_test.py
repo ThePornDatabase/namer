@@ -3,10 +3,10 @@ Reads movie.xml of Emby/Jellyfin format in to a LookedUpFileInfo, allowing the m
 files, or used in renaming the video file (currently only mp4s).
 """
 from pathlib import Path
+from shutil import copytree
 import unittest
 import tempfile
 from namer_moviexml import parse_movie_xml_file
-from namer_dirscanner_test import prepare_workdir
 from namer_types import Performer
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -19,7 +19,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         verify tag in place functions.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
+            tempdir = Path(tmpdir)
+            copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
             xmlfile = tempdir / "test" / "ea.nfo"
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")

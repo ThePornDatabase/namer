@@ -275,8 +275,20 @@ class NamerConfig():
         output += f"  retry_time: {self.retry_time}\n"
         return output
 
+    def verify_naming_config(self) -> bool:
+        """
+        Verifies the contents of your config file. Returns False if configuration failed.
+        """
+        success = True
+        if self.enable_metadataapi_genres is not True and self.default_genre is None:
+            logger.error("Sinse enable_metadataapi_genres is not True, you must specify a default_genre")
+            success = False
+        success = _verify_name_string("inplace_name", self.inplace_name) and success
+        return success
 
-    def verify_config(self) -> bool:
+
+
+    def verify_watchdog_config(self) -> bool:
         """
         Verifies the contents of your config file. Returns False if configuration failed.
         """
@@ -288,7 +300,6 @@ class NamerConfig():
         success = _verify_dir("work_dir", self.work_dir) and success
         success = _verify_dir("failed_dir", self.failed_dir) and success
         success = _verify_dir("dest_dir", self.dest_dir) and success
-        success = _verify_name_string("inplace_name", self.inplace_name) and success
         success = _verify_name_string("new_relative_path_name", self.new_relative_path_name) and success
         return success
 

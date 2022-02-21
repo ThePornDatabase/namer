@@ -5,3 +5,7 @@ test/dest/*
 test/working/*
 test/watch/*
 test/failed/*
+.coverage
+/htmlcov/
+cov.xml
+coverage.xml

@@ -90,32 +90,32 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         logging.basicConfig(level=logging.INFO)
         config = NamerConfig()
-        success = config.verify_config()
+        success = config.verify_watchdog_config()
         self.assertEqual(success, True)
 
         config = NamerConfig()
         config.watch_dir=Path("/not/a/real/path")
-        success = config.verify_config()
+        success = config.verify_watchdog_config()
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.work_dir=Path("/not/a/real/path")
-        success = config.verify_config()
+        success = config.verify_watchdog_config()
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.failed_dir=Path("/not/a/real/path")
-        success = config.verify_config()
+        success = config.verify_watchdog_config()
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.inplace_name="{sitesadf} - {date}"
-        success = config.verify_config()
+        success = config.verify_naming_config()
         self.assertEqual(success, False)
 
         config1 = NamerConfig()
         config1.new_relative_path_name='{whahha}/{site} - {date}'
-        success = config1.verify_config()
+        success = config1.verify_watchdog_config()
         self.assertEqual(success, False)
 
     def test_from_config(self):
@@ -170,6 +170,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(namer_config.dest_dir, Path("/notarealplace/dest"))
         self.assertEqual(namer_config.failed_dir, Path("/notarealplace/failed"))
         self.assertEqual(namer_config.retry_time, "02:16")
+
+    def test_main_method(self):
+        """
+        Test config to string
+        """
+        config = default_config()
+        conf = str(config)
+        self.assertIn("Namer Config", conf)
+        self.assertIn("Watchdog Config", conf)
 
 if __name__ == '__main__':
     unittest.main()

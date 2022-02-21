@@ -2,10 +2,11 @@
 Test namer_metadataapi_test.py
 """
 from pathlib import Path
+import io
 import unittest
 from unittest import mock
 
-from namer_metadataapi import match
+from namer_metadataapi import main, match
 from namer_types import Performer
 from namer_file_parser import parse_file_name
 
@@ -131,16 +132,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 0)
 
-    #Breaks in docker, even with the same python version 3.10.2.  Not sure why.
-    #@mock.patch("builtins.print")
-    #@mock.patch("namer_metadataapi.__get_response_json_object")
-    #def test_call_main(self):
-        #"""
-        #verify main method doesn't fail, need to verify command line output.
-        #"""
-        #mock_response.return_value = readfile(os.path.join("test","response.json"))
-        #main(['-f','Twistys Feature Film.16.04.07.aidra.fox.the.getaway.part.1.mp4','-t','yourkeyhere','-q'])
-        #fake_print.assert_called_with("EvilAngel - 2022-01-03 - Carmela Clutch: Fabulous Anal 3-Way!.mp4")
+
+    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    @mock.patch("namer_metadataapi.__get_response_json_object")
+    def test_main_metadataapi_net(self, mock_response, mock_stdout):
+        """
+        Test parsing a full stored response (with tags) as a LookedUpFileInfo
+        """
+        response = Path(__file__).resolve().parent / "test" / "ea.json"
+        mock_response.return_value = response.read_text()
+        main(['-f', 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', '-t',"your_porndb_authkey"])
+        self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4",mock_stdout.getvalue())
 
 
 if __name__ == '__main__':

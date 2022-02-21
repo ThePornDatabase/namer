@@ -57,8 +57,10 @@ def parse_file_name(filename: str) -> FileNameParts:
         file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
-    logging.warning("Could not fully parse file name: %s", filename)
+    else:
+        logging.warning("Could not parse file name: %s", filename)
     return file_name_parts
+
 
 def main(arglist: List[str]):
     """

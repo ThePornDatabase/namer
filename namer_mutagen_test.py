@@ -11,7 +11,6 @@ from namer_mutagen import update_mp4_file
 from namer_metadataapi import match
 from namer_file_parser import parse_file_name
 from namer_types import NamerConfig
-from namer_dirscanner_test import prepare_workdir
 
 
 def validate_mp4_tags(test_self, file):
@@ -40,7 +39,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         verify tag in place functions.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
+            tempdir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
             message = tempdir / "test" / "dc.json"
             mock_response.return_value = message.read_text()
             mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
@@ -61,7 +61,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         available on scene requests to the porndb using uuid to request scene information.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
+            tempdir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
             response = tempdir / "test" / "ea.full.json"
             mock_response.return_value = response.read_text()
             mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"

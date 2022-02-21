@@ -227,7 +227,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
     namer_watchdog_config=default_config()
-    namer_watchdog_config.verify_config()
+    namer_watchdog_config.verify_watchdog_config()
     if namer_watchdog_config.retry_time is not None:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
     watch_for_movies(namer_watchdog_config)

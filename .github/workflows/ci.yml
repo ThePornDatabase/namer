@@ -26,6 +26,7 @@ jobs:
       - uses: FedericoCarboni/setup-ffmpeg@v1
         id: setup-ffmpeg
       - run: pip install -r requirements.txt
+      - run: pip install pytest
       - run: pytest
 
   pylint:
@@ -40,6 +41,7 @@ jobs:
       - name: Display Python version
         run: python --version
       - run: pip install -r requirements.txt
+      - run: pip install pylint
       - run: pylint *.py
         shell: bash
 
@@ -60,7 +62,6 @@ jobs:
       - run: pip install coverage pytest
       - run: coverage run -m pytest
         shell: bash
-      - run: python -m pip install --upgrade --disable-pip-version-check coveralls
       - run: coverage xml
       - uses: codecov/codecov-action@v2
         with:
@@ -68,5 +69,3 @@ jobs:
           name: unittest
           fail_ci_if_error: true
           verbose: true
-          if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8'
-

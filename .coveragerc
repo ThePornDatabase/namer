@@ -1,0 +1,8 @@
+[run]
+branch = True
+include = *namer*.py
+omit = *tests*
+#[report]
+#exclude_lines = pragma: no cover
+#[html]
+#directory = ./coverage_html_report

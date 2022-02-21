@@ -7,7 +7,5 @@ schedule
 lxml
 requests
 pathvalidate
-pylint
-pytest
 argparse
 

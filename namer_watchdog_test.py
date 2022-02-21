@@ -9,7 +9,6 @@ import tempfile
 import shutil
 from watchdog.events import FileSystemEvent
 from mutagen.mp4 import MP4
-from namer_dirscanner_test import prepare_workdir
 from namer_mutagen_test import validate_mp4_tags
 from namer_test import new_ea, prepare
 from namer_types import default_config
@@ -110,6 +109,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.dest_dir.mkdir()
             config.failed_dir = tempdir / 'failed'
             config.failed_dir.mkdir()
+            config.write_namer_log = True
 
             targets = [
                 new_ea(config.watch_dir / "deeper" / "and_deeper", use_dir=False),
@@ -123,6 +123,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             validate_mp4_tags(self, outputfile)
+            self.assertTrue((outputfile.parent / (outputfile.stem + "_namer.log")).exists())
             outputfile2 = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
             validate_mp4_tags(self, outputfile2)
@@ -134,7 +135,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test the handle function works for a directory.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
+            tempdir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
             mock_response.return_value = "{}"
             input_dir = tempdir / 'test'
             poster = tempdir / 'test' / 'poster.png'
@@ -151,6 +153,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.failed_dir = tempdir / 'failed'
             config.failed_dir.mkdir()
             config.min_file_size = 0
+            config.write_namer_log = True
             targetfile = (tempdir / 'watch' /
                 "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
             input_dir.rename(targetfile)

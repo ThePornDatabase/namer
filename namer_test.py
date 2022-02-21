@@ -11,7 +11,6 @@ import os
 import tempfile
 from mutagen.mp4 import MP4
 from namer import main
-from namer_dirscanner_test import prepare_workdir
 
 ROOT_DIR = './test/'
 
@@ -81,7 +80,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=False)]
             prepare(targets, mock_poster, mock_response)
-            main(['-f',targets[0].file])
+            main(['-f',str(targets[0].file)])
             output = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
@@ -95,7 +94,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True)]
             prepare(targets, mock_poster, mock_response)
-            main(['-d',targets[0].file.parent])
+            main(['-d',str(targets[0].file.parent)])
             output = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
@@ -111,7 +110,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             targets = [new_ea(tempdir, use_dir=True, post_stem='1'),
                     new_ea(tempdir, use_dir=True, post_stem='2')]
             prepare(targets, mock_poster, mock_response)
-            main(['-d',targets[0].file.parent.parent, '-m'])
+            main(['-d',str(targets[0].file.parent.parent), '-m'])
             output = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             output = MP4(targets[1].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
@@ -125,7 +124,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Process all subdfiles of -d, and deal with conflicts.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(prepare_workdir(tmpdir))
+            tempdir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
             path = tempdir / 'test' / "dc.json"
             mock_response.return_value = path.read_text()
             mock_poster.return_value = tempdir / 'test' / "poster.png"
@@ -136,7 +136,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(targetfile, targetfile2)
 
 
-            main(['-f',targetfile])
+            main(['-f',str(targetfile)])
             output = MP4(targetfile.parent / 'DorcelClub - 2021-12-23 - Peeping Tom.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 
@@ -157,7 +157,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(nfo_file, target_nfo_file)
             shutil.copy(poster_file, target_poster_file)
 
-            main(['-f',target_mp4_file,"-i"])
+            main(['-f',str(target_mp4_file),"-i"])
             output = MP4(target_mp4_file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
@@ -173,7 +173,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             targets = [new_ea(tempdir, use_dir=False, post_stem='1'),
                     new_ea(tempdir, use_dir=False, post_stem='2')]
             prepare(targets, mock_poster, mock_response)
-            main(['-d',targets[0].file.parent, '-m'])
+            main(['-d',str(targets[0].file.parent), '-m'])
             output1 = MP4(targets[0].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             self.assertEqual(output1.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             output2 = MP4(targets[1].file.parent / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
