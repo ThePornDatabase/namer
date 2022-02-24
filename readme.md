@@ -1,5 +1,5 @@
 [![workflow](https://github.com/4c0d3r/namer/actions/workflows/ci.yml/badge.svg)](https://github.com/4c0d3r/namer/actions/workflows/ci.yml/)
-
+[![codecov](https://codecov.io/gh/4c0d3r/namer/branch/main/graph/badge.svg?token=4MQEN2NUKZ)](https://codecov.io/gh/4c0d3r/namer)
 ### Namer
 
 Given a file of the form ```<watchdir_location>/site-yy.mm.dd-name.parts.XXX.2160p/abc.mp4```, extracts info from the file name and looks up relevant metatdata.
