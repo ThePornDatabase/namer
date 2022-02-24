@@ -3,7 +3,6 @@ ffmpeg is access through this file, it is used to find the video streams resolut
 and update audio streams "Default" setting.   Apple video players require there be
 only one default audio stream, and this script lets you set it with the correct language
 code their are more than one audio streams and if they are correctly labeled.
-
 See:  https://iso639-3.sil.org/code_tables/639/data/
 """
 
@@ -82,11 +81,11 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
         needs_updated = False
         if language:
             test_lang = language.lower()[0:3]
-            if audio_streams is not None and hasattr(audio_streams, 'stream'):
+            if audio_streams is not None and hasattr(audio_streams, 'streams'):
                 for audio_stream in audio_streams.streams:
                     default = audio_stream.disposition.default == 1
                     lang = audio_stream.tags.language
-                    if lang is test_lang:
+                    if lang == test_lang:
                         lang_stream = audio_stream.index - 1
                         if default is False:
                             needs_updated = True
@@ -101,7 +100,6 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
     """
     Returns true if the file had to be edited to have a default audio stream equal to the desired language,
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
-
     Copies, and potentially updates the default audio stream of a video file.
     """
 
@@ -129,16 +127,16 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
                                    '-c',
                                    'copy',  # don't reencode anything.
                                    workfile],
-                                  stdout=subprocess.PIPE,
+                                  stdout=subprocess.DEVNULL,
                                   stderr=subprocess.PIPE,
                                   universal_newlines=True) as process:
+                stderr = process.stderr.read()
                 success = process.wait() == 0
-                process.stdout.close()
                 process.stderr.close()
                 if not success:
                     logger.info(
                         "Could not update audio stream for %s", mp4_file)
-                    logger.info(process.stderr.read())
+                    logger.info(stderr)
                 else:
                     logger.warning("Return code: %s", process.returncode)
                     if newinput is not None:
