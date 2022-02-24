@@ -1,10 +1,12 @@
 """
 Parse string in to FileNamePart define in namer_types.
 """
+import argparse
 import logging
 from pathlib import PurePath
 import re
 import sys
+from typing import List
 from namer_types import FileNameParts
 
 
@@ -58,20 +60,18 @@ def parse_file_name(filename: str) -> FileNameParts:
     logging.warning("Could not fully parse file name: %s", filename)
     return file_name_parts
 
-
-def usage():
+def main(arglist: List[str]):
     """
-    Help messages for the main method.
+    Attempt to parse a name.
     """
-    print("You are using the file name parser of the Namer project")
-    print("Expects a single input, and will output the contents of FileNameParts, is the internal input")
-    print("to the namer_metadatapi.py script.")
-    print("Output will be the representation of that FileNameParts.")
-
+    description = ("You are using the file name parser of the Namer project.  " +
+        "Expects a single input, and will output the contents of FileNameParts, which is the internal input " +
+        "to the namer_metadatapi.py script. "+
+        "Output will be the representation of that FileNameParts.\n")
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
+    args = parser.parse_args(arglist)
+    print(parse_file_name(args.file))
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1 or sys.argv[1].strip().upper() == '-H':
-        usage()
-    else:
-        parts = parse_file_name(sys.argv[1])
-        print(parts)
+    main(arglist=sys.argv[1:])

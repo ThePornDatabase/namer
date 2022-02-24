@@ -33,46 +33,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
 
-    @unittest.skip('disabling act/part parsing for now.')
-    def test_parse_file_name_with_act_1(self):
-        """
-        Test parsing a name with an 'act'.
-        """
-        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.act.1.XXX.2160p.mp4')
-        self.assertEqual(name.site, "EvilAngel")
-        self.assertEqual(name.date, "2022-01-03")
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
-        self.assertEqual(name.trans, False)
-        self.assertEqual(name.act, "act 1")
-        self.assertEqual(name.extension, "mp4")
-
-    @unittest.skip('disabling act/part parsing for now.')
-    def test_parse_file_name_with_part_1(self):
-        """
-        Test parsing a name with an 'part'.
-        """
-
-        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.part-1.720p.mp4')
-        self.assertEqual(name.site, "EvilAngel")
-        self.assertEqual(name.date, "2022-01-03")
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
-        self.assertEqual(name.act, "part-1")
-        self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
-
-    @unittest.skip('disabling act/part parsing for now.')
-    def test_parse_file_name_with_xxx_segment_after_part(self):
-        """
-        Test parsing a name with garbage after the 'part'
-        """
-        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.part-1-XXX.mp4')
-        self.assertEqual(name.site, "EvilAngel")
-        self.assertEqual(name.date, "2022-01-03")
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
-        self.assertEqual(name.act, "part-1")
-        self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
-
     def test_parse_file_name_with_trans(self):
         """
         Test parsing a name with a TS tag after the date, uncommon, but not unheard of.
@@ -96,6 +56,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.act, None)
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
+
+    #@unittest.skipIf(os.name == 'nt', "StringIO breaks in Windows")
+    #@patch('sys.stdout', new_callable=io.StringIO)
+    #def test_main_method(self, mock_stdout):
+    #    """
+    #    Test the main method.
+    #    """
+    #    main(arglist=['-f','EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'])
+    #    self.assertIn("site: EvilAngel", mock_stdout.getvalue())
 
 if __name__ == '__main__':
     unittest.main()
