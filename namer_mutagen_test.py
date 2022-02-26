@@ -75,5 +75,44 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_mp4_tags(self, targetfile)
 
 
+    @mock.patch("namer_metadataapi.__get_response_json_object")
+    def test_non_existant_poster(self, mock_response):
+        """
+        Test writing metadata to an mp4, including tag information, which is only
+        available on scene requests to the porndb using uuid to request scene information.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
+            response = tempdir / "test" / "ea.full.json"
+            mock_response.return_value = response.read_text()
+            mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
+            targetfile = tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+            shutil.move(mp4_file, targetfile)
+            poster = None
+            name_parts = parse_file_name(targetfile.name)
+            info = match(name_parts, "")
+            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
+            validate_mp4_tags(self, targetfile)
+
+
+    @mock.patch("namer_metadataapi.__get_response_json_object")
+    def test_non_existant_file(self, mock_response):
+        """
+        Test writing metadata to an mp4, including tag information, which is only
+        available on scene requests to the porndb using uuid to request scene information.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
+            response = tempdir / "test" / "ea.full.json"
+            mock_response.return_value = response.read_text()
+            targetfile = tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+            poster = None
+            name_parts = parse_file_name(targetfile.name)
+            info = match(name_parts, "")
+            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
+            self.assertFalse(targetfile.exists())
+
 if __name__ == '__main__':
     unittest.main()
