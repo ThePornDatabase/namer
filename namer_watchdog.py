@@ -12,7 +12,7 @@ import traceback
 from pathlib import Path, PurePath
 import logging
 from watchdog.observers.polling import PollingObserver
-from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, FileSystemMovedEvent
+from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, EVENT_TYPE_DELETED, EVENT_TYPE_MOVED
 import schedule
 from namer import move_to_final_location, process
 from namer_types import NamerConfig, default_config
@@ -68,10 +68,9 @@ def handle(target_file: Path, namer_config: NamerConfig):
         else:
             newvideo = namer_config.failed_dir / relative_path
             workingfile.rename(newvideo)
-            logger.info("Moving failed processing %s to %s to retry later", workingdir, newvideo)
+            logger.info("Moving failed processing %s to %s to retry later", workingfile, newvideo)
             if result.namer_log_file is not None:
-                result.namer_log_file.rename( result.video_file.parent /
-                    (result.namer_log_file.stem+"_namer.log"))
+                result.namer_log_file.rename( newvideo.parent / result.namer_log_file.name)
     else:
         # See if we should, and can, move the whole dir.
         moved = False
@@ -104,7 +103,7 @@ def retry_failed(namer_config: NamerConfig):
     """
     logger.info("Retry failed items:")
     for file in list(namer_config.failed_dir.iterdir()):
-        shutil.move( namer_config.failed_dir / file, namer_config.watch_dir / file )
+        shutil.move( namer_config.failed_dir / file.name, namer_config.watch_dir / file.name )
 
 def is_fs_case_sensitive():
     """
@@ -125,35 +124,29 @@ class MovieEventHandler(PatternMatchingEventHandler):
                          case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.namer_config = namer_config
 
-    def on_moved(self, event: FileSystemMovedEvent):
-        self.process(event.dest_path)
-
-    def on_closed(self, event: FileSystemEvent):
-        self.process(event.src_path)
-
-    def on_created(self, event: FileSystemEvent):
-        self.process(event.src_path)
-
-    def process(self, path_in: str):
-        """
-        Watch for and process new files, after ensuring the file is fully moved in to place.
-        """
-        path = Path(path_in)
-        logger.info("watchdog process called")
-        if done_copying(path) and (path.stat().st_size / (1024*1024) > self.namer_config.min_file_size):
-            try:
-                handle(path, self.namer_config)
-            except Exception as ex:  # pylint: disable=broad-except
+    def on_any_event(self, event: FileSystemEvent):
+        file_path = None
+        if event.event_type == EVENT_TYPE_MOVED:
+            file_path = event.dest_path
+        elif event.event_type != EVENT_TYPE_DELETED:
+            file_path = event.src_path
+        if file_path is not None:
+            path = Path(file_path)
+            logger.info("watchdog process called for %s", path)
+            if path.exists() and done_copying(path) and (path.stat().st_size / (1024*1024) > self.namer_config.min_file_size):
                 try:
-                    exc_info = sys.exc_info()
+                    handle(path, self.namer_config)
+                except Exception as ex:  # pylint: disable=broad-except
                     try:
-                        logger.error("Error handling %s: \n %s", path, ex)
-                    except Exception: # pylint: disable=broad-except
-                        pass
-                finally:
-                    # Display the *original* exception
-                    traceback.print_exception(*exc_info)
-                    del exc_info
+                        exc_info = sys.exc_info()
+                        try:
+                            logger.error("Error handling %s: \n %s", path, ex)
+                        except Exception: # pylint: disable=broad-except
+                            pass
+                    finally:
+                        # Display the *original* exception
+                        traceback.print_exception(*exc_info)
+                        del exc_info
 
 
 class MovieWatcher:
@@ -166,6 +159,7 @@ class MovieWatcher:
     See NamerConfig
     """
     def __init__(self, namer_config: NamerConfig):
+        self.__namer_config = namer_config
         self.__src_path = namer_config.watch_dir
         self.__event_handler = MovieEventHandler(namer_config)
         self.__event_observer = PollingObserver()
@@ -187,16 +181,27 @@ class MovieWatcher:
         """
         starts a background thread to check for files.
         """
+        config = self.__namer_config
+        logger.info(str(config))
+        logger.info("Start porndb scene watcher.... watching: %s",config.watch_dir)
+        if os.environ.get('BUILD_DATE'):
+            build_date = os.environ.get('BUILD_DATE')
+            print(f"Built on: {build_date}")
+        if os.environ.get('GIT_HASH'):
+            git_hash = os.environ.get('GIT_HASH')
+            print(f"Git Hash: {git_hash}")
         self.__schedule()
         self.__event_observer.start()
 
     def stop(self):
         """
         stops a background thread to check for files.
-        Waints for the event processor to complete.
+        Waits for the event processor to complete.
         """
+        logger.info("exiting")
         self.__event_observer.stop()
         self.__event_observer.join()
+        logger.info("exited")
 
     def __schedule(self):
         self.__event_observer.schedule(
@@ -206,28 +211,18 @@ class MovieWatcher:
         )
 
 
-def watch_for_movies(config: NamerConfig):
+def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     """
     Configure and start a watchdog looking for new Movies.
     """
-    logger.info(str(config))
-    logger.info("Start porndb scene watcher.... watching: %s",config.watch_dir)
-    if os.environ.get('BUILD_DATE'):
-        build_date = os.environ.get('BUILD_DATE')
-        print(f"Built on: {build_date}")
-    if os.environ.get('GIT_HASH'):
-        git_hash = os.environ.get('GIT_HASH')
-        print(f"Git Hash: {git_hash}")
-    movie_watcher = MovieWatcher(config)
-    movie_watcher.run()
-    logger.info("exiting")
-
-
-if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-    namer_watchdog_config=default_config()
     namer_watchdog_config.verify_watchdog_config()
     if namer_watchdog_config.retry_time is not None:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
-    watch_for_movies(namer_watchdog_config)
+    movie_watcher = MovieWatcher(namer_watchdog_config)
+    return movie_watcher
+
+
+if __name__ == "__main__":
+    create_watcher(default_config()).run()

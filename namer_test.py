@@ -62,6 +62,12 @@ def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):
         else:
             responses.append('{}')
             responses.append('{}')
+            responses.append('{}')
+            responses.append('{}')
+            responses.append('{}')
+            responses.append('{}')
+            responses.append('{}')
+            responses.append('{}')
     mock_poster.side_effect = posters
     mock_response.side_effect = responses
 

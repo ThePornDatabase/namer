@@ -341,7 +341,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
 
     namer_config.retry_time = config.get('watchdog','retry_time',fallback=None)
     if namer_config.retry_time is None:
-        namer_config.retry_time = "03:"+random.choice(["01", "11" ,"21", "31", "41", "51"])
+        namer_config.retry_time = f"03:{random.randint(0, 59):0>2}"
     return namer_config
 
 

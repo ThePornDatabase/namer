@@ -1,18 +1,41 @@
 """
 Test namer_watchdog.py
 """
+import datetime
 from pathlib import Path
+import time
 import unittest
 from unittest.mock import patch
 import logging
 import tempfile
-import shutil
-from watchdog.events import FileSystemEvent
+from freezegun import freeze_time
 from mutagen.mp4 import MP4
 from namer_mutagen_test import validate_mp4_tags
 from namer_test import new_ea, prepare
-from namer_types import default_config
-from namer_watchdog import MovieEventHandler, handle
+from namer_types import NamerConfig, default_config
+from namer_watchdog import create_watcher, retry_failed
+
+def make_locations(tempdir: Path) -> NamerConfig:
+    """
+    Make temp testing dirs.
+    """
+    config = default_config()
+    config.watch_dir = tempdir / 'watch'
+    config.watch_dir.mkdir()
+    config.work_dir = tempdir / 'work'
+    config.work_dir.mkdir()
+    config.dest_dir = tempdir / 'dest'
+    config.dest_dir.mkdir()
+    config.failed_dir = tempdir / 'failed'
+    config.failed_dir.mkdir()
+    return config
+
+def wait_until_processed(config: NamerConfig):
+    """
+    Waits until all files have been moved out of watch/working dirs.
+    """
+    while len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0:
+        time.sleep(.2)
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -27,21 +50,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-
-            config = default_config()
-            config.prefer_dir_name_if_available = True
-            config.watch_dir = tempdir / 'watch'
-            config.watch_dir.mkdir()
-            config.work_dir = tempdir / 'work'
-            config.work_dir.mkdir()
-            config.dest_dir = tempdir / 'dest'
-            config.dest_dir.mkdir()
-            config.failed_dir = tempdir / 'failed'
-            config.failed_dir.mkdir()
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available=True
+            config.write_namer_log = True
+            config.min_file_size = 0
+            watcher = create_watcher(config)
+            watcher.start()
             targets = [new_ea(config.watch_dir),new_ea(config.watch_dir,use_dir=False)]
             prepare(targets, mock_poster, mock_response)
-            handle(Path(targets[0].file), config)
-            handle(Path(targets[1].file), config)
+            wait_until_processed(config)
+            watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())),0)
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
@@ -64,24 +82,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-
-            config = default_config()
-            config.prefer_dir_name_if_available = True
-            config.watch_dir = tempdir / 'watch'
-            config.watch_dir.mkdir()
-            config.work_dir = tempdir / 'work'
-            config.work_dir.mkdir()
-            config.dest_dir = tempdir / 'dest'
-            config.dest_dir.mkdir()
-            config.failed_dir = tempdir / 'failed'
-            config.failed_dir.mkdir()
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available=True
             config.min_file_size=0
-            targets = [new_ea(config.watch_dir)]
+            config.write_namer_log = True
+            config.min_file_size = 0
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir)
+            ]
             prepare(targets, mock_poster, mock_response)
-
-            moviehandler = MovieEventHandler(config)
-            moviehandler.on_created(FileSystemEvent(Path(targets[0].file)))
-
+            wait_until_processed(config)
+            watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())),0)
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
@@ -98,26 +111,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-
-            config = default_config()
+            config = make_locations(tempdir)
             config.prefer_dir_name_if_available = False
-            config.watch_dir = tempdir / 'watch'
-            config.watch_dir.mkdir()
-            config.work_dir = tempdir / 'work'
-            config.work_dir.mkdir()
-            config.dest_dir = tempdir / 'dest'
-            config.dest_dir.mkdir()
-            config.failed_dir = tempdir / 'failed'
-            config.failed_dir.mkdir()
             config.write_namer_log = True
-
+            config.min_file_size = 0
+            watcher = create_watcher(config)
+            watcher.start()
             targets = [
                 new_ea(config.watch_dir / "deeper" / "and_deeper", use_dir=False),
                 new_ea(config.watch_dir,post_stem="number2", use_dir=False)
             ]
             prepare(targets, mock_poster, mock_response)
-            handle(Path(targets[0].file), config)
-            handle(Path(targets[1].file.parent.parent), config)
+            wait_until_processed(config)
+            watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())),0)
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
@@ -128,6 +134,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
             validate_mp4_tags(self, outputfile2)
 
+
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
     def test_handler_failure(self, mock_poster, mock_response):
@@ -136,37 +143,50 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
-            mock_response.return_value = "{}"
-            input_dir = tempdir / 'test'
-            poster = tempdir / 'test' / 'poster.png'
-            shutil.move(poster, poster)
-
-            mock_poster.return_value = tempdir / 'poster.png'
-            config = default_config()
-            config.watch_dir = tempdir / 'watch'
-            config.watch_dir.mkdir()
-            config.work_dir = tempdir / 'work'
-            config.work_dir.mkdir()
-            config.dest_dir = tempdir / 'dest'
-            config.dest_dir.mkdir()
-            config.failed_dir = tempdir / 'failed'
-            config.failed_dir.mkdir()
-            config.min_file_size = 0
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = False
             config.write_namer_log = True
-            targetfile = (tempdir / 'watch' /
-                "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p")
-            input_dir.rename(targetfile)
+            config.min_file_size = 0
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir, use_dir=False, match=False),
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            relative = targets[0].file.relative_to(config.watch_dir)
+            work_file = config.work_dir / relative
+            self.assertFalse(work_file.exists())
+            failed_file = config.failed_dir /relative
+            self.assertTrue(failed_file.exists() and failed_file.is_file())
+            retry_failed(config)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertGreater(len(list(config.watch_dir.iterdir())), 0)
 
-            handler = MovieEventHandler(config)
-            handler.process(targetfile)
 
-            self.assertFalse(targetfile.exists())
-            self.assertFalse(
-                (config.work_dir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p" ).exists())
-            outputfile = (tempdir / 'failed' /
-                'DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p')
-            self.assertTrue(outputfile.exists() and outputfile.is_dir())
+    def test_manual_tick(self):
+        """
+        see it work.
+        """
+        config = default_config()
+        hour = int(config.retry_time.split(":", maxsplit=1)[0].lstrip('0'))
+        minstr = config.retry_time.split(":")[1].lstrip('0')
+        minute = 0 if len(minstr) == 0 else int(minstr)
+        today = datetime.datetime.today()
+        before_retry = today.replace(hour=hour, minute=minute) - datetime.timedelta(seconds=3)
+        with freeze_time(before_retry) as frozen_datetime:
+            self.assertEqual(frozen_datetime(), before_retry)
+
+            frozen_datetime.tick()
+            before_retry += datetime.timedelta(seconds=1)
+            self.assertEqual(frozen_datetime(),before_retry)
+
+            frozen_datetime.tick(delta=datetime.timedelta(seconds=10))
+            before_retry += datetime.timedelta(seconds=10)
+            self.assertEqual(frozen_datetime(), before_retry)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
