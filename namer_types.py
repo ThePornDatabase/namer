@@ -275,6 +275,7 @@ class NamerConfig():
         output += f"  retry_time: {self.retry_time}\n"
         return output
 
+
     def verify_naming_config(self) -> bool:
         """
         Verifies the contents of your config file. Returns False if configuration failed.
@@ -285,7 +286,6 @@ class NamerConfig():
             success = False
         success = _verify_name_string("inplace_name", self.inplace_name) and success
         return success
-
 
 
     def verify_watchdog_config(self) -> bool:
@@ -344,36 +344,15 @@ def from_config(config : ConfigParser) -> NamerConfig:
         namer_config.retry_time = f"03:{random.randint(0, 59):0>2}"
     return namer_config
 
-
 def default_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    found_config = None
-    if os.environ.get('NAMER_CONFIG'):
-        namer_cfg = os.environ.get('NAMER_CONFIG')
-        if Path(namer_cfg).is_file():
-            logger.info("Using config file from NAMER_CONFIG environment %s",namer_cfg)
-            found_config = namer_cfg
-    if found_config is None:
-        namer_cfg = Path('./namer.cfg')
-        if namer_cfg.is_file():
-            logger.info("Using local executable config: %s",namer_cfg.absolute())
-            found_config = namer_cfg
-    if found_config is None:
-        namer_cfg = Path.home() / ".namer.cfg"
-        if namer_cfg.is_file():
-            logger.info("Using homer dir config: %s",namer_cfg)
-            found_config = namer_cfg
-    if found_config is None:
-        namer_cfg = Path(__file__).absolute().parent / 'namer.cfg'
-        if namer_cfg.is_file():
-            logger.info("Using local executable config: %s",namer_cfg)
-            found_config = namer_cfg
-
-
     config = configparser.ConfigParser()
-    config.read(namer_cfg)
+    default_locations = [Path.home() / ".namer.cfg", Path('./namer.cfg')]
+    if os.environ.get('NAMER_CONFIG') is not None:
+        default_locations.insert(0, Path(os.environ.get('NAMER_CONFIG')))
+    config.read(default_locations)
     return from_config(config)
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -448,9 +427,10 @@ class Performer:
         self.role = role
 
     def __str__(self):
+        name = "Unknown" if self.name is None else self.name
         if self.role is not None:
-            return self.name + " (" + self.role + ")"
-        return self.name
+            return name + " (" + self.role + ")"
+        return name
 
     def __repr__(self):
         return f'Performer[name={self.name}, role={self.role}]'

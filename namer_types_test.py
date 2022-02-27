@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import sys
 import unittest
-from namer_types import NamerConfig, default_config, PartialFormatter, from_config
+from namer_types import NamerConfig, default_config, PartialFormatter, from_config, Performer
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -15,7 +15,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
-    current=os.path.dirname(os.path.abspath(__file__))
+    def test_performer(self):
+        """
+        Test performer __str__
+        """
+        self.assertEqual(str(Performer(None, None)), "Unknown")
+        self.assertEqual(str(Performer('Name', None)), "Name")
+        self.assertEqual(str(Performer(None, 'Role')), "Unknown (Role)")
+        self.assertEqual(str(Performer('Name', 'Role')), "Name (Role)")
 
     def test_local_config(self):
         """

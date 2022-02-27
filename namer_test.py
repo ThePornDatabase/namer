@@ -10,7 +10,8 @@ from unittest.mock import patch
 import os
 import tempfile
 from mutagen.mp4 import MP4
-from namer import main
+from namer import check_arguments, main, set_permissions
+from namer_types import NamerConfig
 
 ROOT_DIR = './test/'
 
@@ -75,6 +76,27 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def test_check_arguments(self):
+        """
+        verify file system checks
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            target_dir = tempdir / "path/"
+            file = tempdir / "file"
+            config = tempdir / "config"
+            error = check_arguments(dir_to_process=target_dir,
+                                    file_to_process=file,
+                                    config_overide=config)
+            self.assertTrue(error)
+            target_dir.mkdir()
+            file.write_text("test")
+            config.write_text("test")
+            error = check_arguments(dir_to_process=target_dir,
+                                    file_to_process=file,
+                                    config_overide=config)
+            self.assertFalse(error)
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -192,6 +214,33 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                               'Cum swallow', 'Deepthroat', 'FaceSitting', 'Facial', 'Gonzo / No Story', 'HD Porn', 'Hairy Pussy',
                               'Handjob', 'Hardcore', 'Latina', 'MILF', 'Pussy to mouth', 'Rimming', 'Sex', 'Tattoo', 'Threesome',
                               'Toys / Dildos'], output2.get('keyw'))
+
+    def test_set_permissions(self):
+        """
+        Test set permissions
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            path = Path(tmpdir)
+            test_file = path / "test_file.txt"
+            test_file.write_text("test")
+            test_dir = path / "test_dir"
+            test_dir.mkdir()
+            config = NamerConfig()
+            if hasattr(os, 'getgroups'):
+                config.set_gid=None if len(os.getgroups()) == 0 else os.getgroups()[0]
+            if hasattr(os, 'getuid'):
+                config.set_uid=os.getuid()
+            config.set_dir_permissions=777
+            config.set_file_permissions=666
+            set_permissions(test_file, config)
+            self.assertTrue(os.access(test_file, os.R_OK))
+            config.set_file_permissions=None
+            set_permissions(test_file, config)
+            self.assertTrue(os.access(test_file, os.R_OK))
+            set_permissions(test_dir, config)
+            self.assertTrue(os.access(test_dir, os.R_OK))
+            set_permissions(None, config)
+
 
 if __name__ == '__main__':
     unittest.main()

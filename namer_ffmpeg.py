@@ -107,11 +107,6 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
         workfile = Path(tempdir) / mp4_file.name
         stream = get_audio_stream_for_lang(mp4_file, language)
         if stream is not None:
-            newinput = None
-            if mp4_file == workfile:
-                newinput = Path(mp4_file).parent.absolute() / "temp_" + mp4_file.name
-                mp4_file.rename(newinput)
-                mp4_file = newinput
             logger.info(
                 "Attempt to alter default audio stream of %s", mp4_file)
             with subprocess.Popen(['ffmpeg',
@@ -139,10 +134,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
                     logger.info(stderr)
                 else:
                     logger.warning("Return code: %s", process.returncode)
-                    if newinput is not None:
-                        newinput.unlink()
-                    else:
-                        mp4_file.unlink()
+                    mp4_file.unlink()
                     workfile.rename(mp4_file)
                 return success
     return True

@@ -20,7 +20,7 @@ RUN apt-get update \
     && apt-get clean
 
 COPY . /opt/renamer/
-RUN pip3 install -r /opt/renamer/requirements.txt
+RUN pip3 install pylint -r /opt/renamer/requirements.txt
 
 FROM APP as TEST
 RUN /usr/bin/python3 -m unittest discover -s /opt/renamer -p '*.py'

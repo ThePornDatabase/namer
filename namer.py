@@ -47,7 +47,7 @@ def set_permissions(file: Path, config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process.
     """
-    if hasattr(os, "chmod") and file.exists():
+    if hasattr(os, "chmod") and file is not None and file.exists():
         if file.is_dir() and not config.set_dir_permissions is None:
             file.chmod(int(str(config.set_dir_permissions), 8))
         elif config.set_file_permissions is not None:
@@ -61,7 +61,7 @@ def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: b
     The directories will be scanned for media and named/tagged in place
     based on config settings.
     """
-    if dir_to_scan is not None and dir_to_scan.is_dir():
+    if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir %s for subdirs/files to process",dir_to_scan)
         files = list(dir_to_scan.iterdir())
         files.sort()
@@ -226,19 +226,19 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide:
     error = False
     if file_to_process is not None:
         logger.info("File to process: %s", file_to_process)
-        if not file_to_process.is_file():
+        if not file_to_process.is_file() or not file_to_process.exists():
             logger.error("Error not a file! %s", file_to_process)
             error = True
 
     if dir_to_process is not None:
         logger.info("Directory to process: %s",dir_to_process)
-        if not dir_to_process.is_dir():
+        if not dir_to_process.is_dir() or not dir_to_process.exists():
             logger.info("Error not a directory! %s", dir_to_process)
             error = True
 
     if config_overide is not None:
         logger.info("Config override specified: %s",config_overide)
-        if not config_overide.is_file():
+        if not config_overide.is_file() or not config_overide.exists():
             logger.info("Config override specified, but file does not exit: %s",config_overide)
             error = True
     return error
