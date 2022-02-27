@@ -60,7 +60,7 @@ class PartialFormatter(string.Formatter):
                 raise KeyError(f"Key {field_name} not in support keys: {self.supported_keys}") from err
         return val
 
-    def format_field(self, value, format_spec):
+    def format_field(self, value, format_spec: str):
         if value is None:
             return self.missing
         try:

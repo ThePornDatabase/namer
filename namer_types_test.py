@@ -56,7 +56,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Verify that partial formatter can handle missing fields gracefully,
         and it's prefix, postfix, and infix capabilities work.
         """
-        fmt = PartialFormatter(missing='',bad_fmt='---')
+        badfmt = '---'
+        fmt = PartialFormatter(missing='',bad_fmt=badfmt)
         name = fmt.format("{name}{act: 1p}", name='scene1', act='act1')
         self.assertEqual(name, 'scene1 act1')
         name = fmt.format('{name}{act: 1p}', name='scene1', act=None)
@@ -78,11 +79,18 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = fmt.format('{name}{act: >10}', name='scene1', act='act1')
         self.assertEqual(name, 'scene1      act1')
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(Exception) as error1:
             name = fmt.format('{name1}{act: >10}', name='scene1', act='act1')
             self.assertEqual(name, 'scene1      act1')
-        self.assertTrue('name1' in str(context.exception))
-        self.assertTrue('all_performers' in str(context.exception) )
+        self.assertTrue('name1' in str(error1.exception))
+        self.assertTrue('all_performers' in str(error1.exception) )
+
+        self.assertEqual(fmt.format_field(format_spec='adsfadsf', value="fmt"), badfmt)
+
+        with self.assertRaises(Exception) as error2:
+            fmt1 = PartialFormatter(missing='',bad_fmt= None)
+            fmt1.format_field(format_spec='adsfadsf', value="fmt")
+        self.assertTrue('Invalid format specifier' in str(error2.exception))
 
     def test_config_verification(self):
         """

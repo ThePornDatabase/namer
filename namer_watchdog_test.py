@@ -2,6 +2,7 @@
 Test namer_watchdog.py
 """
 import datetime
+import os
 from pathlib import Path
 import time
 import unittest
@@ -13,7 +14,7 @@ from mutagen.mp4 import MP4
 from namer_mutagen_test import validate_mp4_tags
 from namer_test import new_ea, prepare
 from namer_types import NamerConfig, default_config
-from namer_watchdog import create_watcher, retry_failed
+from namer_watchdog import create_watcher, done_copying, retry_failed
 
 def make_locations(tempdir: Path) -> NamerConfig:
     """
@@ -41,6 +42,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def test_done_copying_non_existant_file(self):
+        """
+        Test negatives.
+        """
+        non_path = Path("should_not_exist")
+        self.assertFalse(done_copying(non_path))
+        self.assertFalse(done_copying(None))
+
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
@@ -148,6 +158,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.write_namer_log = True
             config.min_file_size = 0
             watcher = create_watcher(config)
+            os.environ.update([('BUILD_DATE','date'),('GIT_HASH','hash')])
             watcher.start()
             targets = [
                 new_ea(config.watch_dir, use_dir=False, match=False),

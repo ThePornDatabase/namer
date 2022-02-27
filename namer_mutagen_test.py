@@ -7,7 +7,7 @@ from unittest import mock
 import tempfile
 import shutil
 from mutagen.mp4 import MP4
-from namer_mutagen import update_mp4_file
+from namer_mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer_metadataapi import match
 from namer_file_parser import parse_file_name
 from namer_types import NamerConfig
@@ -32,6 +32,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def test_video_size(self):
+        """
+        Test resolution.
+        """
+        self.assertEqual(resolution_to_hdv_setting(2160),3)
+        self.assertEqual(resolution_to_hdv_setting(1080),2)
+        self.assertEqual(resolution_to_hdv_setting(720),1)
+        self.assertEqual(resolution_to_hdv_setting(480),0)
+
 
     @mock.patch("namer_metadataapi.__get_response_json_object")
     def test_writing_metadata(self, mock_response):

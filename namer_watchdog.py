@@ -27,7 +27,7 @@ def done_copying(file: Path) -> bool:
     """
     size_past = 0
     while True:
-        if not file.exists():
+        if file is None or not file.exists():
             return False
         size_now = file.stat().st_size
         if size_now == size_past:
