@@ -11,14 +11,28 @@ import pathlib
 import sys
 import logging
 from typing import List
-from namer_moviexml import parse_movie_xml_file
+from namer.moviexml import parse_movie_xml_file
 
-from namer_types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
-from namer_file_parser import parse_file_name
-from namer_mutagen import update_mp4_file
-from namer_metadataapi import get_poster, match
+from namer.types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
+from namer.filenameparser import parse_file_name
+from namer.mutagen import update_mp4_file
+from namer.metadataapi import get_poster, match
 
 logger = logging.getLogger('namer')
+
+DESCRIPTION="""
+    Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
+    or a watchdog service to do the above watching a directory for new files and moving matched files to a target location.
+    File names are assumed to be of the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv].   In the name, read the
+    periods, ".", as any number of spaces " ", dashes "-", or periods ".".
+
+    Provided you have an access token to the porndb (free sign up) https://www.metadataapi.net/, this program will
+    attempt to match your file's name to search results from the porndb.   Please note that the site must at least be
+    a substring of the actual site name on the porndb, and the date must be within one day or the release date on the
+    porndb for a match to be considered.  If the log file flag is enabled then a <original file name minus ext>_namer.log
+    file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
+    match the file.
+  """
 
 def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> str:
     """
@@ -248,10 +262,7 @@ def main(arglist: List[str]):
     Used to tag and rename files from the command line.
     See usage function above.
     """
-    description="""
-    Names a file or directories largest mp4 or mkv file based on a lookup against metadataapi.net.
-    """
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument("-c", "--configfile", help="config file, defaults first to env var NAMER_CONFIG,"
         +" then local path namer.cfg, and finally ~/.namer.cfg.", type=pathlib.Path)
     group = parser.add_mutually_exclusive_group(required=True)

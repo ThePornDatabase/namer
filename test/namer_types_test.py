@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import sys
 import unittest
-from namer_types import NamerConfig, default_config, PartialFormatter, from_config, Performer
+from namer.types import NamerConfig, default_config, PartialFormatter, from_config, Performer
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

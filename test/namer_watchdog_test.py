@@ -9,12 +9,11 @@ import unittest
 from unittest.mock import patch
 import logging
 import tempfile
+from test.utils import validate_mp4_tags, new_ea, prepare
 from freezegun import freeze_time
 from mutagen.mp4 import MP4
-from namer_mutagen_test import validate_mp4_tags
-from namer_test import new_ea, prepare
-from namer_types import NamerConfig, default_config
-from namer_watchdog import create_watcher, done_copying, retry_failed
+from namer.types import NamerConfig, default_config
+from namer.watchdog import create_watcher, done_copying, retry_failed
 
 def make_locations(tempdir: Path) -> NamerConfig:
     """
@@ -52,8 +51,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertFalse(done_copying(None))
 
 
-    @patch('namer_metadataapi.__get_response_json_object')
-    @patch('namer.get_poster')
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
     def test_handler_collisions_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -86,8 +85,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
 
-    @patch('namer_metadataapi.__get_response_json_object')
-    @patch('namer.get_poster')
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
     def test_eventlisterner_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -117,8 +116,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
 
-    @patch('namer_metadataapi.__get_response_json_object')
-    @patch('namer.get_poster')
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
     def test_handler_deeply_nested_success_no_dirname(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -151,8 +150,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
 
-    @patch('namer_metadataapi.__get_response_json_object')
-    @patch('namer.get_poster')
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
     def test_handler_deeply_nested_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -181,8 +180,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
 
-    @patch('namer_metadataapi.__get_response_json_object')
-    @patch('namer.get_poster')
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
     def test_handler_failure(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.

@@ -7,10 +7,10 @@ from unittest import mock
 import tempfile
 import shutil
 from mutagen.mp4 import MP4
-from namer_mutagen import resolution_to_hdv_setting, update_mp4_file
-from namer_metadataapi import match
-from namer_file_parser import parse_file_name
-from namer_types import NamerConfig
+from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
+from namer.metadataapi import match
+from namer.filenameparser import parse_file_name
+from namer.types import NamerConfig
 
 
 def validate_mp4_tags(test_self, file):
@@ -43,20 +43,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(resolution_to_hdv_setting(480),0)
 
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_writing_metadata(self, mock_response):
         """
         verify tag in place functions.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
-            message = tempdir / "test" / "dc.json"
-            mock_response.return_value = message.read_text()
-            mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            targetfile = tempdir / "test" / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
-            shutil.move(mp4_file, targetfile)
-            poster = tempdir / "test" / "poster.png"
+            testdir = Path(__file__).resolve().parent
+            mock_response.return_value = (testdir / "dc.json").read_text()
+            targetfile = testdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
+            poster = tempdir  / "poster.png"
+            shutil.copy(testdir / "poster.png", poster)
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, "")
             update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
@@ -64,7 +63,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Peeping Tom'])
 
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_writing_full_metadata(self, mock_response):
         """
         Test writing metadata to an mp4, including tag information, which is only
@@ -72,20 +71,20 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
-            response = tempdir / "test" / "ea.full.json"
+            testdir = Path(__file__).resolve().parent
+            response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            targetfile = tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-            shutil.move(mp4_file, targetfile)
-            poster = tempdir / "test" / "poster.png"
+            targetfile = tempdir  / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
+            poster = tempdir  / "poster.png"
+            shutil.copy(testdir / "poster.png", poster)
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, "")
             update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
             validate_mp4_tags(self, targetfile)
 
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_non_existant_poster(self, mock_response):
         """
         Test writing metadata to an mp4, including tag information, which is only
@@ -93,12 +92,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
-            response = tempdir / "test" / "ea.full.json"
+            testdir = Path(__file__).resolve().parent
+            response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            mp4_file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            targetfile = tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-            shutil.move(mp4_file, targetfile)
+            targetfile = tempdir  / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
             poster = None
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, "")
@@ -106,7 +104,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_mp4_tags(self, targetfile)
 
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_non_existant_file(self, mock_response):
         """
         Test writing metadata to an mp4, including tag information, which is only
@@ -114,8 +112,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
-            response = tempdir / "test" / "ea.full.json"
+            testdir = Path(__file__).resolve().parent
+            response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
             targetfile = tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
             poster = None

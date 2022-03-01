@@ -1,11 +1,9 @@
 **/.DS_Store
 .vscode
 __pycache__/
-test/dest/*
-test/working/*
-test/watch/*
-test/failed/*
 .coverage
 /htmlcov/
 cov.xml
 coverage.xml
+UNKNOWN.egg-info/
+dist/

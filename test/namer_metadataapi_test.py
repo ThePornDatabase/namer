@@ -6,21 +6,21 @@ import io
 import unittest
 from unittest import mock
 
-from namer_metadataapi import main, match
-from namer_types import Performer
-from namer_file_parser import parse_file_name
+from namer.metadataapi import main, match
+from namer.types import Performer
+from namer.filenameparser import parse_file_name
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_parse_response_metadataapi_net_dorcel(self, mock_response):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        response = ( Path(__file__).resolve().parent / "test" / "dc.json")
+        response = ( Path(__file__).resolve().parent / "dc.json")
         mock_response.return_value = response.read_text()
         name = parse_file_name('DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4')
         results = match(name, "your_porndb_authkey")
@@ -44,12 +44,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertListEqual(info.performers, expected)
 
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net(self, mock_response):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "test" / "ea.json"
+        response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
         results = match(name, "your_porndb_authkey")
@@ -74,12 +74,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertListEqual(info.performers, expected)
         self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_full_metadataapi_net(self, mock_response):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "test" / "ea.json"
+        response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
         results = match(name, "your_porndb_authkey")
@@ -102,7 +102,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected.append(Performer("Mark Wood","Male"))
         self.assertListEqual(info.performers, expected)
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_data(self, mock_response):
         """
         verify an empty response from porndb is properly handled.
@@ -112,7 +112,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 0)
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_message(self, mock_response):
         """
         failed response (empty) is properly handled
@@ -122,7 +122,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, "your_porndb_authkey")
         self.assertEqual(len(results), 0)
 
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_none_message(self, mock_response):
         """
         failed response (None) is properly handled
@@ -134,12 +134,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @mock.patch('sys.stdout', new_callable=io.StringIO)
-    @mock.patch("namer_metadataapi.__get_response_json_object")
+    @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_main_metadataapi_net(self, mock_response, mock_stdout):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "test" / "ea.json"
+        response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
         main(['-f', 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', '-t',"your_porndb_authkey"])
         self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4",mock_stdout.getvalue())

@@ -5,7 +5,7 @@ or used in renaming the video file.
 """
 from pathlib import Path
 from lxml import objectify
-from namer_types import LookedUpFileInfo, Performer
+from namer.types import LookedUpFileInfo, Performer
 
 def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """

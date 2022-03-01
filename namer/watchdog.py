@@ -14,8 +14,8 @@ import logging
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, EVENT_TYPE_DELETED, EVENT_TYPE_MOVED
 import schedule
-from namer import move_to_final_location, process
-from namer_types import NamerConfig, default_config
+from namer.namer import move_to_final_location, process
+from namer.types import NamerConfig, default_config
 
 logger = logging.getLogger('watchdog')
 
@@ -182,7 +182,6 @@ class MovieWatcher:
         starts a background thread to check for files.
         """
         config = self.__namer_config
-        logger.info(str(config))
         logger.info("Start porndb scene watcher.... watching: %s",config.watch_dir)
         if os.environ.get('BUILD_DATE'):
             build_date = os.environ.get('BUILD_DATE')
@@ -217,7 +216,9 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     """
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-    namer_watchdog_config.verify_watchdog_config()
+    logger.info(str(namer_watchdog_config))
+    if not namer_watchdog_config.verify_watchdog_config():
+        sys.exit(-1)
     if namer_watchdog_config.retry_time is not None:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
     movie_watcher = MovieWatcher(namer_watchdog_config)

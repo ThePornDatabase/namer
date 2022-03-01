@@ -1,7 +1,6 @@
 [run]
 branch = True
-include = *namer*.py
-omit = *tests*
+include = namer/*, test/*
 #[report]
 #exclude_lines = pragma: no cover
 #[html]

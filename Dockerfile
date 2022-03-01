@@ -1,4 +1,4 @@
-FROM ubuntu:impish as APP
+FROM ubuntu:impish as BASE
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -15,18 +15,26 @@ RUN apt-get update \
        wget \
        python3-pip \
        python3-dev \
+       python3.9-venv \
+       curl \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
-COPY . /opt/renamer/
-RUN pip3 install pylint -r /opt/renamer/requirements.txt
-
-FROM APP as TEST
-RUN /usr/bin/python3 -m unittest discover -s /opt/renamer -p '*.py'
-RUN pylint --rcfile=/opt/renamer/.pylintrc /opt/renamer/*.py
-FROM APP
-RUN rm -r /opt/renamer/test/
+FROM BASE as BUILD
+RUN mkdir /work/
+COPY . /work/
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && export PATH="/root/.local/bin:$PATH" \
+    && cd /work/ \
+    && poetry install \
+    && poetry run pytest \
+    && poetry run pylint namer \
+    && poetry build
+FROM BASE
+COPY --from=BUILD /work/dist/namer-0.1.0.tar.gz /
+RUN pip3 install /namer-0.1.0.tar.gz \
+    && rm /namer-0.1.0.tar.gz
 
 ARG BUILD_DATE
 ARG GIT_HASH
@@ -35,6 +43,5 @@ ENV PYTHONUNBUFFERED=1
 ENV NAMER_CONFIG=/config/namer.cfg
 ENV BUILD_DATE=$BUILD_DATE
 ENV GIT_HASH=$GIT_HASH
-CMD ["/opt/renamer/namer_watchdog.py"]
-ENTRYPOINT ["python3"]
+ENTRYPOINT ["python3", "-m", "namer", "watchdog"]
 

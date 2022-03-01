@@ -7,7 +7,7 @@ from pathlib import PurePath
 import re
 import sys
 from typing import List
-from namer_types import FileNameParts
+from namer.types import FileNameParts
 
 
 def name_cleaner(name: str) -> str:

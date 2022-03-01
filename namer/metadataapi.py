@@ -20,8 +20,8 @@ import urllib
 import urllib.request
 import rapidfuzz
 import requests
-from namer_types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, default_config
-from namer_file_parser import parse_file_name
+from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, default_config
+from namer.filenameparser import parse_file_name
 
 logger = logging.getLogger('metadata')
 

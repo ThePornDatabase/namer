@@ -4,7 +4,7 @@ Tests for namer_file_parser.py
 import io
 import unittest
 from unittest.mock import patch
-from namer_file_parser import main, parse_file_name
+from namer.filenameparser import main, parse_file_name
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """

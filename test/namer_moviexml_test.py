@@ -6,8 +6,8 @@ from pathlib import Path
 from shutil import copytree
 import unittest
 import tempfile
-from namer_moviexml import parse_movie_xml_file
-from namer_types import Performer
+from namer.moviexml import parse_movie_xml_file
+from namer.types import Performer
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -20,7 +20,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            copytree(Path(__file__).resolve().parent / "test" , tempdir / "test")
+            copytree(Path(__file__).resolve().parent, tempdir / "test")
             xmlfile = tempdir / "test" / "ea.nfo"
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")

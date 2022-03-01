@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "namer"
+version = "0.1.0"
+description = ""
+authors = ["4c0d3r <4c0d3r@protonmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+rapidfuzz = "^2.0.5"
+watchdog = "^2.1.6"
+pathvalidate = "^2.5.0"
+requests = "^2.27.1"
+mutagen = "^1.45.1"
+lxml = "^4.8.0"
+schedule = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^4.6"
+pylint = "^2.12.2"
+pytest-cov = "^3.0.0"
+freezegun = "^1.1.0"
+coverage = "^6.3.2"

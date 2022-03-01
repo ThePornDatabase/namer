@@ -43,3 +43,17 @@ services:
 copy namer.cfg to a path mapped to /config/namer.cfg, and set values for your setup.   The config is well commented.
 
 
+Building:
+poetry build
+
+Linting:
+poetry run pylint 
+
+Testing
+poetry run pytest
+
+Code Coverage
+poetry run pytest --cov
+
+Html Coverage report
+poetry run coverage --html
