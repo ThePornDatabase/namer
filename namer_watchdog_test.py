@@ -81,6 +81,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
             output2 = MP4(outputfile2)
             self.assertEqual(output2.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
 
 
@@ -111,11 +113,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             output = MP4(outputfile)
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
 
     @patch('namer_metadataapi.__get_response_json_object')
     @patch('namer.get_poster')
-    def test_handler_deeply_nested_success(self, mock_poster, mock_response):
+    def test_handler_deeply_nested_success_no_dirname(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
         """
@@ -143,6 +147,38 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             outputfile2 = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
             validate_mp4_tags(self, outputfile2)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+
+
+    @patch('namer_metadataapi.__get_response_json_object')
+    @patch('namer.get_poster')
+    def test_handler_deeply_nested_success(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = True
+            config.write_namer_log = True
+            config.del_other_files = False
+            config.min_file_size = 0
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())),0)
+            outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
+                'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            validate_mp4_tags(self, outputfile)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
 
     @patch('namer_metadataapi.__get_response_json_object')
