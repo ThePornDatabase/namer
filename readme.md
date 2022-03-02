@@ -42,18 +42,37 @@ services:
 
 copy namer.cfg to a path mapped to /config/namer.cfg, and set values for your setup.   The config is well commented.
 
+Pip3 usage:
+
+pip3 install namer
+
+Run the watchdog:
+python3 -m namer watchdog
+
+Manually rename a file, dir, or all subdirs/subfiles of a dir:
+python3 -m namer rename -h
+
+Development:
 
 Building:
 poetry build
 
 Linting:
-poetry run pylint 
+poetry run pylint namer
 
-Testing
+Testing:
 poetry run pytest
 
-Code Coverage
+Code Coverage:
 poetry run pytest --cov
 
-Html Coverage report
-poetry run coverage --html
+Html Coverage report:
+poetry run coverage html
+
+Publishing:
+Make sure you set your token:
+poetry config pypi-token.pypi <token>
+
+Publish to pypi.org:
+poetry publish
+
