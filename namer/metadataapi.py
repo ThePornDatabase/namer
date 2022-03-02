@@ -4,6 +4,7 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 """
 
 import argparse
+import itertools
 import os
 from pathlib import Path
 import json
@@ -28,21 +29,10 @@ logger = logging.getLogger('metadata')
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> ComparisonResult:
     release_date = name_parts.date == looked_up.date
     site = re.sub(r' ', '', name_parts.site.capitalize()) in re.sub( r' ', '', looked_up.site.capitalize())
-    found_words = looked_up.name
-    list_of_options = []
-    list_of_options.append(found_words)
-    performers = ""
-    for lady in list(filter(lambda x: x.role == "Female" ,looked_up.performers)):
-        performers += lady.name+" "
-        found_words += " "+lady.name
-        list_of_options.append(found_words)
-        list_of_options.append(performers)
-    for dude in list(filter(lambda x: x.role != "Female" ,looked_up.performers)):
-        performers += " "+dude.name
-        found_words += " "+dude.name
-        list_of_options.append(found_words)
-        list_of_options.append(performers)
-    ratios = rapidfuzz.process.extractOne(name_parts.name,list_of_options)
+    all_performers = list(map(lambda p: p.name, looked_up.performers))
+    all_performers.insert(0, looked_up.name)
+    powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
+    ratios = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
     return ComparisonResult(
         name=ratios[0],
         name_match=ratios[1],

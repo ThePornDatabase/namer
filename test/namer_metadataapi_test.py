@@ -43,7 +43,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected.append(Performer("Megane Lopez","Female"))
         self.assertListEqual(info.performers, expected)
 
-
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net(self, mock_response):
         """
@@ -73,6 +72,25 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected.append(Performer("Mark Wood","Male"))
         self.assertListEqual(info.performers, expected)
         self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
+
+    @mock.patch("namer.metadataapi.__get_response_json_object")
+    def test_call_metadataapi_net2(self, mock_response):
+        """
+        Test parsing a stored response as a LookedUpFileInfo
+        """
+        response = Path(__file__).resolve().parent / "ssb2.json"
+        mock_response.return_value = response.read_text()
+        name = parse_file_name('BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4')
+        results = match(name, "your_porndb_authkey")
+        self.assertEqual(len(results), 1)
+        result = results[0]
+        self.assertTrue(result.datematch)
+        self.assertTrue(result.sitematch)
+        self.assertGreaterEqual(result.name_match, 90.0)
+        info = results[0].looked_up
+        self.assertEqual(info.name, "Suck, Suck, Blow")
+        self.assertEqual(info.date, "2022-02-28")
+        self.assertEqual(info.site, "Brazzers Exxtra")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_full_metadataapi_net(self, mock_response):

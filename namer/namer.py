@@ -31,7 +31,7 @@ DESCRIPTION="""
     a substring of the actual site name on the porndb, and the date must be within one day or the release date on the
     porndb for a match to be considered.  If the log file flag is enabled then a <original file name minus ext>_namer.log
     file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
-    match the file.
+    match the file's name segment after the 'SITE.[YY]YY.MM.DD'.
   """
 
 def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> str:
