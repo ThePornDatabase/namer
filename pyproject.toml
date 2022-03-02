@@ -15,7 +15,7 @@ lxml = "^4.8.0"
 schedule = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^4.6"
+pytest = "^7.0.0"
 pylint = "^2.12.2"
 pytest-cov = "^3.0.0"
 freezegun = "^1.1.0"

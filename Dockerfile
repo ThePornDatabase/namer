@@ -27,6 +27,8 @@ COPY . /work/
 RUN curl -sSL https://install.python-poetry.org | python3 - \
     && export PATH="/root/.local/bin:$PATH" \
     && cd /work/ \
+    && rm -rf /work/namer/__pycache__/ || true \
+    && rm -rf /work/test/__pycache__/ || true \
     && poetry install \
     && poetry run pytest \
     && poetry run pylint namer \
