@@ -7,3 +7,4 @@ cov.xml
 coverage.xml
 UNKNOWN.egg-info/
 dist/
+creds.sh
