@@ -34,9 +34,9 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
     && poetry run pylint namer \
     && poetry build
 FROM BASE
-COPY --from=BUILD /work/dist/namer-0.1.0.tar.gz /
-RUN pip3 install /namer-0.1.0.tar.gz \
-    && rm /namer-0.1.0.tar.gz
+COPY --from=BUILD /work/dist/namer-*.tar.gz /
+RUN pip3 install /namer-*.tar.gz \
+    && rm /namer-*.tar.gz
 
 ARG BUILD_DATE
 ARG GIT_HASH
