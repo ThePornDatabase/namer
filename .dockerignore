@@ -1,0 +1,13 @@
+.coverage
+.coveragerc
+.git
+.github
+.gitignore
+.pytest_cache
+.vscode
+UNKNOWN.egg-info
+__pycache__
+creds.sh
+dist
+htmlcov
+include
