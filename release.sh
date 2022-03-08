@@ -72,4 +72,6 @@ git push origin v"${new_version}"
 
 docker login ghcr.io -u ${GITHUB_USERNAME} -p ${GITHUB_TOKEN}
 docker tag "${repo}"/namer:"${new_version}" ghcr.io/"${repo}"/namer:"${new_version}"
+docker tag "${repo}"/namer:"${new_version}" ghcr.io/"${repo}"/namer:latest
 docker push ghcr.io/"${repo}"/namer:"${new_version}"
+docker push ghcr.io/"${repo}"/namer:latest
