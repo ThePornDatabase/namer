@@ -218,7 +218,7 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
         else:
             logger.error(
             "Could not parse file: %s, it is not in the right format it must start with a site, a date and end with an extension",
-            output.video_file)     
+            output.video_file)
         target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
         if output.new_metadata is not None:
             output.video_file = move_to_final_location(
