@@ -208,10 +208,17 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
             output.new_metadata = get_local_metadata_if_requested(output.video_file)
             if output.new_metadata is not None:
                 output.new_metadata.original_parsed_filename = output.parsed_file
-        if output.new_metadata is None:
+        if (output.new_metadata is None and
+            output.parsed_file.name != "" and
+            output.parsed_file.site != "" and
+            output.parsed_file.date != ""):
             output.search_results = match(output.parsed_file, config.porndb_token)
             if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
                 output.new_metadata = output.search_results[0].looked_up
+        else:
+            logger.error(
+            "Could not parse file: %s, it is not in the right format it must start with a site, a date and end with an extension",
+            output.video_file)     
         target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
         if output.new_metadata is not None:
             output.video_file = move_to_final_location(
