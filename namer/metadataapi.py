@@ -27,8 +27,9 @@ from namer.filenameparser import parse_file_name
 logger = logging.getLogger('metadata')
 
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> ComparisonResult:
-    release_date = name_parts.date == looked_up.date
-    site = re.sub(r' ', '', name_parts.site.capitalize()) in re.sub( r' ', '', looked_up.site.capitalize())
+    release_date = name_parts.date is None or name_parts.date == looked_up.date
+    site = (name_parts.site is None or
+        re.sub(r' ', '', name_parts.site.capitalize()) in re.sub( r' ', '', looked_up.site.capitalize()))
     all_performers = list(map(lambda p: p.name, looked_up.performers))
     all_performers.insert(0, looked_up.name)
     powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
@@ -240,7 +241,7 @@ def main(argslist: List[str]):
     if args.verbose:
         logger_level=logging.DEBUG
     logging.basicConfig(level=logger_level)
-    file_name = parse_file_name(os.path.basename(args.file))
+    file_name = parse_file_name(os.path.basename(args.file), default_config().name_parser)
     match_results = match(file_name, args.token)
     if len(match_results) > 0 and match_results[0].is_match() is True:
         print(match_results[0].looked_up.new_file_name(default_config().inplace_name))

@@ -10,6 +10,8 @@ from typing import List
 from namer.types import FileNameParts
 
 
+DEFAULT_REGEX_TOKENS = '{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}'
+
 def name_cleaner(name: str) -> str:
     """
     Given the name parts, following a date, but preceding the file extension, attempt to glean
@@ -21,40 +23,59 @@ def name_cleaner(name: str) -> str:
     # remove trailing ".XXX."
     name = re.sub(r"[\.\- ]{0,1}XXX[\.\- ]{0,1}.*$", "", name)
     name = re.sub(r'\.', ' ', name)
-    # Leave act/part in as a test.
-    #match = re.search(r'(?P<name>.+)[\.\- ](?P<part>[p|P][a|A][r|R][t|T][\.\- ]{0,1}[0-9]+){0,1}' +
-    #    r'(?P<act>[a|A][c|C][t|T][\.\- ]{0,1}[0-9]+){0,1}[\.\- ]*$',name)
-    #act = None
-    #if match:
-    #    if match.group('act') is not None:
-    #        act = match.group('act')
-    #    if match.group('part') is not None:
-    #        act = match.group('part')
-    #    if act is not None:
-    #        name = match.group('name')
     return name
 
 
-def parse_file_name(filename: str) -> FileNameParts:
+def parser_config_to_regex(tokens: str) -> str:
+    # pylint: disable=anomalous-backslash-in-string
+    """
+    ``{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}``
+
+    ``Site - YYYY.MM.DD - TS - name.mkv``
+
+    ```
+    _sep    r'[\.\- ]+'
+    _site   r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
+    _date   r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
+    _ts     r'(?P<trans>[T|t][S|s])'+_sep+'){0,1}'
+    _name   r'(?P<name>.*)'
+    _dot    r'\.'
+    _ext    r'(?P<ext>[a-zA-Z0-9]{3,4})$'
+    ```
+    """
+    # pylint: enable=anomalous-backslash-in-string
+
+    _sep=r'[\.\- ]+'
+    _site=r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
+    _date=r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
+    _ts=r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
+    _name=r'(?P<name>.*)'
+    _dot=r'\.'
+    _ext=r'(?P<ext>[a-zA-Z0-9]{3,4})$'
+    regex = tokens.format_map({'_site':_site, '_date':_date, '_ts':_ts, '_name':_name, '_ext':_ext, '_sep':_sep, '_dot':_dot})
+    return regex
+
+
+def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> FileNameParts:
     """
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.
     """
+    regex = parser_config_to_regex(regex_config)
     file_name_parts = FileNameParts()
     file_name_parts.extension = PurePath(filename).suffix[1:]
-    file_name_parts.name = PurePath(filename).stem
-    match = re.search(r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+' +
-                      r'(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+' +
-                      r'((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$',filename)
+    match = re.search(regex,filename)
     if match:
-        prefix = "20" if len(match.group('year'))==2 else ""
-        file_name_parts.date = prefix+match.group('year')+"-"+match.group('month')+"-"+match.group('day')
-        file_name_parts.name = name_cleaner(match.group('name'))
-        #file_name_parts.name = name_act_tuple[0]
-        #file_name_parts.act = name_act_tuple[1]
-        file_name_parts.site = re.sub(r'[\.\-\ ]','',match.group('site'))
-        trans = match.group('trans')
-        file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
+        if match.groupdict().get('year') is not None:
+            prefix = "20" if len(match.group('year'))==2 else ""
+            file_name_parts.date = prefix+match.group('year')+"-"+match.group('month')+"-"+match.group('day')
+        if match.groupdict().get('name') is not None:
+            file_name_parts.name = name_cleaner(match.group('name'))
+        if match.groupdict().get('site') is not None:
+            file_name_parts.site = re.sub(r'[\.\-\ ]','',match.group('site'))
+        if match.groupdict().get('trans') is not None:
+            trans = match.group('trans')
+            file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
     else:
@@ -73,7 +94,7 @@ def main(arglist: List[str]):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
     args = parser.parse_args(arglist)
-    print(parse_file_name(args.file))
+    print(parse_file_name(args.file, DEFAULT_REGEX_TOKENS))
 
 if __name__ == "__main__":
     main(arglist=sys.argv[1:])

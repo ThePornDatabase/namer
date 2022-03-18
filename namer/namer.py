@@ -48,6 +48,12 @@ def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> 
             log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
             log_file.write(f"Match               : {attempt.is_match()}\n")
             log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
+            if attempt.name_parts.site is None:
+                attempt.name_parts.site = 'None'
+            if attempt.name_parts.date is None:
+                attempt.name_parts.date = 'None'
+            if attempt.name_parts.date is None:
+                attempt.name_parts.name = 'None'
             log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"+
                 f" {attempt.name_parts.site:50.50}\n")
             log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"+
@@ -147,7 +153,7 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
 
     results.dirfile = containing_dir
     results.video_file = file
-    results.parsed_file = parse_file_name(name)
+    results.parsed_file = parse_file_name(name, config.name_parser)
     if containing_dir is True:
         results.final_name_relative = file.relative_to(containing_dir)
     else:
@@ -209,9 +215,8 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
             if output.new_metadata is not None:
                 output.new_metadata.original_parsed_filename = output.parsed_file
         if (output.new_metadata is None and
-            output.parsed_file.name != "" and
-            output.parsed_file.site != "" and
-            output.parsed_file.date != ""):
+            output.parsed_file is not None and
+            output.parsed_file.name is not None):
             output.search_results = match(output.parsed_file, config.porndb_token)
             if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
                 output.new_metadata = output.search_results[0].looked_up

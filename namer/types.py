@@ -93,6 +93,38 @@ class NamerConfig():
     sign up here: https://metadataapi.net/
     """
 
+
+    name_parser: str = '{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}'
+    # pylint: disable=anomalous-backslash-in-string disable=line-too-long
+    """
+    This config may be a regex you provide, or a set of token used to build a regex.
+
+    Supported token:
+
+    ```
+        _sep      r'[\.\- ]+'
+        _site     r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
+        _date     r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
+        _ts       r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
+        _name     r'(?P<name>.*)'
+        _dot      r'\.'
+        _ext      r'(?P<ext>[a-zA-Z0-9]{3,4})$'
+    ```
+
+    Full default regex:
+
+    ```
+    r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$'
+    ```
+
+    The parts extracted from the file will be used in matching.
+    _ts  is optional, and is mostly useful in stripping the marker from the _name, aiding in matching.
+    _date if present is used to ensure the match is within 24 hours of your date.
+    If the year/month/day capture groups are not present (due to you not using the supplied _date regex)
+    dates will not be used in matching, possibly allowing false positives.
+    """
+    # pylint: enable=anomalous-backslash-in-string enable=line-too-long
+
     inplace_name: str = '{site} - {date} - {name}.{ext}'
     """
     How to write output file name.  When namer.py is run this is applied in place
@@ -311,6 +343,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config = NamerConfig()
     namer_config.porndb_token = config.get('namer','porndb_token', fallback=None)
     namer_config.inplace_name = config.get('namer','inplace_name',fallback='{site} - {date} - {name}.{ext}')
+    namer_config.name_parser = config.get('namer','name_parser',fallback='{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}')
     namer_config.prefer_dir_name_if_available = config.getboolean('namer','prefer_dir_name_if_available',fallback=False)
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
@@ -366,11 +399,11 @@ class FileNameParts:
 
     # pylint: disable=too-many-instance-attributes
 
-    site: str = ""
+    site: str = None
     """
     Site the file originated from, "DorcelClub", "EvilAngel", etc.
     """
-    date: str = ""
+    date: str = None
     """
     formated: YYYY-mm-dd
     """
@@ -379,21 +412,21 @@ class FileNameParts:
     If the name originally started with an "TS" or "ts"
     it will be stripped out and placed in a seperate location, aids in matching, useable to genre mark content.
     """
-    name: str = ""
+    name: str = None
     act: str = None
     """
     If the name originally ended with an "act ###" or "part ###"
     it will be stripped out and placed in a seperate location, aids in matching.
     """
-    extension: str = ""
+    extension: str = None
     """
-    The file's extension (always .mp4)
+    The file's extension .mp4 or .mkv
     """
-    resolution: str = ""
+    resolution: str = None
     """
     Resolution, if the file name makes a claim about resolution. (480p, 720p, 1080p, 4k)
     """
-    source_file_name: str = ""
+    source_file_name: str = None
     """
     What was originally parsed.
     """

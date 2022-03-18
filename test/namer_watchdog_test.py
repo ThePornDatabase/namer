@@ -212,6 +212,67 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertGreater(len(list(config.watch_dir.iterdir())), 0)
 
 
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
+    def test_name_parser_success(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = True
+            config.write_namer_log = True
+            config.min_file_size = 0
+            config.name_parser = '{_site} - {_ts}{_name}.{_ext}'
+            watcher = create_watcher(config)
+            os.environ.update([('BUILD_DATE','date'),('GIT_HASH','hash')])
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
+                'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            validate_mp4_tags(self, outputfile)          
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+
+
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_poster')
+    def test_name_parser_failure(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = True
+            config.write_namer_log = True
+            config.min_file_size = 0
+            config.name_parser = '{_site}{_sep}{_date}{_sep}{_ts}{_name}.{_ext}'
+            watcher = create_watcher(config)
+            os.environ.update([('BUILD_DATE','date'),('GIT_HASH','hash')])
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            outputfile = ( config.failed_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way" )
+            self.assertTrue(outputfile.exists())
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 1)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.dest_dir.iterdir())), 0)
+
     def test_manual_tick(self):
         """
         see it work.
