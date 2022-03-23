@@ -5,14 +5,22 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Install dependencies.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       build-essential \
+       python3-pip \
+       python3 \
        ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
+    && apt-get clean
+FROM BASE AS BUILD
+RUN mkdir /work/
+COPY . /work
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential \
        libffi-dev \
        libssl-dev \
-       python3 \
        systemd \
        systemd-sysv \
-       wget \
        python3-pip \
        python3-dev \
        python3.9-venv \
@@ -21,9 +29,6 @@ RUN apt-get update \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
-FROM BASE as BUILD
-RUN mkdir /work/
-COPY . /work/
 RUN curl -sSL https://install.python-poetry.org | python3 - \
     && export PATH="/root/.local/bin:$PATH" \
     && cd /work/ \
@@ -33,6 +38,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
     && poetry run pytest \
     && poetry run pylint namer \
     && poetry build
+
 FROM BASE
 COPY --from=BUILD /work/dist/namer-*.tar.gz /
 RUN pip3 install /namer-*.tar.gz \
