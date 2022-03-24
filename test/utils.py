@@ -13,11 +13,12 @@ def validate_permissions(test_self, file: Path, perm: int):
     """
     Validates file permissions are as expected.
     """
-    found = oct(file.stat().st_mode)[-3:]
-    expected = str(perm)[-3:]
-    print("Found {found}, Expected {expected}")
-    #test_self.assertEqual(found, "664")
-    test_self.assertEqual(found, expected)
+    if hasattr(os, "chmod"):
+        found = oct(file.stat().st_mode)[-3:]
+        expected = str(perm)[-3:]
+        print("Found {found}, Expected {expected}")
+        #test_self.assertEqual(found, "664")
+        test_self.assertEqual(found, expected)
 
 def validate_mp4_tags(test_self, file):
     """
