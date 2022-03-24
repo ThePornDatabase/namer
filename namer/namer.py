@@ -65,15 +65,29 @@ def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> 
 def set_permissions(file: Path, config: NamerConfig):
     """
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
-    NamerConfig.set_dir_permissions, and uid/gid if set for the current process.
+    NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
     if hasattr(os, "chmod") and file is not None and file.exists():
-        if file.is_dir() and not config.set_dir_permissions is None:
-            file.chmod(int(str(config.set_dir_permissions), 8))
-        elif config.set_file_permissions is not None:
-            file.chmod(int(str(config.set_file_permissions), 8))
-        if config.set_uid is not None and config.set_gid is not None:
-            os.chown(file, uid=config.set_uid, gid=config.set_gid)
+        fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
+        dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
+        if dirperm is not None and file.is_dir():
+            Path(file).chmod(dirperm)
+            if config.set_uid is not None and config.set_gid is not None:
+                os.chown(file, uid=config.set_uid, gid=config.set_gid)
+        if file.is_dir():
+            for root, _dirs, files in os.walk(file):
+                if dirperm is not None:
+                    Path(root).chmod(dirperm)
+                if config.set_uid is not None and config.set_gid is not None:
+                    os.chown(root, uid=config.set_uid, gid=config.set_gid)
+                for cur in files:
+                    set_permissions(Path(os.path.join(root, cur)), config)
+        elif file.is_file() and fileperm is not None:
+            if fileperm is not None:
+                file.chmod(fileperm)
+                if config.set_uid is not None and config.set_gid is not None:
+                    os.chown(file, uid=config.set_uid, gid=config.set_gid)
+
 
 def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: bool = False):
     """
@@ -225,6 +239,7 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
             "Could not parse file: %s, it is not in the right format it must start with a site, a date and end with an extension",
             output.video_file)
         target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
+        set_permissions(target_dir, config)
         if output.new_metadata is not None:
             output.video_file = move_to_final_location(
                 to_move=output.video_file,

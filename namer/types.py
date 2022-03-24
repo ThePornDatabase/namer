@@ -271,6 +271,11 @@ class NamerConfig():
     Time to retry failed items every day.
     """
 
+    extra_sleep_time: int = 30
+    """
+    Extra time to sleep in seconds to allow all information to be copied in dir
+    """
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -305,6 +310,7 @@ class NamerConfig():
         output += f"  failed_dir: {self.failed_dir}\n"
         output += f"  dest_dir: {self.dest_dir}\n"
         output += f"  retry_time: {self.retry_time}\n"
+        output += f"  extra_sleep_time: {self.extra_sleep_time}\n"
         return output
 
 
@@ -359,6 +365,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.new_relative_path_name = config.get('watchdog','new_relative_path_name',
         fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
     namer_config.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)
+    namer_config.extra_sleep_time = config.getint('watchdog','extra_sleep_time',fallback=30)
     watch_dir = config.get('watchdog','watch_dir',fallback=None)
     if watch_dir is not None:
         namer_config.watch_dir = Path(watch_dir)

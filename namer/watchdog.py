@@ -134,6 +134,9 @@ class MovieEventHandler(PatternMatchingEventHandler):
             path = Path(file_path)
             logger.info("watchdog process called for %s", path)
             if path.exists() and done_copying(path) and (path.stat().st_size / (1024*1024) > self.namer_config.min_file_size):
+                # Extra wait time in case other files are copies in as well.
+                if self.namer_config.del_other_files is True:
+                    time.sleep(self.namer_config.extra_sleep_time)
                 try:
                     handle(path, self.namer_config)
                 except Exception as ex:  # pylint: disable=broad-except

@@ -9,6 +9,16 @@ import tempfile
 from typing import List
 from mutagen.mp4 import MP4
 
+def validate_permissions(test_self, file: Path, perm: int):
+    """
+    Validates file permissions are as expected.
+    """
+    found = oct(file.stat().st_mode)[-3:]
+    expected = str(perm)[-3:]
+    print("Found {found}, Expected {expected}")
+    #test_self.assertEqual(found, "664")
+    test_self.assertEqual(found, expected)
+
 def validate_mp4_tags(test_self, file):
     """
     Validates the tags of the standard mp4 file.
@@ -53,7 +63,9 @@ def new_ea(targetdir: Path, use_dir: bool = True, post_stem: str = "", match: bo
     if use_dir is True:
         target_file = targetdir / name / 'qwerty.mp4'
     os.makedirs(target_file.parent, exist_ok=True)
+    target_file.parent.chmod(int("700",base=8))
     shutil.copy(test_mp4, target_file)
+    test_mp4.chmod(int("600",base=8))
     poster = Path(tempfile.mktemp(suffix=".png"))
     shutil.copy(test_poster, poster)
     return ProcessingTarget(target_file, search_json_file.read_text(), exact_json_file.read_text(), poster, match)

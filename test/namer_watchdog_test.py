@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 import logging
 import tempfile
-from test.utils import validate_mp4_tags, new_ea, prepare
+from test.utils import validate_mp4_tags, new_ea, prepare, validate_permissions
 from freezegun import freeze_time
 from mutagen.mp4 import MP4
 from namer.types import NamerConfig, default_config
@@ -28,6 +28,8 @@ def make_locations(tempdir: Path) -> NamerConfig:
     config.dest_dir.mkdir()
     config.failed_dir = tempdir / 'failed'
     config.failed_dir.mkdir()
+    config.del_other_files = True
+    config.extra_sleep_time = 1
     return config
 
 def wait_until_processed(config: NamerConfig):
@@ -146,6 +148,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             outputfile2 = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4')
             validate_mp4_tags(self, outputfile2)
+            validate_permissions(self, outputfile2, 664)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
@@ -163,6 +166,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.write_namer_log = True
             config.del_other_files = False
             config.min_file_size = 0
+            config.set_dir_permissions = None
+            config.set_file_permissions = None
             watcher = create_watcher(config)
             watcher.start()
             targets = [
@@ -176,6 +181,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
             validate_mp4_tags(self, outputfile)
+            validate_permissions(self, outputfile, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
@@ -237,7 +243,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(targets[0].file.exists())
             outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
                 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
-            validate_mp4_tags(self, outputfile)          
+            validate_mp4_tags(self, outputfile)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
@@ -267,7 +273,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             outputfile = ( config.failed_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way" )
-            self.assertTrue(outputfile.exists())
+            self.assertTrue(outputfile.exists() and outputfile.is_dir())
+            validate_permissions(self, outputfile, 775)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 1)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
