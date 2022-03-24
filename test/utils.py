@@ -4,6 +4,7 @@ Testing utils
 from dataclasses import dataclass
 import os
 from pathlib import Path
+import platform
 import shutil
 import tempfile
 from typing import List
@@ -13,7 +14,7 @@ def validate_permissions(test_self, file: Path, perm: int):
     """
     Validates file permissions are as expected.
     """
-    if hasattr(os, "chmod"):
+    if hasattr(os, "chmod") and platform.system() != "Windows":
         found = oct(file.stat().st_mode)[-3:]
         expected = str(perm)[-3:]
         print("Found {found}, Expected {expected}")
