@@ -1,12 +1,12 @@
 Namer
 #########
 
-.. image:: https://github.com/4c0d3r/namer/actions/workflows/ci.yml/badge.svg?
-  :target: https://github.com/4c0d3r/namer/actions/workflows/ci.yml/
-.. image:: https://codecov.io/gh/4c0d3r/namer/branch/main/graph/badge.svg?token=4MQEN2NUKZ
-  :target: https://codecov.io/gh/4c0d3r/namer
+.. image:: https://github.com/ThePornDatabase/namer/actions/workflows/ci.yml/badge.svg?
+  :target: https://github.com/ThePornDatabase/namer/actions/workflows/ci.yml/
+.. image:: https://codecov.io/gh/ThePornDatabase/namer/branch/main/graph/badge.svg?token=4MQEN2NUKZ
+  :target: https://codecov.io/gh/ThePornDatabase/namer
 .. image:: https://badge.fury.io/py/namer.svg?
-  :target: https://badge.fury.io/py/namer  
+  :target: https://badge.fury.io/py/namer
 
 Namer is a powerful command line tool for renaming and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
 
@@ -20,7 +20,7 @@ Why should I use this?
 How successful at matching videos is this tool?
 ------------------------------------------------
 
-For data pulled from the intered with rss feeds (which are often in the file format listed below) .... perfect.  The author and others have only experienced one mismatch, and that type of failure can never occur again.   
+For data pulled from the interet with rss feeds (which are often in the file format listed below) .... perfect.  The author and others have only experienced one mismatch, and that type of failure can never occur again.   
 
 If running in a background watchdog mode, files that were failed to match are retried every 24 hours, letting the PornDB_ scrapers catch up with any metadata they may be missing.
 
@@ -30,7 +30,8 @@ Optionally, a log file can be enabled to show the original file name parts, what
 For the curious, how is a match made?
 ------------------------------------------------
 
-It assumes that file names exist as in a format like ```sitename-[YY]YY-MM-DD-Scene.and.or.performer.name.mp4.```.  A power regex tries to determine the various parts of a file's name.   Note that the seperating dashes and dots above are interchangable, and spaces may also be used as seperators (or any number of any combo of the three.) 
+It assumes that file names exist as in a format like ```sitename-[YY]YY-MM-DD-Scene.and.or.performer.name.mp4.```.  A powerful regex tries to determine the various parts of a file's name.   Note that the seperating dashes and dots above are interchangable, and spaces may also be used as seperators (or any number of any combo of the three.)   This regex is overriddable, but you really need to know what you're doing and if you don't have all the match groups for the regex, the match from the the PornDB_ will likely not be any where near as robust as it is with a site, a date, and a scene/perform name section.
+You'll have to read the code to figure out how to set this.   You really shouldn't do it.
 
 When determining a possible queried match from the PornDB_:
 
@@ -64,7 +65,7 @@ You have two choices.   Do you use docker?  Pull the docker image, here's docker
       restart: always
 
 Copy namer.cfg to your config location (a path mapped to /config/namer.cfg above), and set values for your setup.   
-The config is well commented.
+The config is well commented and you should only need to add a token for the porndb and change file locations.
 
 Running a service will occur automatically once you call ``docker-compose up``.  Now check out the configuration section below.
 
@@ -158,18 +159,22 @@ Development
   # build docker file with:
   ./docker_build.sh
 
+Pull Requests Are Welcome!
+---------------------------
+
+Just be sure to pay attention to the tests and any failing pylint results.   If you want to vet a pr will be accepted before building code, file an new feature request issue, and 4c0d3r will comment on it and set you up for success.   Tests are must.
 
 .. _PornDB: http://metadataapi.net/
-.. _namer section: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L1
-.. _metadata section: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L59
-.. _watchdog section: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L89
-.. _watch_dir: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L100
-.. _work_dir: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L104
-.. _fail_dir: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L109
-.. _dest_dir: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L112
-.. _retry_time: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L115
-.. _new_relative_path_name: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L97
-.. _enabled_tagging: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L67
-.. _enable_poster: https://github.com/4c0d3r/namer/blob/main/namer.cfg#L72
+.. _namer section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L1
+.. _metadata section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L59
+.. _watchdog section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L89
+.. _watch_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L100
+.. _work_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L104
+.. _fail_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L109
+.. _dest_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L112
+.. _retry_time: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L115
+.. _new_relative_path_name: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L97
+.. _enabled_tagging: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L67
+.. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L72
 .. _Homebrew: https://docs.brew.sh/Installation
 .. _Chocolatey: https://chocolatey.org/install
