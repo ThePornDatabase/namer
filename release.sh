@@ -4,7 +4,7 @@ set -eo pipefail
 
 version_bump=$1
 
-repo="4c0d3r"
+repo="ThePornDatabase"
 
 found=false
 for bump in 'minor' 'major' 'patch'; do 
