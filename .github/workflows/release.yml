@@ -1,0 +1,48 @@
+on:
+  release:
+    types:
+      - "published"
+    branches:
+      - "refs/tags/v*"
+
+jobs:
+  build:
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: Display Python version
+        run: python --version
+      - name: install poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: '1.1.13'
+      - run: poetry install
+      - run: poetry build
+      - name: Prepare to publish python pips.
+        if: ${{ secrets.PYPI_TOKEN != '' }}
+        run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+      - run: |
+          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export GIT_HASH=$(git rev-parse --verify HEAD)
+          export repo=ThePornDatabase
+          export version=$(git describe --tags | sed 's/^v//' | grep -e '[0-9.]*')
+          export docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GITHASH=${GIT_HASH}" -t "${repo}"/namer:"${version}"
+          docker tag "${repo}"/namer:"${version}" ghcr.io/"${repo}"/namer:"${version}"
+          docker tag "${repo}"/namer:"${version}" ghcr.io/"${repo}"/namer:latest
+          docker push ghcr.io/"${repo}"/namer:"${version}"
+          docker push ghcr.io/"${repo}"/namer:latest
+      - if: ${{ secrets.PYPI_TOKEN != '' }}
+        run: poetry publish
