@@ -1,7 +1,7 @@
 name: "auto release from tag"
 
 on:
-  create:
+  create
 
 jobs:
   release:
