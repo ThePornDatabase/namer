@@ -1,11 +1,7 @@
 name: "auto release from tag"
 
 on:
-  push:
-    tags:
-      - '**'
-    branches:
-      - "!**"
+  create:
 
 jobs:
   release:
