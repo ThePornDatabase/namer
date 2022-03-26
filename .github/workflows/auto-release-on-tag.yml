@@ -1,9 +1,11 @@
-name: "tagged-release"
+name: "auto release from tag"
 
 on:
-  create:
+  push:
     tags:
-      - "v*"
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+    branches:
+      - "!*"
 
 jobs:
   release:

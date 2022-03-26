@@ -1,3 +1,5 @@
+name: "auto tag from poetry version."
+
 on:
   push:
     branches: [main]
