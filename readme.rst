@@ -53,7 +53,7 @@ You have two choices.   Do you use docker?  Pull the docker image, here's docker
   services:  
     namer:
       container_name: namer
-      image: ghcr.io/4c0d3r/namer:latest
+      image: ghcr.io/theporndatabase/namer:latest
       environment:
         - PUID=1001
         - PGID=1000
