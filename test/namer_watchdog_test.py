@@ -264,11 +264,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.name_parser = '{_site}{_sep}{_date}{_sep}{_ts}{_name}.{_ext}'
             watcher = create_watcher(config)
             os.environ.update([('BUILD_DATE','date'),('GIT_HASH','hash')])
-            watcher.start()
             targets = [
                 new_ea(config.watch_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
             ]
             prepare(targets, mock_poster, mock_response)
+            watcher.start()
             wait_until_processed(config)
             watcher.stop()
             self.assertFalse(targets[0].file.exists())

@@ -194,6 +194,13 @@ class MovieWatcher:
             print(f"Git Hash: {git_hash}")
         self.__schedule()
         self.__event_observer.start()
+        # touch all existing movie files.
+        for root, _dirnames, filenames in os.walk(self.__namer_config.watch_dir):
+            for file in filenames:
+                ext = os.path.splitext(file)[1].lower()
+                if ext in {'.mkv', '.mp4'}:
+                    movie = Path(os.path.join(root, file))
+                    movie.touch()
 
     def stop(self):
         """
