@@ -42,6 +42,8 @@ jobs:
           export repo=theporndatabase
           export version=$(git describe --tags | sed 's/^v//' | grep -e '[0-9.]*')
           docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GIT_HASH=${GIT_HASH}" -t "ghcr.io/${repo}/namer:${version}" -t "ghcr.io/${repo}/namer:latest"
+          docker push "ghcr.io/${repo}/namer:${version}"
+          docker push "ghcr.io/${repo}/namer:latest"
       - name: publish pip
         run: poetry publish
         if:  "${{ env.PYPI_TOKEN != '' }}"
