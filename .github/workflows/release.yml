@@ -5,8 +5,8 @@ on:
 
 jobs:
   build:
-    permissions:
-      packages: write
+    #permissions:
+    #  packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Login to GitHub Container Registry
@@ -31,7 +31,9 @@ jobs:
       - run: poetry build
       - name: Prepare to publish python pips.
         if: ${{ secrets.PYPI_TOKEN != '' }}
-        run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+        run: poetry config pypi-token.pypi "$PYPI_TOKEN"
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       - run: |
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           export GIT_HASH=$(git rev-parse --verify HEAD)
