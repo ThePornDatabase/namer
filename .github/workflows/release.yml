@@ -5,8 +5,9 @@ on:
 
 jobs:
   build:
-    #permissions:
-    #  packages: write
+    permissions:
+      packages: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Login to GitHub Container Registry
@@ -30,7 +31,7 @@ jobs:
       - run: poetry install
       - run: poetry build
       - name: Prepare to publish python pips.
-        if: ${{ secrets.PYPI_TOKEN != '' }}
+        if:  "${{ env.PYPI_TOKEN != '' }}"
         run: poetry config pypi-token.pypi "$PYPI_TOKEN"
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
@@ -44,5 +45,8 @@ jobs:
           docker tag "${repo}"/namer:"${version}" ghcr.io/"${repo}"/namer:latest
           docker push ghcr.io/"${repo}"/namer:"${version}"
           docker push ghcr.io/"${repo}"/namer:latest
-      - if: ${{ secrets.PYPI_TOKEN != '' }}
+      - name: publish pip
         run: poetry publish
+        if:  "${{ env.PYPI_TOKEN != '' }}"
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
