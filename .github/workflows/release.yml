@@ -38,7 +38,7 @@ jobs:
       - run: |
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           export GIT_HASH=$(git rev-parse --verify HEAD)
-          export repo=ThePornDatabase
+          export repo=theporndatabase
           export version=$(git describe --tags | sed 's/^v//' | grep -e '[0-9.]*')
           docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GITHASH=${GIT_HASH}" -t namer:"${version}"
           docker tag namer:"${version}" ghcr.io/"${repo}"/namer:"${version}"
