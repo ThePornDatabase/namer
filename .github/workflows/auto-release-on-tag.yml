@@ -1,7 +1,7 @@
 name: "tagged-release"
 
 on:
-  push:
+  create:
     tags:
       - "v*"
 

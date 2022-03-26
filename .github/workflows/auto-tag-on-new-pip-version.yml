@@ -10,10 +10,9 @@ jobs:
         with:
           fetch-depth: 2
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3.0.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
       - name: Display Python version
         run: python --version
       - name: install poetry
