@@ -1,7 +1,9 @@
 name: "auto release from tag"
 
 on:
-  create
+  push:
+    tags:        
+      - v**
 
 jobs:
   release:
