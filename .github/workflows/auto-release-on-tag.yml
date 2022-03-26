@@ -3,9 +3,9 @@ name: "auto release from tag"
 on:
   push:
     tags:
-      - 'v*'
+      - '**'
     branches:
-      - "!*"
+      - "!**"
 
 jobs:
   release:
