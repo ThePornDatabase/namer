@@ -40,9 +40,9 @@ jobs:
           export GIT_HASH=$(git rev-parse --verify HEAD)
           export repo=ThePornDatabase
           export version=$(git describe --tags | sed 's/^v//' | grep -e '[0-9.]*')
-          docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GITHASH=${GIT_HASH}" -t "${repo}"/namer:"${version}"
-          docker tag "${repo}"/namer:"${version}" ghcr.io/"${repo}"/namer:"${version}"
-          docker tag "${repo}"/namer:"${version}" ghcr.io/"${repo}"/namer:latest
+          docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GITHASH=${GIT_HASH}" -t namer:"${version}"
+          docker tag namer:"${version}" ghcr.io/"${repo}"/namer:"${version}"
+          docker tag namer:"${version}" ghcr.io/"${repo}"/namer:latest
           docker push ghcr.io/"${repo}"/namer:"${version}"
           docker push ghcr.io/"${repo}"/namer:latest
       - name: publish pip
