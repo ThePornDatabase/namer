@@ -83,3 +83,106 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: ./docker_build.sh
+
+  auto-tag:
+    if: ${{ github.event_name == 'push' and github.ref == 'refs/heads/main'}}
+    needs:
+      - dockerbuild
+      - pylint
+      - build
+    outputs:
+      created-tag: ${{ steps.auto-tag.outputs.tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: Set up Python
+        uses: actions/setup-python@v3.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python --version
+      - name: install poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: '1.1.13'
+      - name: install poetry    
+      - id: auto-tag
+        name: create tag from pyproject version on change.
+        uses: salsify/action-detect-and-tag-new-version@v2
+        with:
+          version-command: |
+            poetry version -s
+
+  project-release:
+    needs: 
+      - auto-tag
+    if: ${{ needs.auto-tag.outputs.created-tag != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        uses: Roang-zero1/github-create-release-action@master
+        with:
+          version_regex: ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+
+          created_tag: ${{ needs.auto-tag.outputs.created-tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  pip-publish:
+    needs: 
+      - auto-tag
+    if: ${{ needs.auto-tag.outputs.created-tag != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v3.0.0
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: Display Python version
+        run: python --version
+      - name: install poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: '1.1.13'
+      - run: poetry install
+      - run: poetry build
+      - name: Prepare to publish python pips.
+        if:  "${{ env.PYPI_TOKEN != '' }}"
+        run: poetry config pypi-token.pypi "$PYPI_TOKEN"
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      - name: publish pip
+        run: poetry publish
+        if:  "${{ env.PYPI_TOKEN != '' }}"
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}   
+
+  docker-release:
+    needs: 
+      - auto-tag
+    if: ${{ needs.auto-tag.outputs.created-tag != '' }}
+    permissions:
+      packages: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - name: build and tag
+        run: |
+          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export GIT_HASH=$(git rev-parse --verify HEAD)
+          export repo=theporndatabase
+          export version=$(git describe --tags | sed 's/^v//' | grep -e '[0-9.]*')
+          docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GIT_HASH=${GIT_HASH}" -t "ghcr.io/${repo}/namer:${version}" -t "ghcr.io/${repo}/namer:latest"
+          docker push "ghcr.io/${repo}/namer:${version}"
+          docker push "ghcr.io/${repo}/namer:latest"
