@@ -251,7 +251,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch('namer.metadataapi.__get_response_json_object')
     @patch('namer.namer.get_poster')
-    def test_name_parser_failure(self, mock_poster, mock_response):
+    def test_name_parser_failure_with_startup_processing(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
         """
@@ -268,6 +268,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 new_ea(config.watch_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
             ]
             prepare(targets, mock_poster, mock_response)
+            # this tests startup processing.
+            time.sleep(1)
             watcher.start()
             wait_until_processed(config)
             watcher.stop()
