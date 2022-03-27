@@ -180,7 +180,7 @@ jobs:
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           export GIT_HASH=$(git rev-parse --verify HEAD)
           export repo=theporndatabase
-          export version=$(git describe --tags | sed 's/^v//' | grep -e '[0-9.]*')
+          export version=$( echo "${{ needs.auto-tag.outputs.created-tag }}" | grep -e '[0-9.]*')
           docker build . --build-arg "BUILD_DATE=${BUILD_DATE}" --build-arg "GIT_HASH=${GIT_HASH}" -t "ghcr.io/${repo}/namer:${version}" -t "ghcr.io/${repo}/namer:latest"
           docker push "ghcr.io/${repo}/namer:${version}"
           docker push "ghcr.io/${repo}/namer:latest"
