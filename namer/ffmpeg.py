@@ -7,6 +7,7 @@ See:  https://iso639-3.sil.org/code_tables/639/data/
 """
 
 import json
+import shutil
 from types import SimpleNamespace
 import subprocess
 from pathlib import Path
@@ -135,6 +136,6 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
                 else:
                     logger.warning("Return code: %s", process.returncode)
                     mp4_file.unlink()
-                    workfile.rename(mp4_file)
+                    shutil.move(workfile, mp4_file)
                 return success
     return True
