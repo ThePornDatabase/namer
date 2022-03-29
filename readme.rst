@@ -1,5 +1,10 @@
-Namer
-#########
+.. |logo| image:: ./logo/namer.png
+  :width: 80
+  :class: display: inline flow; align: left
+
+##############
+|logo| Namer
+##############
 
 .. image:: https://github.com/ThePornDatabase/namer/actions/workflows/ci.yml/badge.svg?
   :target: https://github.com/ThePornDatabase/namer/actions/workflows/ci.yml/
