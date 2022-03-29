@@ -232,6 +232,11 @@ class NamerConfig():
     taken, no streams (audio/video) are re-encoded.  Available here: https://iso639-3.sil.org/code_tables/639/data/
     """
 
+    ignored_dir_regex: str = ".*_UNPACK_.*"
+    """
+    If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
+    """
+
     new_relative_path_name: str = '{site} - {date} - {name}/{site} - {date} - {name}.{ext}'
     """
     like inplace_name above used for local call for renaming, this instead is used to move a file/dir to a location relative
@@ -302,6 +307,7 @@ class NamerConfig():
         output += f"  default_genre: {self.default_genre}\n"
         output += f"  language: {self.language}\n"
         output += "Watchdog Config:\n"
+        output += f"  ignored_dir_regex: {self.ignored_dir_regex}\n"
         output += f"  min_file_size: {self.min_file_size}mb\n"
         output += f"  del_other_files: {self.del_other_files}\n"
         output += f"  new_relative_path_name: {self.new_relative_path_name}\n"
@@ -362,6 +368,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.enable_metadataapi_genres = config.getboolean('metadata','enable_metadataapi_genres',fallback=False)
     namer_config.default_genre = config.get('metadata','default_genre',fallback='Adult')
     namer_config.language = config.get('metadata','language',fallback=None)
+    namer_config.ignored_dir_regex = config.get('metadata','ignored_dir_regex',fallback='.*_UNPACK_.*')
     namer_config.new_relative_path_name = config.get('watchdog','new_relative_path_name',
         fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
     namer_config.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)

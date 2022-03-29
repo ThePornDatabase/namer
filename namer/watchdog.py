@@ -3,6 +3,7 @@ A file watching service to rename movie files and move them
 to revelant locations after match the file against the porndb.
 """
 
+import re
 import shutil
 import tempfile
 import time
@@ -132,8 +133,12 @@ class MovieEventHandler(PatternMatchingEventHandler):
             file_path = event.src_path
         if file_path is not None:
             path = Path(file_path)
-            logger.info("watchdog process called for %s", path)
-            if path.exists() and done_copying(path) and (path.stat().st_size / (1024*1024) > self.namer_config.min_file_size):
+            relative_path = str(path.relative_to(self.namer_config.watch_dir))
+            logger.info("watchdog process called for %s", relative_path)
+            if (re.search(self.namer_config.ignored_dir_regex, relative_path) is None
+                and path.exists()
+                and done_copying(path)
+                and (path.stat().st_size / (1024*1024) > self.namer_config.min_file_size)):
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:
                     time.sleep(self.namer_config.extra_sleep_time)

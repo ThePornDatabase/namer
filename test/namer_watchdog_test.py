@@ -13,7 +13,7 @@ from test.utils import validate_mp4_tags, new_ea, prepare, validate_permissions
 from freezegun import freeze_time
 from mutagen.mp4 import MP4
 from namer.types import NamerConfig, default_config
-from namer.watchdog import create_watcher, done_copying, retry_failed
+from namer.watchdog import create_watcher, done_copying, handle, retry_failed
 
 def make_locations(tempdir: Path) -> NamerConfig:
     """
@@ -184,6 +184,27 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, outputfile, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+
+
+    def test_handler_ignore(self):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = False
+            config.write_namer_log = True
+            config.min_file_size = 0
+            watcher = create_watcher(config)
+            os.environ.update([('BUILD_DATE','date'),('GIT_HASH','hash')])
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir / "_UNPACK_stuff" / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
+            ]
+            time.sleep(2)
+            watcher.stop()
+            self.assertTrue(targets[0].file.exists())
 
 
     @patch('namer.metadataapi.__get_response_json_object')
