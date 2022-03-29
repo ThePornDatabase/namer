@@ -191,6 +191,9 @@ class MovieWatcher:
         """
         config = self.__namer_config
         logger.info("Start porndb scene watcher.... watching: %s",config.watch_dir)
+        if os.environ.get('PROJECT_VERSION'):
+            project_version = os.environ.get('PROJECT_VERSION')
+            print(f"Namer version: {project_version}")
         if os.environ.get('BUILD_DATE'):
             build_date = os.environ.get('BUILD_DATE')
             print(f"Built on: {build_date}")

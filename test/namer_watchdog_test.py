@@ -13,7 +13,7 @@ from test.utils import validate_mp4_tags, new_ea, prepare, validate_permissions
 from freezegun import freeze_time
 from mutagen.mp4 import MP4
 from namer.types import NamerConfig, default_config
-from namer.watchdog import create_watcher, done_copying, handle, retry_failed
+from namer.watchdog import create_watcher, done_copying, retry_failed
 
 def make_locations(tempdir: Path) -> NamerConfig:
     """
