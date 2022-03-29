@@ -46,6 +46,7 @@ RUN pip3 install /namer-*.tar.gz \
 
 ARG BUILD_DATE
 ARG GIT_HASH
+ARG PROJECT_VERSION
 
 ENV PYTHONUNBUFFERED=1
 ENV NAMER_CONFIG=/config/namer.cfg
