@@ -145,8 +145,8 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 try:
                     handle(path, self.namer_config)
                 except Exception as ex:  # pylint: disable=broad-except
+                    exc_info = sys.exc_info()
                     try:
-                        exc_info = sys.exc_info()
                         try:
                             logger.error("Error handling %s: \n %s", path, ex)
                         except Exception: # pylint: disable=broad-except

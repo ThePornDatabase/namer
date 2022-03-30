@@ -69,12 +69,12 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
         success = process.wait() == 0
         audio_streams_str = process.stdout.read()
         if not success:
-            logger.warning("Error gettng audio streams of file %s", input)
+            logger.warning("Error gettng audio streams of file %s", mp4_file)
             logger.warning(process.stderr.read())
         process.stdout.close()
         process.stderr.close()
 
-        logger.info("Target for audio: %s", input)
+        logger.info("Target for audio: %s", mp4_file)
 
         audio_streams = json.loads(
             audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
