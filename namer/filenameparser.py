@@ -2,11 +2,11 @@
 Parse string in to FileNamePart define in namer_types.
 """
 import argparse
-import logging
 from pathlib import PurePath
 import re
 import sys
 from typing import List
+from loguru import logger
 from namer.types import FileNameParts
 
 
@@ -79,7 +79,7 @@ def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> 
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
     else:
-        logging.warning("Could not parse file name: %s", filename)
+        logger.warning("Could not parse file name: {filename}")
     return file_name_parts
 
 

@@ -12,9 +12,7 @@ from types import SimpleNamespace
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import logging
-
-logger = logging.getLogger('ffmpeg')
+from loguru import logger
 
 
 def get_resolution(file: str) -> int:

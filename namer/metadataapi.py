@@ -21,6 +21,7 @@ import urllib
 import urllib.request
 import rapidfuzz
 import requests
+from loguru import logger
 from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, default_config
 from namer.filenameparser import parse_file_name
 

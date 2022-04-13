@@ -9,16 +9,14 @@ import os
 from pathlib import Path
 import pathlib
 import sys
-import logging
 from typing import List
-from namer.moviexml import parse_movie_xml_file
+from loguru import logger
 
+from namer.moviexml import parse_movie_xml_file
 from namer.types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
 from namer.filenameparser import parse_file_name
 from namer.mutagen import update_mp4_file
 from namer.metadataapi import get_poster, match
-
-logger = logging.getLogger('namer')
 
 DESCRIPTION="""
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
@@ -40,7 +38,7 @@ def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> 
     of the result matches to a log file.
     """
     logname = movie_file.with_name(movie_file.stem+"_namer.log")
-    logger.info("Writing log to %s",logname)
+    logger.info("Writing log to {logname}")
     with open(logname, "wt", encoding='utf-8') as log_file:
         for attempt in match_attempts:
             log_file.write("\n")
@@ -303,10 +301,9 @@ def main(arglist: List[str]):
         "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.", action="store_true")
     parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
     args = parser.parse_args(arglist)
-    logger_level = logging.ERROR
-    if args.verbose:
-        logger_level=logging.DEBUG
-    logging.basicConfig(level=logger_level)
+    level = "DEBUG" if args.verbose else "ERROR"
+    logger.remove()
+    logger.add(sys.stderr, format="{time} {level} {message}", filter="namer", level=level)
     check_arguments(args.file, args.dir, args.configfile)
 
     config = default_config()
