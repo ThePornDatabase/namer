@@ -7,8 +7,8 @@ import shutil
 import unittest
 from unittest.mock import patch
 import tempfile
-from mutagen.mp4 import MP4
 from test.utils import new_ea, prepare
+from mutagen.mp4 import MP4
 from namer.types import NamerConfig
 from namer.namer import main, check_arguments, set_permissions
 
@@ -157,7 +157,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             set_permissions(test_dir, config)
             self.assertTrue(os.access(test_dir, os.R_OK))
             set_permissions(None, config)
-
 
 if __name__ == '__main__':
     unittest.main()

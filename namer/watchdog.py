@@ -11,15 +11,12 @@ import os
 import sys
 import traceback
 from pathlib import Path, PurePath
-import logging
+from loguru import logger
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, EVENT_TYPE_DELETED, EVENT_TYPE_MOVED
 import schedule
 from namer.namer import move_to_final_location, process
 from namer.types import NamerConfig, default_config
-
-logger = logging.getLogger('watchdog')
-
 
 def done_copying(file: Path) -> bool:
     """
@@ -203,12 +200,9 @@ class MovieWatcher:
         self.__schedule()
         self.__event_observer.start()
         # touch all existing movie files.
-        for root, _dirnames, filenames in os.walk(self.__namer_config.watch_dir):
-            for file in filenames:
-                ext = os.path.splitext(file)[1].lower()
-                if ext in {'.mkv', '.mp4'}:
-                    movie = Path(os.path.join(root, file))
-                    movie.touch()
+        for file in self.__namer_config.watch_dir.rglob('*.*'):
+            if file.is_file() and file.suffix in ('.mkv', '.mp4'):
+                file.touch()
 
     def stop(self):
         """
@@ -232,8 +226,8 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     """
     Configure and start a watchdog looking for new Movies.
     """
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
+    logger.remove()
+    logger.add(sys.stderr, format="{time} {level} {message}", filter="namer", level="INFO")
     logger.info(str(namer_watchdog_config))
     if not namer_watchdog_config.verify_watchdog_config():
         sys.exit(-1)

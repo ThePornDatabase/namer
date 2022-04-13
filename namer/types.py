@@ -11,11 +11,9 @@ import re
 import sys
 import string
 from pathlib import Path, PurePath
-import logging
 import random
 from pathvalidate import Platform, sanitize_filename
-
-logger = logging.getLogger('types')
+from loguru import logger
 
 def _verify_dir(name: str, file_name: Path) -> bool:
     """
