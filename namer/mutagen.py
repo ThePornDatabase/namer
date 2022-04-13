@@ -40,11 +40,11 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
     mpaa|XXX|0|
     """
 
-    logger.info("Updating audio and tags for: %s",mp4)
+    logger.info("Updating audio and tags for: {}",mp4)
     success = update_audio_stream_if_needed(mp4, config.language)
     if not success:
-        logger.info("Could not process audio or copy %s",mp4)
-    logger.info("Updating atom tags on: %s",mp4)
+        logger.info("Could not process audio or copy {}",mp4)
+    logger.info("Updating atom tags on: {}",mp4)
     if mp4 is not None and mp4.exists():
         video = MP4(mp4)
         video["\xa9nam"] = [looked_up.name]
@@ -91,6 +91,6 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
                         MP4Cover(file.read(), imageformat)
                     ]
         video.save()
-        logger.info("Updated atom tags: %s", mp4)
+        logger.info("Updated atom tags: {}", mp4)
     else:
-        logger.warning("Can not update tags of a non-existant file: %s", mp4)
+        logger.warning("Can not update tags of a non-existant file: {}", mp4)

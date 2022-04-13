@@ -49,24 +49,24 @@ def handle(target_file: Path, namer_config: NamerConfig):
     workingfile = None
     if dir_path.is_dir():
         workingdir = Path(namer_config.work_dir) / detected
-        logger.info("Moving %s to %s for processing", dir_path, workingdir)
+        logger.info("Moving {} to {} for processing", dir_path, workingdir)
         shutil.move(dir_path,workingdir)
         to_process = workingdir
     else:
         workingfile = Path(namer_config.work_dir) / relative_path
         target_file.rename(workingfile)
-        logger.info("Moving %s to %s for processing", target_file, workingfile)
+        logger.info("Moving {} to {} for processing", target_file, workingfile)
         to_process = workingfile
     result = process(to_process, namer_config)
 
     if result.new_metadata is None:
         if workingdir is not None:
             workingdir.rename(namer_config.failed_dir/ detected)
-            logger.info("Moving failed processing %s to %s to retry later", workingdir, namer_config.failed_dir/ detected)
+            logger.info("Moving failed processing {} to {} to retry later", workingdir, namer_config.failed_dir/ detected)
         else:
             newvideo = namer_config.failed_dir / relative_path
             workingfile.rename(newvideo)
-            logger.info("Moving failed processing %s to %s to retry later", workingfile, newvideo)
+            logger.info("Moving failed processing {} to {} to retry later", workingfile, newvideo)
             if result.namer_log_file is not None:
                 result.namer_log_file.rename( newvideo.parent / result.namer_log_file.name)
     else:
@@ -81,7 +81,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
             if not target.exists():
                 shutil.move(workingdir, target)
                 moved = True
-                logger.info("Moving success processed dir %s to %s", workingdir, target)
+                logger.info("Moving success processed dir {} to {}", workingdir, target)
         # else just moved the tagged video file and logs.
         if not moved:
             newfile = move_to_final_location(
@@ -91,7 +91,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
                 result.new_metadata)
             if result.namer_log_file is not None:
                 shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
-            logger.info("Moving success processed file %s to %s", workingfile, newfile)
+            logger.info("Moving success processed file {} to {}", workingfile, newfile)
             if workingdir is not None:
                 shutil.rmtree(workingdir, ignore_errors=True)
 
@@ -131,7 +131,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         if file_path is not None:
             path = Path(file_path)
             relative_path = str(path.relative_to(self.namer_config.watch_dir))
-            logger.info("watchdog process called for %s", relative_path)
+            logger.info("watchdog process called for {}", relative_path)
             if (re.search(self.namer_config.ignored_dir_regex, relative_path) is None
                 and path.exists()
                 and done_copying(path)
@@ -145,7 +145,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
                     exc_info = sys.exc_info()
                     try:
                         try:
-                            logger.error("Error handling %s: \n %s", path, ex)
+                            logger.error("Error handling {}: \n {}", path, ex)
                         except Exception: # pylint: disable=broad-except
                             pass
                     finally:
@@ -187,7 +187,7 @@ class MovieWatcher:
         starts a background thread to check for files.
         """
         config = self.__namer_config
-        logger.info("Start porndb scene watcher.... watching: %s",config.watch_dir)
+        logger.info("Start porndb scene watcher.... watching: {}",config.watch_dir)
         if os.environ.get('PROJECT_VERSION'):
             project_version = os.environ.get('PROJECT_VERSION')
             print(f"Namer version: {project_version}")
@@ -230,7 +230,7 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     Configure and start a watchdog looking for new Movies.
     """
     logger.remove()
-    logger.add(sys.stderr, format="{time} {level} {message}", filter="namer", level="INFO")
+    logger.add(sys.stdout, format="{time} {level} {message}", level="INFO")
     logger.info(str(namer_watchdog_config))
     if not namer_watchdog_config.verify_watchdog_config():
         sys.exit(-1)

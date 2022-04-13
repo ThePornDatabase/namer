@@ -15,7 +15,6 @@ import pathlib
 import re
 import sys
 from typing import List
-import logging
 from types import SimpleNamespace
 import urllib
 import urllib.request
@@ -24,8 +23,6 @@ import requests
 from loguru import logger
 from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, default_config
 from namer.filenameparser import parse_file_name
-
-logger = logging.getLogger('metadata')
 
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> ComparisonResult:
     release_date = name_parts.date is None or name_parts.date == looked_up.date
@@ -60,13 +57,13 @@ def __metadata_api_lookup(name_parts: FileNameParts, authtoken: str) -> List[Com
 
     if len(results) == 0 or not results[-1].is_match():
         name_parts.date =  (date.fromisoformat(name_parts.date)+timedelta(days=-1)).isoformat()
-        logger.info("Not found, trying 1 day before: %s",name_parts)
+        logger.info("Not found, trying 1 day before: {}",name_parts)
         __update_results(results, name_parts, authtoken)
         __update_results(results, name_parts, authtoken, skipdate=False, skipname=True)
 
     if len(results) == 0 or not results[-1].is_match():
         name_parts.date = (date.fromisoformat(name_parts.date)+timedelta(days=2)).isoformat()
-        logger.info("Not found, trying 1 day after: %s",name_parts)
+        logger.info("Not found, trying 1 day after: {}",name_parts)
         __update_results(results, name_parts, authtoken)
         __update_results(results, name_parts, authtoken, skipdate=False, skipname=True)
     return results
@@ -77,7 +74,7 @@ def __match_percent(result: ComparisonResult) -> float:
     if result.is_match() is True:
         addvalue=1000.00
     value = result.name_match + addvalue
-    logger.info("Name match was %.2f for %s", value, result.name)
+    logger.info("Name match was {:.2f} for {}", value, result.name)
     return value
 
 
@@ -182,11 +179,11 @@ def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, authtoken: str, sk
     release_date = name_parts.date if not skipdate else None
     name = name_parts.name if not skipname else None
     url = __build_url(name_parts.site, release_date, name)
-    logger.info("Querying: %s",url)
+    logger.info("Querying: {}",url)
     json_response = __get_response_json_object(url, authtoken)
     file_infos = []
     if json_response is not None and json_response.strip() != '':
-        logger.debug("json_repsonse: \n%s", json_response)
+        logger.debug("json_repsonse: \n{}", json_response)
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
@@ -195,11 +192,11 @@ def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, authtoken: str, sk
 
 def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, authtoken: str) -> LookedUpFileInfo:
     url = __build_url(uuid=uuid)
-    logger.info("Querying: %s",url)
+    logger.info("Querying: {}",url)
     json_response = __get_response_json_object(url, authtoken)
     file_infos = []
     if json_response is not None and json_response.strip() != '':
-        logger.debug("json_repsonse: \n%s",json_response)
+        logger.debug("json_repsonse: \n{}",json_response)
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
@@ -238,10 +235,9 @@ def main(argslist: List[str]):
     parser.add_argument("-j", "--jsonfile", help="write returned json to this file.", type=pathlib.Path)
     parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
     args = parser.parse_args(args=argslist)
-    logger_level = logging.ERROR
-    if args.verbose:
-        logger_level=logging.DEBUG
-    logging.basicConfig(level=logger_level)
+    level = "DEBUG" if args.verbose else "ERROR"
+    logger.remove()
+    logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     file_name = parse_file_name(os.path.basename(args.file), default_config().name_parser)
     match_results = match(file_name, args.token)
     if len(match_results) > 0 and match_results[0].is_match() is True:

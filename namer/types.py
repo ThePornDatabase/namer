@@ -20,7 +20,7 @@ def _verify_dir(name: str, file_name: Path) -> bool:
     verify a config directory exist. return false if verification fails
     """
     if file_name is not None and not file_name.is_dir():
-        logger.error("Configured directory %s: %s is not a directory or not accessible", name, file_name)
+        logger.error("Configured directory {}: {} is not a directory or not accessible", name, file_name)
         return False
     return True
 
@@ -34,8 +34,8 @@ def _verify_name_string(name: str, name_string: str) -> bool:
         formatter.format(name_string, **info.asdict())
         return True
     except KeyError as key_error:
-        logger.error("Configuration %s is not a valid file name format, please check %s", name, name_string)
-        logger.error("Error message: %s", key_error)
+        logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
+        logger.error("Error message: {}", key_error)
         return False
 
 class PartialFormatter(string.Formatter):
