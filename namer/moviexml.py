@@ -45,36 +45,38 @@ def write_movie_xml_file(info: LookedUpFileInfo) -> str:
     """
     element_maker = objectify.ElementMaker(annotate=False)
 
-    root = element_maker.movie(
-        element_maker.plot(info.description),
-        element_maker.outline(),
-        element_maker.title(info.name),
-        element_maker.dateadded(),
-        element_maker.trailer(),
-        element_maker.year(info.date[:4]),
-        element_maker.mpaa("XXX"),
-        element_maker.premiered(info.date),
-        element_maker.releasedate(info.date),
-        element_maker.runtime(),
-        element_maker.art(
-             element_maker.poster(),
-             element_maker.fanart(),
-        ),
-    )
+    root = element_maker("movie")
+    root["plot"]=info.description
+    root["outline"] =  None
+    root["title"] = info.name
+    root["dateadded"] =  None
+    root["trailer"] =  None
+    root["year"] = info.date[:4]
+    root["mpaa"] = "XXX"
+    root["premiered"] = info.date
+    root["releasedate"] = info.date
+    root["runtime"] =  None
+    root["root"] =  None
+    root["root"]["art"] =  None
+    #(
+    #         element_maker.poster(),
+    #         element_maker.fanart(),
+    #     ),
+    # )
 
     for genre in info.tags:
         genre_tag = objectify.SubElement(root, "genre")
-        genre_tag.text = genre
+        genre_tag["text"] = genre
 
-    objectify.SubElement(root, "theporndbid")._setText(f'{info.uuid}')
+    objectify.SubElement(root, "theporndbid")["text"]=(f'{info.uuid}')
     objectify.SubElement(root, "phoenixadultid")
     objectify.SubElement(root, "phoenixadulturlid")
 
     for performer in info.performers:
         actor = objectify.SubElement(root, "actor")
-        objectify.SubElement(actor, "name")._setText(performer.name)
-        objectify.SubElement(actor, "role")._setText(performer.role)
-        objectify.SubElement(actor, "type")._setText("Actor")
+        objectify.SubElement(actor, "name")["text"] = (performer.name)
+        objectify.SubElement(actor, "role")["text"] = (performer.role)
+        objectify.SubElement(actor, "type")["text"] = ("Actor")
         objectify.SubElement(actor, "thumb")
 
     objectify.SubElement(root, "fileinfo")
