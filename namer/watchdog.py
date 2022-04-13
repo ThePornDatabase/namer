@@ -200,9 +200,12 @@ class MovieWatcher:
         self.__schedule()
         self.__event_observer.start()
         # touch all existing movie files.
+        files = []
         for file in self.__namer_config.watch_dir.rglob('*.*'):
             if file.is_file() and file.suffix in ('.mkv', '.mp4'):
-                file.touch()
+                files.append(file)
+        for file in files:
+            handle(file, self.__namer_config)
 
     def stop(self):
         """
