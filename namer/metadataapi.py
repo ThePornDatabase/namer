@@ -28,13 +28,24 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> 
     release_date = name_parts.date is None or name_parts.date == looked_up.date
     site = (name_parts.site is None or
         re.sub(r' ', '', name_parts.site.capitalize()) in re.sub( r' ', '', looked_up.site.capitalize()))
+
+    #Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
     all_performers.insert(0, looked_up.name)
     powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
-    ratios = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
+    ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
+
+    #First Name Powerset.
+    if ratio[1] < 89.9:
+        all_performers = list(map(lambda p: p.name.split(' ')[0], looked_up.performers))
+        powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
+        first_name_ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
+        if first_name_ratio[1] > ratio[1]:
+            ratio = first_name_ratio
+
     return ComparisonResult(
-        name=ratios[0],
-        name_match=ratios[1],
+        name=ratio[0],
+        name_match=ratio[1],
         datematch=release_date,
         sitematch=site,
         name_parts=name_parts,

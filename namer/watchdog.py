@@ -91,7 +91,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
                 result.new_metadata)
             if result.namer_log_file is not None:
                 shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
-            logger.info("Moving success processed file {} to {}", workingfile, newfile)
+            logger.info("Moving success processed file {} to {}", result.video_file, newfile)
             if workingdir is not None:
                 shutil.rmtree(workingdir, ignore_errors=True)
 

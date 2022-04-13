@@ -20,10 +20,12 @@ import namer.namer
 
 DESCRIPTION=namer.namer.DESCRIPTION+"""
 
-    The first argument should be 'watchdog', 'rename', or 'help' to see this message, for more help on rename, call
+    The first argument should be 'watchdog', 'rename', 'suggest', or 'help' to see this message, for more help on rename, call
     namer 'namer rename -h'
 
     watchdog and help take no arguments (please see the config file example https://github.com/4c0d3r/namer/blob/main/namer.cfg)
+
+    'suggest' takes a file name as input and will output a suggested file name.
     """
 
 def create_default_config_if_missing():
@@ -44,6 +46,8 @@ def main(arglist: List[str]):
         namer.watchdog.create_watcher(default_config()).run()
     elif arg1 == 'rename':
         namer.namer.main(arglist[1:])
+    elif arg1 == 'suggest':
+        namer.metadataapi.main(arglist[1:])
     elif arg1 in ['-h','help', None]:
         print(DESCRIPTION)
 
