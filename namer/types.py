@@ -193,6 +193,12 @@ class NamerConfig():
     Permissions Settings for new/moved file.
     """
 
+    sites_with_no_date_info = []
+    """
+    A list of site names that do not have proper date information in them.   This is a problem with some tpdb
+    scrapers/storage mechanisms.
+    """
+
     enabled_tagging: bool = True
     """
     Currently metadata pulled from the porndb can be added to mp4 files.
@@ -358,6 +364,11 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
+    namer_config.sites_with_no_date_info =[
+        x.strip() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
+    ]
+    if "" in namer_config.sites_with_no_date_info:
+        namer_config.sites_with_no_date_info.remove("")
     namer_config.write_namer_log = config.getboolean('namer','write_namer_log',fallback=False)
     namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
     namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
