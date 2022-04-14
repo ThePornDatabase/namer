@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from namer.filenameparser import main, parse_file_name
 
-regex_token = '{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}'
+regex_token = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -24,6 +24,30 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
         self.assertEqual(name.act, None)
         self.assertEqual(name.trans, False)
+        self.assertEqual(name.extension, "mp4")
+
+    def test_parse_file_name_no_date(self):
+        """
+        Test standard name parsing.
+        """
+        name = parse_file_name('EvilAngel.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', regex_token)
+        self.assertEqual(name.site, "EvilAngel")
+        self.assertEqual(name.date, None)
+        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        self.assertEqual(name.act, None)
+        self.assertEqual(name.trans, False)
+        self.assertEqual(name.extension, "mp4")
+
+    def test_parse_file_name_no_date_ts_stamp(self):
+        """
+        Test standard name parsing.
+        """
+        name = parse_file_name('EvilAngel.TS.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', regex_token)
+        self.assertEqual(name.site, "EvilAngel")
+        self.assertEqual(name.date, None)
+        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        self.assertEqual(name.act, None)
+        self.assertEqual(name.trans, True)
         self.assertEqual(name.extension, "mp4")
 
     def test_parse_clean_file_name(self):

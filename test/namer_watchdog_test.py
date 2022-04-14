@@ -252,6 +252,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.write_namer_log = True
             config.min_file_size = 0
             config.name_parser = '{_site} - {_ts}{_name}.{_ext}'
+            config.sites_with_no_date_info = ["EVILANGEL"]
             watcher = create_watcher(config)
             os.environ.update([('BUILD_DATE','date'),('GIT_HASH','hash')])
             watcher.start()

@@ -38,7 +38,7 @@ def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> 
     of the result matches to a log file.
     """
     logname = movie_file.with_name(movie_file.stem+"_namer.log")
-    logger.info("Writing log to {logname}")
+    logger.info("Writing log to {}",logname)
     with open(logname, "wt", encoding='utf-8') as log_file:
         for attempt in match_attempts:
             log_file.write("\n")
@@ -94,7 +94,7 @@ def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: b
     based on config settings.
     """
     if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
-        logger.info("Scanning dir %s for subdirs/files to process",dir_to_scan)
+        logger.info("Scanning dir {} for subdirs/files to process",dir_to_scan)
         files = list(dir_to_scan.iterdir())
         files.sort()
         for file in files:
@@ -112,12 +112,12 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
             if config.enabled_poster is True:
-                logger.info("Downloading poster: %s",new_metadata.poster_url)
+                logger.info("Downloading poster: {}",new_metadata.poster_url)
                 poster = get_poster(new_metadata.poster_url, config.porndb_token, video)
                 set_permissions(poster, config)
-            logger.info("Updating file metadata (atoms): %s",video)
+            logger.info("Updating file metadata (atoms): {}",video)
             update_mp4_file(video, new_metadata, poster, config)
-        logger.info("Done tagging file: %s",video)
+        logger.info("Done tagging file: {}",video)
         if poster is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
 
@@ -127,7 +127,7 @@ def find_largest_file_in_glob(rootdir: Path, globstr: str) -> Path:
     returns largest matching file
     """
     list_of_files = list(rootdir.rglob(globstr))
-    logger.info("found files %s", list_of_files)
+    logger.info("found files {}", list_of_files)
     file = None
     if len(list_of_files) > 0:
         file = max( list_of_files, key =  lambda x: x.stat().st_size)
@@ -147,7 +147,7 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
 
     containing_dir = None
     if file_to_process.is_dir():
-        logger.info("Target dir: %s",file_to_process)
+        logger.info("Target dir: {}",file_to_process)
         containing_dir = file_to_process
         file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
         if file is None:
@@ -160,8 +160,8 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
     else:
         name = file.name
 
-    logger.info("file: %s",file)
-    logger.info("dir : %s",containing_dir)
+    logger.info("file: {}",file)
+    logger.info("dir : {}",containing_dir)
 
     results.dirfile = containing_dir
     results.video_file = file
@@ -217,10 +217,10 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
 
     The file is then update based on the metadata from the porndb if an mp4.
     """
-    logger.info("Analyzing: %s",file_to_process)
+    logger.info("Analyzing: {}",file_to_process)
     output: ProcessingResults = determine_target_file(file_to_process, config)
     if output.video_file is not None:
-        logger.info("Processing: %s", output.video_file)
+        logger.info("Processing: {}", output.video_file)
         # Match to nfo files, if enabled and found.
         if infos is True:
             output.new_metadata = get_local_metadata_if_requested(output.video_file)
@@ -229,12 +229,12 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
         if (output.new_metadata is None and
             output.parsed_file is not None and
             output.parsed_file.name is not None):
-            output.search_results = match(output.parsed_file, config.porndb_token)
+            output.search_results = match(output.parsed_file, config)
             if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
                 output.new_metadata = output.search_results[0].looked_up
         else:
             logger.error(
-            "Could not parse file: %s, it is not in the right format it must start with a site, a date and end with an extension",
+            "Could not parse file: {}, it is not in the right format it must start with a site, a date and end with an extension",
             output.video_file)
         target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
         set_permissions(target_dir, config)
@@ -246,7 +246,7 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
                 new_metadata=output.new_metadata)
             set_permissions(output.video_file, config)
             tag_in_place(output.video_file, config, output.new_metadata)
-            logger.info("Done processing file: %s, moved to %s", file_to_process,output.video_file)
+            logger.info("Done processing file: {}, moved to {}", file_to_process,output.video_file)
         else:
             #not matched.
             output.final_name_relative=os.path.relpath(output.video_file, target_dir)
@@ -264,21 +264,21 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide:
     """
     error = False
     if file_to_process is not None:
-        logger.info("File to process: %s", file_to_process)
+        logger.info("File to process: {}", file_to_process)
         if not file_to_process.is_file() or not file_to_process.exists():
-            logger.error("Error not a file! %s", file_to_process)
+            logger.error("Error not a file! {}", file_to_process)
             error = True
 
     if dir_to_process is not None:
-        logger.info("Directory to process: %s",dir_to_process)
+        logger.info("Directory to process: {}",dir_to_process)
         if not dir_to_process.is_dir() or not dir_to_process.exists():
-            logger.info("Error not a directory! %s", dir_to_process)
+            logger.info("Error not a directory! {}", dir_to_process)
             error = True
 
     if config_overide is not None:
-        logger.info("Config override specified: %s",config_overide)
+        logger.info("Config override specified: {}",config_overide)
         if not config_overide.is_file() or not config_overide.exists():
-            logger.info("Config override specified, but file does not exit: %s",config_overide)
+            logger.info("Config override specified, but file does not exit: {}",config_overide)
             error = True
     return error
 
@@ -303,12 +303,12 @@ def main(arglist: List[str]):
     args = parser.parse_args(arglist)
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
-    logger.add(sys.stderr, format="{time} {level} {message}", filter="namer", level=level)
+    logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     check_arguments(args.file, args.dir, args.configfile)
 
     config = default_config()
     if args.configfile is not None and args.configfile.is_file():
-        logger.info("Config override specified %s",args.configfile)
+        logger.info("Config override specified {}",args.configfile)
         config = from_config(args.configfile)
     config.verify_naming_config()
     target = args.file

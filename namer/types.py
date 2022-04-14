@@ -20,7 +20,7 @@ def _verify_dir(name: str, file_name: Path) -> bool:
     verify a config directory exist. return false if verification fails
     """
     if file_name is not None and not file_name.is_dir():
-        logger.error("Configured directory %s: %s is not a directory or not accessible", name, file_name)
+        logger.error("Configured directory {}: {} is not a directory or not accessible", name, file_name)
         return False
     return True
 
@@ -34,8 +34,8 @@ def _verify_name_string(name: str, name_string: str) -> bool:
         formatter.format(name_string, **info.asdict())
         return True
     except KeyError as key_error:
-        logger.error("Configuration %s is not a valid file name format, please check %s", name, name_string)
-        logger.error("Error message: %s", key_error)
+        logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
+        logger.error("Error message: {}", key_error)
         return False
 
 class PartialFormatter(string.Formatter):
@@ -191,6 +191,12 @@ class NamerConfig():
     set_file_permissions = 664
     """
     Permissions Settings for new/moved file.
+    """
+
+    sites_with_no_date_info = []
+    """
+    A list of site names that do not have proper date information in them.   This is a problem with some tpdb
+    scrapers/storage mechanisms.
     """
 
     enabled_tagging: bool = True
@@ -358,6 +364,11 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
+    namer_config.sites_with_no_date_info =[
+        x.strip().upper() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
+    ]
+    if "" in namer_config.sites_with_no_date_info:
+        namer_config.sites_with_no_date_info.remove("")
     namer_config.write_namer_log = config.getboolean('namer','write_namer_log',fallback=False)
     namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
     namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)

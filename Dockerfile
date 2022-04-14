@@ -11,9 +11,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
+
 FROM BASE AS BUILD
-RUN mkdir /work/
-COPY . /work
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential \
@@ -29,9 +28,12 @@ RUN apt-get update \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
-RUN curl -sSL https://install.python-poetry.org | python3 - \
+RUN curl -sSL https://install.python-poetry.org | python3 - 
+
+RUN mkdir /work/
+COPY . /work
+RUN cd /work/ \
     && export PATH="/root/.local/bin:$PATH" \
-    && cd /work/ \
     && rm -rf /work/namer/__pycache__/ || true \
     && rm -rf /work/test/__pycache__/ || true \
     && poetry install \

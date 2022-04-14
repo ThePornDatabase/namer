@@ -19,7 +19,7 @@ def get_resolution(file: str) -> int:
     """
     Gets the vertical resolution of an mp4 file.  For example, 720, 1080, 2160...
     """
-    logger.info("resolution stream of file %s", file)
+    logger.info("resolution stream of file {}", file)
 
     with subprocess.Popen(['ffprobe',
                            '-v',
@@ -37,11 +37,11 @@ def get_resolution(file: str) -> int:
         success = process.wait() == 0
         output = process.stdout.read()
         if not success:
-            logger.warning("Error gettng resolution of file %s", file)
+            logger.warning("Error gettng resolution of file {}", file)
             logger.warning(process.stderr.read())
         process.stdout.close()
         process.stderr.close()
-        logger.info("output %s", output)
+        logger.info("output {}", output)
         return int(output)
     return None
 
@@ -67,12 +67,12 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
         success = process.wait() == 0
         audio_streams_str = process.stdout.read()
         if not success:
-            logger.warning("Error gettng audio streams of file %s", mp4_file)
+            logger.warning("Error gettng audio streams of file {}", mp4_file)
             logger.warning(process.stderr.read())
         process.stdout.close()
         process.stderr.close()
 
-        logger.info("Target for audio: %s", mp4_file)
+        logger.info("Target for audio: {}", mp4_file)
 
         audio_streams = json.loads(
             audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
@@ -107,7 +107,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
         stream = get_audio_stream_for_lang(mp4_file, language)
         if stream is not None:
             logger.info(
-                "Attempt to alter default audio stream of %s", mp4_file)
+                "Attempt to alter default audio stream of {}", mp4_file)
             with subprocess.Popen(['ffmpeg',
                                    '-i',
                                    mp4_file,  # input file
@@ -129,10 +129,10 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
                 process.stderr.close()
                 if not success:
                     logger.info(
-                        "Could not update audio stream for %s", mp4_file)
+                        "Could not update audio stream for {}", mp4_file)
                     logger.info(stderr)
                 else:
-                    logger.warning("Return code: %s", process.returncode)
+                    logger.warning("Return code: {}", process.returncode)
                     mp4_file.unlink()
                     shutil.move(workfile, mp4_file)
                 return success

@@ -10,7 +10,7 @@ from loguru import logger
 from namer.types import FileNameParts
 
 
-DEFAULT_REGEX_TOKENS = '{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}'
+DEFAULT_REGEX_TOKENS = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
 
 def name_cleaner(name: str) -> str:
     """
@@ -37,6 +37,7 @@ def parser_config_to_regex(tokens: str) -> str:
     _sep    r'[\.\- ]+'
     _site   r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
     _date   r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
+    _optional_date  r'(?=(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ])?'
     _ts     r'(?P<trans>[T|t][S|s])'+_sep+'){0,1}'
     _name   r'(?P<name>.*)'
     _dot    r'\.'
@@ -46,13 +47,23 @@ def parser_config_to_regex(tokens: str) -> str:
     # pylint: enable=anomalous-backslash-in-string
 
     _sep=r'[\.\- ]+'
-    _site=r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
+    _site=r'(?P<site>[a-zA-Z0-9\.\-\ ]*?[a-zA-Z0-9]*?)'
     _date=r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
+    _optional_date=r'(?:(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+)?'
     _ts=r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
-    _name=r'(?P<name>.*)'
+    _name=r'(?P<name>(?:.(?![0-9]{2,4}[\.\-\ ][0-9]{2}[\.\-\ ][0-9]{2}))*)'
     _dot=r'\.'
     _ext=r'(?P<ext>[a-zA-Z0-9]{3,4})$'
-    regex = tokens.format_map({'_site':_site, '_date':_date, '_ts':_ts, '_name':_name, '_ext':_ext, '_sep':_sep, '_dot':_dot})
+    regex = tokens.format_map(
+        {'_site':_site,
+        '_date':_date,
+        '_optional_date':_optional_date,
+        '_ts':_ts,
+        '_name':_name,
+        '_ext':_ext,
+        '_sep':_sep,
+        '_dot':_dot}
+        )
     return regex
 
 
