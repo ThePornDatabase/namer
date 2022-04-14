@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from namer.filenameparser import main, parse_file_name
 
-regex_token = '{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}'
+regex_token = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
