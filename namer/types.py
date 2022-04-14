@@ -575,6 +575,10 @@ class LookedUpFileInfo():
     """
     The url to download a trailer, should it exist.
     """
+    background_url: str = None
+    """
+    The url to download a background image, should it exist.
+    """
     tags: List[str]
     """
     Tags associated with the video.   Noisy and long list.

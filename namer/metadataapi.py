@@ -133,6 +133,29 @@ def get_poster(url: str, authtoken: str, video_file: Path) -> Path:
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
 
+def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
+    """
+    returns json object with info
+    """
+    if url.startswith("http"):
+        headers = {"Authorization": f"Bearer {namer_config.porndb_token}",
+                'User-Agent': 'namer-1'}
+        random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        file =  video_file.parent / ( video_file.stem + "_" + random+"_trailer" + pathlib.Path(url).suffix )
+        try:
+            with requests.get(url, headers=headers) as response:
+                #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
+                #response.raise_for_status()
+                with open(file, "wb") as binary_file:
+                    # Write bytes to file
+                    binary_file.write(response.content)
+                    return file
+        except requests.exceptions.RequestException as ex:
+            logger.warning(ex)
+            return None
+    else:
+        trailer = (video_file.parent / url).resolve()
+        return trailer if trailer.exists() and trailer.is_file() else None
 
 def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()
@@ -142,6 +165,8 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
     file_info.date = data.date
     file_info.source_url = data.url
     file_info.poster_url = data.poster
+    file_info.trailer_url = data.trailer
+    file_info.background_url = data.image
     file_info.site = data.site.name
     file_info.look_up_site_id = data._id # pylint: disable=protected-access
     for json_performer in data.performers:
