@@ -193,6 +193,20 @@ class NamerConfig():
     Permissions Settings for new/moved file.
     """
 
+    write_nfo = False
+    """
+    Write an nfo file next to the directory in an emby/jellyfin readable format.
+    """
+
+    trailer_location = None
+    """
+    If you want the trailers downloaded set the value relative to the final location of the movie file here.
+    Plex:      Trailers/trailer.{ext}, or extras/Trailer-trailer.{ext}
+    Jellyfin:  trailer/trailer.{ext}
+    Extensions are handled by the download's mime type.
+    Leave empty to not download trailers.
+    """
+
     sites_with_no_date_info = []
     """
     A list of site names that do not have proper date information in them.   This is a problem with some tpdb
@@ -303,6 +317,8 @@ class NamerConfig():
         output += f"  set_gid: {self.set_gid}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
         output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
+        output += f"  trailer_location: {self.trailer_location}\n"
+        output += f"  write_nfo: {self.write_nfo}\n"
         output += f"  sites_with_no_date_info: {self.sites_with_no_date_info}\n"
         output += "Tagging Config:\n"
         output += f"  enabled_tagging: {self.enabled_tagging}\n"
@@ -364,6 +380,8 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
+    namer_config.trailer_location = config.get('namer','trailer_location',fallback=None)
+    namer_config.write_nfo = config.getboolean('namer','write_nfo',fallback=False)
     namer_config.sites_with_no_date_info =[
         x.strip().upper() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
     ]

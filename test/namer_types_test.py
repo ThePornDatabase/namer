@@ -147,6 +147,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             write_namer_log = True
             set_dir_permissions = 700
             set_file_permissions = 700
+            write_nfo = True
+            trailer_location = trailer/default.{ext}
             sites_with_no_date_info = Milf, TeamWhatever
 
         [metadata]
@@ -174,6 +176,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(namer_config.write_namer_log, True)
         self.assertEqual(namer_config.set_dir_permissions, "700")
         self.assertEqual(namer_config.set_file_permissions, "700")
+        self.assertEqual(namer_config.trailer_location, "trailer/default.{ext}")
+        self.assertEqual(namer_config.write_nfo, True)
         self.assertEqual(namer_config.sites_with_no_date_info, ["MILF", "TEAMWHATEVER"])
         self.assertEqual(namer_config.enabled_tagging, False)
         self.assertEqual(namer_config.enabled_poster, False)
