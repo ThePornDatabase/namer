@@ -303,7 +303,7 @@ class NamerConfig():
         output += f"  set_gid: {self.set_gid}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
         output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
-        output += f"  set_file_permissions: {self.set_file_permissions}\n"
+        output += f"  sites_with_no_date_info: {self.sites_with_no_date_info}\n"
         output += "Tagging Config:\n"
         output += f"  enabled_tagging: {self.enabled_tagging}\n"
         output += f"  enabled_poster: {self.enabled_poster}\n"
