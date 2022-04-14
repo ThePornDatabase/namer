@@ -14,8 +14,8 @@ from loguru import logger
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, EVENT_TYPE_DELETED, EVENT_TYPE_MOVED
 import schedule
-from namer.namer import move_to_final_location, process
-from namer.types import NamerConfig, default_config
+from namer.namer import add_extra_artifacts, move_to_final_location, process_file
+from namer.types import NamerConfig, default_config, write_log_file
 
 def done_copying(file: Path) -> bool:
     """
@@ -56,7 +56,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
         target_file.rename(workingfile)
         logger.info("Moving {} to {} for processing", target_file, workingfile)
         to_process = workingfile
-    result = process(to_process, namer_config)
+    result = process_file(to_process, namer_config)
 
     if result.new_metadata is None:
         if workingdir is not None:
@@ -66,11 +66,9 @@ def handle(target_file: Path, namer_config: NamerConfig):
             newvideo = namer_config.failed_dir / relative_path
             workingfile.rename(newvideo)
             logger.info("Moving failed processing {} to {} to retry later", workingfile, newvideo)
-            if result.namer_log_file is not None:
-                result.namer_log_file.rename( newvideo.parent / result.namer_log_file.name)
+            write_log_file(newvideo, result.search_results, namer_config)
     else:
-        # See if we should, and can, move the whole dir.
-        moved = False
+        # Move the directory if desired.
         if (
             len(PurePath(result.final_name_relative).parts) > 1
             and workingdir is not None
@@ -79,20 +77,25 @@ def handle(target_file: Path, namer_config: NamerConfig):
             target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
             if not target.exists():
                 shutil.move(workingdir, target)
-                moved = True
                 logger.info("Moving success processed dir {} to {}", workingdir, target)
-        # else just moved the tagged video file and logs.
-        if not moved:
-            newfile = move_to_final_location(
-                result.video_file,
-                namer_config.dest_dir,
-                namer_config.new_relative_path_name,
-                result.new_metadata)
-            if result.namer_log_file is not None:
-                shutil.move(result.namer_log_file, newfile.parent / (newfile.stem+"_namer.log"))
-            logger.info("Moving success processed file {} to {}", result.video_file, newfile)
-            if workingdir is not None:
-                shutil.rmtree(workingdir, ignore_errors=True)
+                result.video_file = namer_config.dest_dir / result.final_name_relative
+        # Rename the file to dest name.
+        newfile = move_to_final_location(
+            result.video_file,
+            namer_config.dest_dir,
+            namer_config.new_relative_path_name,
+            result.new_metadata)
+        result.video_file = newfile
+        logger.info("Moving success processed file {} to {}", result.video_file, newfile)
+
+        # Delete the workingdir if it still exists.
+        if workingdir is not None and workingdir.exists():
+            shutil.rmtree(workingdir, ignore_errors=True)
+
+        # Generate/aggregate extra artifacts if desired.
+        add_extra_artifacts(result, namer_config)
+
+
 
 def retry_failed(namer_config: NamerConfig):
     """

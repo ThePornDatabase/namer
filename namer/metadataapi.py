@@ -21,7 +21,7 @@ import urllib.request
 import rapidfuzz
 import requests
 from loguru import logger
-from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, NamerConfig, default_config
+from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, NamerConfig, default_config, set_permissions
 from namer.filenameparser import parse_file_name
 
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
@@ -137,25 +137,29 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     """
     returns json object with info
     """
-    if url.startswith("http"):
-        headers = {"Authorization": f"Bearer {namer_config.porndb_token}",
-                'User-Agent': 'namer-1'}
-        random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-        file =  video_file.parent / ( video_file.stem + "_" + random+"_trailer" + pathlib.Path(url).suffix )
-        try:
-            with requests.get(url, headers=headers) as response:
-                #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
-                #response.raise_for_status()
-                with open(file, "wb") as binary_file:
-                    # Write bytes to file
-                    binary_file.write(response.content)
-                    return file
-        except requests.exceptions.RequestException as ex:
-            logger.warning(ex)
-            return None
+    if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0:
+        location = namer_config.trailer_location[:max([idx for idx, x in enumerate(namer_config.trailer_location) if x == '.'])]
+        trailerfile: Path = video_file.parent / (location + "." + url.split(".")[-1])
+        if not trailerfile.exists() and url.startswith("http"):
+            headers = {"Authorization": f"Bearer {namer_config.porndb_token}",
+                    'User-Agent': 'namer-1'}
+            try:
+                with requests.get(url, headers=headers) as response:
+                    #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
+                    #response.raise_for_status()
+                    with open(trailerfile, "wb") as binary_file:
+                        # Write bytes to file
+                        binary_file.write(response.content)
+                        set_permissions(trailerfile, namer_config)
+                        return trailerfile
+            except requests.exceptions.RequestException as ex:
+                logger.warning(ex)
+                return None
+        else:
+            trailer = (video_file.parent / url).resolve()
+            return trailer if trailer.exists() and trailer.is_file() else None
     else:
-        trailer = (video_file.parent / url).resolve()
-        return trailer if trailer.exists() and trailer.is_file() else None
+        return None
 
 def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()

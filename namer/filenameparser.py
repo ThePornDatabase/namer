@@ -28,7 +28,7 @@ def name_cleaner(name: str) -> str:
 
 def parser_config_to_regex(tokens: str) -> str:
     """
-    ``{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}``
+    ``{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}``
 
     ``Site - YYYY.MM.DD - TS - name.mkv``
 

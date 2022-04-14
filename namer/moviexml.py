@@ -5,7 +5,7 @@ or used in renaming the video file.
 """
 from pathlib import Path
 from lxml import objectify, etree
-from namer.types import LookedUpFileInfo, Performer
+from namer.types import LookedUpFileInfo, NamerConfig, Performer, set_permissions
 
 def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
@@ -84,3 +84,12 @@ def write_movie_xml_file(info: LookedUpFileInfo) -> str:
     objectify.deannotate(root)
     etree.cleanup_namespaces(root)
     return str(etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
+
+def write_nfo(video_file: Path, info: LookedUpFileInfo, namer_config: NamerConfig ) -> Path:
+    """
+    Writes an .nfo to the correct place for a video file.
+    """
+    if video_file is not None and info is not None and namer_config.write_nfo is True:
+        target = video_file.parent / (video_file.stem + ".nfo")
+        target.write_text(write_movie_xml_file(info))
+        set_permissions(target, namer_config)
