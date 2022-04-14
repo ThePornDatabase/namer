@@ -571,7 +571,10 @@ class LookedUpFileInfo():
     """
     ID Used by the queried site to identify the video
     """
-
+    trailer_url: str = None
+    """
+    The url to download a trailer, should it exist.
+    """
     tags: List[str]
     """
     Tags associated with the video.   Noisy and long list.
