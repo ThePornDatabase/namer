@@ -229,7 +229,7 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
         if (output.new_metadata is None and
             output.parsed_file is not None and
             output.parsed_file.name is not None):
-            output.search_results = match(output.parsed_file, config.porndb_token)
+            output.search_results = match(output.parsed_file, config)
             if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
                 output.new_metadata = output.search_results[0].looked_up
         else:

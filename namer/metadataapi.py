@@ -21,13 +21,17 @@ import urllib.request
 import rapidfuzz
 import requests
 from loguru import logger
-from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, default_config
+from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, NamerConfig, default_config
 from namer.filenameparser import parse_file_name
 
-def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> ComparisonResult:
-    release_date = name_parts.date is None or name_parts.date == looked_up.date
-    site = (name_parts.site is None or
-        re.sub(r' ', '', name_parts.site.capitalize()) in re.sub( r' ', '', looked_up.site.capitalize()))
+def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
+    found_site = re.sub(r' ', '', looked_up.site).upper()
+    site = (name_parts.site is None or re.sub(r' ', '', name_parts.site.upper()) in found_site)
+    release_date = False
+    if found_site in namer_config.sites_with_no_date_info:
+        release_date = True
+    else:
+        release_date = name_parts.date is not None and name_parts.date == looked_up.date
 
     #Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
@@ -51,32 +55,32 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo) -> 
         name_parts=name_parts,
         looked_up=looked_up)
 
-def __update_results(results: List[ComparisonResult], name_parts: FileNameParts, authtoken: str,
+def __update_results(results: List[ComparisonResult], name_parts: FileNameParts, namer_config: NamerConfig,
         skipdate: bool=False, skipname: bool=False):
     if len(results) == 0 or not results[0].is_match():
-        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, authtoken, skipdate, skipname):
-            result = __evaluate_match(name_parts, match_attempt)
+        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skipdate, skipname):
+            result = __evaluate_match(name_parts, match_attempt, namer_config)
             results.append(result)
         results = sorted(results, key=__match_percent, reverse=True)
 
-def __metadata_api_lookup(name_parts: FileNameParts, authtoken: str) -> List[ComparisonResult]:
+def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
     results = []
-    __update_results(results, name_parts, authtoken)
-    __update_results(results, name_parts, authtoken, skipdate=True)
-    __update_results(results, name_parts, authtoken, skipdate=True, skipname=True)
-    __update_results(results, name_parts, authtoken, skipname=True)
+    __update_results(results, name_parts, namer_config)
+    __update_results(results, name_parts, namer_config, skipdate=True)
+    __update_results(results, name_parts, namer_config, skipdate=True, skipname=True)
+    __update_results(results, name_parts, namer_config, skipname=True)
 
     if len(results) == 0 or not results[-1].is_match():
         name_parts.date =  (date.fromisoformat(name_parts.date)+timedelta(days=-1)).isoformat()
         logger.info("Not found, trying 1 day before: {}",name_parts)
-        __update_results(results, name_parts, authtoken)
-        __update_results(results, name_parts, authtoken, skipdate=False, skipname=True)
+        __update_results(results, name_parts, namer_config)
+        __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
 
     if len(results) == 0 or not results[-1].is_match():
         name_parts.date = (date.fromisoformat(name_parts.date)+timedelta(days=2)).isoformat()
         logger.info("Not found, trying 1 day after: {}",name_parts)
-        __update_results(results, name_parts, authtoken)
-        __update_results(results, name_parts, authtoken, skipdate=False, skipname=True)
+        __update_results(results, name_parts, namer_config)
+        __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
     return results
 
 
@@ -185,13 +189,13 @@ def __build_url(site:str=None, release_date:str=None, name:str=None, uuid:str=No
     return f"https://api.metadataapi.net/scenes{query}"
 
 
-def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, authtoken: str, skipdate: bool,
+def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: NamerConfig, skipdate: bool,
         skipname: bool) -> List[LookedUpFileInfo]:
     release_date = name_parts.date if not skipdate else None
     name = name_parts.name if not skipname else None
     url = __build_url(name_parts.site, release_date, name)
     logger.info("Querying: {}",url)
-    json_response = __get_response_json_object(url, authtoken)
+    json_response = __get_response_json_object(url, namer_config.porndb_token)
     file_infos = []
     if json_response is not None and json_response.strip() != '':
         logger.debug("json_repsonse: \n{}", json_response)
@@ -201,10 +205,10 @@ def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, authtoken: str, sk
     return file_infos
 
 
-def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, authtoken: str) -> LookedUpFileInfo:
+def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> LookedUpFileInfo:
     url = __build_url(uuid=uuid)
     logger.info("Querying: {}",url)
-    json_response = __get_response_json_object(url, authtoken)
+    json_response = __get_response_json_object(url, namer_config.porndb_token)
     file_infos = []
     if json_response is not None and json_response.strip() != '':
         logger.debug("json_repsonse: \n{}",json_response)
@@ -215,17 +219,17 @@ def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str,
         return file_infos[0]
     return None
 
-def match(file_name_parts: FileNameParts, porndb_token: str) -> List[ComparisonResult]:
+def match(file_name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
     """
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
     Matches will appear first.
     """
-    comparison_results = __metadata_api_lookup(file_name_parts, porndb_token)
+    comparison_results = __metadata_api_lookup(file_name_parts, namer_config)
     comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.
     if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
-        file_infos =  __get_complete_metadatapi_net_fileinfo(file_name_parts, comparison_results[0].looked_up.uuid ,porndb_token)
+        file_infos =  __get_complete_metadatapi_net_fileinfo(file_name_parts, comparison_results[0].looked_up.uuid ,namer_config)
         if file_infos is not None:
             comparison_results[0].looked_up = file_infos
     return comparison_results
@@ -242,15 +246,15 @@ def main(argslist: List[str]):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-c", "--configfile", help="override location for a configuraion file.", type=pathlib.Path)
     parser.add_argument("-f", "--file", help="File we want to provide a match name for.", required=True, type=pathlib.Path)
-    parser.add_argument("-t", "--token", help="Access token.", required=True)
     parser.add_argument("-j", "--jsonfile", help="write returned json to this file.", type=pathlib.Path)
     parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
     args = parser.parse_args(args=argslist)
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
+    config = default_config()
     file_name = parse_file_name(os.path.basename(args.file), default_config().name_parser)
-    match_results = match(file_name, args.token)
+    match_results = match(file_name, config)
     if len(match_results) > 0 and match_results[0].is_match() is True:
         print(match_results[0].looked_up.new_file_name(default_config().inplace_name))
         if args.jsonfile is not None:

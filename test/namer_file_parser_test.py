@@ -26,6 +26,30 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
 
+    def test_parse_file_name_no_date(self):
+        """
+        Test standard name parsing.
+        """
+        name = parse_file_name('EvilAngel.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', regex_token)
+        self.assertEqual(name.site, "EvilAngel")
+        self.assertEqual(name.date, None)
+        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        self.assertEqual(name.act, None)
+        self.assertEqual(name.trans, False)
+        self.assertEqual(name.extension, "mp4")
+
+    def test_parse_file_name_no_date_ts_stamp(self):
+        """
+        Test standard name parsing.
+        """
+        name = parse_file_name('EvilAngel.TS.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', regex_token)
+        self.assertEqual(name.site, "EvilAngel")
+        self.assertEqual(name.date, None)
+        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        self.assertEqual(name.act, None)
+        self.assertEqual(name.trans, True)
+        self.assertEqual(name.extension, "mp4")
+
     def test_parse_clean_file_name(self):
         """
         Test standard name parsing.

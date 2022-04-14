@@ -7,7 +7,7 @@ import unittest
 from unittest import mock
 
 from namer.metadataapi import main, match
-from namer.types import Performer
+from namer.types import Performer, default_config
 from namer.filenameparser import parse_file_name
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -23,7 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         response = ( Path(__file__).resolve().parent / "dc.json")
         mock_response.return_value = response.read_text()
         name = parse_file_name('DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         info = result.looked_up
@@ -51,7 +51,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.datematch)
@@ -81,7 +81,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         response = Path(__file__).resolve().parent / "ssb2.json"
         mock_response.return_value = response.read_text()
         name = parse_file_name('BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.datematch)
@@ -100,7 +100,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.datematch)
@@ -127,7 +127,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         mock_response.return_value = '{}'
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -137,7 +137,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         mock_response.return_value = ''
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -147,7 +147,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         mock_response.return_value = None
         name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
-        results = match(name, "your_porndb_authkey")
+        results = match(name, default_config())
         self.assertEqual(len(results), 0)
 
 
@@ -159,7 +159,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
-        main(['-f', 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', '-t',"your_porndb_authkey"])
+        main(['-f', 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'])
         self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4",mock_stdout.getvalue())
 
 

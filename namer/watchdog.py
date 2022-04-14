@@ -9,7 +9,6 @@ import tempfile
 import time
 import os
 import sys
-import traceback
 from pathlib import Path, PurePath
 from loguru import logger
 from watchdog.observers.polling import PollingObserver
@@ -33,7 +32,7 @@ def done_copying(file: Path) -> bool:
         size_past = size_now
         time.sleep(.2)
 
-
+@logger.catch
 def handle(target_file: Path, namer_config: NamerConfig):
     """
     Responsible for processing and moving new movie files.
@@ -139,20 +138,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:
                     time.sleep(self.namer_config.extra_sleep_time)
-                try:
-                    handle(path, self.namer_config)
-                except Exception as ex:  # pylint: disable=broad-except
-                    exc_info = sys.exc_info()
-                    try:
-                        try:
-                            logger.error("Error handling {}: \n {}", path, ex)
-                        except Exception: # pylint: disable=broad-except
-                            pass
-                    finally:
-                        # Display the *original* exception
-                        traceback.print_exception(*exc_info)
-                        del exc_info
-
+                handle(path, self.namer_config)
 
 class MovieWatcher:
     """

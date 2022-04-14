@@ -365,7 +365,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
     namer_config.sites_with_no_date_info =[
-        x.strip() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
+        x.strip().upper() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
     ]
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")

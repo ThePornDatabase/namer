@@ -54,7 +54,16 @@ def parser_config_to_regex(tokens: str) -> str:
     _name=r'(?P<name>(?:.(?![0-9]{2,4}[\.\-\ ][0-9]{2}[\.\-\ ][0-9]{2}))*)'
     _dot=r'\.'
     _ext=r'(?P<ext>[a-zA-Z0-9]{3,4})$'
-    regex = tokens.format_map({'_site':_site, '_date':_date, '_optional_date':_optional_date, '_ts':_ts, '_name':_name, '_ext':_ext, '_sep':_sep, '_dot':_dot})
+    regex = tokens.format_map(
+        {'_site':_site,
+        '_date':_date,
+        '_optional_date':_optional_date,
+        '_ts':_ts,
+        '_name':_name,
+        '_ext':_ext,
+        '_sep':_sep,
+        '_dot':_dot}
+        )
     return regex
 
 
