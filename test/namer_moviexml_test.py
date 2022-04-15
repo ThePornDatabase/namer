@@ -6,15 +6,17 @@ from pathlib import Path
 from shutil import copytree
 import unittest
 import tempfile
-from namer.moviexml import parse_movie_xml_file
-from namer.types import Performer
+from unittest import mock
+from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
+from namer.metadataapi import parse_file_name, match
+from namer.types import Performer, default_config
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
 
-    def test_writing_metadata(self):
+    def test_parsing_xml_metadata(self):
         """
         verify tag in place functions.
         """
@@ -35,6 +37,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             expected_performers.append(Performer("Francesca Le","Female"))
             expected_performers.append(Performer("Mark Wood","Male"))
             self.assertListEqual(info.performers, expected_performers)
+
+    @mock.patch("namer.metadataapi.__get_response_json_object")
+    def test_writing_xml_metadata(self, mock_response):
+        """
+        Test parsing a stored response as a LookedUpFileInfo
+        """
+        response = Path(__file__).resolve().parent / "ea.full.json"
+        mock_response.return_value = response.read_text()
+        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
+        results = match(name, default_config())
+        self.assertEqual(len(results), 1)
+        result = results[0]
+        output = write_movie_xml_file(result.looked_up)
+        print("Found: \n"+output)
+
 
 
 if __name__ == '__main__':

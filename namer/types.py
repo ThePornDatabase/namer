@@ -4,7 +4,7 @@ Types shared by all the files in this project, used as interfaces for moving dat
 
 from configparser import ConfigParser
 from dataclasses import dataclass
-from typing import List
+from typing import List, Sequence
 import os
 import configparser
 import re
@@ -92,27 +92,23 @@ class NamerConfig():
     """
 
 
-    name_parser: str = '{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}'
-    # pylint: disable=anomalous-backslash-in-string disable=line-too-long
+    name_parser: str = '{_site}{_optional_date}{_sep}{_ts}{_name}{_dot}{_ext}'
     """
     This config may be a regex you provide, or a set of token used to build a regex.
 
-    Supported token:
+    By default names are of the form:
+    ``Site.YYYY.MM.DD.TS.scene.name.mkv``,``Site.YYYY.MM.DD.scene.name.mkv``,``Site.TS.scene.name.mkv``,``Site.scene.name.mkv``
 
+     Supported token:
     ```
-        _sep      r'[\.\- ]+'
-        _site     r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
-        _date     r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
-        _ts       r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
-        _name     r'(?P<name>.*)'
-        _dot      r'\.'
-        _ext      r'(?P<ext>[a-zA-Z0-9]{3,4})$'
-    ```
-
-    Full default regex:
-
-    ```
-    r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])[\.\- ]+(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})((?P<trans>[T|t][S|s])[\.\- ]+){0,1}(?P<name>.*)\.(?P<ext>[a-zA-Z0-9]{3,4})$'
+    _sep            r'[\\.\\- ]+'
+    _site           r'(?P<site>[a-zA-Z0-9\\.\\-\\ ]*?[a-zA-Z0-9]*?)'
+    _date           r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\\.\\- ]+(?P<month>[0-9]{2})[\\.\\- ]+(?P<day>[0-9]{2})'
+    _optional_date  r'(?:(?P<year>[0-9]{2}(?:[0-9]{2})?)[\\.\\- ]+(?P<month>[0-9]{2})[\\.\\- ]+(?P<day>[0-9]{2})[\\.\\- ]+)?'
+    _ts             r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
+    _name           r'(?P<name>(?:.(?![0-9]{2,4}[\\.\\- ][0-9]{2}[\\.\\- ][0-9]{2}))*)'
+    _dot            r'\\.'
+    _ext            r'(?P<ext>[a-zA-Z0-9]{3,4})$'
     ```
 
     The parts extracted from the file will be used in matching.
@@ -121,7 +117,6 @@ class NamerConfig():
     If the year/month/day capture groups are not present (due to you not using the supplied _date regex)
     dates will not be used in matching, possibly allowing false positives.
     """
-    # pylint: enable=anomalous-backslash-in-string enable=line-too-long
 
     inplace_name: str = '{site} - {date} - {name}.{ext}'
     """
@@ -158,42 +153,56 @@ class NamerConfig():
 
     """
 
-    min_file_size = 300
+    min_file_size: int = 300
     """
     minimum file size to process in MB, ignored if a file is to be processed
     """
 
-    prefer_dir_name_if_available = True
+    prefer_dir_name_if_available: bool = True
     """
     If a directory name is to be prefered over a file name.
     """
 
-    set_uid = None
+    set_uid: bool = None
     """
     UID Settings for new/moved files/dirs.
     """
 
-    set_gid = None
+    set_gid: bool = None
     """
     GID Settings for new/moved files/dirs.
     """
 
-    write_namer_log = False
+    write_namer_log: bool = False
     """
     Should a log of comparisons be written next to processed video files.
     """
 
-    set_dir_permissions = 775
+    set_dir_permissions: int = 775
     """
     Permissions Settings for new/moved dirs.
     """
 
-    set_file_permissions = 664
+    set_file_permissions: int = 664
     """
     Permissions Settings for new/moved file.
     """
 
-    sites_with_no_date_info = []
+    write_nfo: bool = False
+    """
+    Write an nfo file next to the directory in an emby/jellyfin readable format.
+    """
+
+    trailer_location: str = None
+    """
+    If you want the trailers downloaded set the value relative to the final location of the movie file here.
+    Plex:      Trailers/trailer.{ext}, or extras/Trailer-trailer.{ext}
+    Jellyfin:  trailer/trailer.{ext}
+    Extensions are handled by the download's mime type.
+    Leave empty to not download trailers.
+    """
+
+    sites_with_no_date_info: Sequence[str] = None
     """
     A list of site names that do not have proper date information in them.   This is a problem with some tpdb
     scrapers/storage mechanisms.
@@ -247,7 +256,7 @@ class NamerConfig():
     to the dest_dir below on successful matching/tagging.
     """
 
-    del_other_files = False
+    del_other_files: bool = False
     """
     when processing a directory in the dest dir, should extra files besides the largest video be removed?
     or attempt to move them to a subdirectory specified in new_relative_path_name, if one exist.
@@ -303,6 +312,8 @@ class NamerConfig():
         output += f"  set_gid: {self.set_gid}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
         output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
+        output += f"  trailer_location: {self.trailer_location}\n"
+        output += f"  write_nfo: {self.write_nfo}\n"
         output += f"  sites_with_no_date_info: {self.sites_with_no_date_info}\n"
         output += "Tagging Config:\n"
         output += f"  enabled_tagging: {self.enabled_tagging}\n"
@@ -364,6 +375,8 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
+    namer_config.trailer_location = config.get('namer','trailer_location',fallback=None)
+    namer_config.write_nfo = config.getboolean('namer','write_nfo',fallback=False)
     namer_config.sites_with_no_date_info =[
         x.strip().upper() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
     ]
@@ -553,7 +566,14 @@ class LookedUpFileInfo():
     """
     ID Used by the queried site to identify the video
     """
-
+    trailer_url: str = None
+    """
+    The url to download a trailer, should it exist.
+    """
+    background_url: str = None
+    """
+    The url to download a background image, should it exist.
+    """
     tags: List[str]
     """
     Tags associated with the video.   Noisy and long list.
@@ -693,7 +713,59 @@ class ProcessingResults:
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
 
-    namer_log_file: Path = None
+def set_permissions(file: Path, config: NamerConfig):
     """
-    If a log file was written, where it was stored.
+    Given a file or dir, set permissions from NamerConfig.set_file_permissions,
+    NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
+    if hasattr(os, "chmod") and file is not None and file.exists():
+        fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
+        dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
+        if dirperm is not None and file.is_dir():
+            Path(file).chmod(dirperm)
+            if config.set_uid is not None and config.set_gid is not None:
+                os.chown(file, uid=config.set_uid, gid=config.set_gid)
+        if file.is_dir():
+            for root, _dirs, files in os.walk(file):
+                if dirperm is not None:
+                    Path(root).chmod(dirperm)
+                if config.set_uid is not None and config.set_gid is not None:
+                    os.chown(root, uid=config.set_uid, gid=config.set_gid)
+                for cur in files:
+                    set_permissions(Path(os.path.join(root, cur)), config)
+        elif file.is_file() and fileperm is not None:
+            if fileperm is not None:
+                file.chmod(fileperm)
+                if config.set_uid is not None and config.set_gid is not None:
+                    os.chown(file, uid=config.set_uid, gid=config.set_gid)
+
+def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult], namer_config: NamerConfig) -> str:
+    """
+    Given porndb scene results sorted by how closely they match a file,  write the contents
+    of the result matches to a log file.
+    """
+    logname = movie_file.with_name(movie_file.stem+"_namer.log")
+    logger.info("Writing log to {}",logname)
+    with open(logname, "wt", encoding='utf-8') as log_file:
+        if match_attempts is None or len(match_attempts) == 0:
+            log_file.write("No search results returned.\n")
+        for attempt in match_attempts:
+            log_file.write("\n")
+            log_file.write(f"File                : {attempt.name_parts.source_file_name}\n")
+            log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
+            log_file.write(f"Match               : {attempt.is_match()}\n")
+            log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
+            if attempt.name_parts.site is None:
+                attempt.name_parts.site = 'None'
+            if attempt.name_parts.date is None:
+                attempt.name_parts.date = 'None'
+            if attempt.name_parts.date is None:
+                attempt.name_parts.name = 'None'
+            log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"+
+                f" {attempt.name_parts.site:50.50}\n")
+            log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"+
+                f" {attempt.name_parts.date:50.50}\n")
+            log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"+
+                f" {attempt.name_parts.name:50.50}\n")
+    set_permissions(logname, namer_config)
+    return logname

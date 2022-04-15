@@ -27,31 +27,29 @@ def name_cleaner(name: str) -> str:
 
 
 def parser_config_to_regex(tokens: str) -> str:
-    # pylint: disable=anomalous-backslash-in-string
     """
-    ``{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}``
+    ``{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}``
 
     ``Site - YYYY.MM.DD - TS - name.mkv``
 
     ```
-    _sep    r'[\.\- ]+'
-    _site   r'(?P<site>[a-zA-Z0-9\.\-\ ]+[a-zA-Z0-9])'
-    _date   r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
-    _optional_date  r'(?=(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ])?'
-    _ts     r'(?P<trans>[T|t][S|s])'+_sep+'){0,1}'
-    _name   r'(?P<name>.*)'
-    _dot    r'\.'
-    _ext    r'(?P<ext>[a-zA-Z0-9]{3,4})$'
+    _sep            r'[\\.\\- ]+'
+    _site           r'(?P<site>[a-zA-Z0-9\\.\\-\\ ]*?[a-zA-Z0-9]*?)'
+    _date           r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\\.\\- ]+(?P<month>[0-9]{2})[\\.\\- ]+(?P<day>[0-9]{2})'
+    _optional_date  r'(?:(?P<year>[0-9]{2}(?:[0-9]{2})?)[\\.\\- ]+(?P<month>[0-9]{2})[\\.\\- ]+(?P<day>[0-9]{2})[\\.\\- ]+)?'
+    _ts             r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
+    _name           r'(?P<name>(?:.(?![0-9]{2,4}[\\.\\- ][0-9]{2}[\\.\\- ][0-9]{2}))*)'
+    _dot            r'\\.'
+    _ext            r'(?P<ext>[a-zA-Z0-9]{3,4})$'
     ```
     """
-    # pylint: enable=anomalous-backslash-in-string
 
     _sep=r'[\.\- ]+'
     _site=r'(?P<site>[a-zA-Z0-9\.\-\ ]*?[a-zA-Z0-9]*?)'
     _date=r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
     _optional_date=r'(?:(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+)?'
     _ts=r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'
-    _name=r'(?P<name>(?:.(?![0-9]{2,4}[\.\-\ ][0-9]{2}[\.\-\ ][0-9]{2}))*)'
+    _name=r'(?P<name>(?:.(?![0-9]{2,4}[\.\- ][0-9]{2}[\.\- ][0-9]{2}))*)'
     _dot=r'\.'
     _ext=r'(?P<ext>[a-zA-Z0-9]{3,4})$'
     regex = tokens.format_map(

@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import logging
 import tempfile
 from test.utils import validate_mp4_tags, new_ea, prepare, validate_permissions
@@ -54,7 +54,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_handler_collisions_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -88,7 +88,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_eventlisterner_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -119,7 +119,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_handler_deeply_nested_success_no_dirname(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -154,7 +154,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_handler_deeply_nested_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -208,7 +208,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_handler_failure(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -240,7 +240,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_name_parser_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -272,7 +272,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_name_parser_failure_with_startup_processing(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
@@ -303,6 +303,44 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             self.assertEqual(len(list(config.dest_dir.iterdir())), 0)
+
+    @patch('namer.metadataapi.__get_response_json_object')
+    @patch('namer.namer.get_image')
+    @patch('namer.namer.get_trailer')
+    def test_fetch_trailer_write_nfo_success(self, mock_trailer: MagicMock, mock_poster: MagicMock, mock_response: MagicMock):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available=True
+            config.min_file_size=0
+            config.write_namer_log = True
+            config.min_file_size = 0
+            config.write_nfo = True
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir)
+            ]
+            mock_response.return_value=targets[0].json_exact
+            mock_trailer.return_value="/some/location.mp4"
+            mock_poster.return_value=targets[0].poster
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())),0)
+            outputfile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
+                'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4')
+            nfofile = ( config.dest_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!' /
+                'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.nfo')
+            output = MP4(outputfile)
+            self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+            self.assertTrue(nfofile.exists() and nfofile.is_file() and nfofile.stat().st_size != 0 )
+
 
     def test_manual_tick(self):
         """

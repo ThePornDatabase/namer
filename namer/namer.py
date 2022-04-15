@@ -8,15 +8,18 @@ import argparse
 import os
 from pathlib import Path
 import pathlib
+from random import choices
+import string
 import sys
 from typing import List
 from loguru import logger
 
-from namer.moviexml import parse_movie_xml_file
-from namer.types import LookedUpFileInfo, NamerConfig, ComparisonResult, ProcessingResults, default_config, from_config
+from namer.moviexml import parse_movie_xml_file, write_nfo
+from namer.types import LookedUpFileInfo, NamerConfig, ProcessingResults
+from namer.types import default_config, from_config, set_permissions, write_log_file
 from namer.filenameparser import parse_file_name
 from namer.mutagen import update_mp4_file
-from namer.metadataapi import get_poster, match
+from namer.metadataapi import get_image, get_trailer, match
 
 DESCRIPTION="""
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
@@ -31,61 +34,6 @@ DESCRIPTION="""
     file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
     match the file's name segment after the 'SITE.[YY]YY.MM.DD'.
   """
-
-def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult]) -> str:
-    """
-    Given porndb scene results sorted by how closely they match a file,  write the contents
-    of the result matches to a log file.
-    """
-    logname = movie_file.with_name(movie_file.stem+"_namer.log")
-    logger.info("Writing log to {}",logname)
-    with open(logname, "wt", encoding='utf-8') as log_file:
-        for attempt in match_attempts:
-            log_file.write("\n")
-            log_file.write(f"File                : {attempt.name_parts.source_file_name}\n")
-            log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
-            log_file.write(f"Match               : {attempt.is_match()}\n")
-            log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
-            if attempt.name_parts.site is None:
-                attempt.name_parts.site = 'None'
-            if attempt.name_parts.date is None:
-                attempt.name_parts.date = 'None'
-            if attempt.name_parts.date is None:
-                attempt.name_parts.name = 'None'
-            log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"+
-                f" {attempt.name_parts.site:50.50}\n")
-            log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"+
-                f" {attempt.name_parts.date:50.50}\n")
-            log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"+
-                f" {attempt.name_parts.name:50.50}\n")
-    return logname
-
-def set_permissions(file: Path, config: NamerConfig):
-    """
-    Given a file or dir, set permissions from NamerConfig.set_file_permissions,
-    NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
-    """
-    if hasattr(os, "chmod") and file is not None and file.exists():
-        fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
-        dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
-        if dirperm is not None and file.is_dir():
-            Path(file).chmod(dirperm)
-            if config.set_uid is not None and config.set_gid is not None:
-                os.chown(file, uid=config.set_uid, gid=config.set_gid)
-        if file.is_dir():
-            for root, _dirs, files in os.walk(file):
-                if dirperm is not None:
-                    Path(root).chmod(dirperm)
-                if config.set_uid is not None and config.set_gid is not None:
-                    os.chown(root, uid=config.set_uid, gid=config.set_gid)
-                for cur in files:
-                    set_permissions(Path(os.path.join(root, cur)), config)
-        elif file.is_file() and fileperm is not None:
-            if fileperm is not None:
-                file.chmod(fileperm)
-                if config.set_uid is not None and config.set_gid is not None:
-                    os.chown(file, uid=config.set_uid, gid=config.set_gid)
-
 
 def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: bool = False):
     """
@@ -111,10 +59,8 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
     if new_metadata is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
-            if config.enabled_poster is True:
-                logger.info("Downloading poster: {}",new_metadata.poster_url)
-                poster = get_poster(new_metadata.poster_url, config.porndb_token, video)
-                set_permissions(poster, config)
+            random = '-'.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+            poster = get_image(new_metadata.poster_url, random, video, config)
             logger.info("Updating file metadata (atoms): {}",video)
             update_mp4_file(video, new_metadata, poster, config)
         logger.info("Done tagging file: {}",video)
@@ -199,8 +145,7 @@ def move_to_final_location(to_move: Path, target_dir: Path, template: str, new_m
     to_move.rename(newname)
     return newname
 
-
-def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
+def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -247,16 +192,30 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
             set_permissions(output.video_file, config)
             tag_in_place(output.video_file, config, output.new_metadata)
             logger.info("Done processing file: {}, moved to {}", file_to_process,output.video_file)
-        else:
-            #not matched.
-            output.final_name_relative=os.path.relpath(output.video_file, target_dir)
-
-        # Write log file if needed.
-        if config.write_namer_log is True and output.search_results is not None:
-            logfile = write_log_file(output.video_file, output.search_results)
-            set_permissions(logfile, config)
-            output.namer_log_file=logfile
     return output
+
+def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
+    """
+    Fully process (match, tag, rename) a single file in place and download any extra artifacts requested.
+    trailer, .nfo file, logs.
+    """
+    results = process_file(file_to_process, config, infos)
+    add_extra_artifacts(results, config)
+    return results
+
+def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
+    """
+    Once the file is in it's final location we will grab other relevant output if requested.
+    """
+    trailer = None
+    if config.write_namer_log is True:
+        write_log_file(results.video_file, results.search_results, config)
+    if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
+        trailer = get_trailer(results.video_file, results.search_results, config)
+    if config.write_nfo is True:
+        poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
+        background = get_image(results.new_metadata.background_url, "-background", results.video_file, config)
+        write_nfo(results, config, trailer, poster, background)
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """
