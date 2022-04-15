@@ -8,6 +8,8 @@ import argparse
 import os
 from pathlib import Path
 import pathlib
+from random import choices
+import string
 import sys
 from typing import List
 from loguru import logger
@@ -17,7 +19,7 @@ from namer.types import LookedUpFileInfo, NamerConfig, ProcessingResults
 from namer.types import default_config, from_config, set_permissions, write_log_file
 from namer.filenameparser import parse_file_name
 from namer.mutagen import update_mp4_file
-from namer.metadataapi import get_poster, get_trailer, match
+from namer.metadataapi import get_image, get_trailer, match
 
 DESCRIPTION="""
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
@@ -57,10 +59,8 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
     if new_metadata is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
-            if config.enabled_poster is True:
-                logger.info("Downloading poster: {}",new_metadata.poster_url)
-                poster = get_poster(new_metadata.poster_url, config.porndb_token, video)
-                set_permissions(poster, config)
+            random = '-'.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+            poster = get_image(new_metadata.poster_url, random, video, config)
             logger.info("Updating file metadata (atoms): {}",video)
             update_mp4_file(video, new_metadata, poster, config)
         logger.info("Done tagging file: {}",video)
@@ -207,12 +207,15 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     """
     Once the file is in it's final location we will grab other relevant output if requested.
     """
+    trailer = None
     if config.write_namer_log is True:
         write_log_file(results.video_file, results.search_results, config)
     if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
-        get_trailer(results.video_file, results.search_results, config)
+        trailer = get_trailer(results.video_file, results.search_results, config)
     if config.write_nfo is True:
-        write_nfo(results.video_file, results.search_results, config)
+        poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
+        background = get_image(results.new_metadata.background_url, "-background", results.video_file, config)
+        write_nfo(results.video_file, results.new_metadata, config, trailer, poster, background)
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """

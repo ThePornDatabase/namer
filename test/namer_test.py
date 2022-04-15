@@ -39,7 +39,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(error)
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_writing_metadata_file(self, mock_poster, mock_response):
         """
         test namer main method renames and tags in place when -f (video file) is passed
@@ -53,7 +53,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_writing_metadata_dir(self, mock_poster, mock_response):
         """
         test namer main method renames and tags in place when -d (directory) is passed
@@ -67,7 +67,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_writing_metadata_all_dirs(self, mock_poster, mock_response):
         """
         Test multiple directories are processed when -d (directory) and -m are passed.
@@ -107,7 +107,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
 
     @patch('namer.metadataapi.__get_response_json_object')
-    @patch('namer.namer.get_poster')
+    @patch('namer.namer.get_image')
     def test_writing_metadata_all_dirs_files(self, mock_poster, mock_response):
         """
         Test multiple directories are processed when -d (directory) and -m are passed.

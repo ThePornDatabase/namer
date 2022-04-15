@@ -109,15 +109,14 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
         logger.warning(ex)
         return None
 
-def get_poster(url: str, authtoken: str, video_file: Path) -> Path:
+def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Path:
     """
     returns json object with info
     """
-    if url.startswith("http"):
-        headers = {"Authorization": f"Bearer {authtoken}",
+    file =  video_file.parent / ( video_file.stem + infix + pathlib.Path(url).suffix )
+    if config.enabled_poster and not file.exists() and url.startswith("http"):
+        headers = {"Authorization": f"Bearer {config.porndb_token}",
                 'User-Agent': 'namer-1'}
-        random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-        file =  video_file.parent / ( video_file.stem + "_" + random+"_poster" + pathlib.Path(url).suffix )
         try:
             with requests.get(url, headers=headers) as response:
                 #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
@@ -125,6 +124,7 @@ def get_poster(url: str, authtoken: str, video_file: Path) -> Path:
                 with open(file, "wb") as binary_file:
                     # Write bytes to file
                     binary_file.write(response.content)
+                    set_permissions(file, config)
                     return file
         except requests.exceptions.RequestException as ex:
             logger.warning(ex)

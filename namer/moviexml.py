@@ -39,57 +39,54 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     return info
 
 
-def write_movie_xml_file(info: LookedUpFileInfo) -> str:
+def write_movie_xml_file(info: LookedUpFileInfo, trailer: Path = None, poster: Path = None, background: Path = None) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
-    element_maker = objectify.ElementMaker(annotate=False)
 
-    root = element_maker("movie")
-    root["plot"]=info.description
-    root["outline"] =  None
-    root["title"] = info.name
-    root["dateadded"] =  None
-    root["trailer"] =  None
-    root["year"] = info.date[:4]
-    root["mpaa"] = "XXX"
-    root["premiered"] = info.date
-    root["releasedate"] = info.date
-    root["runtime"] =  None
-    root["root"] =  None
-    root["root"]["art"] =  None
-    #(
-    #         element_maker.poster(),
-    #         element_maker.fanart(),
-    #     ),
-    # )
-
-    for genre in info.tags:
-        genre_tag = objectify.SubElement(root, "genre")
-        genre_tag["text"] = genre
-
-    objectify.SubElement(root, "theporndbid")["text"]=(f'{info.uuid}')
-    objectify.SubElement(root, "phoenixadultid")
-    objectify.SubElement(root, "phoenixadulturlid")
-
+    root = etree.Element('movie')
+    etree.SubElement(root, 'plot').text = info.description
+    etree.SubElement(root, 'outline')
+    etree.SubElement(root, 'title').text = info.name
+    etree.SubElement(root, 'dateadded')
+    trailertag = etree.SubElement(root, 'trailer')
+    if trailer is not None:
+        trailertag.text = str(trailer)
+    etree.SubElement(root, 'year').text = info.date[:4]
+    etree.SubElement(root, 'premiered').text = info.date
+    etree.SubElement(root, 'releasedate').text = info.date
+    etree.SubElement(root, 'mpaa').text = "XXX"
+    art = etree.SubElement(root, 'art')
+    postertag = etree.SubElement(art, 'poster')
+    if poster is not None:
+        postertag.text = str(poster)
+    backgroundtag = etree.SubElement(art, 'background')
+    if background is not None:
+        backgroundtag.text = str(background)
+    for tag in info.tags:
+        etree.SubElement(root, 'tag').text = tag
+    etree.SubElement(root, "genre").text = "Adult"
+    etree.SubElement(root, "theporndbid").text=f'{info.uuid}'
+    etree.SubElement(root, "phoenixadultid")
+    etree.SubElement(root, "phoenixadulturlid")
     for performer in info.performers:
         actor = objectify.SubElement(root, "actor")
-        objectify.SubElement(actor, "name")["text"] = (performer.name)
-        objectify.SubElement(actor, "role")["text"] = (performer.role)
-        objectify.SubElement(actor, "type")["text"] = ("Actor")
-        objectify.SubElement(actor, "thumb")
-
+        etree.SubElement(actor, "name").text = performer.name
+        etree.SubElement(actor, "role").text = performer.role
+        etree.SubElement(actor, "type").text = "Actor"
+        etree.SubElement(actor, "thumb")
     objectify.SubElement(root, "fileinfo")
-
     objectify.deannotate(root)
     etree.cleanup_namespaces(root)
-    return str(etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
+    return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8').decode(encoding='UTF-8')
 
-def write_nfo(video_file: Path, info: LookedUpFileInfo, namer_config: NamerConfig ) -> Path:
+def write_nfo(video_file: Path, info: LookedUpFileInfo, namer_config: NamerConfig, trailer: Path, poster: Path, background: Path ) -> Path:
     """
     Writes an .nfo to the correct place for a video file.
     """
     if video_file is not None and info is not None and namer_config.write_nfo is True:
         target = video_file.parent / (video_file.stem + ".nfo")
-        target.write_text(write_movie_xml_file(info))
+        with open(target, "wt", encoding='utf-8') as nfofile:
+            towrite = write_movie_xml_file(info, trailer, poster, background)
+            nfofile.write(towrite)
         set_permissions(target, namer_config)

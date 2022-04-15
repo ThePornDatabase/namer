@@ -767,5 +767,5 @@ def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult], nam
                 f" {attempt.name_parts.date:50.50}\n")
             log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"+
                 f" {attempt.name_parts.name:50.50}\n")
-        set_permissions(logname, namer_config)
+    set_permissions(logname, namer_config)
     return logname
