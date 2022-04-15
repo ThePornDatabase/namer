@@ -211,7 +211,7 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     if config.write_namer_log is True:
         write_log_file(results.video_file, results.search_results, config)
     if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
-        trailer = get_trailer(results.video_file, results.search_results, config)
+        trailer = get_trailer(results.new_metadata.trailer_url, results.video_file, config)
     if config.write_nfo is True:
         poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
         background = get_image(results.new_metadata.background_url, "-background", results.video_file, config)
