@@ -66,13 +66,15 @@ def write_movie_xml_file(info: LookedUpFileInfo, trailer: Path = None, poster: P
     for tag in info.tags:
         etree.SubElement(root, 'tag').text = tag
     etree.SubElement(root, "genre").text = "Adult"
-    etree.SubElement(root, "theporndbid").text=f'{info.uuid}'
+    etree.SubElement(root, "theporndbid").text=str(info.uuid)
     etree.SubElement(root, "phoenixadultid")
     etree.SubElement(root, "phoenixadulturlid")
+    etree.SubElement(root, "sourceid").text = info.source_url
     for performer in info.performers:
         actor = objectify.SubElement(root, "actor")
         etree.SubElement(actor, "name").text = performer.name
         etree.SubElement(actor, "role").text = performer.role
+        etree.SubElement(actor, "image").text = str(performer.image)
         etree.SubElement(actor, "type").text = "Actor"
         etree.SubElement(actor, "thumb")
     objectify.SubElement(root, "fileinfo")

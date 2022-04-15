@@ -132,6 +132,7 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
 
+@logger.catch
 def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     """
     returns json object with info
@@ -140,26 +141,28 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
        and not len(namer_config.trailer_location) == 0
        and url is not None
        and len(url) > 0):
+        logger.info("Attempting to downlaod trailer: {}", url)
         location = namer_config.trailer_location[:max([idx for idx, x in enumerate(namer_config.trailer_location) if x == '.'])]
-        urlparts = url.split(".")
+        urlparts = url.split('?')[0].split(".")
         ext = "mp4"
-        if urlparts is not None and len(urlparts) > 0:
+        if urlparts is not None and len(urlparts) > 0 and urlparts[-1].lower() in ["mp4","mpeg4","mkv","avi"] :
             ext = urlparts[-1]
         trailerfile: Path = video_file.parent / (location + "." + ext)
         trailerfile.parent.mkdir(parents=True, exist_ok=True)
         if not trailerfile.exists() and url.startswith("http"):
-            headers = {"Authorization": f"Bearer {namer_config.porndb_token}",
-                    'User-Agent': 'namer-1'}
+            headers = {'User-Agent': 'namer-1'}
+            if "metadataapi.net" in url:
+                headers["Authorization"] = f"Bearer {namer_config.porndb_token}"
             try:
                 with requests.get(url, headers=headers) as response:
                     #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
-                    #response.raise_for_status()
+                    response.raise_for_status()
                     with open(trailerfile, "wb") as binary_file:
                         # Write bytes to file
                         binary_file.write(response.content)
                         set_permissions(trailerfile, namer_config)
                         return trailerfile
-            except requests.exceptions.RequestException as ex:
+            except OSError as ex:
                 logger.warning(ex)
                 return None
         else:
@@ -185,6 +188,7 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
         if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
             performer.role = json_performer.parent.extras.gender
         performer.name = json_performer.name
+        performer.image = json_performer.image
         file_info.performers.append(performer)
     file_info.original_query=url
     file_info.origninal_response=json_response

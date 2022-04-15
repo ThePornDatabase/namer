@@ -10,6 +10,7 @@ import time
 import os
 import sys
 from pathlib import Path, PurePath
+from typing import List
 from loguru import logger
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, EVENT_TYPE_DELETED, EVENT_TYPE_MOVED
@@ -37,6 +38,8 @@ def handle(target_file: Path, namer_config: NamerConfig):
     """
     Responsible for processing and moving new movie files.
     """
+    if not target_file.exists() and target_file.is_file():
+        return
     relative_path = target_file.relative_to(namer_config.watch_dir)
 
     # is in a dir:
@@ -189,12 +192,13 @@ class MovieWatcher:
         self.__schedule()
         self.__event_observer.start()
         # touch all existing movie files.
-        files = []
+        files: List[Path] = []
         for file in self.__namer_config.watch_dir.rglob('*.*'):
             if file.is_file() and file.suffix in ('.mkv', '.mp4'):
                 files.append(file)
         for file in files:
-            handle(file, self.__namer_config)
+            if file.exists() and file.is_file():
+                handle(file, self.__namer_config)
 
     def stop(self):
         """

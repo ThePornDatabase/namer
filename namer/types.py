@@ -370,7 +370,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config = NamerConfig()
     namer_config.porndb_token = config.get('namer','porndb_token', fallback=None)
     namer_config.inplace_name = config.get('namer','inplace_name',fallback='{site} - {date} - {name}.{ext}')
-    namer_config.name_parser = config.get('namer','name_parser',fallback='{_site}{_sep}{_date}{_sep}{_ts}{_name}{_dot}{_ext}')
+    namer_config.name_parser = config.get('namer','name_parser',fallback='{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}')
     namer_config.prefer_dir_name_if_available = config.getboolean('namer','prefer_dir_name_if_available',fallback=False)
     namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
@@ -484,6 +484,7 @@ class Performer:
     """
     name: str
     role: str
+    image: str
     """
     if available the performers gender, stored as a role.  example: "Female", "Male"
     Useful as many nzbs often don't include the scene name, but instead female performers names,
@@ -491,9 +492,10 @@ class Performer:
     Other performers are also used in name matching, if females are attempted first.
     """
 
-    def __init__(self, name=None, role=None):
-        self.name = name
-        self.role = role
+    def __init__(self, name=None, role=None, image=None):
+        self.name  = name
+        self.role  = role
+        self.image = image
 
     def __str__(self):
         name = "Unknown" if self.name is None else self.name
@@ -502,7 +504,7 @@ class Performer:
         return name
 
     def __repr__(self):
-        return f'Performer[name={self.name}, role={self.role}]'
+        return f'Performer[name={self.name}, role={self.role}, image={self.image}]'
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

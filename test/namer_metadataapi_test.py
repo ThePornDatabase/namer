@@ -36,12 +36,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             "upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2F"+
             "logo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d4"+
             "80ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg")
-        expected = []
-        expected.append(Performer("Ryan Benetti", None))
-        expected.append(Performer("Aya Benetti","Female"))
-        expected.append(Performer("Bella Tina","Female"))
-        expected.append(Performer("Megane Lopez","Female"))
-        self.assertListEqual(info.performers, expected)
+        self.assertEqual(info.performers[0].name, "Ryan Benetti")
+        self.assertEqual(info.performers[1].name, "Aya Benetti")
+        self.assertEqual(info.performers[2].name, "Bella Tina")
+        self.assertEqual(info.performers[3].name, "Megane Lopez")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net(self, mock_response):
@@ -66,11 +64,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale()"+
             "/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Fe6%2Fb9%2F5b%2F066589730107dcfd6b656a398a584b5%2Fbackground%2F"+
             "bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
-        expected = []
-        expected.append(Performer("Carmela Clutch", "Female"))
-        expected.append(Performer("Francesca Le","Female"))
-        expected.append(Performer("Mark Wood","Male"))
-        self.assertListEqual(info.performers, expected)
+        self.assertEqual(info.performers[0].name, "Carmela Clutch")
+        self.assertEqual(info.performers[0].role, "Female")
+        self.assertEqual(info.performers[1].name, "Francesca Le")
+        self.assertEqual(info.performers[1].role, "Female")
+        self.assertEqual(info.performers[2].name, "Mark Wood")
+        self.assertEqual(info.performers[2].role, "Male")
+
         self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -114,11 +114,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
         self.assertRegex(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2F"+
             "bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
-        expected = []
-        expected.append(Performer("Carmela Clutch", "Female"))
-        expected.append(Performer("Francesca Le","Female"))
-        expected.append(Performer("Mark Wood","Male"))
-        self.assertListEqual(info.performers, expected)
+        self.assertEqual(info.performers[0].name, "Carmela Clutch")
+        self.assertEqual(info.performers[0].role, "Female")
+        self.assertEqual(info.performers[1].name, "Francesca Le")
+        self.assertEqual(info.performers[1].role, "Female")
+        self.assertEqual(info.performers[2].name, "Mark Wood")
+        self.assertEqual(info.performers[2].role, "Male")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_data(self, mock_response):
