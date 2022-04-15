@@ -115,6 +115,7 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
     if config.enabled_poster and not file.exists() and url.startswith("http"):
         headers = {"Authorization": f"Bearer {config.porndb_token}",
                 'User-Agent': 'namer-1'}
+        file.parent.mkdir(parents=True, exist_ok=True)
         try:
             with requests.get(url, headers=headers) as response:
                 #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
@@ -135,9 +136,17 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     """
     returns json object with info
     """
-    if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0:
+    if (namer_config.trailer_location is not None
+       and not len(namer_config.trailer_location) == 0
+       and url is not None
+       and len(url) > 0):
         location = namer_config.trailer_location[:max([idx for idx, x in enumerate(namer_config.trailer_location) if x == '.'])]
-        trailerfile: Path = video_file.parent / (location + "." + url.split(".")[-1])
+        urlparts = url.split(".")
+        ext = "mp4"
+        if urlparts is not None and len(urlparts) > 0:
+            ext = urlparts[-1]
+        trailerfile: Path = video_file.parent / (location + "." + ext)
+        trailerfile.parent.mkdir(parents=True, exist_ok=True)
         if not trailerfile.exists() and url.startswith("http"):
             headers = {"Authorization": f"Bearer {namer_config.porndb_token}",
                     'User-Agent': 'namer-1'}
