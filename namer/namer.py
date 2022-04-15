@@ -215,7 +215,7 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     if config.write_nfo is True:
         poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
         background = get_image(results.new_metadata.background_url, "-background", results.video_file, config)
-        write_nfo(results.video_file, results.new_metadata, config, trailer, poster, background)
+        write_nfo(results, config, trailer, poster, background)
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """

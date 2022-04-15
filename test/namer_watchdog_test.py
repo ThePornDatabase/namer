@@ -339,7 +339,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-            self.assertTrue(nfofile.exists() and nfofile.is_file())
+            self.assertTrue(nfofile.exists() and nfofile.is_file() and nfofile.stat().st_size != 0 )
 
 
     def test_manual_tick(self):

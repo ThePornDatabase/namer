@@ -5,7 +5,7 @@ or used in renaming the video file.
 """
 from pathlib import Path
 from lxml import objectify, etree
-from namer.types import LookedUpFileInfo, NamerConfig, Performer, set_permissions
+from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
 
 def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
@@ -80,13 +80,13 @@ def write_movie_xml_file(info: LookedUpFileInfo, trailer: Path = None, poster: P
     etree.cleanup_namespaces(root)
     return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8').decode(encoding='UTF-8')
 
-def write_nfo(video_file: Path, info: LookedUpFileInfo, namer_config: NamerConfig, trailer: Path, poster: Path, background: Path ) -> Path:
+def write_nfo(results: ProcessingResults, namer_config: NamerConfig, trailer: Path, poster: Path, background: Path ) -> Path:
     """
     Writes an .nfo to the correct place for a video file.
     """
-    if video_file is not None and info is not None and namer_config.write_nfo is True:
-        target = video_file.parent / (video_file.stem + ".nfo")
+    if results.video_file is not None and results.new_metadata is not None and namer_config.write_nfo is True:
+        target = results.video_file.parent / (results.video_file.stem + ".nfo")
         with open(target, "wt", encoding='utf-8') as nfofile:
-            towrite = write_movie_xml_file(info, trailer, poster, background)
+            towrite = write_movie_xml_file(results.new_metadata, trailer, poster, background)
             nfofile.write(towrite)
         set_permissions(target, namer_config)
