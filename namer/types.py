@@ -376,7 +376,6 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
     namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
     namer_config.trailer_location = config.get('namer','trailer_location',fallback=None)
-    namer_config.write_nfo = config.getboolean('namer','write_nfo',fallback=False)
     namer_config.sites_with_no_date_info =[
         x.strip().upper() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
     ]
@@ -385,6 +384,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     namer_config.write_namer_log = config.getboolean('namer','write_namer_log',fallback=False)
     namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
     namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
+    namer_config.write_nfo = config.getboolean('metadata','write_nfo',fallback=False)
     namer_config.enabled_tagging = config.getboolean('metadata','enabled_tagging',fallback=True)
     namer_config.enabled_poster = config.getboolean('metadata','enabled_poster',fallback=True)
     namer_config.enable_metadataapi_genres = config.getboolean('metadata','enable_metadataapi_genres',fallback=False)

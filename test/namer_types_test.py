@@ -147,11 +147,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             write_namer_log = True
             set_dir_permissions = 700
             set_file_permissions = 700
-            write_nfo = True
             trailer_location = trailer/default.{ext}
             sites_with_no_date_info = Milf, TeamWhatever
 
         [metadata]
+            write_nfo = True
             enabled_tagging = False
             enabled_poster = False
             enable_metadataapi_genres = True

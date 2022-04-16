@@ -39,7 +39,8 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     return info
 
 
-def write_movie_xml_file(info: LookedUpFileInfo, trailer: Path = None, poster: Path = None, background: Path = None) -> str:
+def write_movie_xml_file(
+    info: LookedUpFileInfo, config: NamerConfig, trailer: Path = None, poster: Path = None, background: Path = None) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
@@ -63,9 +64,13 @@ def write_movie_xml_file(info: LookedUpFileInfo, trailer: Path = None, poster: P
     backgroundtag = etree.SubElement(art, 'background')
     if background is not None:
         backgroundtag.text = str(background)
-    for tag in info.tags:
-        etree.SubElement(root, 'tag').text = tag
-    etree.SubElement(root, "genre").text = "Adult"
+    if config.enable_metadataapi_genres:
+        for tag in info.tags:
+            etree.SubElement(root, 'genre').text = tag
+    else:
+        for tag in info.tags:
+            etree.SubElement(root, 'tag').text = tag
+        etree.SubElement(root, "genre").text = config.default_genre
     etree.SubElement(root, "theporndbid").text=str(info.uuid)
     etree.SubElement(root, "phoenixadultid")
     etree.SubElement(root, "phoenixadulturlid")
@@ -89,6 +94,6 @@ def write_nfo(results: ProcessingResults, namer_config: NamerConfig, trailer: Pa
     if results.video_file is not None and results.new_metadata is not None and namer_config.write_nfo is True:
         target = results.video_file.parent / (results.video_file.stem + ".nfo")
         with open(target, "wt", encoding='utf-8') as nfofile:
-            towrite = write_movie_xml_file(results.new_metadata, trailer, poster, background)
+            towrite = write_movie_xml_file(results.new_metadata, namer_config, trailer, poster, background)
             nfofile.write(towrite)
         set_permissions(target, namer_config)
