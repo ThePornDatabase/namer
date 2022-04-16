@@ -38,16 +38,16 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
     ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
 
     #First Name Powerset.
-    if ratio[1] < 89.9:
+    if ratio is not None and ratio[1] < 89.9:
         all_performers = list(map(lambda p: p.name.split(' ')[0], looked_up.performers))
         powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
         first_name_ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
-        if first_name_ratio[1] > ratio[1]:
+        if first_name_ratio is not None and first_name_ratio[1] > ratio[1]:
             ratio = first_name_ratio
 
     return ComparisonResult(
-        name=ratio[0],
-        name_match=ratio[1],
+        name=ratio[0] if ratio is not None else None,
+        name_match=ratio[1] if ratio is not None else None,
         datematch=release_date,
         sitematch=site,
         name_parts=name_parts,
