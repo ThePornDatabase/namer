@@ -163,6 +163,17 @@ class NamerConfig():
     If a directory name is to be prefered over a file name.
     """
 
+    write_namer_log: bool = False
+    """
+    Should a log of comparisons be written next to processed video files.
+    """
+
+    update_permissions_ownership: bool = False
+    """
+    Should file permissions/ownership be updated.
+    If false, set_uid/set_gid,set_dir_permissions,set_file_permissions will be ignored
+    """
+
     set_uid: bool = None
     """
     UID Settings for new/moved files/dirs.
@@ -171,11 +182,6 @@ class NamerConfig():
     set_gid: bool = None
     """
     GID Settings for new/moved files/dirs.
-    """
-
-    write_namer_log: bool = False
-    """
-    Should a log of comparisons be written next to processed video files.
     """
 
     set_dir_permissions: int = 775
@@ -382,6 +388,7 @@ def from_config(config : ConfigParser) -> NamerConfig:
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")
     namer_config.write_namer_log = config.getboolean('namer','write_namer_log',fallback=False)
+    namer_config.update_permissions_ownership = config.getboolean('namer','update_permissions_ownership',fallback=False)
     namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
     namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
     namer_config.write_nfo = config.getboolean('metadata','write_nfo',fallback=False)
@@ -720,7 +727,7 @@ def set_permissions(file: Path, config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
-    if hasattr(os, "chmod") and file is not None and file.exists():
+    if hasattr(os, "chmod") and file is not None and file.exists() and config.update_permissions_ownership is True:
         fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
         dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
         if dirperm is not None and file.is_dir():
