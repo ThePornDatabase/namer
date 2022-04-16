@@ -5,6 +5,7 @@ from configparser import ConfigParser
 import logging
 import os
 from pathlib import Path
+from platform import system
 import sys
 import tempfile
 import unittest
@@ -206,23 +207,24 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Verify set permission.
         """
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(tmpdir)
-            targetdir = tempdir / "targetdir"
-            targetdir.mkdir()
-            testfile = targetdir / "testfile.txt"
-            with open(testfile, 'w', encoding="utf-8") as file:
-                file.write('Create a new text file!')
-            self.assertEqual(oct(testfile.stat().st_mode)[-3:], "644")
-            self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "755")
-            self.assertNotEqual(targetdir.stat().st_gid, "1234567890")
-            config = default_config()
-            config.set_dir_permissions=777
-            config.set_file_permissions=666
-            set_permissions(testfile, config)
-            self.assertEqual(oct(testfile.stat().st_mode)[-3:], "666")
-            set_permissions(targetdir, config)
-            self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "777")
+        if system() != 'Windows':
+            with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+                tempdir = Path(tmpdir)
+                targetdir = tempdir / "targetdir"
+                targetdir.mkdir()
+                testfile = targetdir / "testfile.txt"
+                with open(testfile, 'w', encoding="utf-8") as file:
+                    file.write('Create a new text file!')
+                self.assertEqual(oct(testfile.stat().st_mode)[-3:], "644")
+                self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "755")
+                self.assertNotEqual(targetdir.stat().st_gid, "1234567890")
+                config = default_config()
+                config.set_dir_permissions=777
+                config.set_file_permissions=666
+                set_permissions(testfile, config)
+                self.assertEqual(oct(testfile.stat().st_mode)[-3:], "666")
+                set_permissions(targetdir, config)
+                self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "777")
 
 
 if __name__ == '__main__':

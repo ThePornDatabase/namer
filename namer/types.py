@@ -4,6 +4,7 @@ Types shared by all the files in this project, used as interfaces for moving dat
 
 from configparser import ConfigParser
 from dataclasses import dataclass
+from platform import system
 from typing import List, Sequence
 import os
 import configparser
@@ -739,7 +740,7 @@ def set_permissions(file: Path, config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
-    if hasattr(os, "chmod") and file is not None and file.exists() and config.update_permissions_ownership is True:
+    if system() != 'Windows' and file is not None and file.exists() and config.update_permissions_ownership is True:
         _set_perms(file, config)
         if file.is_dir():
             for target in file.rglob('*.*'):
