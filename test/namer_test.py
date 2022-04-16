@@ -9,13 +9,26 @@ from unittest.mock import patch
 import tempfile
 from test.utils import new_ea, prepare
 from mutagen.mp4 import MP4
-from namer.types import NamerConfig
-from namer.namer import main, check_arguments, set_permissions
+from namer.types import NamerConfig, default_config
+from namer.namer import determine_target_file, main, check_arguments, set_permissions
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def test_target_filedeterminitatin(self):
+        """
+        Verify artificial names for directories are built correctly.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = default_config()
+            config.watch_dir = tempdir
+            dirtoprocess = tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum"
+            new_ea(dirtoprocess, use_dir=True)
+            results = determine_target_file(dirtoprocess, config)
+            self.assertEqual(results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum")
 
     def test_check_arguments(self):
         """

@@ -102,7 +102,7 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
         file = file_to_process
 
     if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.stem+file.suffix
+        name = containing_dir.name+file.suffix
     else:
         name = file.name
 
