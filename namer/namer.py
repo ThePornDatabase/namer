@@ -5,7 +5,6 @@ the porndb, and used for renaming (in place), and updating an mp4
 file's metadata (poster, artists, etc.)
 """
 import argparse
-import os
 from pathlib import Path
 import pathlib
 from random import choices
@@ -128,21 +127,24 @@ def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
         return parse_movie_xml_file(nfo_file)
     return None
 
-def move_to_final_location(to_move: Path, target_dir: Path, template: str, new_metadata: LookedUpFileInfo) -> Path:
+def move_to_final_location(
+    to_move: Path, target_dir: Path, template: str, new_metadata: LookedUpFileInfo, config: NamerConfig) -> Path:
     """
     Moves a file or directory to it's final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
     """
     infix = 0
     while True:
-        relative_path = new_metadata.new_file_name(template, f"({infix})")
+        relative_path = Path(new_metadata.new_file_name(template, f"({infix})"))
         newname = target_dir / relative_path
         newname = newname.resolve()
         infix += 1
         if not newname.exists() or to_move.samefile(newname):
             break
-    os.makedirs(newname.parent,exist_ok=True)
+    newname.parent.mkdir(exist_ok=True, parents=True)
+    set_permissions(target_dir / relative_path.parts[0], config)
     to_move.rename(newname)
+    set_permissions(newname, config)
     return newname
 
 def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
@@ -188,8 +190,8 @@ def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False
                 to_move=output.video_file,
                 target_dir=output.video_file.parent,
                 template=config.inplace_name,
-                new_metadata=output.new_metadata)
-            set_permissions(output.video_file, config)
+                new_metadata=output.new_metadata,
+                config=config)
             tag_in_place(output.video_file, config, output.new_metadata)
             logger.info("Done processing file: {}, moved to {}", file_to_process,output.video_file)
     return output

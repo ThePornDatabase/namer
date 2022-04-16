@@ -87,7 +87,8 @@ def handle(target_file: Path, namer_config: NamerConfig):
             result.video_file,
             namer_config.dest_dir,
             namer_config.new_relative_path_name,
-            result.new_metadata)
+            result.new_metadata,
+            namer_config)
         result.video_file = newfile
         logger.info("Moving success processed file {} to {}", result.video_file, newfile)
 
