@@ -722,31 +722,29 @@ class ProcessingResults:
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
 
+def _set_perms(target: Path, config: NamerConfig):
+    fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
+    dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
+    if config.set_gid is not None:
+        os.lchown(target, uid=-1, gid=config.set_gid)
+    if config.set_uid is not None:
+        os.lchown(target, uid=config.set_uid, gid=-1)
+    if target.is_dir() and dirperm is not None:
+        target.chmod(dirperm)
+    elif target.is_file() and fileperm is not None:
+        target.chmod(fileperm)
+
 def set_permissions(file: Path, config: NamerConfig):
     """
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
     if hasattr(os, "chmod") and file is not None and file.exists() and config.update_permissions_ownership is True:
-        fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
-        dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
-        if dirperm is not None and file.is_dir():
-            Path(file).chmod(dirperm)
-            if config.set_uid is not None and config.set_gid is not None:
-                os.chown(file, uid=config.set_uid, gid=config.set_gid)
+        _set_perms(file, config)
         if file.is_dir():
-            for root, _dirs, files in os.walk(file):
-                if dirperm is not None:
-                    Path(root).chmod(dirperm)
-                if config.set_uid is not None and config.set_gid is not None:
-                    os.chown(root, uid=config.set_uid, gid=config.set_gid)
-                for cur in files:
-                    set_permissions(Path(os.path.join(root, cur)), config)
-        elif file.is_file() and fileperm is not None:
-            if fileperm is not None:
-                file.chmod(fileperm)
-                if config.set_uid is not None and config.set_gid is not None:
-                    os.chown(file, uid=config.set_uid, gid=config.set_gid)
+            for target in file.rglob('*.*'):
+                _set_perms(target, config)
+
 
 def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult], namer_config: NamerConfig) -> str:
     """
