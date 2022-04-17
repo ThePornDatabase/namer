@@ -3,6 +3,7 @@ A file watching service to rename movie files and move them
 to revelant locations after match the file against the porndb.
 """
 
+from platform import system
 import re
 import shutil
 import tempfile
@@ -12,6 +13,7 @@ import sys
 from pathlib import Path, PurePath
 from typing import List
 from loguru import logger
+import watchdog.observers
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent, EVENT_TYPE_DELETED, EVENT_TYPE_MOVED
 import schedule
@@ -235,4 +237,11 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
 
 
 if __name__ == "__main__":
+    if system() == "Windows":
+        # Monkey-patch Watchdog to:
+        #   - Set the Windows hack delay to 0 in WindowsApiEmitter,
+        #     otherwise we might miss some events
+        #   - Increase the ReadDirectoryChangesW buffer size
+        watchdog.observers.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
+        watchdog.observers.winapi.BUFFER_SIZE = 8192
     create_watcher(default_config()).run()
