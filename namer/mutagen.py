@@ -47,20 +47,29 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
     logger.info("Updating atom tags on: {}",mp4)
     if mp4 is not None and mp4.exists():
         video = MP4(mp4)
-        video["\xa9nam"] = [looked_up.name]
-        video["\xa9day"] = [looked_up.date+"T09:00:00Z"]
-        if config.enable_metadataapi_genres:
+        if looked_up.name is not None:
+            video["\xa9nam"] = [looked_up.name]
+        if looked_up.date is not None:
+            video["\xa9day"] = [looked_up.date+"T09:00:00Z"]
+        if config.enable_metadataapi_genres and looked_up.tags is not None:
             video["\xa9gen"] = looked_up.tags
         else:
-            video["keyw"] = looked_up.tags
-            video["\xa9gen"] = [config.default_genre]
-        video["tven"] = [looked_up.date]
-        video["tvnn"] = [looked_up.site]
+            if looked_up.tags is not None:
+                video["keyw"] = looked_up.tags
+            if config.default_genre is not None:
+                video["\xa9gen"] = [config.default_genre]
+        if looked_up.date is not None:
+            video["tven"] = [looked_up.date]
+        if looked_up.site is not None:
+            video["tvnn"] = [looked_up.site]
+            video["\xa9alb"] = [looked_up.site]
         video["stik"] = [9] #Movie
-        video["hdvd"] = [resolution_to_hdv_setting(get_resolution(mp4))]
-        video["ldes"] = [looked_up.description]
+        resolution = resolution_to_hdv_setting(get_resolution(mp4))
+        if resolution is not None:
+            video["hdvd"] = [resolution]
+        if looked_up.description is not None:
+            video["ldes"] = [looked_up.description]
         video["----:com.apple.iTunes:iTunEXTC"] = 'mpaa|XXX|0|'.encode("UTF-8", errors="ignore")
-        video["\xa9alb"] = [looked_up.site]
         itunes_movie = '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>'
         itunes_movie += f'<key>copy-warning</key><string>{looked_up.source_url}</string>'
         itunes_movie += f'<key>studio</key> <string>{looked_up.site}</string>'
