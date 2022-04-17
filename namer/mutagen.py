@@ -12,6 +12,8 @@ def resolution_to_hdv_setting(resolution: int) -> int:
     """
     Using the resolution (height) of an video stream return the atom value for hdvideo
     """
+    if resolution is None:
+        return 0
     if resolution >= 2160:
         return 3
     if resolution >= 1080:
@@ -19,6 +21,13 @@ def resolution_to_hdv_setting(resolution: int) -> int:
     if resolution >= 720:
         return 1
     return 0
+
+
+def set_if_not_none(video: MP4, atom: str, value: str):
+    """
+    Set a single atom on the video if it is not None.
+    """
+    video[atom] = [value] if value is not None else []
 
 def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig):
     # pylint: disable=too-many-statements
@@ -47,20 +56,20 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
     logger.info("Updating atom tags on: {}",mp4)
     if mp4 is not None and mp4.exists():
         video = MP4(mp4)
-        video["\xa9nam"] = [looked_up.name]
-        video["\xa9day"] = [looked_up.date+"T09:00:00Z"]
+        set_if_not_none(video, "\xa9nam", looked_up.name)
+        video["\xa9day"] = [looked_up.date+"T09:00:00Z"] if looked_up.date is not None else []
         if config.enable_metadataapi_genres:
-            video["\xa9gen"] = looked_up.tags
+            video["\xa9gen"] = looked_up.tags if looked_up.tags is not None else []
         else:
-            video["keyw"] = looked_up.tags
-            video["\xa9gen"] = [config.default_genre]
-        video["tven"] = [looked_up.date]
-        video["tvnn"] = [looked_up.site]
+            video["keyw"] = looked_up.tags if looked_up.tags is not None else []
+            set_if_not_none(video, "\xa9gen", config.default_genre)
+        set_if_not_none(video, "tvnn", looked_up.site)
+        set_if_not_none(video, "\xa9alb", looked_up.site)
         video["stik"] = [9] #Movie
-        video["hdvd"] = [resolution_to_hdv_setting(get_resolution(mp4))]
-        video["ldes"] = [looked_up.description]
+        resolution = resolution_to_hdv_setting(get_resolution(mp4))
+        set_if_not_none(video, "hdvd", resolution)
+        set_if_not_none(video, "ldes", looked_up.description)
         video["----:com.apple.iTunes:iTunEXTC"] = 'mpaa|XXX|0|'.encode("UTF-8", errors="ignore")
-        video["\xa9alb"] = [looked_up.site]
         itunes_movie = '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>'
         itunes_movie += f'<key>copy-warning</key><string>{looked_up.source_url}</string>'
         itunes_movie += f'<key>studio</key> <string>{looked_up.site}</string>'

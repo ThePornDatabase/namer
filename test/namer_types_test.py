@@ -9,8 +9,8 @@ from platform import system
 import sys
 import tempfile
 import unittest
-from namer.types import NamerConfig, default_config, PartialFormatter, from_config, Performer, set_permissions
-
+from namer.types import NamerConfig, PartialFormatter, Performer, from_config, set_permissions
+from test.utils import sample_config
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
@@ -30,7 +30,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Verify the namer.cfg exmple in this directory is loaded.
         """
-        config = default_config()
+        config = sample_config()
         self.assertEqual(config.del_other_files , False)
         self.assertEqual(config.inplace_name, '{site} - {date} - {name}.{ext}')
         self.assertEqual(config.new_relative_path_name, '{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
@@ -198,7 +198,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test config to string
         """
-        config = default_config()
+        config = sample_config()
         conf = str(config)
         self.assertIn("Namer Config", conf)
         self.assertIn("Watchdog Config", conf)
@@ -218,7 +218,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 self.assertEqual(oct(testfile.stat().st_mode)[-3:], "644")
                 self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "755")
                 self.assertNotEqual(targetdir.stat().st_gid, "1234567890")
-                config = default_config()
+                config = sample_config()
                 config.set_dir_permissions=777
                 config.set_file_permissions=666
                 set_permissions(testfile, config)

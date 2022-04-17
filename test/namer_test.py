@@ -7,9 +7,9 @@ import shutil
 import unittest
 from unittest.mock import patch
 import tempfile
-from test.utils import new_ea, prepare
+from test.utils import new_ea, prepare, sample_config
 from mutagen.mp4 import MP4
-from namer.types import NamerConfig, default_config
+from namer.types import NamerConfig
 from namer.namer import determine_target_file, main, check_arguments, set_permissions
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -23,7 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            config = default_config()
+            config = sample_config()
             config.watch_dir = tempdir
             dirtoprocess = tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum"
             new_ea(dirtoprocess, use_dir=True)
@@ -71,6 +71,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         test namer main method renames and tags in place when -d (directory) is passed
         """
+        os.environ['NAMER_CONFIG'] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True)]
@@ -86,6 +87,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test multiple directories are processed when -d (directory) and -m are passed.
         Process all subdirs of -d.
         """
+        os.environ['NAMER_CONFIG'] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True, post_stem='1'),

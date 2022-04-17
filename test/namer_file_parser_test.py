@@ -26,6 +26,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
 
+    def test_parse_file_name_interesting_site(self):
+        """
+        Test standard name parsing.
+        """
+        name = parse_file_name('Mommy\'s Girl - 15.04.20 - BTS-Mommy Takes a Squirt.mp4', REGEX_TOKEN)
+        self.assertEqual(name.site, "Mommy\'sGirl")
+        self.assertEqual(name.date, "2015-04-20")
+        self.assertEqual(name.name, "BTS-Mommy Takes a Squirt")
+        self.assertEqual(name.act, None)
+        self.assertEqual(name.trans, False)
+        self.assertEqual(name.extension, "mp4")
+
+
     def test_parse_file_name_no_date(self):
         """
         Test standard name parsing.

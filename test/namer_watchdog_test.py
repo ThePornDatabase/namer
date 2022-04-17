@@ -124,7 +124,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test the handle function works for a directory.
         """
+        os.environ['NAMER_CONFIG'] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            os.environ['NAMER_CONFIG'] = "./namer.cfg.sample"
             tempdir = Path(tmpdir)
             config = make_locations(tempdir)
             config.prefer_dir_name_if_available = False
@@ -277,6 +279,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test the handle function works for a directory.
         """
+        os.environ['NAMER_CONFIG'] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             config = make_locations(tempdir)

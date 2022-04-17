@@ -523,32 +523,32 @@ class LookedUpFileInfo():
 
     # pylint: disable=too-many-instance-attributes
 
-    uuid: str = ""
+    uuid: str = None
     """
     porndb scene id, allowing lookup of more metadata, (tags)
     """
 
-    site: str = ""
+    site: str = None
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
     """
-    date: str = ""
+    date: str = None
     """
     date of initial release, formated YYYY-mm-dd
     """
-    name: str = ""
+    name: str = None
     """
     Name of the scene in this video
     """
-    description: str = ""
+    description: str = None
     """
     Description of the action in this video
     """
-    source_url: str = ""
+    source_url: str = None
     """
     Original source location of this video
     """
-    poster_url: str = ""
+    poster_url: str = None
     """
     Url to download a poster for this video
     """
@@ -560,11 +560,11 @@ class LookedUpFileInfo():
     """
     List of genres, per porndb.  Tends to be noisey.
     """
-    origninal_response: str = ""
+    origninal_response: str = None
     """
     json reponse parsed in to this object.
     """
-    original_query: str = ""
+    original_query: str = None
     """
     url query used to get the above json response
     """
@@ -572,7 +572,7 @@ class LookedUpFileInfo():
     """
     The FileNameParts used to build the orignal_query
     """
-    look_up_site_id: str = ""
+    look_up_site_id: str = None
     """
     ID Used by the queried site to identify the video
     """
@@ -605,13 +605,14 @@ class LookedUpFileInfo():
                 'date': self.date,
                 'description': self.description,
                 'name': self.name,
-                'site': self.site.replace(' ',''),
+                'site': self.site.replace(' ','') if self.site is not None else None,
                 'full_site': self.site,
-                'performers': " ".join(map(lambda p: p.name, filter( lambda p: p.role == 'Female' , self.performers))),
-                'all_performers': " ".join(map( lambda p: p.name , self.performers)),
-                'act': self.original_parsed_filename.act,
-                'ext': self.original_parsed_filename.extension,
-                'trans': self.original_parsed_filename.trans}
+                'performers': " ".join(map(lambda p: p.name, filter( lambda p: p.role == 'Female' , self.performers))) if
+                    self.performers is not None else None,
+                'all_performers': " ".join(map( lambda p: p.name , self.performers)) if self.performers is not None else None,
+                'act': self.original_parsed_filename.act if self.original_parsed_filename is not None else None,
+                'ext': self.original_parsed_filename.extension if self.original_parsed_filename is not None else None,
+                'trans': self.original_parsed_filename.trans if self.original_parsed_filename is not None else None}
 
     def new_file_name(self, template: str, infix: str = "(0)") -> str:
         """

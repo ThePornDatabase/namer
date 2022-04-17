@@ -9,6 +9,7 @@ import shutil
 import tempfile
 from typing import List
 from mutagen.mp4 import MP4
+from namer.types import NamerConfig, default_config
 
 def validate_permissions(test_self, file: Path, perm: int):
     """
@@ -95,3 +96,10 @@ def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):
             responses.append('{}')
     mock_poster.side_effect = posters
     mock_response.side_effect = responses
+
+def sample_config() -> NamerConfig:
+    """
+    Attempts reading various locations to fine a namer.cfg file.
+    """
+    os.environ['NAMER_CONFIG'] = "./namer.cfg.sample"
+    return default_config()
