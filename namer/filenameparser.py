@@ -81,7 +81,7 @@ def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> 
         if match.groupdict().get('name') is not None:
             file_name_parts.name = name_cleaner(match.group('name'))
         if match.groupdict().get('site') is not None:
-            file_name_parts.site = re.sub(r'[\.\-\ ]','',match.group('site'))
+            file_name_parts.site = re.sub(r'[\.\-\ ]','',match.group('site')).lower()
         if match.groupdict().get('trans') is not None:
             trans = match.group('trans')
             file_name_parts.trans = (not trans is None) and (trans.strip().upper() == 'TS')
