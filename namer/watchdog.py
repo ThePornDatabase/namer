@@ -23,15 +23,17 @@ def done_copying(file: Path) -> bool:
     Determines if a file is being copied by checking it's size in 2 second
     increments and seeing if the size has stayed the same.
     """
-    size_past = 0
+    if file is None or file.exists() is False:
+        return False
     while True:
-        if file is None or not file.exists():
-            return False
-        size_now = file.stat().st_size
-        if size_now == size_past:
-            return True
-        size_past = size_now
-        time.sleep(.2)
+        try:
+            #pylint: disable=consider-using-with
+            file = open(file, mode='rb')
+            file.close()
+            break
+        except PermissionError:
+            time.sleep(.2)
+    return True
 
 @logger.catch
 def handle(target_file: Path, namer_config: NamerConfig):
