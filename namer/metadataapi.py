@@ -68,13 +68,13 @@ def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) 
     __update_results(results, name_parts, namer_config, skipdate=True, skipname=True)
     __update_results(results, name_parts, namer_config, skipname=True)
 
-    if len(results) == 0 or not results[-1].is_match():
+    if name_parts.date is not None and (len(results) == 0 or not results[-1].is_match()):
         name_parts.date =  (date.fromisoformat(name_parts.date)+timedelta(days=-1)).isoformat()
         logger.info("Not found, trying 1 day before: {}",name_parts)
         __update_results(results, name_parts, namer_config)
         __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
 
-    if len(results) == 0 or not results[-1].is_match():
+    if name_parts.date is not None and (len(results) == 0 or not results[-1].is_match()):
         name_parts.date = (date.fromisoformat(name_parts.date)+timedelta(days=2)).isoformat()
         logger.info("Not found, trying 1 day after: {}",name_parts)
         __update_results(results, name_parts, namer_config)
