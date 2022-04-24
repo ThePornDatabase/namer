@@ -4,9 +4,9 @@ Updates mp4 files with metadata tags readable by Plex and Apple TV App.
 
 from pathlib import Path
 from loguru import logger
-from mutagen.mp4 import MP4, MP4Cover
+from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 from namer.types import LookedUpFileInfo, NamerConfig
-from namer.ffmpeg import get_resolution, update_audio_stream_if_needed
+from namer.ffmpeg import attempt_fix_corrupt, get_resolution, update_audio_stream_if_needed
 
 def resolution_to_hdv_setting(resolution: int) -> int:
     """
@@ -29,6 +29,20 @@ def set_if_not_none(video: MP4, atom: str, value: str):
     """
     video[atom] = [value] if value is not None else []
 
+def get_mp4_if_possible(mp4: Path) -> MP4:
+    """
+    Attempt to read an mp4 file to prepare for edit.
+    """
+    video: MP4 = None
+    try:
+        video = MP4(mp4)
+    except MP4StreamInfoError as __mp4_exception:
+        attempt_fix_corrupt(mp4)
+        video = MP4(mp4)
+    return video
+
+
+@logger.catch
 def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig):
     # pylint: disable=too-many-statements
     """
@@ -55,7 +69,7 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
         logger.info("Could not process audio or copy {}",mp4)
     logger.info("Updating atom tags on: {}",mp4)
     if mp4 is not None and mp4.exists():
-        video = MP4(mp4)
+        video: MP4 = get_mp4_if_possible(mp4)
         set_if_not_none(video, "\xa9nam", looked_up.name)
         video["\xa9day"] = [looked_up.date+"T09:00:00Z"] if looked_up.date is not None else []
         if config.enable_metadataapi_genres:

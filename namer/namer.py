@@ -58,7 +58,7 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
     if new_metadata is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
-            random = '-'.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+            random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
             poster = get_image(new_metadata.poster_url, random, video, config)
             logger.info("Updating file metadata (atoms): {}",video)
             update_mp4_file(video, new_metadata, poster, config)
