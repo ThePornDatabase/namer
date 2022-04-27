@@ -45,7 +45,7 @@ def parser_config_to_regex(tokens: str) -> str:
     """
 
     _sep=r'[\.\- ]+'
-    _site=r'(?P<site>[a-zA-Z0-9\'\.\-\ ]*?[a-zA-Z0-9]*?)'
+    _site=r'(?P<site>.*?)'
     _date=r'(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})'
     _optional_date=r'(?:(?P<year>[0-9]{2}(?:[0-9]{2})?)[\.\- ]+(?P<month>[0-9]{2})[\.\- ]+(?P<day>[0-9]{2})[\.\- ]+)?'
     _ts=r'((?P<trans>[T|t][S|s])'+_sep+'){0,1}'

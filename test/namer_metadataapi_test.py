@@ -7,7 +7,7 @@ import unittest
 from unittest import mock
 
 from namer.metadataapi import main, match
-from namer.types import Performer, default_config
+from namer.types import default_config
 from namer.filenameparser import parse_file_name
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -26,6 +26,35 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, default_config())
         self.assertEqual(len(results), 1)
         result = results[0]
+        info = result.looked_up
+        self.assertEqual(info.name, "Peeping Tom")
+        self.assertEqual(info.date, "2021-12-23")
+        self.assertEqual(info.site, "Dorcel Club")
+        self.assertRegex(info.description, r'kissing in a parking lot')
+        self.assertEqual(info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom")
+        self.assertEqual(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():" +
+            "upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2F"+
+            "logo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d4"+
+            "80ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg")
+        self.assertEqual(info.performers[0].name, "Ryan Benetti")
+        self.assertEqual(info.performers[1].name, "Aya Benetti")
+        self.assertEqual(info.performers[2].name, "Bella Tina")
+        self.assertEqual(info.performers[3].name, "Megane Lopez")
+
+
+    @mock.patch("namer.metadataapi.__get_response_json_object")
+    def test_parse_response_metadataapi_net_dorcel_unicode_cruft(self, mock_response):
+        """
+        Test parsing a stored response as a LookedUpFileInfo
+        """
+        response = ( Path(__file__).resolve().parent / "dc.json")
+        mock_response.return_value = response.read_text()
+        #the "e"s in the string below are unicode е (0x435), not asci e (0x65).
+        name = parse_file_name('DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4')
+        results = match(name, default_config())
+        self.assertEqual(len(results), 1)
+        result = results[0]
+        self.assertTrue(result.is_match())
         info = result.looked_up
         self.assertEqual(info.name, "Peeping Tom")
         self.assertEqual(info.date, "2021-12-23")

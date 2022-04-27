@@ -18,32 +18,42 @@ import urllib
 import urllib.request
 import rapidfuzz
 import requests
+from unidecode import unidecode
 from loguru import logger
 from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, NamerConfig, default_config, set_permissions
 from namer.filenameparser import parse_file_name
 
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
     found_site = re.sub(r' ', '', looked_up.site).upper()
-    site = (name_parts.site is None or re.sub(r' ', '', name_parts.site.upper()) in found_site)
+    site = (name_parts.site is None or re.sub(r' ', '', name_parts.site.upper()) in found_site or
+            unidecode(re.sub(r' ', '', name_parts.site.upper())) in found_site)
     release_date = False
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
-        release_date = name_parts.date is not None and name_parts.date == looked_up.date
+        release_date = name_parts.date is not None and (name_parts.date == looked_up.date
+            or unidecode(name_parts.date) == looked_up.date)
 
     #Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
     all_performers.insert(0, looked_up.name)
-    powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
+    powerset = list(combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
     ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
+    undecode_ratio = rapidfuzz.process.extractOne(unidecode(name_parts.name), map(" ".join, powerset))
+    if undecode_ratio is not None and undecode_ratio[1] > ratio[1]:
+        ratio = undecode_ratio
 
     #First Name Powerset.
     if ratio is not None and ratio[1] < 89.9:
         all_performers = list(map(lambda p: p.name.split(' ')[0], looked_up.performers))
-        powerset = (combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
+        powerset = list(combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
         first_name_ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
         if first_name_ratio is not None and first_name_ratio[1] > ratio[1]:
             ratio = first_name_ratio
+        unidecode_first_name_ratio = rapidfuzz.process.extractOne(unidecode(name_parts.name), map(" ".join, powerset))
+        if unidecode_first_name_ratio is not None and unidecode_first_name_ratio[1] > ratio[1]:
+            ratio = unidecode_first_name_ratio
+
 
     return ComparisonResult(
         name=ratio[0] if ratio is not None else None,
