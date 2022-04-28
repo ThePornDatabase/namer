@@ -11,6 +11,7 @@ from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.metadataapi import parse_file_name, match
 from namer.types import Performer, default_config
 
+
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
@@ -27,15 +28,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")
             self.assertEqual(info.date, "2022-01-03")
-            self.assertIn('Cute brunette Carmela Clutch positions her', info.description)
-            self.assertEqual(info.look_up_site_id, "https://www.evilangel.com/en/video/0/198543/")
-            self.assertEqual(info.uuid, '1678283')
+            self.assertIn(
+                "Cute brunette Carmela Clutch positions her", info.description
+            )
+            self.assertEqual(
+                info.look_up_site_id, "https://www.evilangel.com/en/video/0/198543/"
+            )
+            self.assertEqual(info.uuid, "1678283")
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
-            self.assertIn('Deep Throat',info.tags)
+            self.assertIn("Deep Throat", info.tags)
             expected_performers = []
             expected_performers.append(Performer("Carmela Clutch", "Female"))
-            expected_performers.append(Performer("Francesca Le","Female"))
-            expected_performers.append(Performer("Mark Wood","Male"))
+            expected_performers.append(Performer("Francesca Le", "Female"))
+            expected_performers.append(Performer("Mark Wood", "Male"))
             self.assertListEqual(info.performers, expected_performers)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -45,7 +50,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.full.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
+        name = parse_file_name(
+            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+        )
         config = default_config()
         config.enable_metadataapi_genres = True
         results = match(name, config)
@@ -119,9 +126,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   </actor>
   <fileinfo/>
 </movie>
-"""
+"""   # noqa: E501
         self.assertEqual(output, expected)
-
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_writing_xml_metadata(self, mock_response):
@@ -130,7 +136,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.full.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4')
+        name = parse_file_name(
+            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+        )
         config = default_config()
         results = match(name, config)
         self.assertEqual(len(results), 1)
@@ -204,9 +212,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   </actor>
   <fileinfo/>
 </movie>
-"""
+"""  # noqa: E501
         self.assertEqual(output, expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

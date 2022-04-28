@@ -5,7 +5,14 @@ or used in renaming the video file.
 """
 from pathlib import Path
 from lxml import objectify, etree
-from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
+from namer.types import (
+    LookedUpFileInfo,
+    NamerConfig,
+    Performer,
+    ProcessingResults,
+    set_permissions,
+)
+
 
 def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
@@ -40,38 +47,43 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
 
 
 def write_movie_xml_file(
-    info: LookedUpFileInfo, config: NamerConfig, trailer: Path = None, poster: Path = None, background: Path = None) -> str:
+    info: LookedUpFileInfo,
+    config: NamerConfig,
+    trailer: Path = None,
+    poster: Path = None,
+    background: Path = None,
+) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
 
-    root = etree.Element('movie')
-    etree.SubElement(root, 'plot').text = info.description
-    etree.SubElement(root, 'outline')
-    etree.SubElement(root, 'title').text = info.name
-    etree.SubElement(root, 'dateadded')
-    trailertag = etree.SubElement(root, 'trailer')
+    root = etree.Element("movie")
+    etree.SubElement(root, "plot").text = info.description
+    etree.SubElement(root, "outline")
+    etree.SubElement(root, "title").text = info.name
+    etree.SubElement(root, "dateadded")
+    trailertag = etree.SubElement(root, "trailer")
     if trailer is not None:
         trailertag.text = str(trailer)
-    etree.SubElement(root, 'year').text = info.date[:4]
-    etree.SubElement(root, 'premiered').text = info.date
-    etree.SubElement(root, 'releasedate').text = info.date
-    etree.SubElement(root, 'mpaa').text = "XXX"
-    art = etree.SubElement(root, 'art')
-    postertag = etree.SubElement(art, 'poster')
+    etree.SubElement(root, "year").text = info.date[:4]
+    etree.SubElement(root, "premiered").text = info.date
+    etree.SubElement(root, "releasedate").text = info.date
+    etree.SubElement(root, "mpaa").text = "XXX"
+    art = etree.SubElement(root, "art")
+    postertag = etree.SubElement(art, "poster")
     if poster is not None:
         postertag.text = str(poster)
-    backgroundtag = etree.SubElement(art, 'background')
+    backgroundtag = etree.SubElement(art, "background")
     if background is not None:
         backgroundtag.text = str(background)
     if config.enable_metadataapi_genres:
         for tag in info.tags:
-            etree.SubElement(root, 'genre').text = tag
+            etree.SubElement(root, "genre").text = tag
     else:
         for tag in info.tags:
-            etree.SubElement(root, 'tag').text = tag
+            etree.SubElement(root, "tag").text = tag
         etree.SubElement(root, "genre").text = config.default_genre
-    etree.SubElement(root, "theporndbid").text=str(info.uuid)
+    etree.SubElement(root, "theporndbid").text = str(info.uuid)
     etree.SubElement(root, "phoenixadultid")
     etree.SubElement(root, "phoenixadulturlid")
     etree.SubElement(root, "sourceid").text = info.source_url
@@ -85,15 +97,30 @@ def write_movie_xml_file(
     objectify.SubElement(root, "fileinfo")
     objectify.deannotate(root)
     etree.cleanup_namespaces(root)
-    return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8').decode(encoding='UTF-8')
+    return etree.tostring(
+        root, pretty_print=True, xml_declaration=True, encoding="UTF-8"
+    ).decode(encoding="UTF-8")
 
-def write_nfo(results: ProcessingResults, namer_config: NamerConfig, trailer: Path, poster: Path, background: Path ) -> Path:
+
+def write_nfo(
+    results: ProcessingResults,
+    namer_config: NamerConfig,
+    trailer: Path,
+    poster: Path,
+    background: Path,
+) -> Path:
     """
     Writes an .nfo to the correct place for a video file.
     """
-    if results.video_file is not None and results.new_metadata is not None and namer_config.write_nfo is True:
+    if (
+        results.video_file is not None
+        and results.new_metadata is not None
+        and namer_config.write_nfo is True
+    ):
         target = results.video_file.parent / (results.video_file.stem + ".nfo")
-        with open(target, "wt", encoding='utf-8') as nfofile:
-            towrite = write_movie_xml_file(results.new_metadata, namer_config, trailer, poster, background)
+        with open(target, "wt", encoding="utf-8") as nfofile:
+            towrite = write_movie_xml_file(
+                results.new_metadata, namer_config, trailer, poster, background
+            )
             nfofile.write(towrite)
         set_permissions(target, namer_config)

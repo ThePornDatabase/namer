@@ -16,14 +16,20 @@ import random
 from pathvalidate import Platform, sanitize_filename
 from loguru import logger
 
+
 def _verify_dir(name: str, file_name: Path) -> bool:
     """
     verify a config directory exist. return false if verification fails
     """
     if file_name is not None and not file_name.is_dir():
-        logger.error("Configured directory {}: {} is not a directory or not accessible", name, file_name)
+        logger.error(
+            "Configured directory {}: {} is not a directory or not accessible",
+            name,
+            file_name,
+        )
         return False
     return True
+
 
 def _verify_name_string(name: str, name_string: str) -> bool:
     """
@@ -35,51 +41,74 @@ def _verify_name_string(name: str, name_string: str) -> bool:
         formatter.format(name_string, **info.asdict())
         return True
     except KeyError as key_error:
-        logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
+        logger.error(
+            "Configuration {} is not a valid file name format, please check {}",
+            name,
+            name_string,
+        )
         logger.error("Error message: {}", key_error)
         return False
+
 
 class PartialFormatter(string.Formatter):
     """
     Used for formating NamerConfig.inplace_name and NamerConfig.
     """
 
-    supported_keys = ['date','description','name','site','full_site','performers','all_performers','act','ext','trans']
+    supported_keys = [
+        "date",
+        "description",
+        "name",
+        "site",
+        "full_site",
+        "performers",
+        "all_performers",
+        "act",
+        "ext",
+        "trans",
+    ]
 
-    def __init__(self, missing='~~', bad_fmt='!!'):
-        self.missing, self.bad_fmt=missing, bad_fmt
+    def __init__(self, missing="~~", bad_fmt="!!"):
+        self.missing, self.bad_fmt = missing, bad_fmt
 
     def get_field(self, field_name, args, kwargs):
         # Handle a key not found
         try:
-            val=super().get_field(field_name, args, kwargs)
+            val = super().get_field(field_name, args, kwargs)
         except (KeyError, AttributeError) as err:
-            val=None,field_name
-            if not field_name in self.supported_keys:
-                raise KeyError(f"Key {field_name} not in support keys: {self.supported_keys}") from err
+            val = None, field_name
+            if field_name not in self.supported_keys:
+                raise KeyError(
+                    f"Key {field_name} not in support keys: {self.supported_keys}"
+                ) from err
         return val
 
     def format_field(self, value, format_spec: str):
         if value is None:
             return self.missing
         try:
-            if re.match(r'.\d+s', format_spec):
+            if re.match(r".\d+s", format_spec):
                 value = value + format_spec[0] * int(format_spec[1:-1])
-                format_spec = ''
-            if re.match(r'.\d+p', format_spec):
+                format_spec = ""
+            if re.match(r".\d+p", format_spec):
                 value = format_spec[0] * int(format_spec[1:-1]) + value
-                format_spec = ''
-            if re.match(r'.\d+i', format_spec):
-                value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
-                format_spec = ''
+                format_spec = ""
+            if re.match(r".\d+i", format_spec):
+                value = (
+                    format_spec[0] * int(format_spec[1:-1])
+                    + value
+                    + format_spec[0] * int(format_spec[1:-1])
+                )
+                format_spec = ""
             return super().format_field(value, format_spec)
         except ValueError:
             if self.bad_fmt is not None:
                 return self.bad_fmt
             raise
 
+
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class NamerConfig():
+class NamerConfig:
     """
     Configuration for namer and namer_watchdog
     """
@@ -92,8 +121,7 @@ class NamerConfig():
     sign up here: https://metadataapi.net/
     """
 
-
-    name_parser: str = '{_site}{_optional_date}{_sep}{_ts}{_name}{_dot}{_ext}'
+    name_parser: str = "{_site}{_optional_date}{_sep}{_ts}{_name}{_dot}{_ext}"
     """
     This config may be a regex you provide, or a set of token used to build a regex.
 
@@ -119,7 +147,7 @@ class NamerConfig():
     dates will not be used in matching, possibly allowing false positives.
     """
 
-    inplace_name: str = '{site} - {date} - {name}.{ext}'
+    inplace_name: str = "{site} - {date} - {name}.{ext}"
     """
     How to write output file name.  When namer.py is run this is applied in place
     (next to the file to be processed).
@@ -257,7 +285,9 @@ class NamerConfig():
     If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
     """
 
-    new_relative_path_name: str = '{site} - {date} - {name}/{site} - {date} - {name}.{ext}'
+    new_relative_path_name: str = (
+        "{site} - {date} - {name}/{site} - {date} - {name}.{ext}"
+    )
     """
     like inplace_name above used for local call for renaming, this instead is used to move a file/dir to a location relative
     to the dest_dir below on successful matching/tagging.
@@ -306,15 +336,16 @@ class NamerConfig():
             self.set_uid = os.getuid()
             self.set_gid = os.getgid()
 
-
     def __str__(self):
         token = "None In Set, Go to https://metadatapi.net/ to get one!"
         if self.porndb_token is not None:
-            token = re.sub(r'.', '*', self.porndb_token)
-        output = 'Namer Config:\n'
-        output += f'porndb_token: {token}\n'
+            token = re.sub(r".", "*", self.porndb_token)
+        output = "Namer Config:\n"
+        output += f"porndb_token: {token}\n"
         output += f"  inplace_name: {self.inplace_name}\n"
-        output += f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
+        output += (
+            f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
+        )
         output += f"  set_uid: {self.set_uid}\n"
         output += f"  set_gid: {self.set_gid}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
@@ -341,18 +372,19 @@ class NamerConfig():
         output += f"  extra_sleep_time: {self.extra_sleep_time}\n"
         return output
 
-
     def verify_naming_config(self) -> bool:
         """
         Verifies the contents of your config file. Returns False if configuration failed.
         """
         success = True
         if self.enable_metadataapi_genres is not True and self.default_genre is None:
-            logger.error("Sinse enable_metadataapi_genres is not True, you must specify a default_genre")
+            logger.error(
+                "Sinse enable_metadataapi_genres is not True, you must specify a default_genre"
+            )
             success = False
-        success = _verify_name_string("inplace_name", self.inplace_name) and success
+        success = _verify_name_string(
+            "inplace_name", self.inplace_name) and success
         return success
-
 
     def verify_watchdog_config(self) -> bool:
         """
@@ -360,77 +392,125 @@ class NamerConfig():
         """
         success = True
         if self.enable_metadataapi_genres is not True and self.default_genre is None:
-            logger.error("Sinse enable_metadataapi_genres is not True, you must specify a default_genre")
+            logger.error(
+                "Sinse enable_metadataapi_genres is not True, you must specify a default_genre"
+            )
             success = False
         success = _verify_dir("watch_dir", self.watch_dir) and success
         success = _verify_dir("work_dir", self.work_dir) and success
         success = _verify_dir("failed_dir", self.failed_dir) and success
         success = _verify_dir("dest_dir", self.dest_dir) and success
-        success = _verify_name_string("new_relative_path_name", self.new_relative_path_name) and success
+        success = (
+            _verify_name_string("new_relative_path_name",
+                                self.new_relative_path_name)
+            and success
+        )
         return success
 
 
-def from_config(config : ConfigParser) -> NamerConfig:
+def from_config(config: ConfigParser) -> NamerConfig:
     """
     Given a config parser pointed at a namer.cfg file, return a NamerConfig with the file's parameters.
     """
     namer_config = NamerConfig()
-    namer_config.porndb_token = config.get('namer','porndb_token', fallback=None)
-    namer_config.inplace_name = config.get('namer','inplace_name',fallback='{site} - {date} - {name}.{ext}')
-    namer_config.name_parser = config.get('namer','name_parser',fallback='{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}')
-    namer_config.prefer_dir_name_if_available = config.getboolean('namer','prefer_dir_name_if_available',fallback=False)
-    namer_config.min_file_size = config.getint('namer','min_file_size',fallback=100)
-    namer_config.set_uid = config.getint('namer','set_uid',fallback=None)
-    namer_config.set_gid = config.getint('namer','set_gid',fallback=None)
-    namer_config.trailer_location = config.get('namer','trailer_location',fallback=None)
-    namer_config.sites_with_no_date_info =[
-        x.strip().upper() for x in config.get('namer','sites_with_no_date_info',fallback="").split(',')
+    namer_config.porndb_token = config.get(
+        "namer", "porndb_token", fallback=None)
+    namer_config.inplace_name = config.get(
+        "namer", "inplace_name", fallback="{site} - {date} - {name}.{ext}"
+    )
+    namer_config.name_parser = config.get(
+        "namer",
+        "name_parser",
+        fallback="{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}",
+    )
+    namer_config.prefer_dir_name_if_available = config.getboolean(
+        "namer", "prefer_dir_name_if_available", fallback=False
+    )
+    namer_config.min_file_size = config.getint(
+        "namer", "min_file_size", fallback=100)
+    namer_config.set_uid = config.getint("namer", "set_uid", fallback=None)
+    namer_config.set_gid = config.getint("namer", "set_gid", fallback=None)
+    namer_config.trailer_location = config.get(
+        "namer", "trailer_location", fallback=None
+    )
+    namer_config.sites_with_no_date_info = [
+        x.strip().upper()
+        for x in config.get("namer", "sites_with_no_date_info", fallback="").split(",")
     ]
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")
-    namer_config.write_namer_log = config.getboolean('namer','write_namer_log',fallback=False)
-    namer_config.update_permissions_ownership = config.getboolean('namer','update_permissions_ownership',fallback=False)
-    namer_config.set_dir_permissions = config.get('namer','set_dir_permissions',fallback=775)
-    namer_config.set_file_permissions = config.get('namer','set_file_permissions',fallback=664)
-    namer_config.write_nfo = config.getboolean('metadata','write_nfo',fallback=False)
-    namer_config.enabled_tagging = config.getboolean('metadata','enabled_tagging',fallback=True)
-    namer_config.enabled_poster = config.getboolean('metadata','enabled_poster',fallback=True)
-    namer_config.enable_metadataapi_genres = config.getboolean('metadata','enable_metadataapi_genres',fallback=False)
-    namer_config.default_genre = config.get('metadata','default_genre',fallback='Adult')
-    namer_config.language = config.get('metadata','language',fallback=None)
-    namer_config.ignored_dir_regex = config.get('metadata','ignored_dir_regex',fallback='.*_UNPACK_.*')
-    namer_config.new_relative_path_name = config.get('watchdog','new_relative_path_name',
-        fallback='{site} - {date} - {name}/{site} - {date} - {name}.{ext}')
-    namer_config.del_other_files = config.getboolean('watchdog','del_other_files',fallback=False)
-    namer_config.extra_sleep_time = config.getint('watchdog','extra_sleep_time',fallback=30)
-    watch_dir = config.get('watchdog','watch_dir',fallback=None)
+    namer_config.write_namer_log = config.getboolean(
+        "namer", "write_namer_log", fallback=False
+    )
+    namer_config.update_permissions_ownership = config.getboolean(
+        "namer", "update_permissions_ownership", fallback=False
+    )
+    namer_config.set_dir_permissions = config.get(
+        "namer", "set_dir_permissions", fallback=775
+    )
+    namer_config.set_file_permissions = config.get(
+        "namer", "set_file_permissions", fallback=664
+    )
+    namer_config.write_nfo = config.getboolean(
+        "metadata", "write_nfo", fallback=False)
+    namer_config.enabled_tagging = config.getboolean(
+        "metadata", "enabled_tagging", fallback=True
+    )
+    namer_config.enabled_poster = config.getboolean(
+        "metadata", "enabled_poster", fallback=True
+    )
+    namer_config.enable_metadataapi_genres = config.getboolean(
+        "metadata", "enable_metadataapi_genres", fallback=False
+    )
+    namer_config.default_genre = config.get(
+        "metadata", "default_genre", fallback="Adult"
+    )
+    namer_config.language = config.get("metadata", "language", fallback=None)
+    namer_config.ignored_dir_regex = config.get(
+        "metadata", "ignored_dir_regex", fallback=".*_UNPACK_.*"
+    )
+    namer_config.new_relative_path_name = config.get(
+        "watchdog",
+        "new_relative_path_name",
+        fallback="{site} - {date} - {name}/{site} - {date} - {name}.{ext}",
+    )
+    namer_config.del_other_files = config.getboolean(
+        "watchdog", "del_other_files", fallback=False
+    )
+    namer_config.extra_sleep_time = config.getint(
+        "watchdog", "extra_sleep_time", fallback=30
+    )
+    watch_dir = config.get("watchdog", "watch_dir", fallback=None)
     if watch_dir is not None:
         namer_config.watch_dir = Path(watch_dir)
-    work_dir = config.get('watchdog','work_dir',fallback=None)
+    work_dir = config.get("watchdog", "work_dir", fallback=None)
     if work_dir is not None:
         namer_config.work_dir = Path(work_dir)
-    failed_dir = config.get('watchdog','failed_dir',fallback=None)
+    failed_dir = config.get("watchdog", "failed_dir", fallback=None)
     if failed_dir is not None:
         namer_config.failed_dir = Path(failed_dir)
-    dest_dir = config.get('watchdog','dest_dir',fallback=None)
+    dest_dir = config.get("watchdog", "dest_dir", fallback=None)
     if dest_dir is not None:
         namer_config.dest_dir = Path(dest_dir)
 
-    namer_config.retry_time = config.get('watchdog','retry_time',fallback=None)
+    namer_config.retry_time = config.get(
+        "watchdog", "retry_time", fallback=None)
     if namer_config.retry_time is None:
         namer_config.retry_time = f"03:{random.randint(0, 59):0>2}"
     return namer_config
+
 
 def default_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
     config = configparser.ConfigParser()
-    default_locations = [Path.home() / ".namer.cfg", Path('./namer.cfg')]
-    if os.environ.get('NAMER_CONFIG') is not None:
-        default_locations.insert(0, Path(os.environ.get('NAMER_CONFIG')))
+    default_locations = [Path.home() / ".namer.cfg", Path("./namer.cfg")]
+    if os.environ.get("NAMER_CONFIG") is not None:
+        default_locations.insert(0, Path(os.environ.get("NAMER_CONFIG")))
     config.read(default_locations)
     return from_config(config)
+
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FileNameParts:
@@ -485,11 +565,13 @@ class FileNameParts:
         original full name: {self.source_file_name}
         """
 
+
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class Performer:
     """
     Minimal info about a perform, name, and role.
     """
+
     name: str
     role: str
     image: str
@@ -501,8 +583,8 @@ class Performer:
     """
 
     def __init__(self, name=None, role=None, image=None):
-        self.name  = name
-        self.role  = role
+        self.name = name
+        self.role = role
         self.image = image
 
     def __str__(self):
@@ -512,11 +594,11 @@ class Performer:
         return name
 
     def __repr__(self):
-        return f'Performer[name={self.name}, role={self.role}, image={self.image}]'
+        return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class LookedUpFileInfo():
+class LookedUpFileInfo:
     """
     Information from a call to the porndb about a specific scene.
     """
@@ -601,36 +683,56 @@ class LookedUpFileInfo():
         """
         if self.original_parsed_filename is None:
             self.original_parsed_filename = FileNameParts()
-        return {'uuid': self.uuid,
-                'date': self.date,
-                'description': self.description,
-                'name': self.name,
-                'site': self.site.replace(' ','') if self.site is not None else None,
-                'full_site': self.site,
-                'performers': " ".join(map(lambda p: p.name, filter( lambda p: p.role == 'Female' , self.performers))) if
-                    self.performers is not None else None,
-                'all_performers': " ".join(map( lambda p: p.name , self.performers)) if self.performers is not None else None,
-                'act': self.original_parsed_filename.act if self.original_parsed_filename is not None else None,
-                'ext': self.original_parsed_filename.extension if self.original_parsed_filename is not None else None,
-                'trans': self.original_parsed_filename.trans if self.original_parsed_filename is not None else None}
+        return {
+            "uuid": self.uuid,
+            "date": self.date,
+            "description": self.description,
+            "name": self.name,
+            "site": self.site.replace(" ", "") if self.site is not None else None,
+            "full_site": self.site,
+            "performers": " ".join(
+                map(
+                    lambda p: p.name,
+                    filter(lambda p: p.role == "Female", self.performers),
+                )
+            )
+            if self.performers is not None
+            else None,
+            "all_performers": " ".join(map(lambda p: p.name, self.performers))
+            if self.performers is not None
+            else None,
+            "act": self.original_parsed_filename.act
+            if self.original_parsed_filename is not None
+            else None,
+            "ext": self.original_parsed_filename.extension
+            if self.original_parsed_filename is not None
+            else None,
+            "trans": self.original_parsed_filename.trans
+            if self.original_parsed_filename is not None
+            else None,
+        }
 
     def new_file_name(self, template: str, infix: str = "(0)") -> str:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
         dictionary = self.asdict()
-        clean_dic = { k: str(sanitize_filename(str(v), platform=Platform.UNIVERSAL))  for k, v in dictionary.items() }
+        clean_dic = {
+            k: str(sanitize_filename(str(v), platform=Platform.UNIVERSAL))
+            for k, v in dictionary.items()
+        }
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
         if infix != str("(0)"):
             # will apply the infix before the file extension if just a file name, if a path, with apply
-            #the infix after the fist part (first directory name) of the (sub)path
+            # the infix after the fist part (first directory name) of the (sub)path
             path = PurePath(name)
             if len(path.parts) > 1:
-                name = str(path.parent / ( path.stem + infix + path.suffix ))
+                name = str(path.parent / (path.stem + infix + path.suffix))
             else:
                 name = path.stem + infix + path.suffix
         return name
+
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ComparisonResult:
@@ -653,7 +755,6 @@ class ComparisonResult:
     """
     Did the studios match between filenameparts and lookedup
     """
-
 
     datematch: bool
     """
@@ -678,7 +779,6 @@ class ComparisonResult:
         actors and scene name).
         """
         return self.sitematch and self.datematch and self.name_match >= 89.9
-
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -724,9 +824,18 @@ class ProcessingResults:
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
 
+
 def _set_perms(target: Path, config: NamerConfig):
-    fileperm: int = None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8)
-    dirperm: int = None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8)
+    fileperm: int = (
+        None
+        if config.set_file_permissions is None
+        else int(str(config.set_file_permissions), 8)
+    )
+    dirperm: int = (
+        None
+        if config.set_dir_permissions is None
+        else int(str(config.set_dir_permissions), 8)
+    )
     if config.set_gid is not None:
         os.lchown(target, uid=-1, gid=config.set_gid)
     if config.set_uid is not None:
@@ -736,45 +845,63 @@ def _set_perms(target: Path, config: NamerConfig):
     elif target.is_file() and fileperm is not None:
         target.chmod(fileperm)
 
+
 def set_permissions(file: Path, config: NamerConfig):
     """
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
-    if system() != 'Windows' and file is not None and file.exists() and config.update_permissions_ownership is True:
+    if (
+        system() != "Windows"
+        and file is not None
+        and file.exists()
+        and config.update_permissions_ownership is True
+    ):
         _set_perms(file, config)
         if file.is_dir():
-            for target in file.rglob('*.*'):
+            for target in file.rglob("*.*"):
                 _set_perms(target, config)
 
 
-def write_log_file(movie_file: Path, match_attempts: List[ComparisonResult], namer_config: NamerConfig) -> str:
+def write_log_file(
+    movie_file: Path, match_attempts: List[ComparisonResult], namer_config: NamerConfig
+) -> str:
     """
     Given porndb scene results sorted by how closely they match a file,  write the contents
     of the result matches to a log file.
     """
-    logname = movie_file.with_name(movie_file.stem+"_namer.log")
-    logger.info("Writing log to {}",logname)
-    with open(logname, "wt", encoding='utf-8') as log_file:
+    logname = movie_file.with_name(movie_file.stem + "_namer.log")
+    logger.info("Writing log to {}", logname)
+    with open(logname, "wt", encoding="utf-8") as log_file:
         if match_attempts is None or len(match_attempts) == 0:
             log_file.write("No search results returned.\n")
         for attempt in match_attempts:
             log_file.write("\n")
-            log_file.write(f"File                : {attempt.name_parts.source_file_name}\n")
+            log_file.write(
+                f"File                : {attempt.name_parts.source_file_name}\n"
+            )
             log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
             log_file.write(f"Match               : {attempt.is_match()}\n")
-            log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
+            log_file.write(
+                f"Query URL           : {attempt.looked_up.original_query}\n"
+            )
             if attempt.name_parts.site is None:
-                attempt.name_parts.site = 'None'
+                attempt.name_parts.site = "None"
             if attempt.name_parts.date is None:
-                attempt.name_parts.date = 'None'
+                attempt.name_parts.date = "None"
             if attempt.name_parts.date is None:
-                attempt.name_parts.name = 'None'
-            log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"+
-                f" {attempt.name_parts.site:50.50}\n")
-            log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"+
-                f" {attempt.name_parts.date:50.50}\n")
-            log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"+
-                f" {attempt.name_parts.name:50.50}\n")
+                attempt.name_parts.name = "None"
+            log_file.write(
+                f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"
+                + f" {attempt.name_parts.site:50.50}\n"
+            )
+            log_file.write(
+                f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"
+                + f" {attempt.name_parts.date:50.50}\n"
+            )
+            log_file.write(
+                f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"
+                + f" {attempt.name_parts.name:50.50}\n"
+            )
     set_permissions(logname, namer_config)
     return logname

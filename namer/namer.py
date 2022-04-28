@@ -20,11 +20,11 @@ from namer.filenameparser import parse_file_name
 from namer.mutagen import update_mp4_file
 from namer.metadataapi import get_image, get_trailer, match
 
-DESCRIPTION="""
+DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
     or a watchdog service to do the above watching a directory for new files and moving matched files to a target location.
-    File names are assumed to be of the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv].   In the name, read the
-    periods, ".", as any number of spaces " ", dashes "-", or periods ".".
+    File names are assumed to be of the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv].
+    In the name, read the periods, ".", as any number of spaces " ", dashes "-", or periods ".".
 
     Provided you have an access token to the porndb (free sign up) https://www.metadataapi.net/, this program will
     attempt to match your file's name to search results from the porndb.   Please note that the site must at least be
@@ -34,20 +34,27 @@ DESCRIPTION="""
     match the file's name segment after the 'SITE.[YY]YY.MM.DD'.
   """
 
-def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: bool = False):
+
+def dir_with_subdirs_to_process(
+    dir_to_scan: Path, config: NamerConfig, infos: bool = False
+):
     """
     Used to find subdirs of a directory to be individually processed.
     The directories will be scanned for media and named/tagged in place
     based on config settings.
     """
     if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
-        logger.info("Scanning dir {} for subdirs/files to process",dir_to_scan)
+        logger.info("Scanning dir {} for subdirs/files to process", dir_to_scan)
         files = list(dir_to_scan.iterdir())
         files.sort()
         for file in files:
             fullpath_file = dir_to_scan / file
-            if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4",".MKV"]:
+            if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [
+                ".MP4",
+                ".MKV",
+            ]:
                 process(fullpath_file, config, infos)
+
 
 def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInfo):
     """
@@ -58,11 +65,13 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
     if new_metadata is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
-            random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+            random = "".join(
+                choices(population=string.ascii_uppercase + string.digits, k=10)
+            )
             poster = get_image(new_metadata.poster_url, random, video, config)
-            logger.info("Updating file metadata (atoms): {}",video)
+            logger.info("Updating file metadata (atoms): {}", video)
             update_mp4_file(video, new_metadata, poster, config)
-        logger.info("Done tagging file: {}",video)
+        logger.info("Done tagging file: {}", video)
         if poster is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
 
@@ -75,11 +84,13 @@ def find_largest_file_in_glob(rootdir: Path, globstr: str) -> Path:
     logger.info("found files {}", list_of_files)
     file = None
     if len(list_of_files) > 0:
-        file = max( list_of_files, key =  lambda x: x.stat().st_size)
+        file = max(list_of_files, key=lambda x: x.stat().st_size)
     return file
 
 
-def determine_target_file(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
+def determine_target_file(
+    file_to_process: Path, config: NamerConfig
+) -> ProcessingResults:
     """
     Base on the file to process - which may be a file or a dir, and configuration, determine
     the file if needed (largest mp4, or mkv in a directory), or the directory (parent dir of file),
@@ -92,7 +103,7 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
 
     containing_dir = None
     if file_to_process.is_dir():
-        logger.info("Target dir: {}",file_to_process)
+        logger.info("Target dir: {}", file_to_process)
         containing_dir = file_to_process
         file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
         if file is None:
@@ -101,12 +112,12 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
         file = file_to_process
 
     if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.name+file.suffix
+        name = containing_dir.name + file.suffix
     else:
         name = file.name
 
-    logger.info("file: {}",file)
-    logger.info("dir : {}",containing_dir)
+    logger.info("file: {}", file)
+    logger.info("dir : {}", containing_dir)
 
     results.dirfile = containing_dir
     results.video_file = file
@@ -116,6 +127,7 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
     else:
         results.final_name_relative = file.parent
     return results
+
 
 def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
     """
@@ -127,15 +139,22 @@ def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
         return parse_movie_xml_file(nfo_file)
     return None
 
+
 def move_to_final_location(
-    to_move: Path, target_dir: Path, template: str, new_metadata: LookedUpFileInfo, config: NamerConfig) -> Path:
+    to_move: Path,
+    target_dir: Path,
+    template: str,
+    new_metadata: LookedUpFileInfo,
+    config: NamerConfig,
+) -> Path:
     """
     Moves a file or directory to it's final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
     """
     infix = 0
     while True:
-        relative_path = Path(new_metadata.new_file_name(template, f"({infix})"))
+        relative_path = Path(
+            new_metadata.new_file_name(template, f"({infix})"))
         newname = target_dir / relative_path
         newname = newname.resolve()
         infix += 1
@@ -147,7 +166,10 @@ def move_to_final_location(
     set_permissions(newname, config)
     return newname
 
-def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
+
+def process_file(
+    file_to_process: Path, config: NamerConfig, infos: bool = False
+) -> ProcessingResults:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -164,26 +186,38 @@ def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False
 
     The file is then update based on the metadata from the porndb if an mp4.
     """
-    logger.info("Analyzing: {}",file_to_process)
+    logger.info("Analyzing: {}", file_to_process)
     output: ProcessingResults = determine_target_file(file_to_process, config)
     if output.video_file is not None:
         logger.info("Processing: {}", output.video_file)
         # Match to nfo files, if enabled and found.
         if infos is True:
-            output.new_metadata = get_local_metadata_if_requested(output.video_file)
+            output.new_metadata = get_local_metadata_if_requested(
+                output.video_file)
             if output.new_metadata is not None:
                 output.new_metadata.original_parsed_filename = output.parsed_file
-        if (output.new_metadata is None and
-            output.parsed_file is not None and
-            output.parsed_file.name is not None):
+        if (
+            output.new_metadata is None
+            and output.parsed_file is not None
+            and output.parsed_file.name is not None
+        ):
             output.search_results = match(output.parsed_file, config)
-            if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
+            if (
+                len(output.search_results) > 0
+                and output.search_results[0].is_match() is True
+            ):
                 output.new_metadata = output.search_results[0].looked_up
         else:
             logger.error(
-            "Could not parse file: {}, it is not in the right format it must start with a site, a date and end with an extension",
-            output.video_file)
-        target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
+                """
+                Could not parse file: {}
+                It is not in the right format it must start with a site, a date and end with an extension
+                """,
+                output.video_file,
+            )
+        target_dir = (
+            output.dirfile if output.dirfile is not None else output.video_file.parent
+        )
         set_permissions(target_dir, config)
         if output.new_metadata is not None:
             output.video_file = move_to_final_location(
@@ -191,12 +225,20 @@ def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False
                 target_dir=output.video_file.parent,
                 template=config.inplace_name,
                 new_metadata=output.new_metadata,
-                config=config)
+                config=config,
+            )
             tag_in_place(output.video_file, config, output.new_metadata)
-            logger.info("Done processing file: {}, moved to {}", file_to_process,output.video_file)
+            logger.info(
+                "Done processing file: {}, moved to {}",
+                file_to_process,
+                output.video_file,
+            )
     return output
 
-def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
+
+def process(
+    file_to_process: Path, config: NamerConfig, infos: bool = False
+) -> ProcessingResults:
     """
     Fully process (match, tag, rename) a single file in place and download any extra artifacts requested.
     trailer, .nfo file, logs.
@@ -205,6 +247,7 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
     add_extra_artifacts(results, config)
     return results
 
+
 def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     """
     Once the file is in it's final location we will grab other relevant output if requested.
@@ -212,15 +255,34 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     trailer = None
     if config.write_namer_log is True:
         write_log_file(results.video_file, results.search_results, config)
-    if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
-        trailer = get_trailer(results.new_metadata.trailer_url, results.video_file, config)
+    if (
+        config.trailer_location is not None
+        and not len(config.trailer_location) == 0
+        and results.new_metadata is not None
+    ):
+        trailer = get_trailer(
+            results.new_metadata.trailer_url, results.video_file, config
+        )
     if config.write_nfo is True:
-        poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
-        background = get_image(results.new_metadata.background_url, "-background", results.video_file, config)
+        poster = get_image(
+            results.new_metadata.poster_url, "-poster", results.video_file, config
+        )
+        background = get_image(
+            results.new_metadata.background_url,
+            "-background",
+            results.video_file,
+            config,
+        )
         for performer in results.new_metadata.performers:
-            poster = get_image(performer.image, performer.name.replace(" ","-")+"-image", results.video_file, config)
+            poster = get_image(
+                performer.image,
+                performer.name.replace(" ", "-") + "-image",
+                results.video_file,
+                config,
+            )
             performer.image = poster
         write_nfo(results, config, trailer, poster, background)
+
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide: Path):
     """
@@ -234,17 +296,20 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_overide:
             error = True
 
     if dir_to_process is not None:
-        logger.info("Directory to process: {}",dir_to_process)
+        logger.info("Directory to process: {}", dir_to_process)
         if not dir_to_process.is_dir() or not dir_to_process.exists():
             logger.info("Error not a directory! {}", dir_to_process)
             error = True
 
     if config_overide is not None:
-        logger.info("Config override specified: {}",config_overide)
+        logger.info("Config override specified: {}", config_overide)
         if not config_overide.is_file() or not config_overide.exists():
-            logger.info("Config override specified, but file does not exit: {}",config_overide)
+            logger.info(
+                "Config override specified, but file does not exit: {}", config_overide
+            )
             error = True
     return error
+
 
 def main(arglist: List[str]):
     """
@@ -252,18 +317,38 @@ def main(arglist: List[str]):
     See usage function above.
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
-    parser.add_argument("-c", "--configfile", help="config file, defaults first to env var NAMER_CONFIG,"
-        +" then local path namer.cfg, and finally ~/.namer.cfg.", type=pathlib.Path)
+    parser.add_argument(
+        "-c",
+        "--configfile",
+        help="config file, defaults first to env var NAMER_CONFIG,"
+        + " then local path namer.cfg, and finally ~/.namer.cfg.",
+        type=pathlib.Path,
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-f", "--file", help="a single file to process, and rename.", type=pathlib.Path)
-    group.add_argument("-d", "--dir", help="a directory to process.", type=pathlib.Path)
-    parser.add_argument("-m", "--many", help="if set, a directory have all it's sub directories processed."+
-        " Files move only within sub dirs, or are renamed in place, if in the root dir to scan", action="store_true")
-    parser.add_argument("-i", "--infos", help="if set, .nfo files will attempt to be accessed next to movie files" +
-        ", if info files are found and parsed successfully, that metadata will be used rather than " +
-        "porndb matching.  If using jellyfin .nfo files, please bump your release date by one day "+
-        "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.", action="store_true")
-    parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
+    group.add_argument(
+        "-f", "--file", help="a single file to process, and rename.", type=pathlib.Path
+    )
+    group.add_argument(
+        "-d", "--dir", help="a directory to process.", type=pathlib.Path)
+    parser.add_argument(
+        "-m",
+        "--many",
+        help="if set, a directory have all it's sub directories processed."
+        + " Files move only within sub dirs, or are renamed in place, if in the root dir to scan",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-i",
+        "--infos",
+        help="if set, .nfo files will attempt to be accessed next to movie files"
+        + ", if info files are found and parsed successfully, that metadata will be used rather than "
+        + "porndb matching.  If using jellyfin .nfo files, please bump your release date by one day "
+        + "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-v", "--verbose", help="verbose, print logs", action="store_true"
+    )
     args = parser.parse_args(arglist)
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
@@ -272,7 +357,7 @@ def main(arglist: List[str]):
 
     config = default_config()
     if args.configfile is not None and args.configfile.is_file():
-        logger.info("Config override specified {}",args.configfile)
+        logger.info("Config override specified {}", args.configfile)
         config = from_config(args.configfile)
     config.verify_naming_config()
     target = args.file

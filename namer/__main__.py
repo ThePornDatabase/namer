@@ -18,7 +18,9 @@ from namer.types import default_config
 import namer.watchdog
 import namer.namer
 
-DESCRIPTION=namer.namer.DESCRIPTION+"""
+DESCRIPTION = (
+    namer.namer.DESCRIPTION
+    + """
 
     The first argument should be 'watchdog', 'rename', 'suggest', or 'help' to see this message, for more help on rename, call
     namer 'namer rename -h'
@@ -27,6 +29,8 @@ DESCRIPTION=namer.namer.DESCRIPTION+"""
 
     'suggest' takes a file name as input and will output a suggested file name.
     """
+)
+
 
 def create_default_config_if_missing():
     """
@@ -34,7 +38,9 @@ def create_default_config_if_missing():
     """
     conffile = pathlib.Path(".namer.conf")
     print("Creating default config file here: {}", conffile)
-    print("please edit the token or any other settings whose defaults you want changed.")
+    print(
+        "please edit the token or any other settings whose defaults you want changed."
+    )
 
 
 def main(arglist: List[str]):
@@ -42,14 +48,15 @@ def main(arglist: List[str]):
     Call main method in namer.namer or namer.watchdog.
     """
     arg1 = None if len(arglist) == 0 else arglist[0]
-    if arg1 == 'watchdog':
+    if arg1 == "watchdog":
         namer.watchdog.create_watcher(default_config()).run()
-    elif arg1 == 'rename':
+    elif arg1 == "rename":
         namer.namer.main(arglist[1:])
-    elif arg1 == 'suggest':
+    elif arg1 == "suggest":
         namer.metadataapi.main(arglist[1:])
-    elif arg1 in ['-h','help', None]:
+    elif arg1 in ["-h", "help", None]:
         print(DESCRIPTION)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

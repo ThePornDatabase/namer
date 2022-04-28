@@ -6,7 +6,12 @@ from pathlib import Path
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 from namer.types import LookedUpFileInfo, NamerConfig
-from namer.ffmpeg import attempt_fix_corrupt, get_resolution, update_audio_stream_if_needed
+from namer.ffmpeg import (
+    attempt_fix_corrupt,
+    get_resolution,
+    update_audio_stream_if_needed,
+)
+
 
 def resolution_to_hdv_setting(resolution: int) -> int:
     """
@@ -29,6 +34,7 @@ def set_if_not_none(video: MP4, atom: str, value: str):
     """
     video[atom] = [value] if value is not None else []
 
+
 def get_mp4_if_possible(mp4: Path) -> MP4:
     """
     Attempt to read an mp4 file to prepare for edit.
@@ -36,14 +42,16 @@ def get_mp4_if_possible(mp4: Path) -> MP4:
     video: MP4 = None
     try:
         video = MP4(mp4)
-    except MP4StreamInfoError as __mp4_exception:
+    except MP4StreamInfoError:
         attempt_fix_corrupt(mp4)
         video = MP4(mp4)
     return video
 
 
 @logger.catch
-def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig):
+def update_mp4_file(
+    mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig
+):
     # pylint: disable=too-many-statements
     """
     us-tv|TV-MA|600|
@@ -63,15 +71,17 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
     mpaa|XXX|0|
     """
 
-    logger.info("Updating audio and tags for: {}",mp4)
+    logger.info("Updating audio and tags for: {}", mp4)
     success = update_audio_stream_if_needed(mp4, config.language)
     if not success:
-        logger.info("Could not process audio or copy {}",mp4)
-    logger.info("Updating atom tags on: {}",mp4)
+        logger.info("Could not process audio or copy {}", mp4)
+    logger.info("Updating atom tags on: {}", mp4)
     if mp4 is not None and mp4.exists():
         video: MP4 = get_mp4_if_possible(mp4)
         set_if_not_none(video, "\xa9nam", looked_up.name)
-        video["\xa9day"] = [looked_up.date+"T09:00:00Z"] if looked_up.date is not None else []
+        video["\xa9day"] = (
+            [looked_up.date + "T09:00:00Z"] if looked_up.date is not None else []
+        )
         if config.enable_metadataapi_genres:
             video["\xa9gen"] = looked_up.tags if looked_up.tags is not None else []
         else:
@@ -79,40 +89,50 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config
             set_if_not_none(video, "\xa9gen", config.default_genre)
         set_if_not_none(video, "tvnn", looked_up.site)
         set_if_not_none(video, "\xa9alb", looked_up.site)
-        video["stik"] = [9] #Movie
+        video["stik"] = [9]  # Movie
         resolution = resolution_to_hdv_setting(get_resolution(mp4))
         set_if_not_none(video, "hdvd", resolution)
         set_if_not_none(video, "ldes", looked_up.description)
-        video["----:com.apple.iTunes:iTunEXTC"] = 'mpaa|XXX|0|'.encode("UTF-8", errors="ignore")
-        itunes_movie = '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>'
-        itunes_movie += f'<key>copy-warning</key><string>{looked_up.source_url}</string>'
-        itunes_movie += f'<key>studio</key> <string>{looked_up.site}</string>'
-        itunes_movie += f'<key>tpdbid</key> <string>{looked_up.look_up_site_id}</string>'
-        itunes_movie += '<key>cast</key> <array>'
+        video["----:com.apple.iTunes:iTunEXTC"] = "mpaa|XXX|0|".encode(
+            "UTF-8", errors="ignore"
+        )
+        itunes_movie = (
+            '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>'
+        )
+        itunes_movie += (
+            f"<key>copy-warning</key><string>{looked_up.source_url}</string>"
+        )
+        itunes_movie += f"<key>studio</key> <string>{looked_up.site}</string>"
+        itunes_movie += (
+            f"<key>tpdbid</key> <string>{looked_up.look_up_site_id}</string>"
+        )
+        itunes_movie += "<key>cast</key> <array>"
         for performer in looked_up.performers:
             if performer.name:
-                itunes_movie += f'<dict> <key>name</key> <string>{performer.name}</string>'
+                itunes_movie += (
+                    f"<dict> <key>name</key> <string>{performer.name}</string>"
+                )
                 if performer.role:
-                    itunes_movie += f'<key>role</key> <string>{performer.role}</string>'
-                itunes_movie += '</dict>'
-        itunes_movie += '</array>'
-        itunes_movie += '<key>codirectors</key> <array></array>'
-        itunes_movie += '<key>directors</key> <array></array>'
-        itunes_movie += '<key>screenwriters</key><array></array>'
-        itunes_movie += '</dict></plist>'
-        video["----:com.apple.iTunes:iTunMOVI"] = itunes_movie.encode("UTF-8", errors="ignore")
+                    itunes_movie += f"<key>role</key> <string>{performer.role}</string>"
+                itunes_movie += "</dict>"
+        itunes_movie += "</array>"
+        itunes_movie += "<key>codirectors</key> <array></array>"
+        itunes_movie += "<key>directors</key> <array></array>"
+        itunes_movie += "<key>screenwriters</key><array></array>"
+        itunes_movie += "</dict></plist>"
+        video["----:com.apple.iTunes:iTunMOVI"] = itunes_movie.encode(
+            "UTF-8", errors="ignore"
+        )
         if poster is not None:
             with open(poster, "rb") as file:
                 ext = poster.suffix.upper()
                 imageformat = None
-                if ext in ['.JPEG', '.JPG']:
-                    imageformat=MP4Cover.FORMAT_JPEG
-                elif ext == '.PNG':
-                    imageformat=MP4Cover.FORMAT_PNG
+                if ext in [".JPEG", ".JPG"]:
+                    imageformat = MP4Cover.FORMAT_JPEG
+                elif ext == ".PNG":
+                    imageformat = MP4Cover.FORMAT_PNG
                 if imageformat:
-                    video["covr"] = [
-                        MP4Cover(file.read(), imageformat)
-                    ]
+                    video["covr"] = [MP4Cover(file.read(), imageformat)]
         video.save()
         logger.info("Updated atom tags: {}", mp4)
     else:

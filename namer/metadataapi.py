@@ -20,40 +20,74 @@ import rapidfuzz
 import requests
 from unidecode import unidecode
 from loguru import logger
-from namer.types import LookedUpFileInfo, Performer, FileNameParts, ComparisonResult, NamerConfig, default_config, set_permissions
+from namer.types import (
+    LookedUpFileInfo,
+    Performer,
+    FileNameParts,
+    ComparisonResult,
+    NamerConfig,
+    default_config,
+    set_permissions,
+)
 from namer.filenameparser import parse_file_name
 
-def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
-    found_site = re.sub(r' ', '', looked_up.site).upper()
-    site = (name_parts.site is None or re.sub(r' ', '', name_parts.site.upper()) in found_site or
-            unidecode(re.sub(r' ', '', name_parts.site.upper())) in found_site)
+
+def __evaluate_match(
+    name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig
+) -> ComparisonResult:
+    found_site = re.sub(r" ", "", looked_up.site).upper()
+    site = (
+        name_parts.site is None
+        or re.sub(r" ", "", name_parts.site.upper()) in found_site
+        or unidecode(re.sub(r" ", "", name_parts.site.upper())) in found_site
+    )
     release_date = False
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
-        release_date = name_parts.date is not None and (name_parts.date == looked_up.date
-            or unidecode(name_parts.date) == looked_up.date)
+        release_date = name_parts.date is not None and (
+            name_parts.date == looked_up.date
+            or unidecode(name_parts.date) == looked_up.date
+        )
 
-    #Full Name
+    # Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
     all_performers.insert(0, looked_up.name)
-    powerset = list(combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
-    ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
-    undecode_ratio = rapidfuzz.process.extractOne(unidecode(name_parts.name), map(" ".join, powerset))
+    powerset = list(
+        combo
+        for r in range(1, len(all_performers) + 1)
+        for combo in itertools.combinations(all_performers, r)
+    )
+    ratio = rapidfuzz.process.extractOne(
+        name_parts.name, map(" ".join, powerset))
+    undecode_ratio = rapidfuzz.process.extractOne(
+        unidecode(name_parts.name), map(" ".join, powerset)
+    )
     if undecode_ratio is not None and undecode_ratio[1] > ratio[1]:
         ratio = undecode_ratio
 
-    #First Name Powerset.
+    # First Name Powerset.
     if ratio is not None and ratio[1] < 89.9:
-        all_performers = list(map(lambda p: p.name.split(' ')[0], looked_up.performers))
-        powerset = list(combo for r in range(1,len(all_performers) + 1) for combo in itertools.combinations(all_performers, r))
-        first_name_ratio = rapidfuzz.process.extractOne(name_parts.name, map(" ".join, powerset))
+        all_performers = list(
+            map(lambda p: p.name.split(" ")[0], looked_up.performers))
+        powerset = list(
+            combo
+            for r in range(1, len(all_performers) + 1)
+            for combo in itertools.combinations(all_performers, r)
+        )
+        first_name_ratio = rapidfuzz.process.extractOne(
+            name_parts.name, map(" ".join, powerset)
+        )
         if first_name_ratio is not None and first_name_ratio[1] > ratio[1]:
             ratio = first_name_ratio
-        unidecode_first_name_ratio = rapidfuzz.process.extractOne(unidecode(name_parts.name), map(" ".join, powerset))
-        if unidecode_first_name_ratio is not None and unidecode_first_name_ratio[1] > ratio[1]:
+        unidecode_first_name_ratio = rapidfuzz.process.extractOne(
+            unidecode(name_parts.name), map(" ".join, powerset)
+        )
+        if (
+            unidecode_first_name_ratio is not None
+            and unidecode_first_name_ratio[1] > ratio[1]
+        ):
             ratio = unidecode_first_name_ratio
-
 
     return ComparisonResult(
         name=ratio[0] if ratio is not None else None,
@@ -61,41 +95,66 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
         datematch=release_date,
         sitematch=site,
         name_parts=name_parts,
-        looked_up=looked_up)
+        looked_up=looked_up,
+    )
 
-def __update_results(results: List[ComparisonResult], name_parts: FileNameParts, namer_config: NamerConfig,
-        skipdate: bool=False, skipname: bool=False):
+
+def __update_results(
+    results: List[ComparisonResult],
+    name_parts: FileNameParts,
+    namer_config: NamerConfig,
+    skipdate: bool = False,
+    skipname: bool = False,
+):
     if len(results) == 0 or not results[0].is_match():
-        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skipdate, skipname):
+        for match_attempt in __get_metadataapi_net_fileinfo(
+            name_parts, namer_config, skipdate, skipname
+        ):
             result = __evaluate_match(name_parts, match_attempt, namer_config)
             results.append(result)
         results = sorted(results, key=__match_percent, reverse=True)
 
-def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
+
+def __metadata_api_lookup(
+    name_parts: FileNameParts, namer_config: NamerConfig
+) -> List[ComparisonResult]:
     results = []
     __update_results(results, name_parts, namer_config)
     __update_results(results, name_parts, namer_config, skipdate=True)
-    __update_results(results, name_parts, namer_config, skipdate=True, skipname=True)
+    __update_results(results, name_parts, namer_config,
+                     skipdate=True, skipname=True)
     __update_results(results, name_parts, namer_config, skipname=True)
 
-    if name_parts.date is not None and (len(results) == 0 or not results[-1].is_match()):
-        name_parts.date =  (date.fromisoformat(name_parts.date)+timedelta(days=-1)).isoformat()
-        logger.info("Not found, trying 1 day before: {}",name_parts)
+    if name_parts.date is not None and (
+        len(results) == 0 or not results[-1].is_match()
+    ):
+        name_parts.date = (
+            date.fromisoformat(name_parts.date) + timedelta(days=-1)
+        ).isoformat()
+        logger.info("Not found, trying 1 day before: {}", name_parts)
         __update_results(results, name_parts, namer_config)
-        __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
+        __update_results(
+            results, name_parts, namer_config, skipdate=False, skipname=True
+        )
 
-    if name_parts.date is not None and (len(results) == 0 or not results[-1].is_match()):
-        name_parts.date = (date.fromisoformat(name_parts.date)+timedelta(days=2)).isoformat()
-        logger.info("Not found, trying 1 day after: {}",name_parts)
+    if name_parts.date is not None and (
+        len(results) == 0 or not results[-1].is_match()
+    ):
+        name_parts.date = (
+            date.fromisoformat(name_parts.date) + timedelta(days=2)
+        ).isoformat()
+        logger.info("Not found, trying 1 day after: {}", name_parts)
         __update_results(results, name_parts, namer_config)
-        __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
+        __update_results(
+            results, name_parts, namer_config, skipdate=False, skipname=True
+        )
     return results
 
 
 def __match_percent(result: ComparisonResult) -> float:
-    addvalue=0.00
+    addvalue = 0.00
     if result.is_match() is True:
-        addvalue=1000.00
+        addvalue = 1000.00
     value = result.name_match + addvalue
     logger.info("Name match was {:.2f} for {}", value, result.name)
     return value
@@ -105,10 +164,12 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
     """
     returns json object with info
     """
-    headers = {"Authorization": f"Bearer {authtoken}",
-               "Content-Type": "application/json",
-               "Accept": "application/json",
-               'User-Agent': 'namer-1'}
+    headers = {
+        "Authorization": f"Bearer {authtoken}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "namer-1",
+    }
     try:
         with requests.get(url, headers=headers) as response:
             response.raise_for_status()
@@ -117,19 +178,23 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
         logger.warning(ex)
         return None
 
+
 def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Path:
     """
     returns json object with info
     """
-    file =  video_file.parent / ( video_file.stem + infix + pathlib.Path(url).suffix )
+    file = video_file.parent / \
+        (video_file.stem + infix + pathlib.Path(url).suffix)
     if config.enabled_poster and not file.exists() and url.startswith("http"):
-        headers = {"Authorization": f"Bearer {config.porndb_token}",
-                'User-Agent': 'namer-1'}
+        headers = {
+            "Authorization": f"Bearer {config.porndb_token}",
+            "User-Agent": "namer-1",
+        }
         file.parent.mkdir(parents=True, exist_ok=True)
         try:
             with requests.get(url, headers=headers) as response:
-                #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
-                #response.raise_for_status()
+                # Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
+                # response.raise_for_status()
                 with open(file, "wb") as binary_file:
                     # Write bytes to file
                     binary_file.write(response.content)
@@ -142,30 +207,42 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
 
+
 @logger.catch
 def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     """
     returns json object with info
     """
-    if (namer_config.trailer_location is not None
-       and not len(namer_config.trailer_location) == 0
-       and url is not None
-       and len(url) > 0):
+    if (
+        namer_config.trailer_location is not None
+        and not len(namer_config.trailer_location) == 0
+        and url is not None
+        and len(url) > 0
+    ):
         logger.info("Attempting to downlaod trailer: {}", url)
-        location = namer_config.trailer_location[:max([idx for idx, x in enumerate(namer_config.trailer_location) if x == '.'])]
-        urlparts = url.split('?')[0].split(".")
+        location = namer_config.trailer_location[
+            : max(
+                [idx for idx, x in enumerate(
+                    namer_config.trailer_location) if x == "."]
+            )
+        ]
+        urlparts = url.split("?")[0].split(".")
         ext = "mp4"
-        if urlparts is not None and len(urlparts) > 0 and urlparts[-1].lower() in ["mp4","mpeg4","mkv","avi"] :
+        if (
+            urlparts is not None
+            and len(urlparts) > 0
+            and urlparts[-1].lower() in ["mp4", "mpeg4", "mkv", "avi"]
+        ):
             ext = urlparts[-1]
         trailerfile: Path = video_file.parent / (location + "." + ext)
         trailerfile.parent.mkdir(parents=True, exist_ok=True)
         if not trailerfile.exists() and url.startswith("http"):
-            headers = {'User-Agent': 'namer-1'}
+            headers = {"User-Agent": "namer-1"}
             if "metadataapi.net" in url:
                 headers["Authorization"] = f"Bearer {namer_config.porndb_token}"
             try:
                 with requests.get(url, headers=headers) as response:
-                    #Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
+                    # Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
                     response.raise_for_status()
                     with open(trailerfile, "wb") as binary_file:
                         # Write bytes to file
@@ -181,9 +258,10 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     else:
         return None
 
+
 def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()
-    file_info.uuid = data._id # pylint: disable=protected-access
+    file_info.uuid = data._id  # pylint: disable=protected-access
     file_info.name = data.title
     file_info.description = data.description
     file_info.date = data.date
@@ -192,17 +270,19 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
     file_info.trailer_url = data.trailer
     file_info.background_url = data.image
     file_info.site = data.site.name
-    file_info.look_up_site_id = data._id # pylint: disable=protected-access
+    file_info.look_up_site_id = data._id  # pylint: disable=protected-access
     for json_performer in data.performers:
         performer = Performer()
-        if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
+        if hasattr(json_performer, "parent") and hasattr(
+            json_performer.parent, "extras"
+        ):
             performer.role = json_performer.parent.extras.gender
         performer.name = json_performer.name
         performer.image = json_performer.image
         file_info.performers.append(performer)
-    file_info.original_query=url
-    file_info.origninal_response=json_response
-    file_info.original_parsed_filename=name_parts
+    file_info.original_query = url
+    file_info.origninal_response = json_response
+    file_info.original_parsed_filename = name_parts
     tags = []
     if hasattr(data, "tags"):
         for tag in data.tags:
@@ -211,75 +291,101 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
     return file_info
 
 
-def __metadataapi_response_to_data(json_object, url, json_response, name_parts) -> List[LookedUpFileInfo]:
+def __metadataapi_response_to_data(
+    json_object, url, json_response, name_parts
+) -> List[LookedUpFileInfo]:
     file_infos = []
     if hasattr(json_object, "data"):
         if isinstance(json_object.data, list):
             for data in json_object.data:
-                found_file_info = __jsondata_to_fileinfo(data, url, json_response, name_parts)
+                found_file_info = __jsondata_to_fileinfo(
+                    data, url, json_response, name_parts
+                )
                 file_infos.append(found_file_info)
         else:
-            file_infos.append(__jsondata_to_fileinfo(json_object.data, url, json_response, name_parts))
+            file_infos.append(
+                __jsondata_to_fileinfo(
+                    json_object.data, url, json_response, name_parts)
+            )
     return file_infos
 
 
-def __build_url(site:str=None, release_date:str=None, name:str=None, uuid:str=None) -> str:
+def __build_url(
+    site: str = None, release_date: str = None, name: str = None, uuid: str = None
+) -> str:
     query = ""
     if uuid is not None:
-        query = "/"+str(uuid)
+        query = "/" + str(uuid)
     else:
-        query="?parse="
+        query = "?parse="
         if site is not None:
-            query += urllib.parse.quote(re.sub(r' ', '.', site))+"."
+            query += urllib.parse.quote(re.sub(r" ", ".", site)) + "."
         if release_date is not None:
-            query += release_date+"."
+            query += release_date + "."
         if name is not None:
-            query += urllib.parse.quote(re.sub(r' ', '.', name))
-        query+="&limit=25"
+            query += urllib.parse.quote(re.sub(r" ", ".", name))
+        query += "&limit=25"
     return f"https://api.metadataapi.net/scenes{query}"
 
 
-def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: NamerConfig, skipdate: bool,
-        skipname: bool) -> List[LookedUpFileInfo]:
+def __get_metadataapi_net_fileinfo(
+    name_parts: FileNameParts, namer_config: NamerConfig, skipdate: bool, skipname: bool
+) -> List[LookedUpFileInfo]:
     release_date = name_parts.date if not skipdate else None
     name = name_parts.name if not skipname else None
     url = __build_url(name_parts.site, release_date, name)
-    logger.info("Querying: {}",url)
+    logger.info("Querying: {}", url)
     json_response = __get_response_json_object(url, namer_config.porndb_token)
     file_infos = []
-    if json_response is not None and json_response.strip() != '':
+    if json_response is not None and json_response.strip() != "":
         logger.debug("json_repsonse: \n{}", json_response)
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
+        json_obj = json.loads(
+            json_response, object_hook=lambda d: SimpleNamespace(**d))
+        formatted = json.dumps(json.loads(json_response),
+                               indent=4, sort_keys=True)
+        file_infos = __metadataapi_response_to_data(
+            json_obj, url, formatted, name_parts
+        )
     return file_infos
 
 
-def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> LookedUpFileInfo:
+def __get_complete_metadatapi_net_fileinfo(
+    name_parts: FileNameParts, uuid: str, namer_config: NamerConfig
+) -> LookedUpFileInfo:
     url = __build_url(uuid=uuid)
-    logger.info("Querying: {}",url)
+    logger.info("Querying: {}", url)
     json_response = __get_response_json_object(url, namer_config.porndb_token)
     file_infos = []
-    if json_response is not None and json_response.strip() != '':
-        logger.debug("json_repsonse: \n{}",json_response)
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
+    if json_response is not None and json_response.strip() != "":
+        logger.debug("json_repsonse: \n{}", json_response)
+        json_obj = json.loads(
+            json_response, object_hook=lambda d: SimpleNamespace(**d))
+        formatted = json.dumps(json.loads(json_response),
+                               indent=4, sort_keys=True)
+        file_infos = __metadataapi_response_to_data(
+            json_obj, url, formatted, name_parts
+        )
     if len(file_infos) > 0:
         return file_infos[0]
     return None
 
-def match(file_name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
+
+def match(
+    file_name_parts: FileNameParts, namer_config: NamerConfig
+) -> List[ComparisonResult]:
     """
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
     Matches will appear first.
     """
     comparison_results = __metadata_api_lookup(file_name_parts, namer_config)
-    comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
+    comparison_results = sorted(
+        comparison_results, key=__match_percent, reverse=True)
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.
     if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
-        file_infos =  __get_complete_metadatapi_net_fileinfo(file_name_parts, comparison_results[0].looked_up.uuid ,namer_config)
+        file_infos = __get_complete_metadatapi_net_fileinfo(
+            file_name_parts, comparison_results[0].looked_up.uuid, namer_config
+        )
         if file_infos is not None:
             comparison_results[0].looked_up = file_infos
     return comparison_results
@@ -294,21 +400,42 @@ def main(argslist: List[str]):
     that is parsable by namer_file_parser.py
     """
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-c", "--configfile", help="override location for a configuraion file.", type=pathlib.Path)
-    parser.add_argument("-f", "--file", help="File we want to provide a match name for.", required=True, type=pathlib.Path)
-    parser.add_argument("-j", "--jsonfile", help="write returned json to this file.", type=pathlib.Path)
-    parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
+    parser.add_argument(
+        "-c",
+        "--configfile",
+        help="override location for a configuraion file.",
+        type=pathlib.Path,
+    )
+    parser.add_argument(
+        "-f",
+        "--file",
+        help="File we want to provide a match name for.",
+        required=True,
+        type=pathlib.Path,
+    )
+    parser.add_argument(
+        "-j", "--jsonfile", help="write returned json to this file.", type=pathlib.Path
+    )
+    parser.add_argument(
+        "-v", "--verbose", help="verbose, print logs", action="store_true"
+    )
     args = parser.parse_args(args=argslist)
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     config = default_config()
-    file_name = parse_file_name(os.path.basename(args.file), default_config().name_parser)
+    file_name = parse_file_name(
+        os.path.basename(args.file), default_config().name_parser
+    )
     match_results = match(file_name, config)
     if len(match_results) > 0 and match_results[0].is_match() is True:
-        print(match_results[0].looked_up.new_file_name(default_config().inplace_name))
+        print(match_results[0].looked_up.new_file_name(
+            default_config().inplace_name))
         if args.jsonfile is not None:
-            Path(args.jsonfile).write_text(match_results[0].looked_up.origninal_response, encoding="UTF-8")
+            Path(args.jsonfile).write_text(
+                match_results[0].looked_up.origninal_response, encoding="UTF-8"
+            )
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

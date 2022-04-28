@@ -22,19 +22,23 @@ def get_resolution(file: str) -> int:
     """
     logger.info("resolution stream of file {}", file)
 
-    with subprocess.Popen(['ffprobe',
-                           '-v',
-                           'error',
-                           '-select_streams',
-                           'v:0',
-                           '-show_entries',
-                           'stream=height',
-                           '-of',
-                           'csv=p=0',
-                           file],
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          universal_newlines=True) as process:
+    with subprocess.Popen(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=height",
+            "-of",
+            "csv=p=0",
+            file,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    ) as process:
         success = process.wait() == 0
         output = process.stdout.read()
         if not success:
@@ -54,17 +58,21 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
     See: https://iso639-3.sil.org/code_tables/639/data/
     """
 
-    with subprocess.Popen(['ffprobe',
-                           '-show_streams',
-                           '-select_streams',
-                           'a',
-                           '-of',
-                           'json',
-                           '-i',
-                           mp4_file],
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          universal_newlines=True) as process:
+    with subprocess.Popen(
+        [
+            "ffprobe",
+            "-show_streams",
+            "-select_streams",
+            "a",
+            "-of",
+            "json",
+            "-i",
+            mp4_file,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    ) as process:
         success = process.wait() == 0
         audio_streams_str = process.stdout.read()
         if not success:
@@ -76,12 +84,13 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
         logger.info("Target for audio: {}", mp4_file)
 
         audio_streams = json.loads(
-            audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
+            audio_streams_str, object_hook=lambda d: SimpleNamespace(**d)
+        )
         lang_stream = None
         needs_updated = False
         if language:
             test_lang = language.lower()[0:3]
-            if audio_streams is not None and hasattr(audio_streams, 'streams'):
+            if audio_streams is not None and hasattr(audio_streams, "streams"):
                 for audio_stream in audio_streams.streams:
                     default = audio_stream.disposition.default == 1
                     lang = audio_stream.tags.language
@@ -102,34 +111,37 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
     Copies, and potentially updates the default audio stream of a video file.
     """
-    random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    workfile = mp4_file.parent / ( mp4_file.stem + random + mp4_file.suffix )
+    random = "".join(
+        choices(population=string.ascii_uppercase + string.digits, k=10))
+    workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
     stream = get_audio_stream_for_lang(mp4_file, language)
     if stream is not None:
-        logger.info(
-            "Attempt to alter default audio stream of {}", mp4_file)
-        with subprocess.Popen(['ffmpeg',
-                                '-i',
-                                mp4_file,  # input file
-                                '-map',
-                                '0',  # copy all stream
-                                '-disposition:a',
-                                'none',  # mark all audio streams as not default
-                                # mark this audio stream as default
-                                f'-disposition:a:{stream}',
-                                'default',
-                                '-c',
-                                'copy',  # don't reencode anything.
-                                workfile],
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.PIPE,
-                                universal_newlines=True) as process:
+        logger.info("Attempt to alter default audio stream of {}", mp4_file)
+        with subprocess.Popen(
+            [
+                "ffmpeg",
+                "-i",
+                mp4_file,  # input file
+                "-map",
+                "0",  # copy all stream
+                "-disposition:a",
+                "none",  # mark all audio streams as not default
+                # mark this audio stream as default
+                f"-disposition:a:{stream}",
+                "default",
+                "-c",
+                "copy",  # don't reencode anything.
+                workfile,
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        ) as process:
             stderr = process.stderr.read()
             success = process.wait() == 0
             process.stderr.close()
             if not success:
-                logger.info(
-                    "Could not update audio stream for {}", mp4_file)
+                logger.info("Could not update audio stream for {}", mp4_file)
                 logger.info(stderr)
             else:
                 logger.warning("Return code: {}", process.returncode)
@@ -138,29 +150,33 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
             return success
     return True
 
+
 def attempt_fix_corrupt(mp4_file: Path) -> bool:
     """
     Attempt to fix corrupt mp4 files.
     """
-    random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    workfile = mp4_file.parent / ( mp4_file.stem + random + mp4_file.suffix )
-    logger.info(
-        "Attempt to fix damaged mp4 file: {}", mp4_file)
-    with subprocess.Popen(['ffmpeg',
-                            '-i',
-                            mp4_file,  # input file
-                            '-c',
-                            'copy',  # don't reencode anything.
-                            workfile],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.PIPE,
-                            universal_newlines=True) as process:
+    random = "".join(
+        choices(population=string.ascii_uppercase + string.digits, k=10))
+    workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
+    logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
+    with subprocess.Popen(
+        [
+            "ffmpeg",
+            "-i",
+            mp4_file,  # input file
+            "-c",
+            "copy",  # don't reencode anything.
+            workfile,
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    ) as process:
         stderr = process.stderr.read()
         success = process.wait() == 0
         process.stderr.close()
         if not success:
-            logger.info(
-                "Could not fix mp4 files {}", mp4_file)
+            logger.info("Could not fix mp4 files {}", mp4_file)
             logger.info(stderr)
         else:
             logger.warning("Return code: {}", process.returncode)
