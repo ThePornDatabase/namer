@@ -28,11 +28,18 @@ def resolution_to_hdv_setting(resolution: int) -> int:
     return 0
 
 
-def set_if_not_none(video: MP4, atom: str, value: str):
+def set_single_if_not_none(video: MP4, atom: str, value: str):
     """
     Set a single atom on the video if it is not None.
     """
     video[atom] = [value] if value is not None else []
+
+
+def set_array_if_not_none(video: MP4, atom: str, value: str):
+    """
+    Set an array atom on the video if it is not None.
+    """
+    video[atom] = value if value is not None else []
 
 
 def get_mp4_if_possible(mp4: Path) -> MP4:
@@ -78,22 +85,22 @@ def update_mp4_file(
     logger.info("Updating atom tags on: {}", mp4)
     if mp4 is not None and mp4.exists():
         video: MP4 = get_mp4_if_possible(mp4)
-        set_if_not_none(video, "\xa9nam", looked_up.name)
+        set_single_if_not_none(video, "\xa9nam", looked_up.name)
         video["\xa9day"] = (
             [looked_up.date + "T09:00:00Z"] if looked_up.date is not None else []
         )
         if config.enable_metadataapi_genres:
-            video["\xa9gen"] = looked_up.tags if looked_up.tags is not None else []
+            set_array_if_not_none(video, "\xa9gen", looked_up.tags)
         else:
-            video["keyw"] = looked_up.tags if looked_up.tags is not None else []
-            set_if_not_none(video, "\xa9gen", config.default_genre)
-        set_if_not_none(video, "tvnn", looked_up.site)
-        set_if_not_none(video, "\xa9alb", looked_up.site)
+            set_array_if_not_none(video, "keyw", looked_up.tags)
+            set_single_if_not_none(video, "\xa9gen", config.default_genre)
+        set_single_if_not_none(video, "tvnn", looked_up.site)
+        set_single_if_not_none(video, "\xa9alb", looked_up.site)
         video["stik"] = [9]  # Movie
         resolution = resolution_to_hdv_setting(get_resolution(mp4))
-        set_if_not_none(video, "hdvd", resolution)
-        set_if_not_none(video, "ldes", looked_up.description)
-        set_if_not_none(video, "\xa9cmt", looked_up.source_url)
+        set_single_if_not_none(video, "hdvd", resolution)
+        set_single_if_not_none(video, "ldes", looked_up.description)
+        set_single_if_not_none(video, "\xa9cmt", looked_up.source_url)
         video["----:com.apple.iTunes:iTunEXTC"] = "mpaa|XXX|0|".encode(
             "UTF-8", errors="ignore"
         )
@@ -124,17 +131,24 @@ def update_mp4_file(
         video["----:com.apple.iTunes:iTunMOVI"] = itunes_movie.encode(
             "UTF-8", errors="ignore"
         )
-        if poster is not None:
-            with open(poster, "rb") as file:
-                ext = poster.suffix.upper()
-                imageformat = None
-                if ext in [".JPEG", ".JPG"]:
-                    imageformat = MP4Cover.FORMAT_JPEG
-                elif ext == ".PNG":
-                    imageformat = MP4Cover.FORMAT_PNG
-                if imageformat:
-                    video["covr"] = [MP4Cover(file.read(), imageformat)]
+        add_poster(poster, video)
         video.save()
         logger.info("Updated atom tags: {}", mp4)
     else:
         logger.warning("Can not update tags of a non-existant file: {}", mp4)
+
+
+def add_poster(poster, video):
+    """
+    Adds a poster to the mp4 metadata if available and correct format.
+    """
+    if poster is not None:
+        with open(poster, "rb") as file:
+            ext = poster.suffix.upper()
+            imageformat = None
+            if ext in [".JPEG", ".JPG"]:
+                imageformat = MP4Cover.FORMAT_JPEG
+            elif ext == ".PNG":
+                imageformat = MP4Cover.FORMAT_PNG
+            if imageformat:
+                video["covr"] = [MP4Cover(file.read(), imageformat)]

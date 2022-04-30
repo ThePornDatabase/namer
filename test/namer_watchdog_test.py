@@ -1,7 +1,6 @@
 """
 Test namer_watchdog.py
 """
-import datetime
 import os
 from pathlib import Path
 import time

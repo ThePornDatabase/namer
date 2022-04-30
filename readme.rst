@@ -141,13 +141,17 @@ Development
   poetry build
 
   # Linting:
-  poetry run pylint namer
+  poetry run flake8 namer
+  poetry run flake8 test
 
   # Testing:
   poetry run pytest
 
   # Code Coverage:
   poetry run pytest --cov
+
+  # Formatting:
+  poetry run autopep8 --in-place namer/*.py test/*.py
 
   # Html Coverage report:
   poetry run coverage html
@@ -170,16 +174,16 @@ Pull Requests Are Welcome!
 Just be sure to pay attention to the tests and any failing pylint results.   If you want to vet a pr will be accepted before building code, file an new feature request issue, and 4c0d3r will comment on it and set you up for success.   Tests are must.
 
 .. _PornDB: http://metadataapi.net/
-.. _namer section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L1
-.. _metadata section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L59
-.. _watchdog section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L89
-.. _watch_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L100
-.. _work_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L104
-.. _fail_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L109
-.. _dest_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L112
-.. _retry_time: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L115
-.. _new_relative_path_name: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L97
-.. _enabled_tagging: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L67
-.. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg#L72
+.. _namer section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L1
+.. _metadata section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L59
+.. _watchdog section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L89
+.. _watch_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L100
+.. _work_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L104
+.. _fail_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L109
+.. _dest_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L112
+.. _retry_time: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L115
+.. _new_relative_path_name: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L97
+.. _enabled_tagging: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L67
+.. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L72
 .. _Homebrew: https://docs.brew.sh/Installation
 .. _Chocolatey: https://chocolatey.org/install
