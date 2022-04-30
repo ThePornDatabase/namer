@@ -90,7 +90,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main'}}
     needs:
       - dockerbuild
-      - pylint
+      - flake8
       - build
     outputs:
       created-tag: ${{ steps.auto-tag.outputs.tag }}
