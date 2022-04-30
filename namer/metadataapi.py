@@ -268,7 +268,8 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
     file_info.source_url = data.url
     file_info.poster_url = data.poster
     file_info.trailer_url = data.trailer
-    file_info.background_url = data.image
+    if data.background is not None:
+        file_info.background_url = data.background.large
     file_info.site = data.site.name
     file_info.look_up_site_id = data._id  # pylint: disable=protected-access
     for json_performer in data.performers:
