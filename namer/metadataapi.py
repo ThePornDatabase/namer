@@ -179,30 +179,27 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
         return None
 
 
+@logger.catch
 def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Path:
     """
     returns json object with info
     """
     file = video_file.parent / \
         (video_file.stem + infix + pathlib.Path(url).suffix)
-    if config.enabled_poster and not file.exists() and url.startswith("http"):
+    if config.enabled_poster and url.startswith("http") and not file.exists():
         headers = {
             "Authorization": f"Bearer {config.porndb_token}",
             "User-Agent": "namer-1",
         }
         file.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            with requests.get(url, headers=headers) as response:
-                # Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
-                # response.raise_for_status()
-                with open(file, "wb") as binary_file:
-                    # Write bytes to file
-                    binary_file.write(response.content)
-                    set_permissions(file, config)
-                    return file
-        except requests.exceptions.RequestException as ex:
-            logger.warning(ex)
-            return None
+        # choosing to not use requests here as url encoding backed in to requests makes usage difficult.
+        rec = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(rec) as response:
+            with open(file, "wb") as binary_file:
+                # Write bytes to file
+                binary_file.write(response.read())
+                set_permissions(file, config)
+                return file
     else:
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
