@@ -425,12 +425,12 @@ def main(argslist: List[str]):
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     config = default_config()
     file_name = parse_file_name(
-        os.path.basename(args.file), default_config().name_parser
+        os.path.basename(args.file), config.name_parser
     )
     match_results = match(file_name, config)
     if len(match_results) > 0 and match_results[0].is_match() is True:
         print(match_results[0].looked_up.new_file_name(
-            default_config().inplace_name))
+            config.inplace_name))
         if args.jsonfile is not None:
             Path(args.jsonfile).write_text(
                 match_results[0].looked_up.origninal_response, encoding="UTF-8"

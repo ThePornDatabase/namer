@@ -6,8 +6,8 @@ import io
 import unittest
 from unittest import mock
 
+from test.utils import sample_config
 from namer.metadataapi import main, match
-from namer.types import default_config
 from namer.filenameparser import parse_file_name
 
 
@@ -26,7 +26,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         info = result.looked_up
@@ -60,7 +60,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.is_match())
@@ -94,7 +94,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.datematch)
@@ -139,7 +139,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.datematch)
@@ -160,7 +160,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
         self.assertTrue(result.datematch)
@@ -198,7 +198,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -210,7 +210,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -222,7 +222,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        results = match(name, default_config())
+        results = match(name, sample_config())
         self.assertEqual(len(results), 0)
 
     @mock.patch("sys.stdout", new_callable=io.StringIO)

@@ -507,11 +507,11 @@ def default_config() -> NamerConfig:
     config = configparser.ConfigParser()
     default_locations = []
     if os.environ.get("NAMER_CONFIG") is not None and Path(os.environ.get("NAMER_CONFIG")).exists():
-        default_locations = [ Path(os.environ.get("NAMER_CONFIG")) ]
+        default_locations = [Path(os.environ.get("NAMER_CONFIG"))]
     elif (Path.home() / ".namer.cfg").exists():
-        default_locations = [ Path.home() / ".namer.cfg" ]
+        default_locations = [Path.home() / ".namer.cfg"]
     elif Path("./namer.cfg").exists():
-        default_locations = [ Path("./namer.cfg") ]
+        default_locations = [Path("./namer.cfg")]
     config.read(default_locations)
     return from_config(config)
 

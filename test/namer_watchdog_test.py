@@ -9,10 +9,9 @@ import unittest
 from unittest.mock import MagicMock, patch
 import logging
 import tempfile
-from test.utils import validate_mp4_tags, new_ea, prepare, validate_permissions
-from freezegun import freeze_time
+from test.utils import sample_config, validate_mp4_tags, new_ea, prepare, validate_permissions
 from mutagen.mp4 import MP4
-from namer.types import NamerConfig, default_config
+from namer.types import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed
 
 
@@ -20,7 +19,7 @@ def make_locations(tempdir: Path) -> NamerConfig:
     """
     Make temp testing dirs.
     """
-    config = default_config()
+    config = sample_config()
     config.watch_dir = tempdir / "watch"
     config.watch_dir.mkdir()
     config.work_dir = tempdir / "work"
@@ -401,29 +400,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertTrue(
                 nfofile.exists() and nfofile.is_file() and nfofile.stat().st_size != 0
             )
-
-    def test_manual_tick(self):
-        """
-        see it work.
-        """
-        config = default_config()
-        hour = int(config.retry_time.split(":", maxsplit=1)[0].lstrip("0"))
-        minstr = config.retry_time.split(":")[1].lstrip("0")
-        minute = 0 if len(minstr) == 0 else int(minstr)
-        today = datetime.datetime.today()
-        before_retry = today.replace(hour=hour, minute=minute) - datetime.timedelta(
-            seconds=3
-        )
-        with freeze_time(before_retry) as frozen_datetime:
-            self.assertEqual(frozen_datetime(), before_retry)
-
-            frozen_datetime.tick()
-            before_retry += datetime.timedelta(seconds=1)
-            self.assertEqual(frozen_datetime(), before_retry)
-
-            frozen_datetime.tick(delta=datetime.timedelta(seconds=10))
-            before_retry += datetime.timedelta(seconds=10)
-            self.assertEqual(frozen_datetime(), before_retry)
 
 
 if __name__ == "__main__":

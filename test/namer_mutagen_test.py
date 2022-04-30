@@ -6,11 +6,12 @@ import unittest
 from unittest import mock
 import tempfile
 import shutil
+from test.utils import sample_config
 from mutagen.mp4 import MP4
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer.metadataapi import match
 from namer.filenameparser import parse_file_name
-from namer.types import LookedUpFileInfo, NamerConfig, default_config
+from namer.types import LookedUpFileInfo, NamerConfig
 
 
 def validate_mp4_tags(test_self, file):
@@ -93,7 +94,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             poster = tempdir / "poster.png"
             shutil.copy(testdir / "poster.png", poster)
             name_parts = parse_file_name(targetfile.name)
-            info = match(name_parts, default_config())
+            info = match(name_parts, sample_config())
             update_mp4_file(
                 targetfile, info[0].looked_up, poster, NamerConfig())
             output = MP4(targetfile)
@@ -120,7 +121,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             poster = tempdir / "poster.png"
             shutil.copy(testdir / "poster.png", poster)
             name_parts = parse_file_name(targetfile.name)
-            info = match(name_parts, default_config())
+            info = match(name_parts, sample_config())
             update_mp4_file(
                 targetfile, info[0].looked_up, poster, NamerConfig())
             validate_mp4_tags(self, targetfile)
@@ -145,7 +146,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             )
             poster = None
             name_parts = parse_file_name(targetfile.name)
-            info = match(name_parts, default_config())
+            info = match(name_parts, sample_config())
             update_mp4_file(
                 targetfile, info[0].looked_up, poster, NamerConfig())
             validate_mp4_tags(self, targetfile)
@@ -168,7 +169,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             )
             poster = None
             name_parts = parse_file_name(targetfile.name)
-            info = match(name_parts, default_config())
+            info = match(name_parts, sample_config())
             update_mp4_file(
                 targetfile, info[0].looked_up, poster, NamerConfig())
             self.assertFalse(targetfile.exists())

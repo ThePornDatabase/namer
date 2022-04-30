@@ -7,9 +7,10 @@ from shutil import copytree
 import unittest
 import tempfile
 from unittest import mock
+from test.utils import sample_config
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.metadataapi import parse_file_name, match
-from namer.types import Performer, default_config
+from namer.types import Performer
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -53,7 +54,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        config = default_config()
+        config = sample_config()
         config.enable_metadataapi_genres = True
         results = match(name, config)
         self.assertEqual(len(results), 1)
@@ -139,7 +140,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name(
             "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
         )
-        config = default_config()
+        config = sample_config()
         results = match(name, config)
         self.assertEqual(len(results), 1)
         result = results[0]
