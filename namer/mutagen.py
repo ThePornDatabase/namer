@@ -93,6 +93,7 @@ def update_mp4_file(
         resolution = resolution_to_hdv_setting(get_resolution(mp4))
         set_if_not_none(video, "hdvd", resolution)
         set_if_not_none(video, "ldes", looked_up.description)
+        set_if_not_none(video, "\xa9cmt", looked_up.source_url)
         video["----:com.apple.iTunes:iTunEXTC"] = "mpaa|XXX|0|".encode(
             "UTF-8", errors="ignore"
         )
