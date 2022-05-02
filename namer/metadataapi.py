@@ -35,11 +35,11 @@ from namer.filenameparser import parse_file_name
 def __evaluate_match(
     name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig
 ) -> ComparisonResult:
-    found_site = re.sub(r" ", "", looked_up.site).upper()
+    found_site = re.sub(r"[\-\ \.\+\_]", "", looked_up.site).upper()
     site = (
         name_parts.site is None
-        or re.sub(r" ", "", name_parts.site.upper()) in found_site
-        or unidecode(re.sub(r" ", "", name_parts.site.upper())) in found_site
+        or re.sub(r"[\-\ \.\+\_]", "", name_parts.site.upper()) in found_site
+        or unidecode(re.sub(r"[\-\ \.\+\_]", "", name_parts.site.upper())) in found_site
     )
     release_date = False
     if found_site in namer_config.sites_with_no_date_info:
