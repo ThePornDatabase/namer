@@ -85,6 +85,7 @@ def update_mp4_file(
     logger.info("Updating atom tags on: {}", mp4)
     if mp4 is not None and mp4.exists():
         video: MP4 = get_mp4_if_possible(mp4)
+        video.clear()
         set_single_if_not_none(video, "\xa9nam", looked_up.name)
         video["\xa9day"] = (
             [looked_up.date + "T09:00:00Z"] if looked_up.date is not None else []
