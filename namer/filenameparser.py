@@ -93,8 +93,7 @@ def parse_file_name(
         if match.groupdict().get("name") is not None:
             file_name_parts.name = name_cleaner(match.group("name"))
         if match.groupdict().get("site") is not None:
-            file_name_parts.site = re.sub(
-                r"[\.\-\ ]", "", match.group("site")).lower()
+            file_name_parts.site = match.group("site")
         if match.groupdict().get("trans") is not None:
             trans = match.group("trans")
             file_name_parts.trans = trans is not None and trans.strip().upper() == "TS"
