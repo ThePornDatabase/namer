@@ -27,8 +27,16 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: '1.1.13'
-      - uses: FedericoCarboni/setup-ffmpeg@v1
-        id: setup-ffmpeg
+      - name: Install ffmpeg
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt-get install -y --no-install-recommends ffmpeg
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+              choco install -q -y ffmpeg
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              env HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg
+          fi
+        shell: bash 
       - run: poetry install
       - run: poetry run pytest
 
@@ -64,8 +72,16 @@ jobs:
           #cache: 'poetry'
       - name: Display Python version
         run: python --version
-      - uses: FedericoCarboni/setup-ffmpeg@v1
-        id: setup-ffmpeg
+      - name: Install ffmpeg
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt-get install -y --no-install-recommends ffmpeg
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+              choco install -q -y ffmpeg
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              env HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg
+          fi
+        shell: bash
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
