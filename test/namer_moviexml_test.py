@@ -100,6 +100,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <genre>Tattoo</genre>
   <genre>Threesome</genre>
   <genre>Toys / Dildos</genre>
+  <studio>Evil Angel</studio>
   <theporndbid>1678283</theporndbid>
   <phoenixadultid/>
   <phoenixadulturlid/>
@@ -186,6 +187,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <tag>Threesome</tag>
   <tag>Toys / Dildos</tag>
   <genre>Adult</genre>
+  <studio>Evil Angel</studio>
   <theporndbid>1678283</theporndbid>
   <phoenixadultid/>
   <phoenixadulturlid/>

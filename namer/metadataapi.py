@@ -184,25 +184,25 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
     """
     returns json object with info
     """
-    file = video_file.parent / \
-        (video_file.stem + infix + pathlib.Path(url).suffix)
-    if config.enabled_poster and url.startswith("http") and not file.exists():
-        headers = {
-            "Authorization": f"Bearer {config.porndb_token}",
-            "User-Agent": "namer-1",
-        }
-        file.parent.mkdir(parents=True, exist_ok=True)
-        # choosing to not use requests here as url encoding backed in to requests makes usage difficult.
-        rec = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(rec) as response:
-            with open(file, "wb") as binary_file:
-                # Write bytes to file
-                binary_file.write(response.read())
-                set_permissions(file, config)
-                return file
-    else:
-        poster = (video_file.parent / url).resolve()
-        return poster if poster.exists() and poster.is_file() else None
+    if url is not None:
+        file = video_file.parent / \
+            (video_file.stem + infix + pathlib.Path(url).suffix)
+        if config.enabled_poster and url.startswith("http") and not file.exists():
+            headers = {
+                "Authorization": f"Bearer {config.porndb_token}",
+                "User-Agent": "namer-1",
+            }
+            file.parent.mkdir(parents=True, exist_ok=True)
+            http = requests.get(url, headers=headers, stream=True)
+            if http.ok:
+                with open(file, 'wb') as f:
+                    for data in http.iter_content(1024):
+                        f.write(data)
+                    set_permissions(file, config)
+                    return file
+        else:
+            poster = (video_file.parent / url).resolve()
+            return poster if poster.exists() and poster.is_file() else None
 
 
 @logger.catch
@@ -238,12 +238,11 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
             if "metadataapi.net" in url:
                 headers["Authorization"] = f"Bearer {namer_config.porndb_token}"
             try:
-                with requests.get(url, headers=headers) as response:
-                    # Not sure how to avoid this 406, tried all kinds of Accept/User-Agent...
-                    response.raise_for_status()
-                    with open(trailerfile, "wb") as binary_file:
-                        # Write bytes to file
-                        binary_file.write(response.content)
+                http = requests.get(url, headers=headers, stream=True)
+                if http.ok:
+                    with open(trailerfile, 'wb') as f:
+                        for data in http.iter_content(1024):
+                            f.write(data)
                         set_permissions(trailerfile, namer_config)
                         return trailerfile
             except OSError as ex:
