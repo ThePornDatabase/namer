@@ -83,6 +83,7 @@ def write_movie_xml_file(
         for tag in info.tags:
             etree.SubElement(root, "tag").text = tag
         etree.SubElement(root, "genre").text = config.default_genre
+    etree.SubElement(root, "studio").text = info.site
     etree.SubElement(root, "theporndbid").text = str(info.uuid)
     etree.SubElement(root, "phoenixadultid")
     etree.SubElement(root, "phoenixadulturlid")

@@ -208,13 +208,22 @@ def process_file(
             ):
                 output.new_metadata = output.search_results[0].looked_up
         else:
-            logger.error(
-                """
-                Could not parse file: {}
-                It is not in the right format it must start with a site, a date and end with an extension
-                """,
-                output.video_file,
-            )
+            if not infos:
+                if file_to_process != output.video_file:
+                    logger.error(
+                        """
+                        Could not process file in directory: {}
+                        Likely attempted to use the directory's name as the name to parse.
+                        In general the dir or file's name should start with a site, a date and end with an extension
+                        Target video file in dir was: {}""",
+                        file_to_process, output.video_file)
+                else:
+                    logger.error(
+                        """
+                        Could not process files: {}
+                        In the file's name should start with a site, a date and end with an extension""",
+                        file_to_process
+                    )
         target_dir = (
             output.dirfile if output.dirfile is not None else output.video_file.parent
         )
@@ -263,7 +272,7 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
         trailer = get_trailer(
             results.new_metadata.trailer_url, results.video_file, config
         )
-    if config.write_nfo is True:
+    if config.write_nfo is True and results.new_metadata is not None:
         poster = get_image(
             results.new_metadata.poster_url, "-poster", results.video_file, config
         )
@@ -364,9 +373,9 @@ def main(arglist: List[str]):
     if args.dir is not None:
         target = args.dir
     if args.many is True:
-        dir_with_subdirs_to_process(args.dir, config, args.infos)
+        dir_with_subdirs_to_process(args.dir.absolute(), config, args.infos)
     else:
-        process(target, config, args.infos)
+        process(target.absolute(), config, args.infos)
 
 
 if __name__ == "__main__":
