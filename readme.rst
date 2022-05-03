@@ -16,18 +16,29 @@
 Namer is a powerful command line tool for renaming and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
 Namer is easily installed as a python pip and can:
 
-* can be used to name and embed tags in individual files with metadata from porndb: 
+* can be used to name and embed tags in individual files with metadata from porndb:
+
   ``python -m namer rename -f /path/to/file/Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4 [-v]`` 
+
 * can be used to name and tag files with metadata from a jellyfin/emby/kodi .nfo file (should be named the same as the file except for extension).
+
   ``python -m namer rename -f /path/to/file/Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4 -i [-v]``
+
 * can be used to rename a tag a file based on the directory name, so if you have a file like ``/Site.[YY]YY.MM.DD.MessOfText.XXX.2160/abc.mp4`` 
+
   ``python -m namer rename -d /path/to/dir/Site.[YY]YY.MM.DD.MessOfText.XXX.2160/``
+
 * can be used to rename a tag a whole mess of dirs and files in a directory (using -m, meaning "many").
+
   ``python -m namer rename -m -d /path/to/dir/``
+  
 * can be used to just suggest a possible name.  The file doesn't need to exist but should have an extension.
+
   ``python -m namer suggest -f Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4``
+
 * can be run watching a directory for new files to name, tag and move to an output location, possible setting file permissions, writing .nfo files with downloaded images, attempting to grab trailers, and retrying failed files nightly.
-   ``python -m namer watchdog``  
+
+  ``python -m namer watchdog``  
 
 For all of the above it's recommended to have a config file in your home directory (copied from namer.cfg.sample in this git repo)
 
