@@ -40,6 +40,8 @@ RUN cd /work/ \
     && poetry run pytest \
     && poetry run flake8 namer \
     && poetry run flake8 test \
+    && poetry run pylint namer \
+    && poetry run pylint test \
     && poetry build
 
 FROM BASE

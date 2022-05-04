@@ -40,7 +40,7 @@ jobs:
       - run: poetry install
       - run: poetry run pytest
 
-  flake8:
+  linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -59,6 +59,10 @@ jobs:
       - run: poetry run flake8 namer
         shell: bash
       - run: poetry run flake8 test
+        shell: bash  
+      - run: poetry run pylint namer
+        shell: bash
+      - run: poetry run pylint test
         shell: bash  
 
   coverage:
@@ -106,7 +110,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main'}}
     needs:
       - dockerbuild
-      - flake8
+      - linting
       - build
     outputs:
       created-tag: ${{ steps.auto-tag.outputs.tag }}
