@@ -46,8 +46,12 @@ prefer_dir_name_if_available = True
 # minimum file size to process in MB, ignored if a file is to be processed
 min_file_size = 300
 
-# Should namer's comparison log be written next to videos.
+# Should namer's comparison log be written next to successfully moved videos (it will always be added to the failed dir).
 write_namer_log = False
+
+# Comma separated list of extensions for namer to process (in order of preference in case multiple types exist in a target directory)
+# Case insensitive, Only mp4 supports tagging.  
+target_extensions = mp4,mkv,avi,mov,flv
 
 # Should new and moved files have permissions and ownership set.
 update_permissions_ownership = True
@@ -79,7 +83,7 @@ sites_with_no_date_info =
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
 # MP4 metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).
 # Metadata includes, Title, Release Date, Scene Name, Artist, Source URL, XXX Movie rating.
-# If a file is an mkv adding metadata at this time isn't supported.
+# If a file is not an mp4 adding metadata at this time isn't supported.
 # .nfo files are supported by a number of players, though some require plugins.
 
 #  Write an nfo file next to the directory in an emby/jellyfin readable format

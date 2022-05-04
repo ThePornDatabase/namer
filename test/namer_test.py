@@ -7,7 +7,7 @@ import shutil
 import unittest
 from unittest.mock import patch
 import tempfile
-from test.utils import new_ea, prepare, sample_config
+from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 from mutagen.mp4 import MP4
 from namer.types import NamerConfig
 from namer.namer import determine_target_file, main, check_arguments, set_permissions
@@ -160,6 +160,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test multiple directories are processed when -d (directory) and -m are passed.
         Process all subdirs of -d.
         """
+        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [
@@ -168,57 +169,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             ]
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent), "-m"])
-            output1 = MP4(
-                targets[0].file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            )
-            self.assertEqual(
-                output1.get("\xa9nam"), [
-                    "Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
-            output2 = MP4(
-                targets[1].file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
-            )
-            self.assertEqual(
-                output2.get("\xa9nam"), [
-                    "Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
-            self.assertEqual(output2.get("\xa9day"), ["2022-01-03T09:00:00Z"])
-            self.assertEqual(output2.get("\xa9alb"), [
-                             "Evil Angel"])  # plex collection
-            self.assertEqual(output2.get("tvnn"), ["Evil Angel"])
-            self.assertEqual(output2.get("\xa9gen"), ["Adult"])
-            self.assertEqual(
-                [
-                    "Anal",
-                    "Ass",
-                    "Ass to mouth",
-                    "Big Dick",
-                    "Blowjob",
-                    "Blowjob - Double",
-                    "Brunette",
-                    "Bubble Butt",
-                    "Cum swallow",
-                    "Deepthroat",
-                    "FaceSitting",
-                    "Facial",
-                    "Gonzo / No Story",
-                    "HD Porn",
-                    "Hairy Pussy",
-                    "Handjob",
-                    "Hardcore",
-                    "Latina",
-                    "MILF",
-                    "Pussy to mouth",
-                    "Rimming",
-                    "Sex",
-                    "Tattoo",
-                    "Threesome",
-                    "Toys / Dildos",
-                ],
-                output2.get("keyw"),
-            )
+            output1 = (targets[0].file.parent /
+                       "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            validate_mp4_tags(self, output1)
+            output2 = (targets[1].file.parent /
+                       "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
+            validate_mp4_tags(self, output2)
 
     def test_set_permissions(self):
         """

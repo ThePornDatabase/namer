@@ -21,7 +21,7 @@ from namer.mutagen import update_mp4_file
 from namer.metadataapi import get_image, get_trailer, match
 
 DESCRIPTION = """
-    Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
+    Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
     or a watchdog service to do the above watching a directory for new files and moving matched files to a target location.
     File names are assumed to be of the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv].
     In the name, read the periods, ".", as any number of spaces " ", dashes "-", or periods ".".
@@ -76,15 +76,18 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
             poster.unlink()
 
 
-def find_largest_file_in_glob(rootdir: Path, globstr: str) -> Path:
+def find_target_file(rootdir: Path, config: NamerConfig) -> Path:
     """
     returns largest matching file
     """
-    list_of_files = list(rootdir.rglob(globstr))
-    logger.info("found files {}", list_of_files)
+    list_of_files = list(rootdir.rglob("**/*.*"))
     file = None
+    ext = None
     if len(list_of_files) > 0:
-        file = max(list_of_files, key=lambda x: x.stat().st_size)
+        for target_ext in config.target_extensions:
+            ext = target_ext
+            if file is None:
+                file = max(filter(lambda file: file.suffix.lower()[1:] == ext, list_of_files), key=lambda x: x.stat().st_size)
     return file
 
 
@@ -105,9 +108,7 @@ def determine_target_file(
     if file_to_process.is_dir():
         logger.info("Target dir: {}", file_to_process)
         containing_dir = file_to_process
-        file = find_largest_file_in_glob(file_to_process, "**/*.mp4")
-        if file is None:
-            file = find_largest_file_in_glob(file_to_process, "**/*.mkv")
+        file = find_target_file(file_to_process, config)
     else:
         file = file_to_process
 
@@ -272,7 +273,7 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
         trailer = get_trailer(
             results.new_metadata.trailer_url, results.video_file, config
         )
-    if config.write_nfo is True and results.new_metadata is not None:
+    if config.write_nfo and results.new_metadata is not None:
         poster = get_image(
             results.new_metadata.poster_url, "-poster", results.video_file, config
         )

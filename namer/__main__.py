@@ -1,7 +1,7 @@
 """
-Namer, the porn db file renamer. It can be a command line tool to rename mp4/mkvs and to embed tags in mp4s,
+Namer, the porn db file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
 or a watchdog service to do the above watching a directory for new files.  File names are assumed to be of
-the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv].   In the name, read the
+the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv|...].   In the name, read the
 periods, ".", as any number of spaces " ", dashes "-", or periods ".".
 
 Provided you have an access token to the porndb (free sign up) https://www.metadataapi.net/, this program will

@@ -192,6 +192,11 @@ class NamerConfig:
     If a directory name is to be prefered over a file name.
     """
 
+    target_extensions: List[str] = None
+    """
+    File types namer targets, only 'mp4's are can be tagged.
+    """
+
     write_namer_log: bool = False
     """
     Should a log of comparisons be written next to processed video files.
@@ -346,14 +351,17 @@ class NamerConfig:
         output += (
             f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
         )
-        output += f"  set_uid: {self.set_uid}\n"
-        output += f"  set_gid: {self.set_gid}\n"
+        output += f"  target_extensions: {self.target_extensions}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
-        output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
         output += f"  trailer_location: {self.trailer_location}\n"
-        output += f"  write_nfo: {self.write_nfo}\n"
         output += f"  sites_with_no_date_info: {self.sites_with_no_date_info}\n"
+        output += f"  update_permissions_ownership: {self.update_permissions_ownership}"
+        output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
+        output += f"  set_file_permissions: {self.set_file_permissions}\n"
+        output += f"  set_uid: {self.set_file_permissions}\n"
+        output += f"  set_gid: {self.set_file_permissions}\n"
         output += "Tagging Config:\n"
+        output += f"  write_nfo: {self.write_nfo}\n"
         output += f"  enabled_tagging: {self.enabled_tagging}\n"
         output += f"  enabled_poster: {self.enabled_poster}\n"
         output += f"  enable_metadataapi_genres: {self.enable_metadataapi_genres}\n"
@@ -426,6 +434,11 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.prefer_dir_name_if_available = config.getboolean(
         "namer", "prefer_dir_name_if_available", fallback=False
     )
+    namer_config.target_extensions = [
+        x.strip().lower()
+        for x in config.get("namer", "target_extensions", fallback="mp4,mkv,avi,mov,flv").split(",")
+    ]
+
     namer_config.min_file_size = config.getint(
         "namer", "min_file_size", fallback=100)
     namer_config.set_uid = config.getint("namer", "set_uid", fallback=None)
@@ -804,7 +817,7 @@ class ProcessingResults:
     New metadata found for the file being processed.
     Sourced including queries against the porndb, which would be stored in search_results,
     or reading a .nfo xml file next to the video, with the file name identical exept for
-    the extension, which would be .nfo instead of .mkv, or .mp4.
+    the extension, which would be .nfo instead of .mp4,.mkv,.avi,.mov,.flv.
     """
 
     dirfile: Path = None

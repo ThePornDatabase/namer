@@ -60,7 +60,7 @@ For data pulled from the interet with rss feeds (which are often in the file for
 
 If running in a background watchdog mode, files that were failed to match are retried every 24 hours, letting the PornDB_ scrapers catch up with any metadata they may be missing.
 
-Optionally, a log file can be enabled to show the original file name parts, what options were evaluated, and which match was used to name the file, it will be written next to your video file with the same name as the file (with a _namer.log) suffix rather than an mp4/mkv extension.   This is very useful for sanity checking matches, and if ever a mismatch does occur the original file name is available in the log.
+Optionally, a log file can be enabled to show the original file name parts, what options were evaluated, and which match was used to name the file, it will be written next to your video file with the same name as the file (with a _namer.log) suffix rather than an mp4/mkv/avi/mov/flv extension.   This is very useful for sanity checking matches, and if ever a mismatch does occur the original file name is available in the log.
 
 
 For the curious, how is a match made?
@@ -139,7 +139,7 @@ Please note that the `namer section`_ section and the `watchdog section`_
 section both have a field to describe the new name of a file based on looked up metadata from the PornDB_.   
 They differ because when run from the command line namer will keep the file "in place".  
 If namer is passed a dir on the command line as input it can opperate in one of two modes,
-the default mode is to look for the largest mp4 file, or mkv if no mp4 exists,
+the default mode is to look for the largest mp4 file, or other configured movie file extension if no mp4 exists,
 and rename and move that file to the root of the folder (if it's in a subfolder).
 In this case, by default the assumption is the name of the folder should be parsed to look for information to
 search the PornDB_ for matching rather than the file name.   Meaning,
@@ -150,7 +150,7 @@ Typical Watchdog Behavior:
 ----------------------------
 
 The watchdog process will watch a single folder, configured with watch_dir_ in the ``namer.cfg`` file.   Any new files and directories that appear in the watch_dir_
-will be processed once an mp4/mkv file has been fully copied in to it.  
+will be processed once an mp4/mkv/avi/mov/flv file has been fully copied in to it.  
 
 The first step in processing is to moce the newly appearing directory or file in to the work_dir_.  
 

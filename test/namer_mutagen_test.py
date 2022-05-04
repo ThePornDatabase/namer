@@ -6,57 +6,12 @@ import unittest
 from unittest import mock
 import tempfile
 import shutil
-from test.utils import sample_config
+from test.utils import sample_config, validate_mp4_tags
 from mutagen.mp4 import MP4
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer.metadataapi import match
 from namer.filenameparser import parse_file_name
 from namer.types import LookedUpFileInfo, NamerConfig
-
-
-def validate_mp4_tags(test_self, file):
-    """
-    Validates the tags of the standard mp4 file.
-    """
-    output2 = MP4(file)
-    test_self.assertEqual(
-        output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-    )
-    test_self.assertEqual(output2.get("\xa9day"), ["2022-01-03T09:00:00Z"])
-    test_self.assertEqual(output2.get("\xa9alb"), [
-                          "Evil Angel"])  # plex collection
-    test_self.assertEqual(output2.get("tvnn"), ["Evil Angel"])
-    test_self.assertEqual(output2.get("\xa9gen"), ["Adult"])
-    test_self.assertEqual(
-        [
-            "Anal",
-            "Ass",
-            "Ass to mouth",
-            "Big Dick",
-            "Blowjob",
-            "Blowjob - Double",
-            "Brunette",
-            "Bubble Butt",
-            "Cum swallow",
-            "Deepthroat",
-            "FaceSitting",
-            "Facial",
-            "Gonzo / No Story",
-            "HD Porn",
-            "Hairy Pussy",
-            "Handjob",
-            "Hardcore",
-            "Latina",
-            "MILF",
-            "Pussy to mouth",
-            "Rimming",
-            "Sex",
-            "Tattoo",
-            "Threesome",
-            "Toys / Dildos",
-        ],
-        output2.get("keyw"),
-    )
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

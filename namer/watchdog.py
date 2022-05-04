@@ -153,7 +153,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     def __init__(self, namer_config: NamerConfig):
         super().__init__(
-            patterns=["**/*.mp4", "**/*.mkv", "**/*.MP4", "**/*.MKV"],
+            patterns=["*.*"],
             case_sensitive=is_fs_case_sensitive(),
             ignore_directories=True,
             ignore_patterns=None,
@@ -169,17 +169,18 @@ class MovieEventHandler(PatternMatchingEventHandler):
         if file_path is not None:
             path = Path(file_path)
             relative_path = str(path.relative_to(self.namer_config.watch_dir))
-            logger.info("watchdog process called for {}", relative_path)
             if (
                 re.search(self.namer_config.ignored_dir_regex,
                           relative_path) is None
                 and path.exists()
+                and path.suffix.lower()[1:] in self.namer_config.target_extensions
                 and done_copying(path)
                 and (
                     path.stat().st_size / (1024 * 1024)
                     > self.namer_config.min_file_size
                 )
             ):
+                logger.info("watchdog process called for {}", relative_path)
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:
                     time.sleep(self.namer_config.extra_sleep_time)
@@ -235,8 +236,8 @@ class MovieWatcher:
         self.__event_observer.start()
         # touch all existing movie files.
         files: List[Path] = []
-        for file in self.__namer_config.watch_dir.rglob("*.*"):
-            if file.is_file() and file.suffix in (".mkv", ".mp4"):
+        for file in self.__namer_config.watch_dir.rglob("**/*.*"):
+            if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
                 files.append(file)
         for file in files:
             if file.exists() and file.is_file():

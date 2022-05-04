@@ -195,14 +195,15 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
             file.parent.mkdir(parents=True, exist_ok=True)
             http = requests.get(url, headers=headers, stream=True)
             if http.ok:
-                with open(file, 'wb') as f:
+                with open(file, 'wb') as io_wrapper:
                     for data in http.iter_content(1024):
-                        f.write(data)
+                        io_wrapper.write(data)
                     set_permissions(file, config)
                     return file
-        else:
-            poster = (video_file.parent / url).resolve()
-            return poster if poster.exists() and poster.is_file() else None
+            return None
+        poster = (video_file.parent / url).resolve()
+        return poster if poster.exists() and poster.is_file() else None
+    return None
 
 
 @logger.catch
@@ -228,7 +229,7 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
         if (
             urlparts is not None
             and len(urlparts) > 0
-            and urlparts[-1].lower() in ["mp4", "mpeg4", "mkv", "avi"]
+            and urlparts[-1].lower() in namer_config.target_extensions
         ):
             ext = urlparts[-1]
         trailerfile: Path = video_file.parent / (location + "." + ext)
@@ -237,22 +238,17 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
             headers = {"User-Agent": "namer-1"}
             if "metadataapi.net" in url:
                 headers["Authorization"] = f"Bearer {namer_config.porndb_token}"
-            try:
-                http = requests.get(url, headers=headers, stream=True)
-                if http.ok:
-                    with open(trailerfile, 'wb') as f:
-                        for data in http.iter_content(1024):
-                            f.write(data)
-                        set_permissions(trailerfile, namer_config)
-                        return trailerfile
-            except OSError as ex:
-                logger.warning(ex)
-                return None
-        else:
-            trailer = (video_file.parent / url).resolve()
-            return trailer if trailer.exists() and trailer.is_file() else None
-    else:
-        return None
+            http = requests.get(url, headers=headers, stream=True)
+            if http.ok:
+                with open(trailerfile, 'wb') as io_wrapper:
+                    for data in http.iter_content(1024):
+                        io_wrapper.write(data)
+                    set_permissions(trailerfile, namer_config)
+                    return trailerfile
+            return None
+        trailer = (video_file.parent / url).resolve()
+        return trailer if trailer.exists() and trailer.is_file() else None
+    return None
 
 
 def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
