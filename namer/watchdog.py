@@ -86,7 +86,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
                 workingfile,
                 newvideo,
             )
-            write_log_file(newvideo, result.search_results, namer_config)
+        write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
         # Move the directory if desired.
         if (
@@ -129,6 +129,10 @@ def retry_failed(namer_config: NamerConfig):
     Moves the contents from the failed dir to the watch dir to attempt reprocessing.
     """
     logger.info("Retry failed items:")
+    # remove all old namer log files
+    for log_file in namer_config.failed_dir.rglob("**/*_namer.log"):
+        log_file.unlink()
+    # move all files back to watch dir.
     for file in list(namer_config.failed_dir.iterdir()):
         shutil.move(
             namer_config.failed_dir / file.name, namer_config.watch_dir / file.name

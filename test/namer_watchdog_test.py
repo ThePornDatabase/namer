@@ -271,6 +271,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(work_file.exists())
             failed_file = config.failed_dir / relative
             self.assertTrue(failed_file.exists() and failed_file.is_file())
+            failed_log_file = failed_file.parent / (failed_file.stem + "_namer.log")
+            self.assertTrue(failed_log_file.exists() and failed_log_file.is_file())
             retry_failed(config)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertGreater(len(list(config.watch_dir.iterdir())), 0)
