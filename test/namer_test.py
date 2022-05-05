@@ -10,7 +10,7 @@ import tempfile
 from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 from mutagen.mp4 import MP4
 from namer.types import NamerConfig
-from namer.namer import determine_target_file, main, check_arguments, set_permissions
+from namer.namer import determine_target_file, find_target_file, main, check_arguments, set_permissions
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -175,6 +175,18 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output2 = (targets[1].file.parent /
                        "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
             validate_mp4_tags(self, output2)
+
+    def test_find_target_file(self):
+        """
+        Test set permissions
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            path = Path(tmpdir)
+            test_file = path / "test_file.avi"
+            test_file.write_text("test")
+            config = sample_config()
+            target = find_target_file(path, config)
+            self.assertEqual(target, test_file)
 
     def test_set_permissions(self):
         """

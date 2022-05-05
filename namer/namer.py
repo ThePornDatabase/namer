@@ -82,12 +82,13 @@ def find_target_file(rootdir: Path, config: NamerConfig) -> Path:
     """
     list_of_files = list(rootdir.rglob("**/*.*"))
     file = None
-    ext = None
     if len(list_of_files) > 0:
         for target_ext in config.target_extensions:
-            ext = target_ext
-            if file is None:
-                file = max(filter(lambda file: file.suffix.lower()[1:] == ext, list_of_files), key=lambda x: x.stat().st_size)
+            filtered = list(filter(
+                lambda file, ext=target_ext: file.suffix is not None and file.suffix.lower()[1:] == ext,
+                list_of_files))
+            if file is None and filtered is not None and len(filtered) > 0:
+                file = max(filtered, key=lambda x: x.stat().st_size)
     return file
 
 
