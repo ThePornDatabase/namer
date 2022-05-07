@@ -12,7 +12,11 @@
   :target: https://codecov.io/gh/ThePornDatabase/namer
 .. image:: https://badge.fury.io/py/namer.svg?
   :target: https://badge.fury.io/py/namer
-
+.. image:: https://static.pepy.tech/personalized-badge/namer?period=total&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads
+  :target: https://pepy.tech/project/namer  
+.. image:: https://static.pepy.tech/personalized-badge/namer?period=month&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads/Month
+ :target: https://pepy.tech/project/namer
+ 
 Namer is a powerful command line tool for renaming and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
 Namer is easily installed as a python pip and can:
 
