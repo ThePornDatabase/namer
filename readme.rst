@@ -176,8 +176,7 @@ Development
   poetry build
 
   # Linting:
-  poetry run flake8 namer
-  poetry run flake8 test
+  poetry run flakeheaven lint
 
   # Testing:
   poetry run pytest
