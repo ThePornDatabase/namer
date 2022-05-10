@@ -52,7 +52,7 @@ new_version=$(poetry version -s)
 git add pyproject.toml
 
 poetry run pytest
-poetry run pylint namer
+poetry run flakeheaven lint
 poetry build
 
 echo build docker image before publishing pip
