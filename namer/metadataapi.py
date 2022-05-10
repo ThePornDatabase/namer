@@ -62,20 +62,13 @@ def __attempt_better_match(existing: Tuple[str, float],
 def __evaluate_match(
     name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig
 ) -> ComparisonResult:
-    found_site = re.sub(r"[\-\ \.\+\_]", "", looked_up.site).upper()
-    site = (
-        name_parts.site is None
-        or re.sub(r"[\-\ \.\+\_]", "", name_parts.site.upper()) in found_site
-        or unidecode(re.sub(r"[\-\ \.\+\_]", "", name_parts.site.upper())) in found_site
-    )
+    found_site = re.sub(r"[\- .+_]", "", looked_up.site).upper()
+    site = name_parts.site is None or re.sub(r"[\- .+_]", "", name_parts.site.upper()) in found_site or unidecode(re.sub(r"[\- .+_]", "", name_parts.site.upper())) in found_site
     release_date = False
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
-        release_date = name_parts.date is not None and (
-            name_parts.date == looked_up.date
-            or unidecode(name_parts.date) == looked_up.date
-        )
+        release_date = name_parts.date is not None and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
 
     result: Tuple[str, float] = None
 
@@ -215,12 +208,7 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     """
     returns json object with info
     """
-    if (
-        namer_config.trailer_location is not None
-        and not len(namer_config.trailer_location) == 0
-        and url is not None
-        and len(url) > 0
-    ):
+    if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0 and url is not None and len(url) > 0:
         logger.info("Attempting to downlaod trailer: {}", url)
         location = namer_config.trailer_location[
             : max(
@@ -230,11 +218,7 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
         ]
         urlparts = url.split("?")[0].split(".")
         ext = "mp4"
-        if (
-            urlparts is not None
-            and len(urlparts) > 0
-            and urlparts[-1].lower() in namer_config.target_extensions
-        ):
+        if urlparts is not None and len(urlparts) > 0 and urlparts[-1].lower() in namer_config.target_extensions:
             ext = urlparts[-1]
         trailerfile: Path = video_file.parent / (location + "." + ext)
         trailerfile.parent.mkdir(parents=True, exist_ok=True)

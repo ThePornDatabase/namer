@@ -27,8 +27,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config = sample_config()
             config.watch_dir = tempdir
             dirtoprocess = (
-                tempdir
-                / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum"
+                tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum"
             )
             new_ea(dirtoprocess, use_dir=True)
             results = determine_target_file(dirtoprocess, config)
@@ -69,8 +68,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             prepare(targets, mock_poster, mock_response)
             main(["-f", str(targets[0].file)])
             output = MP4(
-                targets[0].file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+                targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             )
             self.assertEqual(
                 output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
@@ -89,8 +87,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent)])
             output = MP4(
-                targets[0].file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+                targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             )
             self.assertEqual(
                 output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
@@ -113,15 +110,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent.parent), "-m"])
             output = MP4(
-                targets[0].file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+                targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             )
             self.assertEqual(
                 output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
             )
             output = MP4(
-                targets[1].file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+                targets[1].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             )
             self.assertEqual(
                 output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
@@ -146,8 +141,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
             main(["-f", str(target_mp4_file), "-i"])
             output = MP4(
-                target_mp4_file.parent
-                / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+                target_mp4_file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             )
             self.assertEqual(
                 output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
@@ -169,11 +163,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             ]
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent), "-m"])
-            output1 = (targets[0].file.parent /
-                       "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output1 = (targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
             validate_mp4_tags(self, output1)
-            output2 = (targets[1].file.parent /
-                       "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
+            output2 = (targets[1].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
             validate_mp4_tags(self, output2)
 
     def test_find_target_file(self):

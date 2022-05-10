@@ -39,10 +39,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         )
         self.assertEqual(
             info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():"
-            + "upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2F"
-            + "logo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d4"
-            + "80ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
+            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
         )
         self.assertEqual(info.performers[0].name, "Ryan Benetti")
         self.assertEqual(info.performers[1].name, "Aya Benetti")
@@ -74,10 +71,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         )
         self.assertEqual(
             info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():"
-            + "upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2F"
-            + "logo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d4"
-            + "80ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
+            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
         )
         self.assertEqual(info.performers[0].name, "Ryan Benetti")
         self.assertEqual(info.performers[1].name, "Aya Benetti")
@@ -113,9 +107,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         )
         self.assertEqual(
             info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale()"
-            + "/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Fe6%2Fb9%2F5b%2F066589730107dcfd6b656a398a584b5%2Fbackground%2F"
-            + "bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
+            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Fe6%2Fb9%2F5b%2F066589730107dcfd6b656a398a584b5%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
         )
         self.assertEqual(info.performers[0].name, "Carmela Clutch")
         self.assertEqual(info.performers[0].role, "Female")
@@ -179,8 +171,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         )
         self.assertRegex(
             info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2F"
-            + "bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
+            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
         )
         self.assertEqual(info.performers[0].name, "Carmela Clutch")
         self.assertEqual(info.performers[0].role, "Female")

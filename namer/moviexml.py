@@ -113,15 +113,9 @@ def write_nfo(
     """
     Writes an .nfo to the correct place for a video file.
     """
-    if (
-        results.video_file is not None
-        and results.new_metadata is not None
-        and namer_config.write_nfo is True
-    ):
+    if results.video_file is not None and results.new_metadata is not None and namer_config.write_nfo is True:
         target = results.video_file.parent / (results.video_file.stem + ".nfo")
         with open(target, "wt", encoding="utf-8") as nfofile:
-            towrite = write_movie_xml_file(
-                results.new_metadata, namer_config, trailer, poster, background
-            )
+            towrite = write_movie_xml_file(results.new_metadata, namer_config, trailer, poster, background)
             nfofile.write(towrite)
         set_permissions(target, namer_config)

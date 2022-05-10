@@ -40,8 +40,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             testdir = Path(__file__).resolve().parent
             mock_response.return_value = (testdir / "dc.json").read_text()
             targetfile = (
-                tempdir
-                / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
+                tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
             )
             shutil.copy(
                 testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
@@ -67,8 +66,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
             targetfile = (
-                tempdir
-                / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+                tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
             )
             shutil.copy(
                 testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
@@ -93,8 +91,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
             targetfile = (
-                tempdir
-                / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+                tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
             )
             shutil.copy(
                 testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
@@ -118,9 +115,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
             targetfile = (
-                tempdir
-                / "test"
-                / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+                tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
             )
             poster = None
             name_parts = parse_file_name(targetfile.name)
@@ -137,9 +132,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targetfile = (
-                tempdir
-                / "test"
-                / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
+                tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
             )
             targetfile.parent.mkdir(parents=True, exist_ok=True)
             testdir = Path(__file__).resolve().parent
