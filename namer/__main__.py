@@ -19,8 +19,7 @@ import namer.watchdog
 import namer.namer
 
 DESCRIPTION = (
-    namer.namer.DESCRIPTION
-    + """
+    namer.namer.DESCRIPTION + """
 
     The first argument should be 'watchdog', 'rename', 'suggest', or 'help' to see this message, for more help on rename, call
     namer 'namer rename -h'

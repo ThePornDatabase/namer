@@ -94,11 +94,7 @@ class PartialFormatter(string.Formatter):
                 value = format_spec[0] * int(format_spec[1:-1]) + value
                 format_spec = ""
             if re.match(r".\d+i", format_spec):
-                value = (
-                    format_spec[0] * int(format_spec[1:-1])
-                    + value
-                    + format_spec[0] * int(format_spec[1:-1])
-                )
+                value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
             return super().format_field(value, format_spec)
         except ValueError:
@@ -416,11 +412,7 @@ class NamerConfig:
         success = _verify_dir("work_dir", self.work_dir) and success
         success = _verify_dir("failed_dir", self.failed_dir) and success
         success = _verify_dir("dest_dir", self.dest_dir) and success
-        success = (
-            _verify_name_string("new_relative_path_name",
-                                self.new_relative_path_name)
-            and success
-        )
+        success = _verify_name_string("new_relative_path_name", self.new_relative_path_name) and success
         return success
 
 
@@ -879,12 +871,7 @@ def set_permissions(file: Path, config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
-    if (
-        system() != "Windows"
-        and file is not None
-        and file.exists()
-        and config.update_permissions_ownership is True
-    ):
+    if system() != "Windows" and file is not None and file.exists() and config.update_permissions_ownership is True:
         _set_perms(file, config)
         if file.is_dir():
             for target in file.rglob("*.*"):
@@ -910,26 +897,15 @@ def write_log_file(
             )
             log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
             log_file.write(f"Match               : {attempt.is_match()}\n")
-            log_file.write(
-                f"Query URL           : {attempt.looked_up.original_query}\n"
-            )
+            log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
             if attempt.name_parts.site is None:
                 attempt.name_parts.site = "None"
             if attempt.name_parts.date is None:
                 attempt.name_parts.date = "None"
             if attempt.name_parts.date is None:
                 attempt.name_parts.name = "None"
-            log_file.write(
-                f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename:"
-                + f" {attempt.name_parts.site:50.50}\n"
-            )
-            log_file.write(
-                f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    :"
-                + f" {attempt.name_parts.date:50.50}\n"
-            )
-            log_file.write(
-                f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    :"
-                + f" {attempt.name_parts.name:50.50}\n"
-            )
+            log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename: {attempt.name_parts.site:50.50}\n")
+            log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    : {attempt.name_parts.date:50.50}\n")
+            log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    : {attempt.name_parts.name:50.50}\n")
     set_permissions(logname, namer_config)
     return logname

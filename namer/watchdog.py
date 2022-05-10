@@ -89,14 +89,9 @@ def handle(target_file: Path, namer_config: NamerConfig):
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
         # Move the directory if desired.
-        if (
-            len(PurePath(result.final_name_relative).parts) > 1
-            and workingdir is not None
-            and namer_config.del_other_files is False
-        ):
+        if len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namer_config.del_other_files is False:
             target = (
-                namer_config.dest_dir /
-                PurePath(result.final_name_relative).parts[0]
+                namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
             )
             if not target.exists():
                 shutil.move(workingdir, target)
@@ -173,17 +168,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         if file_path is not None:
             path = Path(file_path)
             relative_path = str(path.relative_to(self.namer_config.watch_dir))
-            if (
-                re.search(self.namer_config.ignored_dir_regex,
-                          relative_path) is None
-                and path.exists()
-                and path.suffix.lower()[1:] in self.namer_config.target_extensions
-                and done_copying(path)
-                and (
-                    path.stat().st_size / (1024 * 1024)
-                    > self.namer_config.min_file_size
-                )
-            ):
+            if re.search(self.namer_config.ignored_dir_regex, relative_path) is None and path.exists() and path.suffix.lower()[1:] in self.namer_config.target_extensions and done_copying(path) and path.stat().st_size / (1024 * 1024) > self.namer_config.min_file_size:
                 logger.info("watchdog process called for {}", relative_path)
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:

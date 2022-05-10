@@ -198,16 +198,9 @@ def process_file(
                 output.video_file)
             if output.new_metadata is not None:
                 output.new_metadata.original_parsed_filename = output.parsed_file
-        if (
-            output.new_metadata is None
-            and output.parsed_file is not None
-            and output.parsed_file.name is not None
-        ):
+        if output.new_metadata is None and output.parsed_file is not None and output.parsed_file.name is not None:
             output.search_results = match(output.parsed_file, config)
-            if (
-                len(output.search_results) > 0
-                and output.search_results[0].is_match() is True
-            ):
+            if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
                 output.new_metadata = output.search_results[0].looked_up
         else:
             if not infos:
@@ -266,11 +259,7 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     trailer = None
     if config.write_namer_log is True:
         write_log_file(results.video_file, results.search_results, config)
-    if (
-        config.trailer_location is not None
-        and not len(config.trailer_location) == 0
-        and results.new_metadata is not None
-    ):
+    if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
         trailer = get_trailer(
             results.new_metadata.trailer_url, results.video_file, config
         )
@@ -331,8 +320,7 @@ def main(arglist: List[str]):
     parser.add_argument(
         "-c",
         "--configfile",
-        help="config file, defaults first to env var NAMER_CONFIG,"
-        + " then local path namer.cfg, and finally ~/.namer.cfg.",
+        help="config file, defaults first to env var NAMER_CONFIG, then local path namer.cfg, and finally ~/.namer.cfg.",
         type=pathlib.Path,
     )
     group = parser.add_mutually_exclusive_group(required=True)
@@ -344,17 +332,13 @@ def main(arglist: List[str]):
     parser.add_argument(
         "-m",
         "--many",
-        help="if set, a directory have all it's sub directories processed."
-        + " Files move only within sub dirs, or are renamed in place, if in the root dir to scan",
+        help="if set, a directory have all it's sub directories processed. Files move only within sub dirs, or are renamed in place, if in the root dir to scan",
         action="store_true",
     )
     parser.add_argument(
         "-i",
         "--infos",
-        help="if set, .nfo files will attempt to be accessed next to movie files"
-        + ", if info files are found and parsed successfully, that metadata will be used rather than "
-        + "porndb matching.  If using jellyfin .nfo files, please bump your release date by one day "
-        + "until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.",
+        help="if set, .nfo files will attempt to be accessed next to movie files, if info files are found and parsed successfully, that metadata will be used rather than porndb matching.  If using jellyfin .nfo files, please bump your release date by one day until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.",
         action="store_true",
     )
     parser.add_argument(

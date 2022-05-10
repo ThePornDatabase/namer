@@ -82,14 +82,7 @@ def parse_file_name(
     if match:
         if match.groupdict().get("year") is not None:
             prefix = "20" if len(match.group("year")) == 2 else ""
-            file_name_parts.date = (
-                prefix
-                + match.group("year")
-                + "-"
-                + match.group("month")
-                + "-"
-                + match.group("day")
-            )
+            file_name_parts.date = prefix + match.group("year") + "-" + match.group("month") + "-" + match.group("day")
         if match.groupdict().get("name") is not None:
             file_name_parts.name = name_cleaner(match.group("name"))
         if match.groupdict().get("site") is not None:
@@ -100,8 +93,7 @@ def parse_file_name(
         file_name_parts.extension = match.group("ext")
         file_name_parts.source_file_name = filename
     else:
-        logger.warning("Could not parse target name which may be a file (or directory) name depending on settings and input: {}",
-                       filename)
+        logger.warning("Could not parse target name which may be a file (or directory) name depending on settings and input: {}", filename)
     return file_name_parts
 
 
@@ -109,16 +101,9 @@ def main(arglist: List[str]):
     """
     Attempt to parse a name.
     """
-    description = (
-        "You are using the file name parser of the Namer project.  "
-        + "Expects a single input, and will output the contents of FileNameParts, which is the internal input "
-        + "to the namer_metadatapi.py script. "
-        + "Output will be the representation of that FileNameParts.\n"
-    )
+    description = "You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileNameParts, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileNameParts.\n"
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument(
-        "-f", "--file", help="String to parse for name parts", required=True
-    )
+    parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
     args = parser.parse_args(arglist)
     print(parse_file_name(args.file, DEFAULT_REGEX_TOKENS))
 
