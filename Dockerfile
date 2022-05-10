@@ -38,10 +38,7 @@ RUN cd /work/ \
     && rm -rf /work/test/__pycache__/ || true \
     && poetry install \
     && poetry run pytest \
-    && poetry run flake8 namer \
-    && poetry run flake8 test \
-    && poetry run pylint namer \
-    && poetry run pylint test \
+    && poetry run flakeheaven lint \
     && poetry build
 
 FROM BASE
