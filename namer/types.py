@@ -228,6 +228,13 @@ class NamerConfig:
     Permissions Settings for new/moved file.
     """
 
+    max_performer_names: int = 6
+    """
+    When guessing at matches namer can use performer names to attempt to match.   This can be costly in terms of cpu time.
+    Plus who lists all the performers if over 6 on a scene's name?   You can increase this, but the cpu/runtime cost increases
+    rapidly (combinatorial)
+    """
+
     write_nfo: bool = False
     """
     Write an nfo file next to the directory in an emby/jellyfin readable format.
@@ -360,6 +367,7 @@ class NamerConfig:
         output += f"  set_file_permissions: {self.set_file_permissions}\n"
         output += f"  set_uid: {self.set_file_permissions}\n"
         output += f"  set_gid: {self.set_file_permissions}\n"
+        output += f"  max_performer_names: {self.set_file_permissions}\n"
         output += "Tagging Config:\n"
         output += f"  write_nfo: {self.write_nfo}\n"
         output += f"  enabled_tagging: {self.enabled_tagging}\n"
@@ -463,6 +471,9 @@ def from_config(config: ConfigParser) -> NamerConfig:
     )
     namer_config.set_file_permissions = config.get(
         "namer", "set_file_permissions", fallback=664
+    )
+    namer_config.max_performer_names = config.getint(
+        "namer", "max_performer_names", fallback=6
     )
     namer_config.write_nfo = config.getboolean(
         "metadata", "write_nfo", fallback=False)
@@ -795,7 +806,7 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatinations of metadata about
         actors and scene name).
         """
-        return self.sitematch and self.datematch and self.name_match >= 89.9
+        return self.sitematch and self.datematch and self.name_match is not None and self.name_match >= 89.9
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

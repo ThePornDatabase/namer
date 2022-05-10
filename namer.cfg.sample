@@ -79,6 +79,12 @@ trailer_location =
 # values are set to the scrape time, not the video release date.
 sites_with_no_date_info =
 
+
+# When guessing at matches namer can use performer names to attempt to match.   This can be costly in terms of cpu time.
+# Plus who lists all the performers if over 6 on a scene's name?   You can increase this, but the cpu/runtime cost increases
+# rapidly (combinatorial)
+max_performer_names = 6
+
 [metadata]
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
 # MP4 metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).

@@ -12,7 +12,7 @@ from datetime import timedelta, date
 import pathlib
 import re
 import sys
-from typing import List
+from typing import List, Tuple
 from types import SimpleNamespace
 import urllib
 import urllib.request
@@ -30,6 +30,34 @@ from namer.types import (
     set_permissions,
 )
 from namer.filenameparser import parse_file_name
+
+
+def __find_best_match(query: str, match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
+    powerset_iter = None
+    max_size = len(match_terms) if len(match_terms) < config.max_performer_names else config.max_performer_names
+    for length in range(1, max_size + 1):
+        if powerset_iter is None:
+            powerset_iter = map(" ".join, itertools.combinations(match_terms, length))
+        else:
+            powerset_iter = itertools.chain(
+                                powerset_iter,
+                                map(" ".join, itertools.combinations(match_terms, length)))
+    ratio = rapidfuzz.process.extractOne(query, choices=powerset_iter)
+    return None if ratio is None else (ratio[0], ratio[1])
+
+
+def __attempt_better_match(existing: Tuple[str, float],
+                           query: str,
+                           match_terms: List[str],
+                           namer_config: NamerConfig) -> Tuple[str, float]:
+    if existing is not None and existing[1] >= 89.9:
+        return existing
+    found = __find_best_match(query, match_terms, namer_config)
+    if existing is None:
+        return found
+    if found is None:
+        return None
+    return existing if existing[1] >= found[1] else found
 
 
 def __evaluate_match(
@@ -50,48 +78,25 @@ def __evaluate_match(
             or unidecode(name_parts.date) == looked_up.date
         )
 
+    result: Tuple[str, float] = None
+
     # Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
     all_performers.insert(0, looked_up.name)
-    powerset = list(
-        combo
-        for r in range(1, len(all_performers) + 1)
-        for combo in itertools.combinations(all_performers, r)
-    )
-    ratio = rapidfuzz.process.extractOne(
-        name_parts.name, map(" ".join, powerset))
-    undecode_ratio = rapidfuzz.process.extractOne(
-        unidecode(name_parts.name), map(" ".join, powerset)
-    )
-    if undecode_ratio is not None and undecode_ratio[1] > ratio[1]:
-        ratio = undecode_ratio
+
+    result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
+    result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     # First Name Powerset.
-    if ratio is not None and ratio[1] < 89.9:
-        all_performers = list(
-            map(lambda p: p.name.split(" ")[0], looked_up.performers))
-        powerset = list(
-            combo
-            for r in range(1, len(all_performers) + 1)
-            for combo in itertools.combinations(all_performers, r)
-        )
-        first_name_ratio = rapidfuzz.process.extractOne(
-            name_parts.name, map(" ".join, powerset)
-        )
-        if first_name_ratio is not None and first_name_ratio[1] > ratio[1]:
-            ratio = first_name_ratio
-        unidecode_first_name_ratio = rapidfuzz.process.extractOne(
-            unidecode(name_parts.name), map(" ".join, powerset)
-        )
-        if (
-            unidecode_first_name_ratio is not None
-            and unidecode_first_name_ratio[1] > ratio[1]
-        ):
-            ratio = unidecode_first_name_ratio
+    if result is not None and result[1] < 89.9:
+        all_performers = list(map(lambda p: p.name.split(" ")[0], looked_up.performers))
+        all_performers.insert(0, looked_up.name)
+        result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
+        result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     return ComparisonResult(
-        name=ratio[0] if ratio is not None else None,
-        name_match=ratio[1] if ratio is not None else None,
+        name=result[0] if result is not None else None,
+        name_match=result[1] if result is not None else None,
         datematch=release_date,
         sitematch=site,
         name_parts=name_parts,
@@ -155,7 +160,7 @@ def __match_percent(result: ComparisonResult) -> float:
     addvalue = 0.00
     if result.is_match() is True:
         addvalue = 1000.00
-    value = result.name_match + addvalue
+    value = (result.name_match + addvalue) if result is not None and result.name_match is not None else addvalue
     logger.info("Name match was {:.2f} for {}", value, result.name)
     return value
 
