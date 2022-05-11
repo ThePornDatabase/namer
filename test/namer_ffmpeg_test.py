@@ -37,9 +37,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
             stream_number = get_audio_stream_for_lang(file, "und")
-            self.assertEqual(stream_number, None)
+            self.assertEqual(stream_number, -1)
             stream_number = get_audio_stream_for_lang(file, "eng")
-            self.assertEqual(stream_number, None)
+            self.assertEqual(stream_number, -1)
 
     def test_update_audio_stream(self):
         """
