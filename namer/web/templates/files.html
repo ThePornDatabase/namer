@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Main{% endblock %}
+{% block content %}
+    <ul class="list-group mt-1">
+        {% for status, files in files.items() %}
+            {% for file in files %}
+                <li class="list-group-item list-group-item-{{ status }}">{{ file }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endblock %}

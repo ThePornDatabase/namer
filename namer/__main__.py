@@ -13,10 +13,14 @@ match the file.
 """
 import pathlib
 import sys
+
 from typing import List
-from namer.types import default_config
-import namer.watchdog
+import namer.metadataapi
 import namer.namer
+import namer.watchdog
+import namer.web
+
+from namer.types import default_config
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """
@@ -53,6 +57,8 @@ def main(arglist: List[str]):
         namer.namer.main(arglist[1:])
     elif arg1 == "suggest":
         namer.metadataapi.main(arglist[1:])
+    elif arg1 == "web":
+        namer.web.main(arglist[1:])
     elif arg1 in ["-h", "help", None]:
         print(DESCRIPTION)
 
