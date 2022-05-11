@@ -180,14 +180,12 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as process:
-        if process.stderr is not None:
-            stderr = process.stderr.read()
         success = process.wait() == 0
         if not success:
             logger.info("Could not fix mp4 files {}", mp4_file)
             if process.stderr is not None:
                 logger.info(process.stderr.read())
-                process.stderr.close()    
+                process.stderr.close()
         else:
             logger.warning("Return code: {}", process.returncode)
             mp4_file.unlink()

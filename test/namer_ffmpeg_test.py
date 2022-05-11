@@ -52,12 +52,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost_wrong.mp4"
             )
             stream_number = get_audio_stream_for_lang(file, "und")
-            self.assertEqual(stream_number, None)
+            self.assertEqual(stream_number, -1)
             stream_number = get_audio_stream_for_lang(file, "eng")
             self.assertEqual(stream_number, 1)
             update_audio_stream_if_needed(file, "eng")
             stream_number = get_audio_stream_for_lang(file, "eng")
-            self.assertEqual(stream_number, None)
+            self.assertEqual(stream_number, -1)
 
 
 if __name__ == "__main__":
