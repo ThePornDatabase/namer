@@ -839,7 +839,7 @@ class ProcessingResults:
     The parsed file name.
     """
 
-    final_name_relative: str = None
+    final_name_relative: Path = None
     """
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
