@@ -10,7 +10,7 @@ import pathlib
 from random import choices
 import string
 import sys
-from typing import List
+from typing import List, Optional
 from loguru import logger
 
 from namer.moviexml import parse_movie_xml_file, write_nfo
@@ -109,29 +109,28 @@ def determine_target_file(
     if file_to_process.is_dir():
         logger.info("Target dir: {}", file_to_process)
         containing_dir = file_to_process
-        file = find_target_file(file_to_process, config)
+        results.dirfile = containing_dir
+        results.video_file = find_target_file(file_to_process, config)
     else:
-        file = file_to_process
+        results.video_file = file_to_process
 
     if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.name + file.suffix
+        name = containing_dir.name + results.video_file.suffix
     else:
-        name = file.name
+        name = results.video_file.name
 
-    logger.info("file: {}", file)
+    logger.info("file: {}", results.video_file)
     logger.info("dir : {}", containing_dir)
 
-    results.dirfile = containing_dir
-    results.video_file = file
     results.parsed_file = parse_file_name(name, config.name_parser)
     if containing_dir is True:
-        results.final_name_relative = file.relative_to(containing_dir)
+        results.final_name_relative = results.video_file.relative_to(containing_dir)
     else:
-        results.final_name_relative = file.parent
+        results.final_name_relative = results.video_file.parent
     return results
 
 
-def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
+def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileInfo]:
     """
     If there is an .nfo file next to the video_file, attempt to read it as
     a Emby/Jellyfin style movie xml file.
