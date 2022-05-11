@@ -133,7 +133,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(name.extension, "mp4")
 
     @patch("sys.stdout", new_callable=io.StringIO)
-    def test_main_method(self, mock_stdout):
+    def test_main_method(self, mock_stdout: io.StringIO):
         """
         Test the main method.
         """

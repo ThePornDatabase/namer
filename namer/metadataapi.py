@@ -12,7 +12,7 @@ from datetime import timedelta, date
 import pathlib
 import re
 import sys
-from typing import List, Tuple
+from typing import Any, Iterable, List, Tuple
 from types import SimpleNamespace
 import urllib
 import urllib.request
@@ -32,23 +32,20 @@ from namer.types import (
 from namer.filenameparser import parse_file_name
 
 
-def __find_best_match(query: str, match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
-    powerset_iter = None
+def __find_best_match(query: None | str, match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
+    powerset_iter: Iterable[str] = []
     max_size = min(len(match_terms), config.max_performer_names)
     for length in range(1, max_size + 1):
-        data = map(" ".join, itertools.combinations(match_terms, length))
-        if powerset_iter is None:
-            powerset_iter = data
-        else:
-            powerset_iter = itertools.chain(powerset_iter, data)
-    ratio = rapidfuzz.process.extractOne(query, choices=powerset_iter)
+        data: Iterable[str] = map(" ".join, itertools.combinations(match_terms, length))
+        powerset_iter = itertools.chain(powerset_iter, data)
+    ratio: Tuple[str, float ,int] = rapidfuzz.process.extractOne(query, choices=powerset_iter)
     return ratio[0], ratio[1] if ratio is not None else ratio
 
 
-def __attempt_better_match(existing: Tuple[str, float],
+def __attempt_better_match(existing: None | Tuple[str, float],
                            query: str,
                            match_terms: List[str],
-                           namer_config: NamerConfig) -> Tuple[str, float]:
+                           namer_config: NamerConfig) -> None | Tuple[str, float]:
     if existing is not None and existing[1] >= 89.9:
         return existing
     found = __find_best_match(query, match_terms, namer_config)
@@ -62,7 +59,7 @@ def __attempt_better_match(existing: Tuple[str, float],
 def __evaluate_match(
     name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig
 ) -> ComparisonResult:
-    found_site = re.sub(r"[\- .+_]", "", looked_up.site).upper()
+    found_site = None if looked_up.site is None else re.sub(r"[\- .+_]", "", looked_up.site).upper()
     site = name_parts.site is None or re.sub(r"[\- .+_]", "", name_parts.site.upper()) in found_site or unidecode(re.sub(r"[\- .+_]", "", name_parts.site.upper())) in found_site
     release_date = False
     if found_site in namer_config.sites_with_no_date_info:
@@ -70,11 +67,12 @@ def __evaluate_match(
     else:
         release_date = name_parts.date is not None and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
 
-    result: Tuple[str, float] = None
+    result: None | Tuple[str, float] = None
 
     # Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
-    all_performers.insert(0, looked_up.name)
+    if looked_up.name is not None:
+        all_performers.insert(0, looked_up.name)
 
     result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
     result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
@@ -82,7 +80,8 @@ def __evaluate_match(
     # First Name Powerset.
     if result is not None and result[1] < 89.9:
         all_performers = list(map(lambda p: p.name.split(" ")[0], looked_up.performers))
-        all_performers.insert(0, looked_up.name)
+        if looked_up.name is not None:
+            all_performers.insert(0, looked_up.name)
         result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
         result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
@@ -115,7 +114,7 @@ def __update_results(
 def __metadata_api_lookup(
     name_parts: FileNameParts, namer_config: NamerConfig
 ) -> List[ComparisonResult]:
-    results = []
+    results: List[ComparisonResult]= []
     __update_results(results, name_parts, namer_config)
     __update_results(results, name_parts, namer_config, skipdate=True)
     __update_results(results, name_parts, namer_config,
@@ -157,7 +156,7 @@ def __match_percent(result: ComparisonResult) -> float:
     return value
 
 
-def __get_response_json_object(url: str, authtoken: str) -> str:
+def __get_response_json_object(url: str, authtoken: str) -> None | str:
     """
     returns json object with info
     """
@@ -177,7 +176,7 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
 
 
 @logger.catch
-def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Path:
+def get_image(url: None | str, infix: str, video_file: Path, config: NamerConfig) -> None | Path:
     """
     returns json object with info
     """
@@ -204,7 +203,7 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
 
 
 @logger.catch
-def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
+def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> None | Path:
     """
     returns json object with info
     """
@@ -239,7 +238,7 @@ def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
     return None
 
 
-def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
+def __jsondata_to_fileinfo(data: Any, url: str, json_response: str, name_parts: FileNameParts) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()
     file_info.uuid = data._id  # pylint: disable=protected-access
     file_info.name = data.title
@@ -253,18 +252,17 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
     file_info.site = data.site.name
     file_info.look_up_site_id = data._id  # pylint: disable=protected-access
     for json_performer in data.performers:
-        performer = Performer()
+        role: None | str = None
         if hasattr(json_performer, "parent") and hasattr(
             json_performer.parent, "extras"
         ):
-            performer.role = json_performer.parent.extras.gender
-        performer.name = json_performer.name
-        performer.image = json_performer.image
+            role = json_performer.parent.extras.gender
+        performer = Performer(json_performer.name, role, json_performer.image)
         file_info.performers.append(performer)
     file_info.original_query = url
     file_info.origninal_response = json_response
     file_info.original_parsed_filename = name_parts
-    tags = []
+    tags: List[str] = []
     if hasattr(data, "tags"):
         for tag in data.tags:
             tags.append(tag.name)
@@ -273,9 +271,9 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
 
 
 def __metadataapi_response_to_data(
-    json_object, url, json_response, name_parts
+    json_object, url: str, json_response: str, name_parts: FileNameParts
 ) -> List[LookedUpFileInfo]:
-    file_infos = []
+    file_infos: List[LookedUpFileInfo] = []
     if hasattr(json_object, "data"):
         if isinstance(json_object.data, list):
             for data in json_object.data:
@@ -292,7 +290,7 @@ def __metadataapi_response_to_data(
 
 
 def __build_url(
-    site: str = None, release_date: str = None, name: str = None, uuid: str = None
+    site: None | str = None, release_date: None | str = None, name: None | str = None, uuid: None | str = None
 ) -> str:
     query = ""
     if uuid is not None:
@@ -332,7 +330,7 @@ def __get_metadataapi_net_fileinfo(
 
 def __get_complete_metadatapi_net_fileinfo(
     name_parts: FileNameParts, uuid: str, namer_config: NamerConfig
-) -> LookedUpFileInfo:
+) -> None | LookedUpFileInfo:
     url = __build_url(uuid=uuid)
     logger.info("Querying: {}", url)
     json_response = __get_response_json_object(url, namer_config.porndb_token)

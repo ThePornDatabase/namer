@@ -29,9 +29,7 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     info.poster_url = str(movie.art.poster)
     info.performers = []
     for actor in movie.actor:
-        performer = Performer()
-        performer.name = str(actor.name)
-        performer.role = str(actor.role)
+        performer = Performer(str(actor.name), str(actor.role))
         info.performers.append(performer)
     if hasattr(movie, "phoenixadulturlid"):
         info.look_up_site_id = str(movie.phoenixadulturlid)
@@ -49,9 +47,9 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
 def write_movie_xml_file(
     info: LookedUpFileInfo,
     config: NamerConfig,
-    trailer: Path = None,
-    poster: Path = None,
-    background: Path = None,
+    trailer: None | Path = None,
+    poster: None | Path = None,
+    background: None | Path = None,
 ) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
@@ -109,7 +107,7 @@ def write_nfo(
     trailer: Path,
     poster: Path,
     background: Path,
-) -> Path:
+) -> None | Path:
     """
     Writes an .nfo to the correct place for a video file.
     """

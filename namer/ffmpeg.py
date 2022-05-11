@@ -16,7 +16,7 @@ from pathlib import Path
 from loguru import logger
 
 
-def get_resolution(file: str) -> int:
+def get_resolution(file: Path) -> None | int:
     """
     Gets the vertical resolution of an mp4 file.  For example, 720, 1080, 2160...
     """
@@ -40,18 +40,21 @@ def get_resolution(file: str) -> int:
         universal_newlines=True,
     ) as process:
         success = process.wait() == 0
-        output = process.stdout.read()
+        output = None if process.stdout is None else process.stdout.read()
         if not success:
             logger.warning("Error gettng resolution of file {}", file)
-            logger.warning(process.stderr.read())
-        process.stdout.close()
-        process.stderr.close()
+            if process.stderr is not None:
+                logger.warning(process.stderr.read())
+        if process.stdout is not None:
+            process.stdout.close()
+        if process.stderr is not None:
+            process.stderr.close()
         logger.info("output {}", output)
-        return int(output)
+        return None if output is None else int(output)
     return None
 
 
-def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
+def get_audio_stream_for_lang(mp4_file: Path, language: None | str) -> None | int:
     """
     given an mp4 input file and a desired language will return the stream position of that language in the mp4.
     if the language is None, or the stream is not found, or the desired stream is the only default stream, None is returned.
@@ -74,18 +77,19 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
         universal_newlines=True,
     ) as process:
         success = process.wait() == 0
-        audio_streams_str = process.stdout.read()
+        audio_streams_str = process.stdout.read() if process.stdout is not None else None
         if not success:
             logger.warning("Error gettng audio streams of file {}", mp4_file)
-            logger.warning(process.stderr.read())
-        process.stdout.close()
-        process.stderr.close()
+            if process.stderr is not None:
+                logger.warning(process.stderr.read())
+        if process.stdout is not None:
+            process.stdout.close()
+        if process.stderr is not None:
+            process.stderr.close()
 
         logger.info("Target for audio: {}", mp4_file)
 
-        audio_streams = json.loads(
-            audio_streams_str, object_hook=lambda d: SimpleNamespace(**d)
-        )
+        audio_streams = None if audio_streams_str is None else json.loads(audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
         lang_stream = None
         needs_updated = False
         if language:
@@ -105,7 +109,7 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
     return None
 
 
-def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
+def update_audio_stream_if_needed(mp4_file: Path, language: None | str) -> bool:
     """
     Returns true if the file had to be edited to have a default audio stream equal to the desired language,
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
@@ -137,9 +141,10 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
             stderr=subprocess.PIPE,
             universal_newlines=True,
         ) as process:
-            stderr = process.stderr.read()
+            stderr = None if process.stderr is None else process.stderr.read()
             success = process.wait() == 0
-            process.stderr.close()
+            if process.stderr is not None:
+                process.stderr.close()
             if not success:
                 logger.info("Could not update audio stream for {}", mp4_file)
                 logger.info(stderr)
@@ -172,9 +177,10 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as process:
-        stderr = process.stderr.read()
+        stderr = None if process.stderr is None else process.stderr.read()
         success = process.wait() == 0
-        process.stderr.close()
+        if process.stderr is not None:
+            process.stderr.close()
         if not success:
             logger.info("Could not fix mp4 files {}", mp4_file)
             logger.info(stderr)

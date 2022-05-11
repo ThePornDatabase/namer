@@ -5,7 +5,7 @@ Types shared by all the files in this project, used as interfaces for moving dat
 from configparser import ConfigParser
 from dataclasses import dataclass
 from platform import system
-from typing import List, Sequence
+from typing import Any, List, Mapping, Sequence
 import os
 import configparser
 import re
@@ -13,11 +13,12 @@ import sys
 import string
 from pathlib import Path, PurePath
 import random
-from pathvalidate import Platform, sanitize_filename
+from pathvalidate._common import Platform
+from pathvalidate._filename import sanitize_filename
 from loguru import logger
 
 
-def _verify_dir(name: str, file_name: Path) -> bool:
+def _verify_dir(name: str, file_name: None | Path) -> bool:
     """
     verify a config directory exist. return false if verification fails
     """
@@ -68,10 +69,10 @@ class PartialFormatter(string.Formatter):
         "trans",
     ]
 
-    def __init__(self, missing="~~", bad_fmt="!!"):
+    def __init__(self, missing: str = "~~", bad_fmt: None | str = "!!"):
         self.missing, self.bad_fmt = missing, bad_fmt
 
-    def get_field(self, field_name, args, kwargs):
+    def get_field(self, field_name: str, args: Sequence[Any], kwargs: Mapping[str, Any]):
         # Handle a key not found
         try:
             val = super().get_field(field_name, args, kwargs)
@@ -83,7 +84,7 @@ class PartialFormatter(string.Formatter):
                 ) from err
         return val
 
-    def format_field(self, value, format_spec: str):
+    def format_field(self, value: Any, format_spec: str):
         if value is None:
             return self.missing
         try:
@@ -111,7 +112,7 @@ class NamerConfig:
 
     # pylint: disable=too-many-instance-attributes
 
-    porndb_token: str = None
+    porndb_token: str
     """
     token to access porndb.
     sign up here: https://metadataapi.net/
@@ -145,7 +146,7 @@ class NamerConfig:
 
     inplace_name: str = "{site} - {date} - {name}.{ext}"
     """
-    How to write output file name.  When namer.py is run this is applied in place
+    How to write output file name.  When namer.py is run this is applied in-place
     (next to the file to be processed).
     When run from namer_watchdog.py this will be written in to the successdir.
 
@@ -188,7 +189,7 @@ class NamerConfig:
     If a directory name is to be prefered over a file name.
     """
 
-    target_extensions: List[str] = None
+    target_extensions: List[str]
     """
     File types namer targets, only 'mp4's are can be tagged.
     """
@@ -204,22 +205,22 @@ class NamerConfig:
     If false, set_uid/set_gid,set_dir_permissions,set_file_permissions will be ignored
     """
 
-    set_uid: bool = None
+    set_uid: None | int = None
     """
     UID Settings for new/moved files/dirs.
     """
 
-    set_gid: bool = None
+    set_gid: None | int = None
     """
     GID Settings for new/moved files/dirs.
     """
 
-    set_dir_permissions: int = 775
+    set_dir_permissions: None | int = 775
     """
     Permissions Settings for new/moved dirs.
     """
 
-    set_file_permissions: int = 664
+    set_file_permissions: None | int = 664
     """
     Permissions Settings for new/moved file.
     """
@@ -236,7 +237,7 @@ class NamerConfig:
     Write an nfo file next to the directory in an emby/jellyfin readable format.
     """
 
-    trailer_location: str = None
+    trailer_location: None | str = None
     """
     If you want the trailers downloaded set the value relative to the final location of the movie file here.
     Plex:      Trailers/trailer.{ext}, or extras/Trailer-trailer.{ext}
@@ -245,7 +246,7 @@ class NamerConfig:
     Leave empty to not download trailers.
     """
 
-    sites_with_no_date_info: Sequence[str] = None
+    sites_with_no_date_info: None | Sequence[str] = None
     """
     A list of site names that do not have proper date information in them.   This is a problem with some tpdb
     scrapers/storage mechanisms.
@@ -281,7 +282,7 @@ class NamerConfig:
     Default value is adult.
     """
 
-    language: str = None
+    language: None | str = None
     """
     if language is set it will be used to select the default audio stream in an mp4 that has too many default stream
     to play correct in quicktime/apple tv.   If the language isn't found or is already the only default no action is
@@ -307,34 +308,34 @@ class NamerConfig:
     or attempt to move them to a subdirectory specified in new_relative_path_name, if one exist.
     """
 
-    watch_dir: Path = None
+    watch_dir: None | Path = None
     """
     If running in watchdog mode, director where new downloads go.
     """
 
-    work_dir: Path = None
+    work_dir: None | Path = None
     """
     If running in watchdog mode, temporary directory where work is done.
     a log file shows attempted matchs and match closeness.
     """
 
-    failed_dir: Path = None
+    failed_dir: None | Path = None
     """
     If running in watchdog mode, Should processing fail the file or directory is moved here.
     Files can be manually moved to watchdir to force reprocessing.
     """
 
-    dest_dir: Path = None
+    dest_dir: None | Path = None
     """
     If running in watchdog mode, dir where finalized files get written.
     """
 
-    retry_time: str = None
+    retry_time: None | str = None
     """
     Time to retry failed items every day.
     """
 
-    extra_sleep_time: int = 30
+    extra_sleep_time: None | int = 30
     """
     Extra time to sleep in seconds to allow all information to be copied in dir
     """
@@ -422,7 +423,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     """
     namer_config = NamerConfig()
     namer_config.porndb_token = config.get(
-        "namer", "porndb_token", fallback=None)
+        "namer", "porndb_token", fallback="")
     namer_config.inplace_name = config.get(
         "namer", "inplace_name", fallback="{site} - {date} - {name}.{ext}"
     )
@@ -458,10 +459,10 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.update_permissions_ownership = config.getboolean(
         "namer", "update_permissions_ownership", fallback=False
     )
-    namer_config.set_dir_permissions = config.get(
+    namer_config.set_dir_permissions = config.getint(
         "namer", "set_dir_permissions", fallback=775
     )
-    namer_config.set_file_permissions = config.get(
+    namer_config.set_file_permissions = config.getint(
         "namer", "set_file_permissions", fallback=664
     )
     namer_config.max_performer_names = config.getint(
@@ -522,8 +523,10 @@ def default_config() -> NamerConfig:
     """
     config = configparser.ConfigParser()
     default_locations = []
-    if os.environ.get("NAMER_CONFIG") is not None and Path(os.environ.get("NAMER_CONFIG")).exists():
-        default_locations = [Path(os.environ.get("NAMER_CONFIG"))]
+    config_loc = os.environ.get("NAMER_CONFIG")
+    if config_loc is not None:
+        if Path(config_loc).exists():
+            default_locations = [Path(config_loc)]
     elif (Path.home() / ".namer.cfg").exists():
         default_locations = [Path.home() / ".namer.cfg"]
     elif Path("./namer.cfg").exists():
@@ -543,11 +546,11 @@ class FileNameParts:
 
     # pylint: disable=too-many-instance-attributes
 
-    site: str = None
+    site: None | str = None
     """
     Site the file originated from, "DorcelClub", "EvilAngel", etc.
     """
-    date: str = None
+    date: None | str = None
     """
     formated: YYYY-mm-dd
     """
@@ -556,21 +559,21 @@ class FileNameParts:
     If the name originally started with an "TS" or "ts"
     it will be stripped out and placed in a seperate location, aids in matching, useable to genre mark content.
     """
-    name: str = None
-    act: str = None
+    name: None | str = None
+    act: None | str = None
     """
     If the name originally ended with an "act ###" or "part ###"
     it will be stripped out and placed in a seperate location, aids in matching.
     """
-    extension: str = None
+    extension: None | str = None
     """
     The file's extension .mp4 or .mkv
     """
-    resolution: str = None
+    resolution: None | str = None
     """
     Resolution, if the file name makes a claim about resolution. (480p, 720p, 1080p, 4k)
     """
-    source_file_name: str = None
+    source_file_name: None | str = None
     """
     What was originally parsed.
     """
@@ -592,9 +595,9 @@ class Performer:
     Minimal info about a perform, name, and role.
     """
 
-    name: str
-    role: str
-    image: str
+    name: None | str
+    role: None | str 
+    image: None | str 
     """
     if available the performers gender, stored as a role.  example: "Female", "Male"
     Useful as many nzbs often don't include the scene name, but instead female performers names,
@@ -602,20 +605,21 @@ class Performer:
     Other performers are also used in name matching, if females are attempted first.
     """
 
-    def __init__(self, name=None, role=None, image=None):
+    def __init__(self, name: None | str, role: None | str, image: None | str = None):
         self.name = name
         self.role = role
         self.image = image
 
     def __str__(self):
-        name = "Unknown" if self.name is None else self.name
         if self.role is not None:
-            return name + " (" + self.role + ")"
-        return name
+            return self.get_name() + " (" + self.role + ")"
+        return self.get_name()
 
     def __repr__(self):
         return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
 
+    def get_name(self):
+        return "Unknown" if self.name is None else self.name
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo:
@@ -625,32 +629,32 @@ class LookedUpFileInfo:
 
     # pylint: disable=too-many-instance-attributes
 
-    uuid: str = None
+    uuid: None | str = None
     """
     porndb scene id, allowing lookup of more metadata, (tags)
     """
 
-    site: str = None
+    site: None | str = None
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
     """
-    date: str = None
+    date: None | str = None
     """
     date of initial release, formated YYYY-mm-dd
     """
-    name: str = None
+    name: None | str = None
     """
     Name of the scene in this video
     """
-    description: str = None
+    description: None | str = None
     """
     Description of the action in this video
     """
-    source_url: str = None
+    source_url: None | str = None
     """
     Original source location of this video
     """
-    poster_url: str = None
+    poster_url: None | str = None
     """
     Url to download a poster for this video
     """
@@ -662,27 +666,27 @@ class LookedUpFileInfo:
     """
     List of genres, per porndb.  Tends to be noisey.
     """
-    origninal_response: str = None
+    origninal_response: None | str = None
     """
     json reponse parsed in to this object.
     """
-    original_query: str = None
+    original_query: None | str = None
     """
     url query used to get the above json response
     """
-    original_parsed_filename: FileNameParts
+    original_parsed_filename: None | FileNameParts
     """
     The FileNameParts used to build the orignal_query
     """
-    look_up_site_id: str = None
+    look_up_site_id: None | str = None
     """
     ID Used by the queried site to identify the video
     """
-    trailer_url: str = None
+    trailer_url: None | str = None
     """
     The url to download a trailer, should it exist.
     """
-    background_url: str = None
+    background_url: None | str = None
     """
     The url to download a background image, should it exist.
     """
@@ -711,14 +715,11 @@ class LookedUpFileInfo:
             "site": self.site.replace(" ", "") if self.site is not None else None,
             "full_site": self.site,
             "performers": " ".join(
-                map(
-                    lambda p: p.name,
-                    filter(lambda p: p.role == "Female", self.performers),
-                )
+                map(lambda p: p.get_name(), filter(lambda p: p.role == "Female", self.performers))
             )
             if self.performers is not None
             else None,
-            "all_performers": " ".join(map(lambda p: p.name, self.performers))
+            "all_performers": " ".join(map(lambda p: p.get_name(), self.performers))
             if self.performers is not None
             else None,
             "act": self.original_parsed_filename.act
@@ -738,7 +739,7 @@ class LookedUpFileInfo:
         """
         dictionary = self.asdict()
         clean_dic = {
-            k: str(sanitize_filename(str(v), platform=Platform.UNIVERSAL))
+            k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL)))
             for k, v in dictionary.items()
         }
         fmt = PartialFormatter(missing="", bad_fmt="---")
@@ -763,8 +764,8 @@ class ComparisonResult:
     actor names and/or scene name.   RapidFuzz is used to make the comparison.
     """
 
-    name: str
-    name_match: float
+    name: None | str
+    name_match: None | float
     """
     How closely did the name found in FileNameParts match (via RapidFuzz string comparison)
     The performers and scene name found in LookedUpFileInfo.  Various combinations of performers
@@ -810,12 +811,12 @@ class ProcessingResults:
     and preserve relative files, or to delete left over artifacts.
     """
 
-    search_results: List[ComparisonResult] = None
+    search_results: None | List[ComparisonResult] = None
     """
     True if a match was found in the porndb.
     """
 
-    new_metadata: LookedUpFileInfo = None
+    new_metadata: None | LookedUpFileInfo = None
     """
     New metadata found for the file being processed.
     Sourced including queries against the porndb, which would be stored in search_results,
@@ -823,35 +824,35 @@ class ProcessingResults:
     the extension, which would be .nfo instead of .mp4,.mkv,.avi,.mov,.flv.
     """
 
-    dirfile: Path = None
+    dirfile: None | Path = None
     """
     Set if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
     or all files can be moved to a destination specified in the field final_name_relative.
     """
 
-    video_file: Path = None
+    video_file: None | Path = None
     """
     The location of the found video file.
     """
 
-    parsed_file: FileNameParts = None
+    parsed_file: None | FileNameParts = None
     """
     The parsed file name.
     """
 
-    final_name_relative: str = None
+    final_name_relative: None | str = None
     """
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
 
 
 def _set_perms(target: Path, config: NamerConfig):
-    fileperm: int = (
+    fileperm: None | int = (
         None
         if config.set_file_permissions is None
         else int(str(config.set_file_permissions), 8)
     )
-    dirperm: int = (
+    dirperm: None | int = (
         None
         if config.set_dir_permissions is None
         else int(str(config.set_dir_permissions), 8)
@@ -879,8 +880,7 @@ def set_permissions(file: Path, config: NamerConfig):
 
 
 def write_log_file(
-    movie_file: Path, match_attempts: List[ComparisonResult], namer_config: NamerConfig
-) -> str:
+    movie_file: Path, match_attempts: List[ComparisonResult], namer_config: NamerConfig) -> Path:
     """
     Given porndb scene results sorted by how closely they match a file,  write the contents
     of the result matches to a log file.

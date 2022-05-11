@@ -4,9 +4,11 @@ files, or used in renaming the video file (currently only mp4s).
 """
 from pathlib import Path
 from shutil import copytree
+from typing import List
 import unittest
 import tempfile
 from unittest import mock
+from unittest.mock import Mock
 from test.utils import sample_config
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.metadataapi import parse_file_name, match
@@ -38,14 +40,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.uuid, "1678283")
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
             self.assertIn("Deep Throat", info.tags)
-            expected_performers = []
+            expected_performers: List[Performer] = []
             expected_performers.append(Performer("Carmela Clutch", "Female"))
             expected_performers.append(Performer("Francesca Le", "Female"))
             expected_performers.append(Performer("Mark Wood", "Male"))
             self.assertListEqual(info.performers, expected_performers)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_writing_xml_metadata_genere_flag(self, mock_response):
+    def test_writing_xml_metadata_genere_flag(self, mock_response: Mock):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
@@ -132,7 +134,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(output, expected)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_writing_xml_metadata(self, mock_response):
+    def test_writing_xml_metadata(self, mock_response: Mock):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """

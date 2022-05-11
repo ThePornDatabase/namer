@@ -3,6 +3,7 @@ Updates mp4 files with metadata tags readable by Plex and Apple TV App.
 """
 
 from pathlib import Path
+from typing import List
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 from namer.types import LookedUpFileInfo, NamerConfig
@@ -13,7 +14,7 @@ from namer.ffmpeg import (
 )
 
 
-def resolution_to_hdv_setting(resolution: int) -> int:
+def resolution_to_hdv_setting(resolution: None | int) -> int:
     """
     Using the resolution (height) of an video stream return the atom value for hdvideo
     """
@@ -28,14 +29,14 @@ def resolution_to_hdv_setting(resolution: int) -> int:
     return 0
 
 
-def set_single_if_not_none(video: MP4, atom: str, value: str):
+def set_single_if_not_none(video: MP4, atom: str, value: None | str | int):
     """
     Set a single atom on the video if it is not None.
     """
     video[atom] = [value] if value is not None else []
 
 
-def set_array_if_not_none(video: MP4, atom: str, value: str):
+def set_array_if_not_none(video: MP4, atom: str, value: None | List[str] | List[int]):
     """
     Set an array atom on the video if it is not None.
     """
@@ -46,7 +47,7 @@ def get_mp4_if_possible(mp4: Path) -> MP4:
     """
     Attempt to read an mp4 file to prepare for edit.
     """
-    video: MP4 = None
+    video: None | MP4 = None
     try:
         video = MP4(mp4)
     except MP4StreamInfoError:
@@ -57,7 +58,7 @@ def get_mp4_if_possible(mp4: Path) -> MP4:
 
 @logger.catch
 def update_mp4_file(
-    mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig
+    mp4: Path, looked_up: LookedUpFileInfo, poster: None | Path, config: NamerConfig
 ):
     # pylint: disable=too-many-statements
     """
@@ -139,7 +140,7 @@ def update_mp4_file(
         logger.warning("Can not update tags of a non-existant file: {}", mp4)
 
 
-def add_poster(poster, video):
+def add_poster(poster: None | Path, video: MP4):
     """
     Adds a poster to the mp4 metadata if available and correct format.
     """

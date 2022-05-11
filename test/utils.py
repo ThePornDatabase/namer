@@ -8,11 +8,13 @@ import platform
 import shutil
 import tempfile
 from typing import List
+from unittest import TestCase
+from unittest.mock import Mock
 from mutagen.mp4 import MP4
 from namer.types import NamerConfig, default_config
 
 
-def validate_permissions(test_self, file: Path, perm: int):
+def validate_permissions(test_self: TestCase, file: Path, perm: int):
     """
     Validates file permissions are as expected.
     """
@@ -24,17 +26,14 @@ def validate_permissions(test_self, file: Path, perm: int):
         test_self.assertEqual(found, expected)
 
 
-def validate_mp4_tags(test_self, file):
+def validate_mp4_tags(test_self: TestCase, file: Path):
     """
     Validates the tags of the standard mp4 file.
     """
     output2 = MP4(file)
-    test_self.assertEqual(
-        output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-    )
+    test_self.assertEqual(output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
     test_self.assertEqual(output2.get("\xa9day"), ["2022-01-03T09:00:00Z"])
-    test_self.assertEqual(output2.get("\xa9alb"), [
-                          "Evil Angel"])  # plex collection
+    test_self.assertEqual(output2.get("\xa9alb"), ["Evil Angel"])  # plex collection
     test_self.assertEqual(output2.get("tvnn"), ["Evil Angel"])
     test_self.assertEqual(output2.get("\xa9gen"), ["Adult"])
     test_self.assertEqual(
@@ -65,7 +64,7 @@ def validate_mp4_tags(test_self, file):
             "Threesome",
             "Toys / Dildos",
         ],
-        output2.get("keyw"),
+        output2.get("keyw")
     )
 
 
@@ -115,13 +114,13 @@ def new_ea(
     )
 
 
-def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):
+def prepare(targets: List[ProcessingTarget], mock_poster: Mock, mock_response: Mock):
     """
     Prepares mocks for responses based on targets input.
     """
     targets.sort(key=lambda x: str(x.file))
-    posters = []
-    responses = []
+    posters: List[Path] = []
+    responses: List[str] = []
     for target in targets:
         posters.append(target.poster)
         if target.expect_match is True:

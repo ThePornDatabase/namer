@@ -34,8 +34,8 @@ def done_copying(file: Path) -> bool:
     while True:
         try:
             # pylint: disable=consider-using-with
-            file = open(file, mode="rb")
-            file.close()
+            reader = open(file, mode="rb")
+            reader.close()
             break
         except PermissionError:
             time.sleep(0.2)
