@@ -34,8 +34,8 @@ def done_copying(file: Path) -> bool:
     while True:
         try:
             # pylint: disable=consider-using-with
-            file = open(file, mode="rb")
-            file.close()
+            bufferedReader = open(file, mode="rb")
+            bufferedReader.close()
             break
         except PermissionError:
             time.sleep(0.2)
@@ -80,7 +80,8 @@ def handle(target_file: Path, namer_config: NamerConfig):
             )
         else:
             newvideo = namer_config.failed_dir / relative_path
-            workingfile.rename(newvideo)
+            if workingfile is not None:
+                workingfile.rename(newvideo)
             logger.info(
                 "Moving failed processing {} to {} to retry later",
                 workingfile,
@@ -162,7 +163,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
         if event.event_type == EVENT_TYPE_MOVED:
-            file_path = event.dest_path
+            file_path = event.dest_path  # type: ignore
         elif event.event_type != EVENT_TYPE_DELETED:
             file_path = event.src_path
         if file_path is not None:

@@ -17,6 +17,7 @@ from typing import List
 from namer.types import default_config
 import namer.watchdog
 import namer.namer
+import namer.metadataapi
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """
