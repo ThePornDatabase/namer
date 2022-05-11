@@ -18,6 +18,7 @@ import urllib
 import urllib.request
 import rapidfuzz
 import requests
+from urllib.parse import quote
 from unidecode import unidecode
 from loguru import logger
 from namer.types import (
@@ -33,14 +34,11 @@ from namer.filenameparser import parse_file_name
 
 
 def __find_best_match(query: str, match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
-    powerset_iter = None
+    powerset_iter = []
     max_size = min(len(match_terms), config.max_performer_names)
     for length in range(1, max_size + 1):
         data = map(" ".join, itertools.combinations(match_terms, length))
-        if powerset_iter is None:
-            powerset_iter = data
-        else:
-            powerset_iter = itertools.chain(powerset_iter, data)
+        powerset_iter = itertools.chain(powerset_iter, data)
     ratio = rapidfuzz.process.extractOne(query, choices=powerset_iter)
     return ratio[0], ratio[1] if ratio is not None else ratio
 
@@ -55,7 +53,7 @@ def __attempt_better_match(existing: Tuple[str, float],
     if existing is None:
         return found
     if found is None:
-        return None
+        return ("", 0.0)
     return existing if existing[1] >= found[1] else found
 
 
@@ -70,7 +68,7 @@ def __evaluate_match(
     else:
         release_date = name_parts.date is not None and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
 
-    result: Tuple[str, float] = None
+    result: Tuple[str, float] = ('',0.0)
 
     # Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
@@ -87,8 +85,8 @@ def __evaluate_match(
         result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     return ComparisonResult(
-        name=result[0] if result is not None else None,
-        name_match=result[1] if result is not None else None,
+        name=result[0],
+        name_match=result[1],
         datematch=release_date,
         sitematch=site,
         name_parts=name_parts,
@@ -156,7 +154,7 @@ def __match_percent(result: ComparisonResult) -> float:
     logger.info("Name match was {:.2f} for {}", value, result.name)
     return value
 
-
+@logger.catch
 def __get_response_json_object(url: str, authtoken: str) -> str:
     """
     returns json object with info
@@ -167,13 +165,9 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    try:
-        with requests.get(url, headers=headers) as response:
-            response.raise_for_status()
-            return response.text
-    except requests.exceptions.RequestException as ex:
-        logger.warning(ex)
-        return None
+    with requests.get(url, headers=headers) as response:
+        response.raise_for_status()
+        return response.text
 
 
 @logger.catch
@@ -300,11 +294,11 @@ def __build_url(
     else:
         query = "?parse="
         if site is not None:
-            query += urllib.parse.quote(re.sub(r" ", ".", site)) + "."
+            query += quote(re.sub(r" ", ".", site)) + "."
         if release_date is not None:
             query += release_date + "."
         if name is not None:
-            query += urllib.parse.quote(re.sub(r" ", ".", name))
+            query += quote(re.sub(r" ", ".", name))
         query += "&limit=25"
     return f"https://api.metadataapi.net/scenes{query}"
 
