@@ -12,13 +12,11 @@ from datetime import timedelta, date
 import pathlib
 import re
 import sys
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from types import SimpleNamespace
-import urllib
-import urllib.request
+from urllib.parse import quote
 import rapidfuzz
 import requests
-from urllib.parse import quote
 from unidecode import unidecode
 from loguru import logger
 from namer.types import (
@@ -33,7 +31,7 @@ from namer.types import (
 from namer.filenameparser import parse_file_name
 
 
-def __find_best_match(query: str, match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
+def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
     powerset_iter = []
     max_size = min(len(match_terms), config.max_performer_names)
     for length in range(1, max_size + 1):
@@ -44,7 +42,7 @@ def __find_best_match(query: str, match_terms: List[str], config: NamerConfig) -
 
 
 def __attempt_better_match(existing: Tuple[str, float],
-                           query: str,
+                           query: Optional[str],
                            match_terms: List[str],
                            namer_config: NamerConfig) -> Tuple[str, float]:
     if existing is not None and existing[1] >= 89.9:
@@ -60,29 +58,37 @@ def __attempt_better_match(existing: Tuple[str, float],
 def __evaluate_match(
     name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig
 ) -> ComparisonResult:
-    found_site = re.sub(r"[\- .+_]", "", looked_up.site).upper()
-    site = name_parts.site is None or re.sub(r"[\- .+_]", "", name_parts.site.upper()) in found_site or unidecode(re.sub(r"[\- .+_]", "", name_parts.site.upper())) in found_site
+    site = False
+    found_site = None
+    if looked_up.site is not None:
+        found_site = re.sub(r"[\- .+_]", "", looked_up.site).upper()
+        if name_parts.site is not None:
+            site = name_parts.site is None or re.sub(r"[\- .+_]", "", name_parts.site.upper()) in found_site or unidecode(re.sub(r"[\- .+_]", "", name_parts.site.upper())) in found_site
     release_date = False
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
         release_date = name_parts.date is not None and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
 
-    result: Tuple[str, float] = ('',0.0)
+    result: Tuple[str, float] = ('', 0.0)
 
     # Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
-    all_performers.insert(0, looked_up.name)
+    if looked_up.name is not None:
+        all_performers.insert(0, looked_up.name)
 
     result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
-    result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
+    if name_parts.name is not None:
+        result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     # First Name Powerset.
     if result is not None and result[1] < 89.9:
         all_performers = list(map(lambda p: p.name.split(" ")[0], looked_up.performers))
-        all_performers.insert(0, looked_up.name)
+        if looked_up.name is not None:
+            all_performers.insert(0, looked_up.name)
         result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
-        result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
+        if name_parts.name is not None:
+            result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     return ComparisonResult(
         name=result[0],
@@ -154,6 +160,7 @@ def __match_percent(result: ComparisonResult) -> float:
     logger.info("Name match was {:.2f} for {}", value, result.name)
     return value
 
+
 @logger.catch
 def __get_response_json_object(url: str, authtoken: str) -> str:
     """
@@ -171,11 +178,11 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
 
 
 @logger.catch
-def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Path:
+def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config: NamerConfig) -> Optional[Path]:
     """
     returns json object with info
     """
-    if url is not None:
+    if url is not None and video_file is not None:
         file = video_file.parent / \
             (video_file.stem + infix + pathlib.Path(url).suffix)
         if config.enabled_poster and url.startswith("http") and not file.exists():
@@ -198,11 +205,11 @@ def get_image(url: str, infix: str, video_file: Path, config: NamerConfig) -> Pa
 
 
 @logger.catch
-def get_trailer(url: str, video_file: Path, namer_config: NamerConfig) -> Path:
+def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: NamerConfig) -> Optional[Path]:
     """
     returns json object with info
     """
-    if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0 and url is not None and len(url) > 0:
+    if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0 and url is not None and len(url) > 0 and video_file is not None:
         logger.info("Attempting to downlaod trailer: {}", url)
         location = namer_config.trailer_location[
             : max(
@@ -286,7 +293,7 @@ def __metadataapi_response_to_data(
 
 
 def __build_url(
-    site: str = None, release_date: str = None, name: str = None, uuid: str = None
+    site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None
 ) -> str:
     query = ""
     if uuid is not None:
@@ -326,7 +333,7 @@ def __get_metadataapi_net_fileinfo(
 
 def __get_complete_metadatapi_net_fileinfo(
     name_parts: FileNameParts, uuid: str, namer_config: NamerConfig
-) -> LookedUpFileInfo:
+) -> Optional[LookedUpFileInfo]:
     url = __build_url(uuid=uuid)
     logger.info("Querying: {}", url)
     json_response = __get_response_json_object(url, namer_config.porndb_token)
@@ -358,11 +365,13 @@ def match(
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.
     if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
-        file_infos = __get_complete_metadatapi_net_fileinfo(
-            file_name_parts, comparison_results[0].looked_up.uuid, namer_config
-        )
-        if file_infos is not None:
-            comparison_results[0].looked_up = file_infos
+        uuid = comparison_results[0].looked_up.uuid
+        if uuid is not None:
+            file_infos = __get_complete_metadatapi_net_fileinfo(
+                file_name_parts, uuid, namer_config
+            )
+            if file_infos is not None:
+                comparison_results[0].looked_up = file_infos
     return comparison_results
 
 
@@ -406,7 +415,7 @@ def main(argslist: List[str]):
     if len(match_results) > 0 and match_results[0].is_match() is True:
         print(match_results[0].looked_up.new_file_name(
             config.inplace_name))
-        if args.jsonfile is not None:
+        if args.jsonfile is not None and match_results[0].looked_up is not None and match_results[0].looked_up.origninal_response is not None:
             Path(args.jsonfile).write_text(
                 match_results[0].looked_up.origninal_response, encoding="UTF-8"
             )

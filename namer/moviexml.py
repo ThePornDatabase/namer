@@ -4,7 +4,7 @@ allowing the metadata to be written in to video files (currently only mp4s),
 or used in renaming the video file.
 """
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 from lxml import objectify, etree
 from namer.types import (
     LookedUpFileInfo,
@@ -50,9 +50,9 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
 def write_movie_xml_file(
     info: LookedUpFileInfo,
     config: NamerConfig,
-    trailer: Path = None,
-    poster: Path = None,
-    background: Path = None,
+    trailer: Optional[Path] = None,
+    poster: Optional[Path] = None,
+    background: Optional[Path] = None,
 ) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
@@ -66,7 +66,8 @@ def write_movie_xml_file(
     trailertag = etree.SubElement(root, "trailer", attrib=None, nsmap=None)
     if trailer is not None:
         trailertag.text = str(trailer)
-    etree.SubElement(root, "year", attrib=None, nsmap=None).text = info.date[:4]
+    if info.date is not None:
+        etree.SubElement(root, "year", attrib=None, nsmap=None).text = info.date[:4]
     etree.SubElement(root, "premiered", attrib=None, nsmap=None).text = info.date
     etree.SubElement(root, "releasedate", attrib=None, nsmap=None).text = info.date
     etree.SubElement(root, "mpaa", attrib=None, nsmap=None).text = "XXX"
@@ -107,9 +108,9 @@ def write_movie_xml_file(
 def write_nfo(
     results: ProcessingResults,
     namer_config: NamerConfig,
-    trailer: Path,
-    poster: Path,
-    background: Path,
+    trailer: Optional[Path],
+    poster: Optional[Path],
+    background: Optional[Path],
 ):
     """
     Writes an .nfo to the correct place for a video file.

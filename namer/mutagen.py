@@ -3,7 +3,7 @@ Updates mp4 files with metadata tags readable by Plex and Apple TV App.
 """
 
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 from namer.types import LookedUpFileInfo, NamerConfig
@@ -14,7 +14,7 @@ from namer.ffmpeg import (
 )
 
 
-def resolution_to_hdv_setting(resolution: int) -> int:
+def resolution_to_hdv_setting(resolution: Optional[int]) -> int:
     """
     Using the resolution (height) of an video stream return the atom value for hdvideo
     """
@@ -57,7 +57,7 @@ def get_mp4_if_possible(mp4: Path) -> MP4:
 
 @logger.catch
 def update_mp4_file(
-    mp4: Path, looked_up: LookedUpFileInfo, poster: Path, config: NamerConfig
+    mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Path], config: NamerConfig
 ):
     # pylint: disable=too-many-statements
     """

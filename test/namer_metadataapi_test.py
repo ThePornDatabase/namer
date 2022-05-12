@@ -33,7 +33,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.name, "Peeping Tom")
         self.assertEqual(info.date, "2021-12-23")
         self.assertEqual(info.site, "Dorcel Club")
-        self.assertRegex(info.description, r"kissing in a parking lot")
+        self.assertIsNotNone(info.description)
+        if info.description is not None:
+            self.assertRegex(info.description, r"kissing in a parking lot")
         self.assertEqual(
             info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
         )
@@ -65,7 +67,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.name, "Peeping Tom")
         self.assertEqual(info.date, "2021-12-23")
         self.assertEqual(info.site, "Dorcel Club")
-        self.assertRegex(info.description, r"kissing in a parking lot")
+        self.assertIsNotNone(info.description)
+        if info.description is not None:
+            self.assertRegex(info.description, r"kissing in a parking lot")
         self.assertEqual(
             info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
         )
@@ -98,9 +102,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
         self.assertEqual(info.date, "2022-01-03")
         self.assertEqual(info.site, "Evil Angel")
-        self.assertRegex(
-            info.description, r"brunette Carmela Clutch positions her big, juicy"
-        )
+        self.assertIsNotNone(info.description)
+        if info.description is not None:
+            self.assertRegex(
+                info.description, r"brunette Carmela Clutch positions her big, juicy"
+            )
         self.assertEqual(
             info.source_url,
             "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543",
@@ -162,17 +168,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
         self.assertEqual(info.date, "2022-01-03")
         self.assertEqual(info.site, "Evil Angel")
-        self.assertRegex(
-            info.description, r"brunette Carmela Clutch positions her big, juicy"
-        )
+        self.assertIsNotNone(info.description)
+        if info.description is not None:
+            self.assertRegex(
+                info.description, r"brunette Carmela Clutch positions her big, juicy"
+            )
         self.assertEqual(
             info.source_url,
             "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543",
         )
-        self.assertRegex(
-            info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
-        )
+        self.assertIsNotNone(info.poster_url)
+        if info.poster_url is not None:
+            self.assertRegex(
+                info.poster_url,
+                "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
+            )
         self.assertEqual(info.performers[0].name, "Carmela Clutch")
         self.assertEqual(info.performers[0].role, "Female")
         self.assertEqual(info.performers[1].name, "Francesca Le")

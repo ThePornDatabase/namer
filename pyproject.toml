@@ -24,7 +24,7 @@ coverage = "^6.3.2"
 flakeheaven = "^0.11.1"
 
 [tool.flakeheaven]
-exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*"]
+exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]
 format = "colored"
 show_source = false
 max_line_length = 150
@@ -33,7 +33,12 @@ max_line_length = 150
 mccabe = ["+*"]
 pycodestyle = ["+*", "-E501", "-E722"]
 pyflakes = ["+*"]
-pylint = ["+*"]
+pylint = ["+*", "-C0301", "-I1101" ]
+
+[tool.pylint.'MASTER']
+extension-pkg-allow-list = ["lxml"]
+#extension-pkg-whitelist = ["lxml"]
+max-line-length = 150
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

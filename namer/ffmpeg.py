@@ -13,6 +13,7 @@ import string
 from types import SimpleNamespace
 import subprocess
 from pathlib import Path
+from typing import Optional
 from loguru import logger
 
 
@@ -113,7 +114,7 @@ def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
     return -1
 
 
-def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
+def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bool:
     """
     Returns true if the file had to be edited to have a default audio stream equal to the desired language,
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
@@ -122,7 +123,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
     random = "".join(
         choices(population=string.ascii_uppercase + string.digits, k=10))
     workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
-    stream = get_audio_stream_for_lang(mp4_file, language)
+    stream = None if language is None else get_audio_stream_for_lang(mp4_file, language)
     if stream is not None and stream >= 0:
         logger.info("Attempt to alter default audio stream of {}", mp4_file)
         with subprocess.Popen(
