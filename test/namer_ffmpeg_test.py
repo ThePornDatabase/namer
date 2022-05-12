@@ -1,10 +1,11 @@
 """
 Tests namer_ffmpeg
 """
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
+
 from namer.ffmpeg import (
     get_resolution,
     get_audio_stream_for_lang,

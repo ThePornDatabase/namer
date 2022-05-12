@@ -1,17 +1,19 @@
 """
 Test namer_watchdog.py
 """
+import logging
 import os
-from pathlib import Path
+import tempfile
 import time
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
-import logging
-import tempfile
-from test.utils import sample_config, validate_mp4_tags, new_ea, prepare, validate_permissions
+
 from mutagen.mp4 import MP4
+
 from namer.types import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed
+from test.utils import sample_config, validate_mp4_tags, new_ea, prepare, validate_permissions
 
 
 def make_locations(tempdir: Path) -> NamerConfig:

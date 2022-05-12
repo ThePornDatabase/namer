@@ -1,15 +1,15 @@
 """
 Test namer_types.py
 """
-from configparser import ConfigParser
 import logging
 import os
-from pathlib import Path
-from platform import system
 import sys
 import tempfile
 import unittest
-from test.utils import sample_config
+from configparser import ConfigParser
+from pathlib import Path
+from platform import system
+
 from namer.types import (
     NamerConfig,
     PartialFormatter,
@@ -17,6 +17,7 @@ from namer.types import (
     from_config,
     set_permissions,
 )
+from test.utils import sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

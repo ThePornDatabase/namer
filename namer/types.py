@@ -2,20 +2,21 @@
 Types shared by all the files in this project, used as interfaces for moving data.
 """
 
+import configparser
+import os
+import random
+import re
+import string
+import sys
 from configparser import ConfigParser
 from dataclasses import dataclass
+from pathlib import Path, PurePath
 from platform import system
 from typing import List, Optional, Sequence
-import os
-import configparser
-import re
-import sys
-import string
-from pathlib import Path, PurePath
-import random
+
+from loguru import logger
 from pathvalidate._common import Platform
 from pathvalidate._filename import sanitize_filename
-from loguru import logger
 
 
 def _verify_name_string(name: str, name_string: str) -> bool:

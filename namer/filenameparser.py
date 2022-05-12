@@ -2,13 +2,14 @@
 Parse string in to FileNamePart define in namer_types.
 """
 import argparse
-from pathlib import PurePath
 import re
 import sys
+from pathlib import PurePath
 from typing import List
-from loguru import logger
-from namer.types import FileNameParts
 
+from loguru import logger
+
+from namer.types import FileNameParts
 
 DEFAULT_REGEX_TOKENS = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
 

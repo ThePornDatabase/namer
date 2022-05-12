@@ -1,14 +1,16 @@
 """
 Testing utils
 """
-from dataclasses import dataclass
 import os
-from pathlib import Path
 import platform
 import shutil
 import tempfile
+from dataclasses import dataclass
+from pathlib import Path
 from typing import List
+
 from mutagen.mp4 import MP4
+
 from namer.types import NamerConfig, default_config
 
 

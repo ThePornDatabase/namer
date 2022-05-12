@@ -5,7 +5,9 @@ or used in renaming the video file.
 """
 from pathlib import Path
 from typing import Any, Optional
+
 from lxml import objectify, etree
+
 from namer.types import (
     LookedUpFileInfo,
     NamerConfig,

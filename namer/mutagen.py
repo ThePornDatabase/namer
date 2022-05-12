@@ -4,14 +4,16 @@ Updates mp4 files with metadata tags readable by Plex and Apple TV App.
 
 from pathlib import Path
 from typing import Any, List, Optional
+
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
-from namer.types import LookedUpFileInfo, NamerConfig
+
 from namer.ffmpeg import (
     attempt_fix_corrupt,
     get_resolution,
     update_audio_stream_if_needed,
 )
+from namer.types import LookedUpFileInfo, NamerConfig
 
 
 def resolution_to_hdv_setting(resolution: Optional[int]) -> int:

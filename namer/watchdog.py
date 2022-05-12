@@ -3,23 +3,25 @@ A file watching service to rename movie files and move them
 to revelant locations after match the file against the porndb.
 """
 
+import os
 import re
 import shutil
+import sys
 import tempfile
 import time
-import os
-import sys
 from pathlib import Path, PurePath
 from typing import List, Optional
+
+import schedule
 from loguru import logger
-from watchdog.observers.polling import PollingObserver
 from watchdog.events import (
     PatternMatchingEventHandler,
     FileSystemEvent,
     EVENT_TYPE_DELETED,
     EVENT_TYPE_MOVED,
 )
-import schedule
+from watchdog.observers.polling import PollingObserver
+
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
 from namer.types import NamerConfig, default_config, write_log_file
 

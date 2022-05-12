@@ -2,15 +2,17 @@
 Fully test namer.py
 """
 import os
-from pathlib import Path
 import shutil
-import unittest
-from unittest.mock import patch
 import tempfile
-from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
 from mutagen.mp4 import MP4
-from namer.types import NamerConfig
+
 from namer.namer import determine_target_file, find_target_file, main, check_arguments, set_permissions
+from namer.types import NamerConfig
+from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

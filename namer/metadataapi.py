@@ -5,19 +5,22 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 
 import argparse
 import itertools
-from pathlib import Path
 import json
-from datetime import timedelta, date
 import pathlib
 import re
 import sys
-from typing import List, Optional, Tuple
+from datetime import timedelta, date
+from pathlib import Path
 from types import SimpleNamespace
+from typing import List, Optional, Tuple
 from urllib.parse import quote
+
 import rapidfuzz
 import requests
-from unidecode import unidecode
 from loguru import logger
+from unidecode import unidecode
+
+from namer.filenameparser import parse_file_name
 from namer.types import (
     LookedUpFileInfo,
     Performer,
@@ -27,7 +30,6 @@ from namer.types import (
     default_config,
     set_permissions,
 )
-from namer.filenameparser import parse_file_name
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:

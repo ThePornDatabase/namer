@@ -7,13 +7,14 @@ See:  https://iso639-3.sil.org/code_tables/639/data/
 """
 
 import json
-from random import choices
 import shutil
 import string
-from types import SimpleNamespace
 import subprocess
 from pathlib import Path
+from random import choices
+from types import SimpleNamespace
 from typing import Optional
+
 from loguru import logger
 
 

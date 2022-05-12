@@ -4,6 +4,7 @@ Tests for namer_file_parser.py
 import io
 import unittest
 from unittest.mock import patch
+
 from namer.filenameparser import main, parse_file_name
 
 REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"

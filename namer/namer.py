@@ -5,20 +5,21 @@ the porndb, and used for renaming (in place), and updating an mp4
 file's metadata (poster, artists, etc.)
 """
 import argparse
-from pathlib import Path
 import pathlib
-from random import choices
 import string
 import sys
+from pathlib import Path
+from random import choices
 from typing import List, Optional
+
 from loguru import logger
 
+from namer.filenameparser import parse_file_name
+from namer.metadataapi import get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
+from namer.mutagen import update_mp4_file
 from namer.types import LookedUpFileInfo, NamerConfig, ProcessingResults
 from namer.types import default_config, from_config, set_permissions, write_log_file
-from namer.filenameparser import parse_file_name
-from namer.mutagen import update_mp4_file
-from namer.metadataapi import get_image, get_trailer, match
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,

@@ -3,7 +3,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from namer.filenameparser import parse_file_name
-from namer.metadataapi import __jsondata_to_fileinfo, __get_response_json_object, __build_url, __metadataapi_response_to_data
+from namer.metadataapi import __jsondata_to_fileinfo, __get_response_json_object, __build_url, \
+    __metadataapi_response_to_data
 from namer.namer import move_to_final_location
 from namer.types import default_config
 
