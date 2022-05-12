@@ -1,10 +1,9 @@
 import argparse
 import sys
 
-from flask import Flask, render_template, url_for
-from loguru import logger
+from flask import Flask, render_template, url_for, request, jsonify
 
-from namer.web.helpers import has_no_empty_params, get_files, config
+from namer.web.helpers import has_no_empty_params, get_files, config, get_search_results, make_rename
 
 app = Flask(__name__, static_url_path='/', static_folder='public', template_folder='templates')
 
@@ -20,19 +19,26 @@ def index():
     return render_template('index.html', links=data)
 
 
-@app.route('/files')
+@app.route('/failed')
 def files():
-    data = {
-        'danger': get_files(config.failed_dir),
-        'warning': get_files(config.work_dir),
-        'light': get_files(config.watch_dir),
-        'success': get_files(config.dest_dir),
-    }
-
-    return render_template('files.html', files=data)
+    data = get_files(config.failed_dir)
+    return render_template('failed.html', files=data)
 
 
-@logger.catch
+@app.route('/get_search', methods=['POST'])
+def get_results():
+    data = request.json
+    res = get_search_results(data['query'], data['file'])
+    return jsonify(res)
+
+
+@app.route('/rename', methods=['POST'])
+def rename():
+    data = request.json
+    res = make_rename(data['file'], data['scene_id'])
+    return jsonify(res)
+
+
 def main(arg_list: list[str]):
     parser = argparse.ArgumentParser(description='Namer webserver')
     parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode')
