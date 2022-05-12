@@ -2,37 +2,18 @@
 $(function () {
     const resultBody = $('#searchResults .modal-body');
     const queryInput = $('#queryInput');
-    const searchResultsProgress = $('#searchResultsProgress');
 
     $('.search').on('click', function () {
-        resultBody.html('<div class="progress"><div id="searchResultsProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>');
+        resultBody.html(getProgressBar());
 
         const data = {
             'query': queryInput.val(),
             'file': queryInput.data('file'),
         }
-        $.ajax({
-            xhr: function () {
-                const xhr = new window.XMLHttpRequest();
-                xhr.addEventListener("progress", function (evt) {
-                    if (evt.lengthComputable) {
-                        const percentComplete = Math.ceil(evt.loaded / evt.total * 100);
-                        searchResultsProgress.width(percentComplete + '%');
-                    }
-                }, false);
 
-                return xhr;
-            },
-            url: "/get_search",
-            type: "POST",
-            data: JSON.stringify(data, null, 4),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function (data) {
-                data = getSearchResultHTML(data);
-                resultBody.html(data);
-            }
-        });
+        request('/get_search', data, function (data) {
+            render('searchResults', data, resultBody);
+        })
     });
 
     $('.match').on('click', function () {
@@ -47,36 +28,47 @@ $(function () {
             'scene_id': $(this).data('scene-id'),
         }
 
-        $.ajax({
-            url: "/rename",
-            type: "POST",
-            data: JSON.stringify(data, null, 4),
-            contentType: 'application/json',
-            dataType: 'json',
-        });
+        request('/rename', data)
     });
 
-    function getSearchResultHTML(data) {
-        let html = '<div class="row row-cols-auto">';
+    function render(template, res, selector) {
+        const data = {
+            'template': template,
+            'data': res,
+        }
 
-        data.files.forEach(function (value) {
-            html += '<div class="col m-1">';
-            html += '<div class="card h-100" style="width:12rem">';
-            html += `<img class="card-img-top" src="${value.poster}" alt="${value.title}">`
-            html += '<div class="card-body">';
-            html += `<h5 class="card-title">${value.title}</h5>`
-            html += `<p class="card-text">${value.date}</p>`
-            html += '</div>'
-            html += `<div class="card-footer">`
-            html += `<a href="https://metadataapi.net/scenes/${value.id}" class="btn btn-secondary">Show</a>`
-            html += `<button class="btn btn-primary float-end rename" data-bs-dismiss="modal" data-scene-id="${value.id}" data-file="${data.file}">Select</button>`
-            html += '</div>'
-            html += '</div>'
-            html += '</div>'
+        request('/render', data, function (data) {
+            selector.html(data.response);
         })
+    }
 
-        html += '</div>'
+    function getProgressBar() {
+        return '<div class="progress"><div id="searchResultsProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
+    }
 
-        return html;
+    function request(url, data, success = null) {
+        const searchResultsProgress = $('#searchResultsProgress');
+
+        $.ajax({
+            xhr: function () {
+                const xhr = new window.XMLHttpRequest();
+                xhr.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        const percentComplete = Math.ceil(evt.loaded / evt.total * 100);
+                        if (searchResultsProgress) {
+                            searchResultsProgress.width(percentComplete + '%');
+                        }
+                    }
+                }, false);
+
+                return xhr;
+            },
+            url: url,
+            type: "POST",
+            data: JSON.stringify(data, null, 0),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: success,
+        });
     }
 });

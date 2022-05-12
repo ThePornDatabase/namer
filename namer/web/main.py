@@ -2,6 +2,8 @@ import argparse
 import sys
 
 from flask import Flask, jsonify, render_template, request, url_for
+from htmlmin.main import minify
+from waitress import serve
 
 from namer.web.helpers import config, get_files, get_search_results, has_no_empty_params, make_rename
 
@@ -16,13 +18,29 @@ def index():
             url = url_for(rule.endpoint, **(rule.defaults or {}))
             data.append((url, rule.endpoint))
 
-    return render_template('index.html', links=data)
+    return render_template('pages/index.html', links=data)
 
 
 @app.route('/failed')
 def files():
     data = get_files(config.failed_dir)
-    return render_template('failed.html', files=data)
+    return render_template('pages/failed.html', files=data)
+
+
+@app.route('/render', methods=['POST'])
+def render():
+    data = request.json
+    template = data.get('template')
+    data = data.get('data')
+
+    template_file = f'components/{template}.html'
+    data = render_template(template_file, data=data)
+
+    res = {
+        'response': minify(data),
+    }
+
+    return jsonify(res)
 
 
 @app.route('/get_search', methods=['POST'])
@@ -39,6 +57,16 @@ def rename():
     return jsonify(res)
 
 
+@app.after_request
+def response_minify(response):
+    if 'text/html' in response.content_type:
+        response.set_data(minify(response.get_data(as_text=True)))
+
+        return response
+
+    return response
+
+
 def main(arg_list: list[str]):
     parser = argparse.ArgumentParser(description='Namer webserver')
     parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode')
@@ -49,7 +77,6 @@ def main(arg_list: list[str]):
     if args.debug:
         app.run(debug=args.debug, host=args.host, port=args.port)
     else:
-        from waitress import serve
         serve(app, host=args.host, port=args.port)
 
 
