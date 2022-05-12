@@ -14,16 +14,11 @@ from typing import List, Optional
 
 import schedule
 from loguru import logger
-from watchdog.events import (
-    PatternMatchingEventHandler,
-    FileSystemEvent,
-    EVENT_TYPE_DELETED,
-    EVENT_TYPE_MOVED,
-)
+from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
-from namer.types import NamerConfig, default_config, write_log_file
+from namer.types import default_config, NamerConfig, write_log_file
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -75,20 +70,12 @@ def handle(target_file: Path, namer_config: NamerConfig):
     if result.new_metadata is None:
         if workingdir is not None:
             workingdir.rename(namer_config.failed_dir / detected)
-            logger.info(
-                "Moving failed processing {} to {} to retry later",
-                workingdir,
-                namer_config.failed_dir / detected,
-            )
+            logger.info("Moving failed processing {} to {} to retry later", workingdir, namer_config.failed_dir / detected)
         else:
             newvideo = namer_config.failed_dir / relative_path
             if workingfile is not None:
                 workingfile.rename(newvideo)
-            logger.info(
-                "Moving failed processing {} to {} to retry later",
-                workingfile,
-                newvideo,
-            )
+            logger.info("Moving failed processing {} to {} to retry later", workingfile, newvideo)
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
         # Move the directory if desired.
@@ -99,13 +86,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
                 logger.info("Moving success processed dir {} to {}", workingdir, target)
                 result.video_file = namer_config.dest_dir / result.final_name_relative
         # Rename the file to dest name.
-        newfile = move_to_final_location(
-            result.video_file,
-            namer_config.dest_dir,
-            namer_config.new_relative_path_name,
-            result.new_metadata,
-            namer_config,
-        )
+        newfile = move_to_final_location(result.video_file, namer_config.dest_dir, namer_config.new_relative_path_name, result.new_metadata, namer_config)
         result.video_file = newfile
         logger.info("Moving success processed file {} to {}", result.video_file, newfile)
 
@@ -127,9 +108,7 @@ def retry_failed(namer_config: NamerConfig):
         log_file.unlink()
     # move all files back to watch dir.
     for file in list(namer_config.failed_dir.iterdir()):
-        shutil.move(
-            namer_config.failed_dir / file.name, namer_config.watch_dir / file.name
-        )
+        shutil.move(namer_config.failed_dir / file.name, namer_config.watch_dir / file.name)
 
 
 def is_fs_case_sensitive():
@@ -149,12 +128,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
     namer_config: NamerConfig
 
     def __init__(self, namer_config: NamerConfig):
-        super().__init__(
-            patterns=["*.*"],
-            case_sensitive=is_fs_case_sensitive(),
-            ignore_directories=True,
-            ignore_patterns=None,
-        )
+        super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.namer_config = namer_config
 
     def on_any_event(self, event: FileSystemEvent):

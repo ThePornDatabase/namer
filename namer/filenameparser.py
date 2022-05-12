@@ -69,9 +69,7 @@ def parser_config_to_regex(tokens: str) -> str:
     return regex
 
 
-def parse_file_name(
-    filename: str, regex_config: str = DEFAULT_REGEX_TOKENS
-) -> FileNameParts:
+def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> FileNameParts:
     """
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.

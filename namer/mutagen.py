@@ -8,11 +8,7 @@ from typing import Any, List, Optional
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
-from namer.ffmpeg import (
-    attempt_fix_corrupt,
-    get_resolution,
-    update_audio_stream_if_needed,
-)
+from namer.ffmpeg import attempt_fix_corrupt, get_resolution, update_audio_stream_if_needed
 from namer.types import LookedUpFileInfo, NamerConfig
 
 

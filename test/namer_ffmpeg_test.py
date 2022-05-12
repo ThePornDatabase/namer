@@ -6,11 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from namer.ffmpeg import (
-    get_resolution,
-    get_audio_stream_for_lang,
-    update_audio_stream_if_needed,
-)
+from namer.ffmpeg import get_audio_stream_for_lang, get_resolution, update_audio_stream_if_needed
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -49,9 +45,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
-            file = (
-                tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost_wrong.mp4"
-            )
+            file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost_wrong.mp4"
             stream_number = get_audio_stream_for_lang(file, "und")
             self.assertEqual(stream_number, -1)
             stream_number = get_audio_stream_for_lang(file, "eng")

@@ -40,9 +40,7 @@ def create_default_config_if_missing():
     """
     conffile = pathlib.Path(".namer.conf")
     print("Creating default config file here: {}", conffile)
-    print(
-        "please edit the token or any other settings whose defaults you want changed."
-    )
+    print("please edit the token or any other settings whose defaults you want changed.")
 
 
 def main(arglist: List[str]):

@@ -9,7 +9,7 @@ import json
 import pathlib
 import re
 import sys
-from datetime import timedelta, date
+from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
@@ -21,15 +21,7 @@ from loguru import logger
 from unidecode import unidecode
 
 from namer.filenameparser import parse_file_name
-from namer.types import (
-    LookedUpFileInfo,
-    Performer,
-    FileNameParts,
-    ComparisonResult,
-    NamerConfig,
-    default_config,
-    set_permissions,
-)
+from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer, set_permissions
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
@@ -105,9 +97,7 @@ def __update_results(results: List[ComparisonResult],
                      skipdate: bool = False,
                      skipname: bool = False):
     if len(results) == 0 or not results[0].is_match():
-        for match_attempt in __get_metadataapi_net_fileinfo(
-            name_parts, namer_config, skipdate, skipname
-        ):
+        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skipdate, skipname):
             result = __evaluate_match(name_parts, match_attempt, namer_config)
             results.append(result)
         results = sorted(results, key=__match_percent, reverse=True)

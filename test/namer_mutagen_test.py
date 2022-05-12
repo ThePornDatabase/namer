@@ -41,18 +41,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             testdir = Path(__file__).resolve().parent
             mock_response.return_value = (testdir / "dc.json").read_text()
-            targetfile = (
-                tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4"
-            )
-            shutil.copy(
-                testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
-            )
+            targetfile = (tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
             poster = tempdir / "poster.png"
             shutil.copy(testdir / "poster.png", poster)
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(
-                targetfile, info[0].looked_up, poster, NamerConfig())
+            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
             output = MP4(targetfile)
             self.assertEqual(output.get("\xa9nam"), ["Peeping Tom"])
 
@@ -67,18 +62,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             testdir = Path(__file__).resolve().parent
             response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            targetfile = (
-                tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-            )
-            shutil.copy(
-                testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
-            )
+            targetfile = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
             poster = tempdir / "poster.png"
             shutil.copy(testdir / "poster.png", poster)
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(
-                targetfile, info[0].looked_up, poster, NamerConfig())
+            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
             validate_mp4_tags(self, targetfile)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -92,17 +82,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             testdir = Path(__file__).resolve().parent
             response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            targetfile = (
-                tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-            )
-            shutil.copy(
-                testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
-            )
+            targetfile = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
             poster = None
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(
-                targetfile, info[0].looked_up, poster, NamerConfig())
+            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
             validate_mp4_tags(self, targetfile)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -116,14 +101,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             testdir = Path(__file__).resolve().parent
             response = testdir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            targetfile = (
-                tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-            )
+            targetfile = (tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             poster = None
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(
-                targetfile, info[0].looked_up, poster, NamerConfig())
+            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
             self.assertFalse(targetfile.exists())
 
     def test_empty_infos(self):
@@ -133,14 +115,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            targetfile = (
-                tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-            )
+            targetfile = (tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             targetfile.parent.mkdir(parents=True, exist_ok=True)
             testdir = Path(__file__).resolve().parent
-            shutil.copy(
-                testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile
-            )
+            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
             info = LookedUpFileInfo()
             update_mp4_file(targetfile, info, None, NamerConfig())
             self.assertTrue(targetfile.exists())

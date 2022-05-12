@@ -1,9 +1,9 @@
 import argparse
 import sys
 
-from flask import Flask, render_template, url_for, request, jsonify
+from flask import Flask, jsonify, render_template, request, url_for
 
-from namer.web.helpers import has_no_empty_params, get_files, config, get_search_results, make_rename
+from namer.web.helpers import config, get_files, get_search_results, has_no_empty_params, make_rename
 
 app = Flask(__name__, static_url_path='/', static_folder='public', template_folder='templates')
 

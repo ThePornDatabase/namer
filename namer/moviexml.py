@@ -6,15 +6,9 @@ or used in renaming the video file.
 from pathlib import Path
 from typing import Any, Optional
 
-from lxml import objectify, etree
+from lxml import etree, objectify
 
-from namer.types import (
-    LookedUpFileInfo,
-    NamerConfig,
-    Performer,
-    ProcessingResults,
-    set_permissions,
-)
+from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
 
 
 def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
