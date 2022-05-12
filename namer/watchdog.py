@@ -91,13 +91,10 @@ def handle(target_file: Path, namer_config: NamerConfig):
     else:
         # Move the directory if desired.
         if result.final_name_relative is not None and len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namer_config.del_other_files is False:
-            target = (
-                namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
-            )
+            target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
             if not target.exists():
                 shutil.move(workingdir, target)
-                logger.info("Moving success processed dir {} to {}",
-                            workingdir, target)
+                logger.info("Moving success processed dir {} to {}", workingdir, target)
                 result.video_file = namer_config.dest_dir / result.final_name_relative
         # Rename the file to dest name.
         newfile = move_to_final_location(
@@ -108,9 +105,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
             namer_config,
         )
         result.video_file = newfile
-        logger.info(
-            "Moving success processed file {} to {}", result.video_file, newfile
-        )
+        logger.info("Moving success processed file {} to {}", result.video_file, newfile)
 
         # Delete the workingdir if it still exists.
         if workingdir is not None and workingdir.exists():
@@ -140,7 +135,7 @@ def is_fs_case_sensitive():
     Create a temporary file to determine if a filesystem is case sensitive, or not.
     """
     with tempfile.NamedTemporaryFile(prefix="TmP") as tmp_file:
-        return not os.path.exists(tmp_file.name.lower())
+        return not Path(tmp_file.name.lower()).is_file()
 
 
 class MovieEventHandler(PatternMatchingEventHandler):
@@ -211,8 +206,7 @@ class MovieWatcher:
         starts a background thread to check for files.
         """
         config = self.__namer_config
-        logger.info("Start porndb scene watcher.... watching: {}",
-                    config.watch_dir)
+        logger.info("Start porndb scene watcher.... watching: {}", config.watch_dir)
         if os.environ.get("PROJECT_VERSION"):
             project_version = os.environ.get("PROJECT_VERSION")
             print(f"Namer version: {project_version}")
@@ -244,9 +238,7 @@ class MovieWatcher:
         logger.info("exited")
 
     def __schedule(self):
-        self.__event_observer.schedule(
-            self.__event_handler, self.__src_path, recursive=True
-        )
+        self.__event_observer.schedule(self.__event_handler, str(self.__src_path), recursive=True)
 
 
 def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
@@ -259,9 +251,7 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     if not namer_watchdog_config.verify_watchdog_config():
         sys.exit(-1)
     if namer_watchdog_config.retry_time is not None:
-        schedule.every().day.at(namer_watchdog_config.retry_time).do(
-            lambda: retry_failed(namer_watchdog_config)
-        )
+        schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
     movie_watcher = MovieWatcher(namer_watchdog_config)
     return movie_watcher
 

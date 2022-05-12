@@ -35,9 +35,7 @@ DESCRIPTION = """
   """
 
 
-def dir_with_subdirs_to_process(
-    dir_to_scan: Path, config: NamerConfig, infos: bool = False
-):
+def dir_with_subdirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: bool = False):
     """
     Used to find subdirs of a directory to be individually processed.
     The directories will be scanned for media and named/tagged in place
@@ -49,10 +47,7 @@ def dir_with_subdirs_to_process(
         files.sort()
         for file in files:
             fullpath_file = dir_to_scan / file
-            if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [
-                ".MP4",
-                ".MKV",
-            ]:
+            if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4", ".MKV"]:
                 process(fullpath_file, config, infos)
 
 
@@ -65,9 +60,7 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
     if new_metadata is not None and video is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
-            random = "".join(
-                choices(population=string.ascii_uppercase + string.digits, k=10)
-            )
+            random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
             poster = get_image(new_metadata.poster_url, random, video, config)
             logger.info("Updating file metadata (atoms): {}", video)
             update_mp4_file(video, new_metadata, poster, config)
@@ -84,17 +77,13 @@ def find_target_file(rootdir: Path, config: NamerConfig) -> Path:
     file = None
     if len(list_of_files) > 0:
         for target_ext in config.target_extensions:
-            filtered = list(filter(
-                lambda file, ext=target_ext: file.suffix is not None and file.suffix.lower()[1:] == ext,
-                list_of_files))
+            filtered = list(filter(lambda o, ext=target_ext: o.suffix is not None and o.suffix.lower()[1:] == ext, list_of_files))
             if file is None and filtered is not None and len(filtered) > 0:
                 file = max(filtered, key=lambda x: x.stat().st_size)
     return file
 
 
-def determine_target_file(
-    file_to_process: Path, config: NamerConfig
-) -> ProcessingResults:
+def determine_target_file(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
     """
     Base on the file to process - which may be a file or a dir, and configuration, determine
     the file if needed (largest mp4, or mkv in a directory), or the directory (parent dir of file),
@@ -141,13 +130,11 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     return None
 
 
-def move_to_final_location(
-    to_move: Optional[Path],
-    target_dir: Path,
-    template: str,
-    new_metadata: LookedUpFileInfo,
-    config: NamerConfig,
-) -> Optional[Path]:
+def move_to_final_location(to_move: Optional[Path],
+                           target_dir: Path,
+                           template: str,
+                           new_metadata: LookedUpFileInfo,
+                           config: NamerConfig) -> Optional[Path]:
     """
     Moves a file or directory to it's final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
@@ -156,8 +143,7 @@ def move_to_final_location(
     newname = None
     if to_move is not None:
         while True:
-            relative_path = Path(
-                new_metadata.new_file_name(template, f"({infix})"))
+            relative_path = Path(new_metadata.new_file_name(template, f"({infix})"))
             newname = target_dir / relative_path
             newname = newname.resolve()
             infix += 1
@@ -170,9 +156,7 @@ def move_to_final_location(
     return newname
 
 
-def process_file(
-    file_to_process: Path, config: NamerConfig, infos: bool = False
-) -> ProcessingResults:
+def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -195,8 +179,7 @@ def process_file(
         logger.info("Processing: {}", output.video_file)
         # Match to nfo files, if enabled and found.
         if infos is True:
-            output.new_metadata = get_local_metadata_if_requested(
-                output.video_file)
+            output.new_metadata = get_local_metadata_if_requested(output.video_file)
             if output.new_metadata is not None:
                 output.new_metadata.original_parsed_filename = output.parsed_file
         if output.new_metadata is None and output.parsed_file is not None and output.parsed_file.name is not None:
@@ -220,9 +203,7 @@ def process_file(
                         In the file's name should start with a site, a date and end with an extension""",
                         file_to_process
                     )
-        target_dir = (
-            output.dirfile if output.dirfile is not None else output.video_file.parent
-        )
+        target_dir = output.dirfile if output.dirfile is not None else output.video_file.parent
         set_permissions(target_dir, config)
         if output.new_metadata is not None:
             output.video_file = move_to_final_location(
@@ -241,9 +222,7 @@ def process_file(
     return output
 
 
-def process(
-    file_to_process: Path, config: NamerConfig, infos: bool = False
-) -> ProcessingResults:
+def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
     """
     Fully process (match, tag, rename) a single file in place and download any extra artifacts requested.
     trailer, .nfo file, logs.
@@ -261,13 +240,9 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
     if config.write_namer_log is True:
         write_log_file(results.video_file, results.search_results, config)
     if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
-        trailer = get_trailer(
-            results.new_metadata.trailer_url, results.video_file, config
-        )
+        trailer = get_trailer(results.new_metadata.trailer_url, results.video_file, config)
     if config.write_nfo and results.new_metadata is not None:
-        poster = get_image(
-            results.new_metadata.poster_url, "-poster", results.video_file, config
-        )
+        poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
         background = get_image(
             results.new_metadata.background_url,
             "-background",

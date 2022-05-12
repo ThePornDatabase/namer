@@ -120,8 +120,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
     Copies, and potentially updates the default audio stream of a video file.
     """
-    random = "".join(
-        choices(population=string.ascii_uppercase + string.digits, k=10))
+    random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
     workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
     stream = None if language is None else get_audio_stream_for_lang(mp4_file, language)
     if stream is not None and stream >= 0:
@@ -164,8 +163,7 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
     """
     Attempt to fix corrupt mp4 files.
     """
-    random = "".join(
-        choices(population=string.ascii_uppercase + string.digits, k=10))
+    random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
     workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
     logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
     with subprocess.Popen(
