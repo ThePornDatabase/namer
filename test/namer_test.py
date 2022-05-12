@@ -31,9 +31,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             )
             new_ea(dirtoprocess, use_dir=True)
             results = determine_target_file(dirtoprocess, config)
-            self.assertEqual(
-                results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum"
-            )
+            self.assertIsNotNone(results.parsed_file)
+            if results.parsed_file is not None:
+                self.assertEqual(
+                    results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum"
+                )
 
     def test_check_arguments(self):
         """

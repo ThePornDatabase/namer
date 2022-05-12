@@ -29,9 +29,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             info = parse_movie_xml_file(xmlfile)
             self.assertEqual(info.site, "Evil Angel")
             self.assertEqual(info.date, "2022-01-03")
-            self.assertIn(
-                "Cute brunette Carmela Clutch positions her", info.description
-            )
+            self.assertIsNotNone(info.description)
+            if info.description is not None:
+                self.assertIn(
+                    "Cute brunette Carmela Clutch positions her", info.description
+                )
             self.assertEqual(
                 info.look_up_site_id, "https://www.evilangel.com/en/video/0/198543/"
             )

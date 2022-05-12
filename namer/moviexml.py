@@ -4,6 +4,7 @@ allowing the metadata to be written in to video files (currently only mp4s),
 or used in renaming the video file.
 """
 from pathlib import Path
+from typing import Any, Optional
 from lxml import objectify, etree
 from namer.types import (
     LookedUpFileInfo,
@@ -20,7 +21,7 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     """
     content = xmlfile.read_text(encoding="utf8")
 
-    movie = objectify.fromstring(bytes(content, encoding="utf8"))
+    movie: Any = objectify.fromstring(bytes(content, encoding="utf8"), parser=None)
     info = LookedUpFileInfo()
     info.name = str(movie.title)
     info.site = str(movie.studio[0])
@@ -49,67 +50,68 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
 def write_movie_xml_file(
     info: LookedUpFileInfo,
     config: NamerConfig,
-    trailer: Path = None,
-    poster: Path = None,
-    background: Path = None,
+    trailer: Optional[Path] = None,
+    poster: Optional[Path] = None,
+    background: Optional[Path] = None,
 ) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
 
-    root = etree.Element("movie")
-    etree.SubElement(root, "plot").text = info.description
-    etree.SubElement(root, "outline")
-    etree.SubElement(root, "title").text = info.name
-    etree.SubElement(root, "dateadded")
-    trailertag = etree.SubElement(root, "trailer")
+    root: Any = etree.Element("movie", attrib=None, nsmap=None)
+    etree.SubElement(root, "plot", attrib=None, nsmap=None).text = info.description
+    etree.SubElement(root, "outline", attrib=None, nsmap=None)
+    etree.SubElement(root, "title", attrib=None, nsmap=None).text = info.name
+    etree.SubElement(root, "dateadded", attrib=None, nsmap=None)
+    trailertag = etree.SubElement(root, "trailer", attrib=None, nsmap=None)
     if trailer is not None:
         trailertag.text = str(trailer)
-    etree.SubElement(root, "year").text = info.date[:4]
-    etree.SubElement(root, "premiered").text = info.date
-    etree.SubElement(root, "releasedate").text = info.date
-    etree.SubElement(root, "mpaa").text = "XXX"
-    art = etree.SubElement(root, "art")
-    postertag = etree.SubElement(art, "poster")
+    if info.date is not None:
+        etree.SubElement(root, "year", attrib=None, nsmap=None).text = info.date[:4]
+    etree.SubElement(root, "premiered", attrib=None, nsmap=None).text = info.date
+    etree.SubElement(root, "releasedate", attrib=None, nsmap=None).text = info.date
+    etree.SubElement(root, "mpaa", attrib=None, nsmap=None).text = "XXX"
+    art = etree.SubElement(root, "art", attrib=None, nsmap=None)
+    postertag = etree.SubElement(art, "poster", attrib=None, nsmap=None)
     if poster is not None:
         postertag.text = str(poster)
-    backgroundtag = etree.SubElement(art, "background")
+    backgroundtag = etree.SubElement(art, "background", attrib=None, nsmap=None)
     if background is not None:
         backgroundtag.text = str(background)
     if config.enable_metadataapi_genres:
         for tag in info.tags:
-            etree.SubElement(root, "genre").text = tag
+            etree.SubElement(root, "genre", attrib=None, nsmap=None).text = tag
     else:
         for tag in info.tags:
-            etree.SubElement(root, "tag").text = tag
-        etree.SubElement(root, "genre").text = config.default_genre
-    etree.SubElement(root, "studio").text = info.site
-    etree.SubElement(root, "theporndbid").text = str(info.uuid)
-    etree.SubElement(root, "phoenixadultid")
-    etree.SubElement(root, "phoenixadulturlid")
-    etree.SubElement(root, "sourceid").text = info.source_url
+            etree.SubElement(root, "tag", attrib=None, nsmap=None).text = tag
+        etree.SubElement(root, "genre", attrib=None, nsmap=None).text = config.default_genre
+    etree.SubElement(root, "studio", attrib=None, nsmap=None).text = info.site
+    etree.SubElement(root, "theporndbid", attrib=None, nsmap=None).text = str(info.uuid)
+    etree.SubElement(root, "phoenixadultid", attrib=None, nsmap=None)
+    etree.SubElement(root, "phoenixadulturlid", attrib=None, nsmap=None)
+    etree.SubElement(root, "sourceid", attrib=None, nsmap=None).text = info.source_url
     for performer in info.performers:
-        actor = objectify.SubElement(root, "actor")
-        etree.SubElement(actor, "name").text = performer.name
-        etree.SubElement(actor, "role").text = performer.role
-        etree.SubElement(actor, "image").text = str(performer.image)
-        etree.SubElement(actor, "type").text = "Actor"
-        etree.SubElement(actor, "thumb")
-    objectify.SubElement(root, "fileinfo")
+        actor = objectify.SubElement(root, "actor", attrib=None, nsmap=None)
+        etree.SubElement(actor, "name", attrib=None, nsmap=None).text = performer.name
+        etree.SubElement(actor, "role", attrib=None, nsmap=None).text = performer.role
+        etree.SubElement(actor, "image", attrib=None, nsmap=None).text = str(performer.image)
+        etree.SubElement(actor, "type", attrib=None, nsmap=None).text = "Actor"
+        etree.SubElement(actor, "thumb", attrib=None, nsmap=None)
+    objectify.SubElement(root, "fileinfo", attrib=None, nsmap=None)
     objectify.deannotate(root)
-    etree.cleanup_namespaces(root)
+    etree.cleanup_namespaces(root, top_nsmap=None, keep_ns_prefixes=None)
     return etree.tostring(
-        root, pretty_print=True, xml_declaration=True, encoding="UTF-8"
+        root, pretty_print=True, xml_declaration=True, encoding="UTF-8"  # type: ignore
     ).decode(encoding="UTF-8")
 
 
 def write_nfo(
     results: ProcessingResults,
     namer_config: NamerConfig,
-    trailer: Path,
-    poster: Path,
-    background: Path,
-) -> Path:
+    trailer: Optional[Path],
+    poster: Optional[Path],
+    background: Optional[Path],
+):
     """
     Writes an .nfo to the correct place for a video file.
     """

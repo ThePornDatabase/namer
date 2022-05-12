@@ -10,7 +10,7 @@ import time
 import os
 import sys
 from pathlib import Path, PurePath
-from typing import List
+from typing import List, Optional
 from loguru import logger
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import (
@@ -24,7 +24,7 @@ from namer.namer import add_extra_artifacts, move_to_final_location, process_fil
 from namer.types import NamerConfig, default_config, write_log_file
 
 
-def done_copying(file: Path) -> bool:
+def done_copying(file: Optional[Path]) -> bool:
     """
     Determines if a file is being copied by checking it's size in 2 second
     increments and seeing if the size has stayed the same.
@@ -34,8 +34,8 @@ def done_copying(file: Path) -> bool:
     while True:
         try:
             # pylint: disable=consider-using-with
-            file = open(file, mode="rb")
-            file.close()
+            buffered_reader = open(file, mode="rb")
+            buffered_reader.close()
             break
         except PermissionError:
             time.sleep(0.2)
@@ -80,7 +80,8 @@ def handle(target_file: Path, namer_config: NamerConfig):
             )
         else:
             newvideo = namer_config.failed_dir / relative_path
-            workingfile.rename(newvideo)
+            if workingfile is not None:
+                workingfile.rename(newvideo)
             logger.info(
                 "Moving failed processing {} to {} to retry later",
                 workingfile,
@@ -89,7 +90,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
         # Move the directory if desired.
-        if len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namer_config.del_other_files is False:
+        if result.final_name_relative is not None and len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namer_config.del_other_files is False:
             target = (
                 namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
             )
@@ -162,7 +163,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
         if event.event_type == EVENT_TYPE_MOVED:
-            file_path = event.dest_path
+            file_path = event.dest_path  # type: ignore
         elif event.event_type != EVENT_TYPE_DELETED:
             file_path = event.src_path
         if file_path is not None:
