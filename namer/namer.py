@@ -10,7 +10,7 @@ import pathlib
 from random import choices
 import string
 import sys
-from typing import List
+from typing import List, Optional
 from loguru import logger
 
 from namer.moviexml import parse_movie_xml_file, write_nfo
@@ -56,13 +56,13 @@ def dir_with_subdirs_to_process(
                 process(fullpath_file, config, infos)
 
 
-def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInfo):
+def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: LookedUpFileInfo):
     """
     Uses ComparisonResults to update an mp4 file's metadata based on a match in
     ComparisonResults.   Expects the first item of list to be the match if there is one.
     Will download a poster as well depending on NamerConfig config setting.
     """
-    if new_metadata is not None:
+    if new_metadata is not None and video is not None:
         poster = None
         if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
             random = "".join(
@@ -72,7 +72,7 @@ def tag_in_place(video: Path, config: NamerConfig, new_metadata: LookedUpFileInf
             logger.info("Updating file metadata (atoms): {}", video)
             update_mp4_file(video, new_metadata, poster, config)
         logger.info("Done tagging file: {}", video)
-        if poster is not None and new_metadata.poster_url.startswith("http"):
+        if poster is not None and new_metadata.poster_url is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
 
 
@@ -109,29 +109,28 @@ def determine_target_file(
     if file_to_process.is_dir():
         logger.info("Target dir: {}", file_to_process)
         containing_dir = file_to_process
-        file = find_target_file(file_to_process, config)
+        results.dirfile = containing_dir
+        results.video_file = find_target_file(file_to_process, config)
     else:
-        file = file_to_process
+        results.video_file = file_to_process
 
     if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.name + file.suffix
+        name = containing_dir.name + results.video_file.suffix
     else:
-        name = file.name
+        name = results.video_file.name
 
-    logger.info("file: {}", file)
+    logger.info("file: {}", results.video_file)
     logger.info("dir : {}", containing_dir)
 
-    results.dirfile = containing_dir
-    results.video_file = file
     results.parsed_file = parse_file_name(name, config.name_parser)
     if containing_dir is True:
-        results.final_name_relative = file.relative_to(containing_dir)
+        results.final_name_relative = results.video_file.relative_to(containing_dir)
     else:
-        results.final_name_relative = file.parent
+        results.final_name_relative = results.video_file.parent
     return results
 
 
-def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
+def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileInfo]:
     """
     If there is an .nfo file next to the video_file, attempt to read it as
     a Emby/Jellyfin style movie xml file.
@@ -143,29 +142,31 @@ def get_local_metadata_if_requested(video_file: Path) -> LookedUpFileInfo:
 
 
 def move_to_final_location(
-    to_move: Path,
+    to_move: Optional[Path],
     target_dir: Path,
     template: str,
     new_metadata: LookedUpFileInfo,
     config: NamerConfig,
-) -> Path:
+) -> Optional[Path]:
     """
     Moves a file or directory to it's final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
     """
     infix = 0
-    while True:
-        relative_path = Path(
-            new_metadata.new_file_name(template, f"({infix})"))
-        newname = target_dir / relative_path
-        newname = newname.resolve()
-        infix += 1
-        if not newname.exists() or to_move.samefile(newname):
-            break
-    newname.parent.mkdir(exist_ok=True, parents=True)
-    set_permissions(target_dir / relative_path.parts[0], config)
-    to_move.rename(newname)
-    set_permissions(newname, config)
+    newname = None
+    if to_move is not None:
+        while True:
+            relative_path = Path(
+                new_metadata.new_file_name(template, f"({infix})"))
+            newname = target_dir / relative_path
+            newname = newname.resolve()
+            infix += 1
+            if not newname.exists() or to_move.samefile(newname):
+                break
+        newname.parent.mkdir(exist_ok=True, parents=True)
+        set_permissions(target_dir / relative_path.parts[0], config)
+        to_move.rename(newname)
+        set_permissions(newname, config)
     return newname
 
 
@@ -280,7 +281,8 @@ def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
                 results.video_file,
                 config,
             )
-            performer.image = poster
+            if poster is not None:
+                performer.image = str(poster)
         write_nfo(results, config, trailer, poster, background)
 
 

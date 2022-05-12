@@ -13,12 +13,14 @@ import string
 from types import SimpleNamespace
 import subprocess
 from pathlib import Path
+from typing import Optional
 from loguru import logger
 
 
-def get_resolution(file: str) -> int:
+def get_resolution(file: Path) -> int:
     """
     Gets the vertical resolution of an mp4 file.  For example, 720, 1080, 2160...
+    Returns zero if resolution can not be determined.
     """
     logger.info("resolution stream of file {}", file)
 
@@ -40,22 +42,28 @@ def get_resolution(file: str) -> int:
         universal_newlines=True,
     ) as process:
         success = process.wait() == 0
-        output = process.stdout.read()
+        output = 0
+        if process.stdout is not None:
+            output = process.stdout.read()
+            process.stdout.close()
         if not success:
             logger.warning("Error gettng resolution of file {}", file)
-            logger.warning(process.stderr.read())
-        process.stdout.close()
-        process.stderr.close()
-        logger.info("output {}", output)
-        return int(output)
-    return None
+            if process.stderr is not None:
+                logger.warning(process.stderr.read())
+                process.stderr.close()
+        if output is not None:
+            logger.info("output {}", output)
+            return int(output)
+    return 0
 
 
-def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
+def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
     """
     given an mp4 input file and a desired language will return the stream position of that language in the mp4.
     if the language is None, or the stream is not found, or the desired stream is the only default stream, None is returned.
     See: https://iso639-3.sil.org/code_tables/639/data/
+
+    Returns -1 if stream can not be determined
     """
 
     with subprocess.Popen(
@@ -74,18 +82,19 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
         universal_newlines=True,
     ) as process:
         success = process.wait() == 0
-        audio_streams_str = process.stdout.read()
+        audio_streams_str = None
+        if process.stdout is not None:
+            audio_streams_str = process.stdout.read()
+            process.stdout.close()
         if not success:
             logger.warning("Error gettng audio streams of file {}", mp4_file)
-            logger.warning(process.stderr.read())
-        process.stdout.close()
-        process.stderr.close()
-
+            if process.stderr is not None:
+                logger.warning(process.stderr.read())
+                process.stderr.close()
         logger.info("Target for audio: {}", mp4_file)
-
-        audio_streams = json.loads(
-            audio_streams_str, object_hook=lambda d: SimpleNamespace(**d)
-        )
+        audio_streams = None
+        if audio_streams_str is not None:
+            audio_streams = json.loads(audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
         lang_stream = None
         needs_updated = False
         if language:
@@ -102,10 +111,10 @@ def get_audio_stream_for_lang(mp4_file: str, language: str) -> int:
                         needs_updated = True
                 if needs_updated and lang_stream:
                     return lang_stream
-    return None
+    return -1
 
 
-def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
+def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bool:
     """
     Returns true if the file had to be edited to have a default audio stream equal to the desired language,
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
@@ -114,8 +123,8 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
     random = "".join(
         choices(population=string.ascii_uppercase + string.digits, k=10))
     workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
-    stream = get_audio_stream_for_lang(mp4_file, language)
-    if stream is not None:
+    stream = None if language is None else get_audio_stream_for_lang(mp4_file, language)
+    if stream is not None and stream >= 0:
         logger.info("Attempt to alter default audio stream of {}", mp4_file)
         with subprocess.Popen(
             [
@@ -137,12 +146,12 @@ def update_audio_stream_if_needed(mp4_file: Path, language: str) -> bool:
             stderr=subprocess.PIPE,
             universal_newlines=True,
         ) as process:
-            stderr = process.stderr.read()
             success = process.wait() == 0
-            process.stderr.close()
             if not success:
                 logger.info("Could not update audio stream for {}", mp4_file)
-                logger.info(stderr)
+                if process.stderr is not None:
+                    logger.info(process.stderr.read())
+                    process.stderr.close()
             else:
                 logger.warning("Return code: {}", process.returncode)
                 mp4_file.unlink()
@@ -172,12 +181,12 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as process:
-        stderr = process.stderr.read()
         success = process.wait() == 0
-        process.stderr.close()
         if not success:
             logger.info("Could not fix mp4 files {}", mp4_file)
-            logger.info(stderr)
+            if process.stderr is not None:
+                logger.info(process.stderr.read())
+                process.stderr.close()
         else:
             logger.warning("Return code: {}", process.returncode)
             mp4_file.unlink()

@@ -19,7 +19,7 @@ import namer.metadataapi
 import namer.namer
 import namer.watchdog
 import namer.web
-
+import namer.metadataapi
 from namer.types import default_config
 
 DESCRIPTION = (
