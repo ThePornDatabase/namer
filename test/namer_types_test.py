@@ -1,22 +1,17 @@
 """
 Test namer_types.py
 """
-from configparser import ConfigParser
 import logging
 import os
-from pathlib import Path
-from platform import system
 import sys
 import tempfile
 import unittest
+from configparser import ConfigParser
+from pathlib import Path
+from platform import system
+
+from namer.types import (from_config, NamerConfig, PartialFormatter, Performer, set_permissions)
 from test.utils import sample_config
-from namer.types import (
-    NamerConfig,
-    PartialFormatter,
-    Performer,
-    from_config,
-    set_permissions,
-)
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -40,10 +35,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config = sample_config()
         self.assertEqual(config.del_other_files, False)
         self.assertEqual(config.inplace_name, "{site} - {date} - {name}.{ext}")
-        self.assertEqual(
-            config.new_relative_path_name,
-            "{site} - {date} - {name}/{site} - {date} - {name}.{ext}",
-        )
+        self.assertEqual(config.new_relative_path_name, "{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
+        self.assertEqual(config.new_relative_path_name, "{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
         self.assertEqual(config.dest_dir.parts, ("test", "dest"))
         self.assertEqual(config.failed_dir.parts, ("test", "failed"))
         self.assertEqual(config.min_file_size, 300)
@@ -104,8 +97,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertTrue("name1" in str(error1.exception))
         self.assertTrue("all_performers" in str(error1.exception))
 
-        self.assertEqual(fmt.format_field(
-            format_spec="adsfadsf", value="fmt"), badfmt)
+        self.assertEqual(fmt.format_field(format_spec="adsfadsf", value="fmt"), badfmt)
 
         with self.assertRaises(Exception) as error2:
             fmt1 = PartialFormatter(missing="", bad_fmt=None)
@@ -189,25 +181,20 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(namer_config.write_namer_log, True)
         self.assertEqual(namer_config.set_dir_permissions, 700)
         self.assertEqual(namer_config.set_file_permissions, 700)
-        self.assertEqual(namer_config.trailer_location,
-                         "trailer/default.{ext}")
+        self.assertEqual(namer_config.trailer_location, "trailer/default.{ext}")
         self.assertEqual(namer_config.write_nfo, True)
-        self.assertEqual(namer_config.sites_with_no_date_info,
-                         ["MILF", "TEAMWHATEVER"])
+        self.assertEqual(namer_config.sites_with_no_date_info, ["MILF", "TEAMWHATEVER"])
         self.assertEqual(namer_config.enabled_tagging, False)
         self.assertEqual(namer_config.enabled_poster, False)
         self.assertEqual(namer_config.enable_metadataapi_genres, True)
         self.assertEqual(namer_config.default_genre, "Pron")
         self.assertEqual(namer_config.language, "rus")
         self.assertEqual(namer_config.del_other_files, True)
-        self.assertEqual(
-            namer_config.new_relative_path_name, "{site} - {name}/{site} - {name}.{ext}"
-        )
+        self.assertEqual(namer_config.new_relative_path_name, "{site} - {name}/{site} - {name}.{ext}")
         self.assertEqual(namer_config.watch_dir, Path("/notarealplace/watch"))
         self.assertEqual(namer_config.work_dir, Path("/notarealplace/work"))
         self.assertEqual(namer_config.dest_dir, Path("/notarealplace/dest"))
-        self.assertEqual(namer_config.failed_dir,
-                         Path("/notarealplace/failed"))
+        self.assertEqual(namer_config.failed_dir, Path("/notarealplace/failed"))
         self.assertEqual(namer_config.retry_time, "02:16")
 
     def test_main_method(self):

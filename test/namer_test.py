@@ -2,15 +2,17 @@
 Fully test namer.py
 """
 import os
-from pathlib import Path
 import shutil
-import unittest
-from unittest.mock import patch
 import tempfile
-from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
 from mutagen.mp4 import MP4
+
+from namer.namer import check_arguments, determine_target_file, find_target_file, main, set_permissions
 from namer.types import NamerConfig
-from namer.namer import determine_target_file, find_target_file, main, check_arguments, set_permissions
+from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -26,16 +28,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             config = sample_config()
             config.watch_dir = tempdir
-            dirtoprocess = (
-                tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum"
-            )
+            dirtoprocess = (tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum")
             new_ea(dirtoprocess, use_dir=True)
             results = determine_target_file(dirtoprocess, config)
             self.assertIsNotNone(results.parsed_file)
             if results.parsed_file is not None:
-                self.assertEqual(
-                    results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum"
-                )
+                self.assertEqual(results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum")
 
     def test_check_arguments(self):
         """
@@ -46,16 +44,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             target_dir = tempdir / "path/"
             file = tempdir / "file"
             config = tempdir / "config"
-            error = check_arguments(
-                dir_to_process=target_dir, file_to_process=file, config_overide=config
-            )
+            error = check_arguments(dir_to_process=target_dir, file_to_process=file, config_overide=config)
             self.assertTrue(error)
             target_dir.mkdir()
             file.write_text("test")
             config.write_text("test")
-            error = check_arguments(
-                dir_to_process=target_dir, file_to_process=file, config_overide=config
-            )
+            error = check_arguments(dir_to_process=target_dir, file_to_process=file, config_overide=config)
             self.assertFalse(error)
 
     @patch("namer.metadataapi.__get_response_json_object")
@@ -69,12 +63,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             targets = [new_ea(tempdir, use_dir=False)]
             prepare(targets, mock_poster, mock_response)
             main(["-f", str(targets[0].file)])
-            output = MP4(
-                targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            )
-            self.assertEqual(
-                output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
+            output = MP4(targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
@@ -88,12 +78,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             targets = [new_ea(tempdir, use_dir=True)]
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent)])
-            output = MP4(
-                targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            )
-            self.assertEqual(
-                output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
+            output = MP4(targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
@@ -105,24 +91,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            targets = [
-                new_ea(tempdir, use_dir=True, post_stem="1"),
-                new_ea(tempdir, use_dir=True, post_stem="2"),
-            ]
+            targets = [new_ea(tempdir, use_dir=True, post_stem="1"), new_ea(tempdir, use_dir=True, post_stem="2"), ]
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent.parent), "-m"])
-            output = MP4(
-                targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            )
-            self.assertEqual(
-                output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
-            output = MP4(
-                targets[1].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            )
-            self.assertEqual(
-                output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
+            output = MP4(targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
+            output = MP4(targets[1].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     def test_writing_metadata_from_nfo(self):
         """
@@ -142,12 +117,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(poster_file, target_poster_file)
 
             main(["-f", str(target_mp4_file), "-i"])
-            output = MP4(
-                target_mp4_file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            )
-            self.assertEqual(
-                output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-            )
+            output = MP4(target_mp4_file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
@@ -159,10 +130,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            targets = [
-                new_ea(tempdir, use_dir=False, post_stem="1"),
-                new_ea(tempdir, use_dir=False, post_stem="2"),
-            ]
+            targets = [new_ea(tempdir, use_dir=False, post_stem="1"), new_ea(tempdir, use_dir=False, post_stem="2")]
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent), "-m"])
             output1 = (targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
@@ -194,8 +162,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             test_dir.mkdir()
             config = NamerConfig()
             if hasattr(os, "getgroups"):
-                config.set_gid = None if len(
-                    os.getgroups()) == 0 else os.getgroups()[0]
+                config.set_gid = None if len(os.getgroups()) == 0 else os.getgroups()[0]
             if hasattr(os, "getuid"):
                 config.set_uid = os.getuid()
             config.set_dir_permissions = 777

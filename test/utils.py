@@ -1,15 +1,17 @@
 """
 Testing utils
 """
-from dataclasses import dataclass
 import os
-from pathlib import Path
 import platform
 import shutil
 import tempfile
+from dataclasses import dataclass
+from pathlib import Path
 from typing import List
+
 from mutagen.mp4 import MP4
-from namer.types import NamerConfig, default_config
+
+from namer.types import default_config, NamerConfig
 
 
 def validate_permissions(test_self, file: Path, perm: int):
@@ -29,12 +31,9 @@ def validate_mp4_tags(test_self, file):
     Validates the tags of the standard mp4 file.
     """
     output2 = MP4(file)
-    test_self.assertEqual(
-        output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"]
-    )
+    test_self.assertEqual(output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
     test_self.assertEqual(output2.get("\xa9day"), ["2022-01-03T09:00:00Z"])
-    test_self.assertEqual(output2.get("\xa9alb"), [
-                          "Evil Angel"])  # plex collection
+    test_self.assertEqual(output2.get("\xa9alb"), ["Evil Angel"])  # plex collection
     test_self.assertEqual(output2.get("tvnn"), ["Evil Angel"])
     test_self.assertEqual(output2.get("\xa9gen"), ["Adult"])
     test_self.assertEqual(
@@ -82,9 +81,7 @@ class ProcessingTarget:
     expect_match: bool
 
 
-def new_ea(
-    targetdir: Path, use_dir: bool = True, post_stem: str = "", match: bool = True
-):
+def new_ea(targetdir: Path, use_dir: bool = True, post_stem: str = "", match: bool = True):
     """
     Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
     optionally, names the dir and not the mp4 file to match.
@@ -106,13 +103,7 @@ def new_ea(
     test_mp4.chmod(int("600", base=8))
     poster = Path(tempfile.mktemp(suffix=".png"))
     shutil.copy(test_poster, poster)
-    return ProcessingTarget(
-        target_file,
-        search_json_file.read_text(),
-        exact_json_file.read_text(),
-        poster,
-        match,
-    )
+    return ProcessingTarget(target_file, search_json_file.read_text(), exact_json_file.read_text(), poster, match)
 
 
 def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):

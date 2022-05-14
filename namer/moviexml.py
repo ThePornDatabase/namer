@@ -5,14 +5,10 @@ or used in renaming the video file.
 """
 from pathlib import Path
 from typing import Any, Optional
-from lxml import objectify, etree
-from namer.types import (
-    LookedUpFileInfo,
-    NamerConfig,
-    Performer,
-    ProcessingResults,
-    set_permissions,
-)
+
+from lxml import etree, objectify
+
+from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
 
 
 def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
@@ -47,13 +43,11 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
     return info
 
 
-def write_movie_xml_file(
-    info: LookedUpFileInfo,
-    config: NamerConfig,
-    trailer: Optional[Path] = None,
-    poster: Optional[Path] = None,
-    background: Optional[Path] = None,
-) -> str:
+def write_movie_xml_file(info: LookedUpFileInfo,
+                         config: NamerConfig,
+                         trailer: Optional[Path] = None,
+                         poster: Optional[Path] = None,
+                         background: Optional[Path] = None) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
@@ -100,18 +94,14 @@ def write_movie_xml_file(
     objectify.SubElement(root, "fileinfo", attrib=None, nsmap=None)
     objectify.deannotate(root)
     etree.cleanup_namespaces(root, top_nsmap=None, keep_ns_prefixes=None)
-    return etree.tostring(
-        root, pretty_print=True, xml_declaration=True, encoding="UTF-8"  # type: ignore
-    ).decode(encoding="UTF-8")
+    return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="UTF-8").decode(encoding="UTF-8")
 
 
-def write_nfo(
-    results: ProcessingResults,
-    namer_config: NamerConfig,
-    trailer: Optional[Path],
-    poster: Optional[Path],
-    background: Optional[Path],
-):
+def write_nfo(results: ProcessingResults,
+              namer_config: NamerConfig,
+              trailer: Optional[Path],
+              poster: Optional[Path],
+              background: Optional[Path]):
     """
     Writes an .nfo to the correct place for a video file.
     """

@@ -3,25 +3,22 @@ A file watching service to rename movie files and move them
 to revelant locations after match the file against the porndb.
 """
 
+import os
 import re
 import shutil
+import sys
 import tempfile
 import time
-import os
-import sys
 from pathlib import Path, PurePath
 from typing import List, Optional
-from loguru import logger
-from watchdog.observers.polling import PollingObserver
-from watchdog.events import (
-    PatternMatchingEventHandler,
-    FileSystemEvent,
-    EVENT_TYPE_DELETED,
-    EVENT_TYPE_MOVED,
-)
+
 import schedule
+from loguru import logger
+from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
+from watchdog.observers.polling import PollingObserver
+
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
-from namer.types import NamerConfig, default_config, write_log_file
+from namer.types import default_config, NamerConfig, write_log_file
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -73,44 +70,25 @@ def handle(target_file: Path, namer_config: NamerConfig):
     if result.new_metadata is None:
         if workingdir is not None:
             workingdir.rename(namer_config.failed_dir / detected)
-            logger.info(
-                "Moving failed processing {} to {} to retry later",
-                workingdir,
-                namer_config.failed_dir / detected,
-            )
+            logger.info("Moving failed processing {} to {} to retry later", workingdir, namer_config.failed_dir / detected)
         else:
             newvideo = namer_config.failed_dir / relative_path
             if workingfile is not None:
                 workingfile.rename(newvideo)
-            logger.info(
-                "Moving failed processing {} to {} to retry later",
-                workingfile,
-                newvideo,
-            )
+            logger.info("Moving failed processing {} to {} to retry later", workingfile, newvideo)
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
         # Move the directory if desired.
         if result.final_name_relative is not None and len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namer_config.del_other_files is False:
-            target = (
-                namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
-            )
+            target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
             if not target.exists():
                 shutil.move(workingdir, target)
-                logger.info("Moving success processed dir {} to {}",
-                            workingdir, target)
+                logger.info("Moving success processed dir {} to {}", workingdir, target)
                 result.video_file = namer_config.dest_dir / result.final_name_relative
         # Rename the file to dest name.
-        newfile = move_to_final_location(
-            result.video_file,
-            namer_config.dest_dir,
-            namer_config.new_relative_path_name,
-            result.new_metadata,
-            namer_config,
-        )
+        newfile = move_to_final_location(result.video_file, namer_config.dest_dir, namer_config.new_relative_path_name, result.new_metadata, namer_config)
         result.video_file = newfile
-        logger.info(
-            "Moving success processed file {} to {}", result.video_file, newfile
-        )
+        logger.info("Moving success processed file {} to {}", result.video_file, newfile)
 
         # Delete the workingdir if it still exists.
         if workingdir is not None and workingdir.exists():
@@ -130,9 +108,7 @@ def retry_failed(namer_config: NamerConfig):
         log_file.unlink()
     # move all files back to watch dir.
     for file in list(namer_config.failed_dir.iterdir()):
-        shutil.move(
-            namer_config.failed_dir / file.name, namer_config.watch_dir / file.name
-        )
+        shutil.move(namer_config.failed_dir / file.name, namer_config.watch_dir / file.name)
 
 
 def is_fs_case_sensitive():
@@ -140,7 +116,7 @@ def is_fs_case_sensitive():
     Create a temporary file to determine if a filesystem is case sensitive, or not.
     """
     with tempfile.NamedTemporaryFile(prefix="TmP") as tmp_file:
-        return not os.path.exists(tmp_file.name.lower())
+        return not Path(tmp_file.name.lower()).is_file()
 
 
 class MovieEventHandler(PatternMatchingEventHandler):
@@ -152,12 +128,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
     namer_config: NamerConfig
 
     def __init__(self, namer_config: NamerConfig):
-        super().__init__(
-            patterns=["*.*"],
-            case_sensitive=is_fs_case_sensitive(),
-            ignore_directories=True,
-            ignore_patterns=None,
-        )
+        super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.namer_config = namer_config
 
     def on_any_event(self, event: FileSystemEvent):
@@ -211,8 +182,7 @@ class MovieWatcher:
         starts a background thread to check for files.
         """
         config = self.__namer_config
-        logger.info("Start porndb scene watcher.... watching: {}",
-                    config.watch_dir)
+        logger.info("Start porndb scene watcher.... watching: {}", config.watch_dir)
         if os.environ.get("PROJECT_VERSION"):
             project_version = os.environ.get("PROJECT_VERSION")
             print(f"Namer version: {project_version}")
@@ -244,9 +214,7 @@ class MovieWatcher:
         logger.info("exited")
 
     def __schedule(self):
-        self.__event_observer.schedule(
-            self.__event_handler, self.__src_path, recursive=True
-        )
+        self.__event_observer.schedule(self.__event_handler, str(self.__src_path), recursive=True)
 
 
 def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
@@ -259,9 +227,7 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     if not namer_watchdog_config.verify_watchdog_config():
         sys.exit(-1)
     if namer_watchdog_config.retry_time is not None:
-        schedule.every().day.at(namer_watchdog_config.retry_time).do(
-            lambda: retry_failed(namer_watchdog_config)
-        )
+        schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
     movie_watcher = MovieWatcher(namer_watchdog_config)
     return movie_watcher
 

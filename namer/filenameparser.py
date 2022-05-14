@@ -2,13 +2,14 @@
 Parse string in to FileNamePart define in namer_types.
 """
 import argparse
-from pathlib import PurePath
 import re
 import sys
+from pathlib import PurePath
 from typing import List
-from loguru import logger
-from namer.types import FileNameParts
 
+from loguru import logger
+
+from namer.types import FileNameParts
 
 DEFAULT_REGEX_TOKENS = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
 
@@ -20,9 +21,9 @@ def name_cleaner(name: str) -> str:
     """
     # truncating cruft
     for size in ["2160p", "1080p", "720p", "4k", "3840p"]:
-        name = re.sub(r"[\.\- ]" + size + r"[\.\- ]{0,1}.*", "", name)
+        name = re.sub(r"[.\- ]" + size + r"[.\- ]?.*", "", name)
     # remove trailing ".XXX."
-    name = re.sub(r"[\.\- ]{0,1}XXX[\.\- ]{0,1}.*$", "", name)
+    name = re.sub(r"[.\- ]?XXX[.\- ]?.*$", "", name)
     name = re.sub(r"\.", " ", name)
     return name
 
@@ -68,9 +69,7 @@ def parser_config_to_regex(tokens: str) -> str:
     return regex
 
 
-def parse_file_name(
-    filename: str, regex_config: str = DEFAULT_REGEX_TOKENS
-) -> FileNameParts:
+def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> FileNameParts:
     """
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.

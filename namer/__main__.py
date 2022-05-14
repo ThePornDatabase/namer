@@ -14,10 +14,12 @@ match the file.
 import pathlib
 import sys
 from typing import List
-from namer.types import default_config
-import namer.watchdog
-import namer.namer
+
 import namer.metadataapi
+import namer.namer
+import namer.watchdog
+import namer.web
+from namer.types import default_config
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """
@@ -38,9 +40,7 @@ def create_default_config_if_missing():
     """
     conffile = pathlib.Path(".namer.conf")
     print("Creating default config file here: {}", conffile)
-    print(
-        "please edit the token or any other settings whose defaults you want changed."
-    )
+    print("please edit the token or any other settings whose defaults you want changed.")
 
 
 def main(arglist: List[str]):
@@ -54,6 +54,8 @@ def main(arglist: List[str]):
         namer.namer.main(arglist[1:])
     elif arg1 == "suggest":
         namer.metadataapi.main(arglist[1:])
+    elif arg1 == "web":
+        namer.web.main(arglist[1:])
     elif arg1 in ["-h", "help", None]:
         print(DESCRIPTION)
 

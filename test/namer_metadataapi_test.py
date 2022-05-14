@@ -1,14 +1,14 @@
 """
 Test namer_metadataapi_test.py
 """
-from pathlib import Path
 import io
 import unittest
+from pathlib import Path
 from unittest import mock
 
-from test.utils import sample_config
-from namer.metadataapi import main, match
 from namer.filenameparser import parse_file_name
+from namer.metadataapi import main, match
+from test.utils import sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -23,9 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "dc.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name(
-            "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4"
-        )
+        name = parse_file_name("DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -56,9 +54,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         response = Path(__file__).resolve().parent / "dc.json"
         mock_response.return_value = response.read_text()
         # the "e"s in the string below are unicode е (0x435), not asci e (0x65).
-        name = parse_file_name(
-            "DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4"
-        )
+        name = parse_file_name("DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -89,9 +85,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name(
-            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-        )
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -122,10 +116,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.performers[2].name, "Mark Wood")
         self.assertEqual(info.performers[2].role, "Male")
 
-        self.assertEqual(
-            info.new_file_name(
-                template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!"
-        )
+        self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net2(self, mock_response):
@@ -134,9 +125,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ssb2.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name(
-            "BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4"
-        )
+        name = parse_file_name("BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -155,9 +144,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name(
-            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-        )
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -170,19 +157,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.site, "Evil Angel")
         self.assertIsNotNone(info.description)
         if info.description is not None:
-            self.assertRegex(
-                info.description, r"brunette Carmela Clutch positions her big, juicy"
-            )
-        self.assertEqual(
-            info.source_url,
-            "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543",
-        )
+            self.assertRegex(info.description, r"brunette Carmela Clutch positions her big, juicy")
+        self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
         self.assertIsNotNone(info.poster_url)
         if info.poster_url is not None:
-            self.assertRegex(
-                info.poster_url,
-                "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
-            )
+            self.assertRegex(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
         self.assertEqual(info.performers[0].name, "Carmela Clutch")
         self.assertEqual(info.performers[0].role, "Female")
         self.assertEqual(info.performers[1].name, "Francesca Le")
@@ -196,9 +175,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         verify an empty response from porndb is properly handled.
         """
         mock_response.return_value = "{}"
-        name = parse_file_name(
-            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-        )
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 0)
 
@@ -208,9 +185,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         failed response (empty) is properly handled
         """
         mock_response.return_value = ""
-        name = parse_file_name(
-            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-        )
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 0)
 
@@ -220,9 +195,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         failed response (None) is properly handled
         """
         mock_response.return_value = None
-        name = parse_file_name(
-            "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"
-        )
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
         results = match(name, sample_config())
         self.assertEqual(len(results), 0)
 
@@ -235,10 +208,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         response = Path(__file__).resolve().parent / "ea.json"
         mock_response.return_value = response.read_text()
         main(["-f", "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"])
-        self.assertIn(
-            "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4",
-            mock_stdout.getvalue(),
-        )
+        self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4", mock_stdout.getvalue())
 
 
 if __name__ == "__main__":
