@@ -3,11 +3,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from namer.filenameparser import parse_file_name
-from namer.metadataapi import __build_url, __get_response_json_object, __jsondata_to_fileinfo, __metadataapi_response_to_data
+from namer.metadataapi import __build_url, __get_response_json_object, __jsondata_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import move_to_final_location
-from namer.types import default_config
-
-config = default_config()
+from namer.types import NamerConfig, default_config
 
 
 def has_no_empty_params(rule):
@@ -16,11 +14,11 @@ def has_no_empty_params(rule):
     return len(defaults) >= len(arguments)
 
 
-def get_files(path: Path) -> list[Path]:
-    return [file for file in path.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
+def get_files(config: NamerConfig) -> list[Path]:
+    return [file for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
 
 
-def get_search_results(query: str, file: str):
+def get_search_results(query: str, file: str, config: NamerConfig):
     url = __build_url(query)
     json_response = __get_response_json_object(url, config.porndb_token)
     file_infos = []
@@ -47,8 +45,8 @@ def get_search_results(query: str, file: str):
     return res
 
 
-def make_rename(file_name: str, scene_id: str) -> bool:
-    file_name = Path(file_name)
+def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
+    file_name = Path(file_name_str)
 
     file_name_parts = parse_file_name(file_name.name, config.name_parser)
     url = f'https://api.metadataapi.net/scenes/{scene_id}'
@@ -60,4 +58,4 @@ def make_rename(file_name: str, scene_id: str) -> bool:
 
     res = move_to_final_location(file_name, config.dest_dir, config.new_relative_path_name, result, config)
 
-    return res.is_file()
+    return res is not None and res.is_file()

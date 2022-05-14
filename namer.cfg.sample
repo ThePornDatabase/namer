@@ -155,3 +155,15 @@ dest_dir = ./test/dest
 
 # When to retry failed items, default is a random minute during the 3 am hour in your timezone.
 #retry_time = 03:16
+
+# Run webserver while running watchdog.
+web = False
+
+#port to run on
+port = 6980
+
+#target host
+host = 0.0.0.0
+
+#webroot (root url to place pages), useful for reverse proxies
+web_root =

@@ -319,6 +319,26 @@ class NamerConfig:
     Extra time to sleep in seconds to allow all information to be copied in dir
     """
 
+    web: bool = True
+    """
+    Run webserver while running watchdog
+    """
+
+    port: int = 6980
+    """
+    Web server port
+    """
+
+    host: str = "0.0.0.0"
+    """
+    Web server host
+    """
+
+    web_root: Optional[str] = None
+    """
+    webroot (root url to place pages), useful for reverse proxies
+    """
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -360,6 +380,10 @@ class NamerConfig:
         output += f"  dest_dir: {self.dest_dir}\n"
         output += f"  retry_time: {self.retry_time}\n"
         output += f"  extra_sleep_time: {self.extra_sleep_time}\n"
+        output += f"  web: {self.web}\n"
+        output += f"  port: {self.port}\n"
+        output += f"  host: {self.host}\n"
+        output += f"  web_root: {self.web_root}\n"
         return output
 
     def verify_naming_config(self) -> bool:
@@ -445,6 +469,10 @@ def from_config(config: ConfigParser) -> NamerConfig:
     if dest_dir is not None:
         namer_config.dest_dir = Path(dest_dir)
     namer_config.retry_time = config.get("watchdog", "retry_time", fallback=f"03:{random.randint(0, 59):0>2}")
+    namer_config.web = config.getboolean("watchdog", "web", fallback=False)
+    namer_config.port = config.getint("watchdog", "port", fallback=6980)
+    namer_config.host = config.get("watchdog", "host", fallback="0.0.0.0")
+    namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
     return namer_config
 
 

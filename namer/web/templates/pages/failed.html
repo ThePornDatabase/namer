@@ -1,6 +1,7 @@
 {% extends "partials/base.html" %}
 {% block title %}Failed files{% endblock %}
 {% block content %}
+    <p>Unmatched Files:</p>
     <ul class="list-group mt-1">
         {% for file in files %}
             <li class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">

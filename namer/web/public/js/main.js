@@ -11,7 +11,7 @@ $(function () {
             'file': queryInput.data('file'),
         }
 
-        request('/get_search', data, function (data) {
+        request('./get_search', data, function (data) {
             render('searchResults', data, resultBody);
         })
     });
@@ -28,7 +28,7 @@ $(function () {
             'scene_id': $(this).data('scene-id'),
         }
 
-        request('/rename', data)
+        request('./rename', data)
     });
 
     function render(template, res, selector) {
@@ -37,7 +37,7 @@ $(function () {
             'data': res,
         }
 
-        request('/render', data, function (data) {
+        request('./render', data, function (data) {
             selector.html(data.response);
         })
     }

@@ -8,6 +8,7 @@ import re
 import shutil
 import sys
 import tempfile
+from threading import Thread
 import time
 from pathlib import Path, PurePath
 from typing import List, Optional
@@ -19,6 +20,7 @@ from watchdog.observers.polling import PollingObserver
 
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
 from namer.types import default_config, NamerConfig, write_log_file
+from namer.web.main import RunAndStoppable, start_server
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -163,6 +165,7 @@ class MovieWatcher:
         self.__src_path = namer_config.watch_dir
         self.__event_handler = MovieEventHandler(namer_config)
         self.__event_observer = PollingObserver()
+        self.__webserver: Optional[RunAndStoppable] = None
 
     def run(self):
         """
@@ -170,6 +173,10 @@ class MovieWatcher:
         needed if running in docker as events aren't properly passed in.
         """
         self.start()
+        if self.__namer_config.web is True:
+            self.__webserver = start_server(self.__namer_config)
+            if self.__webserver:
+                Thread(target=self.__webserver.run).start()
         try:
             while True:
                 schedule.run_pending()
@@ -211,6 +218,8 @@ class MovieWatcher:
         logger.info("exiting")
         self.__event_observer.stop()
         self.__event_observer.join()
+        if self.__webserver is not None:
+            self.__webserver.stop()
         logger.info("exited")
 
     def __schedule(self):

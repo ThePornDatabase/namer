@@ -41,7 +41,6 @@ pylint = ["+*", "-C0301", "-I1101" ]
 
 [tool.pylint.'MASTER']
 extension-pkg-allow-list = ["lxml"]
-#extension-pkg-whitelist = ["lxml"]
 max-line-length = 150
 
 [build-system]
