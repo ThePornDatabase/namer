@@ -94,7 +94,7 @@ def write_movie_xml_file(info: LookedUpFileInfo,
     objectify.SubElement(root, "fileinfo", attrib=None, nsmap=None)
     objectify.deannotate(root)
     etree.cleanup_namespaces(root, top_nsmap=None, keep_ns_prefixes=None)
-    return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="UTF-8").decode(encoding="UTF-8")
+    return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="UTF-8").decode(encoding="UTF-8")  # type: ignore
 
 
 def write_nfo(results: ProcessingResults,

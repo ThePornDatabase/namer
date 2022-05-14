@@ -256,7 +256,11 @@ def __build_url(site: Optional[str] = None, release_date: Optional[str] = None, 
     else:
         query = "?parse="
         if site is not None:
-            query += quote(re.sub(r" ", ".", site)) + "."
+            # There is a known issue in tpdb, where site names are not matched due to casing.
+            # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
+            # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
+            # Hense, the hack of lower casing the site.
+            query += quote(re.sub(r" ", ".", site.lower())) + "."
         if release_date is not None:
             query += release_date + "."
         if name is not None:
