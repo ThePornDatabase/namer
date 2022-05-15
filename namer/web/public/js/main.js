@@ -17,7 +17,7 @@ $(function() {
         })
     });
 
-    $('.match').on('click', function() {
+    filesResult.on('click', '.match', function() {
         const file = $(this).data('file')
         queryInput.val(file);
         queryInput.data('file', file);
