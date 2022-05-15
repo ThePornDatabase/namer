@@ -1,9 +1,10 @@
 /*globals $*/
-$(function () {
+$(function() {
+    const filesResult = $('#filesResult');
     const resultBody = $('#searchResults .modal-body');
     const queryInput = $('#queryInput');
 
-    $('.search').on('click', function () {
+    $('.search').on('click', function() {
         resultBody.html(getProgressBar());
 
         const data = {
@@ -11,24 +12,30 @@ $(function () {
             'file': queryInput.data('file'),
         }
 
-        request('./get_search', data, function (data) {
+        request('./get_search', data, function(data) {
             render('searchResults', data, resultBody);
         })
     });
 
-    $('.match').on('click', function () {
+    $('.match').on('click', function() {
         const file = $(this).data('file')
         queryInput.val(file);
         queryInput.data('file', file);
     });
 
-    $('#searchResults').on('click', '.rename', function () {
+    $('#refreshFiles').on('click', function() {
+        refreshFiles();
+    });
+
+    $('#searchResults').on('click', '.rename', function() {
         const data = {
             'file': $(this).data('file'),
             'scene_id': $(this).data('scene-id'),
         }
 
-        request('./rename', data)
+        request('./rename', data, function() {
+            refreshFiles();
+        })
     });
 
     function render(template, res, selector) {
@@ -37,7 +44,7 @@ $(function () {
             'data': res,
         }
 
-        request('./render', data, function (data) {
+        request('./render', data, function(data) {
             selector.html(data.response);
         })
     }
@@ -46,13 +53,19 @@ $(function () {
         return '<div class="progress"><div id="searchResultsProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
     }
 
+    function refreshFiles() {
+        request('./get_files', null, function(data) {
+            render('failedFiles', data, filesResult);
+        });
+    }
+
     function request(url, data, success = null) {
         const searchResultsProgress = $('#searchResultsProgress');
 
         $.ajax({
-            xhr: function () {
+            xhr: function() {
                 const xhr = new window.XMLHttpRequest();
-                xhr.addEventListener("progress", function (evt) {
+                xhr.addEventListener('progress', function(evt) {
                     if (evt.lengthComputable) {
                         const percentComplete = Math.ceil(evt.loaded / evt.total * 100);
                         if (searchResultsProgress) {
@@ -64,7 +77,7 @@ $(function () {
                 return xhr;
             },
             url: url,
-            type: "POST",
+            type: 'POST',
             data: JSON.stringify(data, null, 0),
             contentType: 'application/json',
             dataType: 'json',

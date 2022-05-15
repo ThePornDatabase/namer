@@ -1,0 +1,13 @@
+<div class="row row-cols-auto">
+    {% if data['files'] %}
+        {% for file in data['files'] %}
+            <div class="col m-1">
+                {% include 'components/card.html' %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col m-1">
+            <span>No results found</span>
+        </div>
+    {% endif %}
+</div>

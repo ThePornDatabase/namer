@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import List
+
 from werkzeug.routing import Rule
 
 from namer.filenameparser import parse_file_name
@@ -23,11 +24,11 @@ def has_no_empty_params(rule: Rule):
     return len(defaults) >= len(arguments)
 
 
-def get_files(config: NamerConfig) -> List[Path]:
+def get_failed_files(config: NamerConfig) -> List[str]:
     """
     Get failed files to rename.
     """
-    return [file for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
+    return [str(file) for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
 
 
 def get_search_results(query: str, file: str, config: NamerConfig):
@@ -37,7 +38,7 @@ def get_search_results(query: str, file: str, config: NamerConfig):
     url = __build_url(query)
     json_response = __get_response_json_object(url, config.porndb_token)
     file_infos = []
-    if json_response is not None and json_response.strip() != "":
+    if json_response is not None and json_response.strip() != '':
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, None)
