@@ -351,7 +351,7 @@ class NamerConfig:
         output = "Namer Config:\n"
         output += f"porndb_token: {token}\n"
         output += f"  inplace_name: {self.inplace_name}\n"
-        output += (f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n")
+        output += f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
         output += f"  target_extensions: {self.target_extensions}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
         output += f"  trailer_location: {self.trailer_location}\n"
