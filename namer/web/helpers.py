@@ -9,8 +9,8 @@ from werkzeug.routing import Rule
 
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import __build_url, __get_response_json_object, __jsondata_to_fileinfo, __metadataapi_response_to_data  # type: ignore
-from namer.namer import move_to_final_location
-from namer.types import NamerConfig
+from namer.namer import add_extra_artifacts, move_to_final_location
+from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, ProcessingResults
 
 
 def has_no_empty_params(rule: Rule):
@@ -64,15 +64,21 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     Rename selected file.
     """
     file_name = Path(file_name_str)
-
-    file_name_parts = parse_file_name(file_name.name, config.name_parser)
+    file_name_parts: FileNameParts = parse_file_name(file_name.name, config.name_parser)
     url = f'https://api.metadataapi.net/scenes/{scene_id}'
 
-    data = __get_response_json_object(url, config.porndb_token)
+    data: str = __get_response_json_object(url, config.porndb_token)
     data_res = json.loads(data)
     data_obj = json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
-    result = __jsondata_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
+    result: LookedUpFileInfo = __jsondata_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
 
     res = move_to_final_location(file_name, config.dest_dir, config.new_relative_path_name, result, config)
+
+    processing: ProcessingResults = ProcessingResults()
+    processing.new_metadata = result
+    processing.parsed_file = file_name_parts
+    processing.video_file = res
+
+    add_extra_artifacts(processing, config)
 
     return res is not None and res.is_file()
