@@ -1,3 +1,6 @@
+"""
+Defines the routes of a Flask webserver for namer.
+"""
 from typing import Any, Optional
 
 from flask import Blueprint, jsonify, render_template, request
@@ -70,7 +73,7 @@ def create_blueprint(config: NamerConfig) -> Blueprint:
             return jsonify(res)
 
     @blueprint.after_request
-    def response_minify(response: Any) -> Optional[Response]:
+    def response_minify(response: Any) -> Response:
         if response is not None and 'text/html' in response.content_type:
             response.set_data(minify(response.get_data(as_text=True)))
             return response

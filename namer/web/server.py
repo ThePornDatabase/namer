@@ -1,3 +1,6 @@
+"""
+A wrapper allowing shutdown of a Flask server.
+"""
 from typing import Any
 
 from flask import Flask
@@ -10,6 +13,9 @@ app = Flask(__name__)
 
 
 class WebServer:
+    """
+    A wrapper allowing shutdown of a Flask server.
+    """
     __server: Any  # MultiSocketServer | BaseWSGIServer
     __config: NamerConfig
     __debug: bool
@@ -24,18 +30,17 @@ class WebServer:
         path = '/' if self.__config.web_root is None else self.__config.web_root
         blueprint = create_blueprint(self.__config)
         app.register_blueprint(blueprint, url_prefix=path, root_path=path)
-
-        if self.__debug:
-            app.run(debug=True, host=self.__config.host, port=self.__config.port)
-        else:
+        if not self.__debug:
             self.__server = create_server(app, host=self.__config.host, port=self.__config.port)
-            self.__server.run()
 
     def run(self):
         """
         Start server on existing thread.
         """
-        self.__server.run()
+        if self.__debug:
+            app.run(debug=True, host=self.__config.host, port=self.__config.port)
+        else:
+            self.__server.run()
 
     def stop(self):
         """
