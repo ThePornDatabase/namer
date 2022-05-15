@@ -4,60 +4,12 @@ Creates a webserver allowing the renaming of failed files.
 
 import argparse
 import sys
-from typing import Any, List
+from typing import List
 
-from flask import Flask
 from loguru import logger
-from waitress import create_server
 
-from namer.types import default_config, NamerConfig
-from namer.web.routes import create_blueprint
-
-app = Flask(__name__)
-
-
-class RunAndStoppable:
-    """
-    Has a stop method to allow for halting the webserver.
-    """
-
-    server: Any  # MultiSocketServer | BaseWSGIServer
-
-    def __init__(self, server: Any):
-        self.server = server
-
-    def run(self):
-        """
-        Start server on existing thread.
-        """
-        self.server.run()
-
-    def stop(self):
-        """
-        Stop severing requests and empty threads.
-        """
-        self.server.close()
-
-
-def start_server(config: NamerConfig) -> RunAndStoppable:
-    """
-    starts a web server with config from NamerConfig.
-    """
-    path = '/' if config.web_root is None else config.web_root
-    blueprint = create_blueprint(config)
-    app.register_blueprint(blueprint, url_prefix=path, root_path=path)
-    server = create_server(app, host=config.host, port=config.port)
-    return RunAndStoppable(server)
-
-
-def debug_server(config: NamerConfig):
-    """
-    starts a web server with config from NamerConfig in debug mode.
-    """
-    path = '/' if config.web_root is None else config.web_root
-    blueprint = create_blueprint(config)
-    app.register_blueprint(blueprint, url_prefix=path, root_path=path)
-    app.run(debug=True, host=config.host, port=config.port)
+from namer.types import default_config
+from namer.web.server import WebServer
 
 
 def main(arg_list: List[str]):
@@ -81,10 +33,7 @@ def main(arg_list: List[str]):
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
 
-    if args.debug:
-        debug_server(local_config)
-    else:
-        start_server(local_config).run()
+    WebServer(local_config, args.debug)
 
 
 if __name__ == '__main__':

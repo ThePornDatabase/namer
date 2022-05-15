@@ -20,7 +20,7 @@ from watchdog.observers.polling import PollingObserver
 
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
 from namer.types import default_config, NamerConfig, write_log_file
-from namer.web.main import RunAndStoppable, start_server
+from namer.web.main import WebServer
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -165,7 +165,7 @@ class MovieWatcher:
         self.__src_path = namer_config.watch_dir
         self.__event_handler = MovieEventHandler(namer_config)
         self.__event_observer = PollingObserver()
-        self.__webserver: Optional[RunAndStoppable] = None
+        self.__webserver: Optional[WebServer] = None
 
     def run(self):
         """
@@ -174,7 +174,7 @@ class MovieWatcher:
         """
         self.start()
         if self.__namer_config.web is True:
-            self.__webserver = start_server(self.__namer_config)
+            self.__webserver = WebServer(self.__namer_config)
             if self.__webserver:
                 Thread(target=self.__webserver.run).start()
         try:
