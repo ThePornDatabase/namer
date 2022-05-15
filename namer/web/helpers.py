@@ -5,6 +5,7 @@ Helper functions to tie in to namer's functionality.
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from typing import List
 from werkzeug.routing import Rule
 
 from namer.filenameparser import parse_file_name
@@ -22,7 +23,7 @@ def has_no_empty_params(rule: Rule):
     return len(defaults) >= len(arguments)
 
 
-def get_files(config: NamerConfig) -> list[Path]:
+def get_files(config: NamerConfig) -> List[Path]:
     """
     Get failed files to rename.
     """

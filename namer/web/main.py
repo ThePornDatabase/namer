@@ -4,14 +4,13 @@ Creates a webserver allowing the renaming of failed files.
 
 import argparse
 import sys
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from flask import Flask, jsonify, render_template, request, Blueprint
 from flask.wrappers import Response
 from htmlmin.main import minify
 from loguru import logger
 from waitress import create_server
-from waitress.server import MultiSocketServer, BaseWSGIServer
 
 from namer.types import NamerConfig, default_config
 from namer.web.helpers import get_files, get_search_results, make_rename
@@ -24,9 +23,9 @@ class RunAndStoppable:
     Has a stop method to allow for halting the webserver.
     """
 
-    server: MultiSocketServer | BaseWSGIServer
+    server: Any  # MultiSocketServer | BaseWSGIServer
 
-    def __init__(self, server: MultiSocketServer | BaseWSGIServer):
+    def __init__(self, server: Any):
         self.server = server
 
     def run(self):
@@ -130,7 +129,7 @@ def debug_server(config: NamerConfig):
     app.run(debug=True, host=config.host, port=config.port)
 
 
-def main(arg_list: list[str]):
+def main(arg_list: List[str]):
     """
     uses default namer config, with possible override port and host, and potentially in debug mode.
     """
