@@ -15,18 +15,20 @@ def create_blueprint(config: NamerConfig) -> Blueprint:
 
     blueprint = Blueprint('/', __name__, static_url_path='/', static_folder='public', template_folder='templates')
 
-    # @blueprint.route('/')
-    # def index():
-    #     data = []
-    #     for rule in app.url_map.iter_rules():
-    #         if rule.methods is not None and 'GET' in rule.methods and has_no_empty_params(rule):
-    #             url = url_for(rule.endpoint, **(rule.defaults or {}))
-    #             data.append((url, rule.endpoint))
-    #
-    #     return render_template('pages/index.html', links=data)
-
+    """
     @blueprint.route('/')
     def index():
+         data = []
+         for rule in app.url_map.iter_rules():
+             if rule.methods is not None and 'GET' in rule.methods and has_no_empty_params(rule):
+                 url = url_for(rule.endpoint, **(rule.defaults or {}))
+                 data.append((url, rule.endpoint))
+
+         return render_template('pages/index.html', links=data)
+     """
+
+    @blueprint.route('/')
+    def failed():
         """
         Displays all failed to name files.
         """
