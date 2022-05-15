@@ -5,10 +5,10 @@ import io
 import unittest
 from pathlib import Path
 from unittest import mock
+from test.utils import sample_config
 
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import main, match
-from test.utils import sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

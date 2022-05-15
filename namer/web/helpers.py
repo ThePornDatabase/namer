@@ -1,24 +1,38 @@
+"""
+Helper functions to tie in to namer's functionality.
+"""
+
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from werkzeug.routing import Rule
 
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import __build_url, __get_response_json_object, __jsondata_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import move_to_final_location
-from namer.types import NamerConfig, default_config
+from namer.types import NamerConfig
 
 
-def has_no_empty_params(rule):
+def has_no_empty_params(rule: Rule):
+    """
+    Currently unused, useful to inspect Flask rules.
+    """
     defaults = rule.defaults if rule.defaults is not None else ()
     arguments = rule.arguments if rule.arguments is not None else ()
     return len(defaults) >= len(arguments)
 
 
 def get_files(config: NamerConfig) -> list[Path]:
+    """
+    Get failed files to rename.
+    """
     return [file for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
 
 
 def get_search_results(query: str, file: str, config: NamerConfig):
+    """
+    Search results for user selection.
+    """
     url = __build_url(query)
     json_response = __get_response_json_object(url, config.porndb_token)
     file_infos = []
@@ -46,6 +60,9 @@ def get_search_results(query: str, file: str, config: NamerConfig):
 
 
 def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
+    """
+    Rename selected file.
+    """
     file_name = Path(file_name_str)
 
     file_name_parts = parse_file_name(file_name.name, config.name_parser)

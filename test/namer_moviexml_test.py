@@ -7,11 +7,11 @@ import unittest
 from pathlib import Path
 from shutil import copytree
 from unittest import mock
+from test.utils import sample_config
 
 from namer.metadataapi import match, parse_file_name
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.types import Performer
-from test.utils import sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

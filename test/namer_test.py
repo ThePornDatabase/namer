@@ -7,12 +7,12 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 from mutagen.mp4 import MP4
 
 from namer.namer import check_arguments, determine_target_file, find_target_file, main, set_permissions
 from namer.types import NamerConfig
-from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

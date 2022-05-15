@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
+from test.utils import sample_config, validate_mp4_tags
 
 from mutagen.mp4 import MP4
 
@@ -13,7 +14,6 @@ from namer.filenameparser import parse_file_name
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer.types import LookedUpFileInfo, NamerConfig
-from test.utils import sample_config, validate_mp4_tags
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

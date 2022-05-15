@@ -8,12 +8,12 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from test.utils import new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
 
 from mutagen.mp4 import MP4
 
 from namer.types import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed
-from test.utils import new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
 
 
 def make_locations(tempdir: Path) -> NamerConfig:
