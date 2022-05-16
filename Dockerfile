@@ -30,7 +30,9 @@ RUN apt-get update \
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-RUN apt-get install -y --no-install-recommends nodejs
+RUN apt-get install -y --no-install-recommends  \
+    nodejs \
+    yarn
 
 RUN mkdir /work/
 COPY . /work
