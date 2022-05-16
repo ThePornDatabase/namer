@@ -27,6 +27,7 @@ $(function () {
     })
 
     $('#refreshFiles').on('click', function () {
+        filesResult.html(getProgressBar())
         refreshFiles()
     })
 
