@@ -16,17 +16,21 @@ jobs:
         python-version: [ '3.8', '3.9', '3.10' ]
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v3.0.0
         with:
           python-version: ${{ matrix.python-version }}
           #cache: 'poetry'
+
       - name: Display Python version
         run: python --version
+
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: '1.1.13'
+
       - name: Install ffmpeg
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -40,17 +44,31 @@ jobs:
       - run: poetry install
       - run: poetry run pytest
 
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          node-version: '16'
+
+      - name: Install Node packages
+        run: yarn install
+
+      - name: Build Assets
+        run: yarn run build
+
   linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v3.0.0
         with:
           python-version: '3.10'
           #cache: 'poetry'
+
       - name: Display Python version
-        run: python --version        
+        run: python --version
+
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
@@ -62,13 +80,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v3.0.0
         with:
           python-version: '3.10'
           #cache: 'poetry'
+
       - name: Display Python version
         run: python --version
+
       - name: Install ffmpeg
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -79,6 +100,7 @@ jobs:
               env HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg
           fi
         shell: bash
+
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
@@ -112,18 +134,22 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 2
+
       - name: Set up Python
         uses: actions/setup-python@v3.0.0
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Display Python version
         run: python --version
+
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: '1.1.13'
-      - id: auto-tag
-        name: create tag from pyproject version on change.
+
+      - name: create tag from pyproject version on change.
+        id: auto-tag
         uses: salsify/action-detect-and-tag-new-version@v2
         with:
           version-command: |
@@ -150,24 +176,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v3.0.0
         with:
           python-version: '3.10'
           #cache: 'poetry'
+
       - name: Display Python version
         run: python --version
+
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: '1.1.13'
       - run: poetry install
       - run: poetry build
+
       - name: Prepare to publish python pips.
         if:  "${{ env.PYPI_TOKEN != '' }}"
         run: poetry config pypi-token.pypi "$PYPI_TOKEN"
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
       - name: publish pip
         run: poetry publish
         if:  "${{ env.PYPI_TOKEN != '' }}"
@@ -190,6 +221,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2
+
       - name: build and tag
         run: |
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')

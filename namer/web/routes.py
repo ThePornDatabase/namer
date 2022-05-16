@@ -1,7 +1,7 @@
 """
 Defines the routes of a Flask webserver for namer.
 """
-from typing import Any, Optional
+from typing import Any
 
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
@@ -11,7 +11,7 @@ from namer.types import NamerConfig
 from namer.web.helpers import get_failed_files, get_search_results, make_rename
 
 
-def create_blueprint(config: NamerConfig) -> Blueprint:
+def get_web_routes(config: NamerConfig) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
@@ -20,7 +20,7 @@ def create_blueprint(config: NamerConfig) -> Blueprint:
 
     """
     @blueprint.route('/')
-    def index():
+    def index() -> str:
          data = []
          for rule in app.url_map.iter_rules():
              if rule.methods is not None and 'GET' in rule.methods and has_no_empty_params(rule):
@@ -31,7 +31,7 @@ def create_blueprint(config: NamerConfig) -> Blueprint:
      """
 
     @blueprint.route('/')
-    def failed():
+    def failed() -> str:
         """
         Displays all failed to name files.
         """
@@ -39,8 +39,10 @@ def create_blueprint(config: NamerConfig) -> Blueprint:
         return render_template('pages/failed.html', data=data)
 
     @blueprint.route('/render', methods=['POST'])
-    def render() -> Optional[Response]:
+    def render() -> Response:
         data = request.json
+
+        res = False
         if data is not None:
             template = data.get('template')
             data = data.get('data')
@@ -51,32 +53,40 @@ def create_blueprint(config: NamerConfig) -> Blueprint:
             res = {
                 'response': minify(data),
             }
-            return jsonify(res)
+
+        return jsonify(res)
 
     @blueprint.route('/get_files', methods=['POST'])
-    def get_files() -> Optional[Response]:
+    def get_files() -> Response:
         data = get_failed_files(config)
         return jsonify(data)
 
     @blueprint.route('/get_search', methods=['POST'])
-    def get_results() -> Optional[Response]:
+    def get_results() -> Response:
         data = request.json
+
+        res = False
         if data is not None:
             res = get_search_results(data['query'], data['file'], config)
-            return jsonify(res)
+
+        return jsonify(res)
 
     @blueprint.route('/rename', methods=['POST'])
-    def rename() -> Optional[Response]:
+    def rename() -> Response:
         data = request.json
+
+        res = False
         if data is not None:
             res = make_rename(data['file'], data['scene_id'], config)
-            return jsonify(res)
+
+        return jsonify(res)
 
     @blueprint.after_request
     def response_minify(response: Any) -> Response:
-        if response is not None and 'text/html' in response.content_type:
-            response.set_data(minify(response.get_data(as_text=True)))
-            return response
+        if response is not None:
+            if 'text/html' in response.content_type:
+                response.set_data(minify(response.get_data(as_text=True)))
+                return response
 
         return response
 
