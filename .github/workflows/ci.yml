@@ -44,17 +44,6 @@ jobs:
       - run: poetry install
       - run: poetry run pytest
 
-      - uses: actions/setup-node@v3
-        with:
-          cache: 'yarn'
-          node-version: '16'
-
-      - name: Install Node packages
-        run: yarn install
-
-      - name: Build Assets
-        run: yarn run build
-
   linting:
     runs-on: ubuntu-latest
     steps:
@@ -192,6 +181,17 @@ jobs:
           poetry-version: '1.1.13'
       - run: poetry install
       - run: poetry build
+
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          node-version: '16'
+
+      - name: Install Node packages
+        run: yarn install
+
+      - name: Build Assets
+        run: yarn run build
 
       - name: Prepare to publish python pips.
         if:  "${{ env.PYPI_TOKEN != '' }}"
