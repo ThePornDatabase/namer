@@ -9,7 +9,7 @@ const HtmlMinimizerPlugin = require('html-minimizer-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 
 const targetPath = path.resolve(__dirname, 'namer', 'web')
-const targetBrowser = 'chrome 75'
+const targetBrowser = 'last 2 versions'
 
 module.exports = {
     entry: [
@@ -45,6 +45,17 @@ module.exports = {
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: {
+                                browsers: targetBrowser,
+                                plugins: [
+                                    ['postcss-preset-env', {enableClientSidePolyfills: true}]
+                                ],
+                            },
+                        },
+                    },
                     'sass-loader'
                 ]
             },
