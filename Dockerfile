@@ -13,6 +13,7 @@ RUN apt-get update \
     && apt-get clean
 
 FROM BASE AS BUILD
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential \
@@ -24,11 +25,10 @@ RUN apt-get update \
        python3-dev \
        python3.9-venv \
        curl \
+       nodejs \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
-
-FROM node:16-alpine
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
