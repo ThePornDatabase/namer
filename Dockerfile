@@ -28,16 +28,14 @@ RUN apt-get update \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
+FROM node:16-alpine
+
 RUN mkdir /work/
 COPY . /work
 
-FROM node:16-alpine
-RUN cd /work/  \
-    && yarn install \
-    && yarn run build
-
 RUN curl -sSL https://install.python-poetry.org | python3 - 
 
+COPY . /work
 RUN cd /work/ \
     && export PATH="/root/.local/bin:$PATH" \
     && rm -rf /work/namer/__pycache__/ || true \
@@ -45,6 +43,8 @@ RUN cd /work/ \
     && poetry install \
     && poetry run pytest \
     && poetry run flakeheaven lint \
+    && yarn install \
+    && yarn run build \
     && poetry build
 
 FROM BASE
