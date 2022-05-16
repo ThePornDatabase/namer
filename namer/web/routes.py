@@ -1,8 +1,6 @@
 """
 Defines the routes of a Flask webserver for namer.
 """
-from typing import Any
-
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
 from htmlmin.main import minify
@@ -80,14 +78,5 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
             res = make_rename(data['file'], data['scene_id'], config)
 
         return jsonify(res)
-
-    @blueprint.after_request
-    def response_minify(response: Any) -> Response:
-        if response is not None:
-            if 'text/html' in response.content_type:
-                response.set_data(minify(response.get_data(as_text=True)))
-                return response
-
-        return response
 
     return blueprint
