@@ -7,7 +7,7 @@ from flask import Flask
 from waitress import create_server
 
 from namer.types import NamerConfig
-from namer.web.routes import create_blueprint
+from namer.web.routes import get_web_routes
 
 app = Flask(__name__)
 
@@ -28,7 +28,7 @@ class WebServer:
 
     def __make_server(self):
         path = '/' if self.__config.web_root is None else self.__config.web_root
-        blueprint = create_blueprint(self.__config)
+        blueprint = get_web_routes(self.__config)
         app.register_blueprint(blueprint, url_prefix=path, root_path=path)
         if not self.__debug:
             self.__server = create_server(app, host=self.__config.host, port=self.__config.port)

@@ -33,7 +33,8 @@ def main(arg_list: List[str]):
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
 
-    WebServer(local_config, args.debug).run()
+    web = WebServer(local_config, args.debug)
+    web.run()
 
 
 if __name__ == '__main__':

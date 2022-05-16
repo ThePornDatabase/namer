@@ -10,3 +10,5 @@ dist/
 creds.sh
 init
 .python-version
+node_modules
+bundle.min.*
