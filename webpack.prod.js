@@ -51,7 +51,7 @@ module.exports = {
                             postcssOptions: {
                                 browsers: targetBrowser,
                                 plugins: [
-                                    ['postcss-preset-env', {enableClientSidePolyfills: true}]
+                                    'postcss-preset-env'
                                 ],
                             },
                         },
