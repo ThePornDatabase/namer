@@ -28,6 +28,9 @@ RUN apt-get update \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
+FROM node:16-alpine
+RUN yarn install && yarn run build
+
 RUN curl -sSL https://install.python-poetry.org | python3 - 
 
 RUN mkdir /work/
