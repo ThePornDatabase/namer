@@ -30,11 +30,9 @@ RUN apt-get update \
 
 FROM node:16-alpine
 
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
 RUN mkdir /work/
-COPY . /work
-
-RUN curl -sSL https://install.python-poetry.org | python3 - 
-
 COPY . /work
 RUN cd /work/ \
     && export PATH="/root/.local/bin:$PATH" \
