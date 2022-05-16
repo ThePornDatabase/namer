@@ -175,13 +175,6 @@ jobs:
       - name: Display Python version
         run: python --version
 
-      - name: install poetry
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: '1.1.13'
-      - run: poetry install
-      - run: poetry build
-
       - uses: actions/setup-node@v3
         with:
           cache: 'yarn'
@@ -192,6 +185,13 @@ jobs:
 
       - name: Build Assets
         run: yarn run build
+
+      - name: install poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: '1.1.13'
+      - run: poetry install
+      - run: poetry build
 
       - name: Prepare to publish python pips.
         if:  "${{ env.PYPI_TOKEN != '' }}"
