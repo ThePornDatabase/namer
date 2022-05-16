@@ -12,3 +12,4 @@ init
 .python-version
 node_modules
 bundle.min.*
+namer/web/templates/
