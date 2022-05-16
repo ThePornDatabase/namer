@@ -9,7 +9,7 @@ const HtmlMinimizerPlugin = require('html-minimizer-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 
 const targetPath = path.resolve(__dirname, 'namer', 'web')
-const target = 'chrome 75'
+const targetBrowser = 'chrome 75'
 
 module.exports = {
     entry: [
@@ -17,6 +17,9 @@ module.exports = {
         './src/css/main.scss'
     ],
     mode: 'production',
+    performance: {
+        hints: false
+    },
     output: {
         path: path.resolve(targetPath, 'public', 'assets'),
         filename: 'bundle.min.js'
@@ -52,7 +55,7 @@ module.exports = {
                     loader: 'babel-loader',
                     options: {
                         presets: [
-                            ['@babel/preset-env', {targets: target}]
+                            ['@babel/preset-env', {targets: targetBrowser}]
                         ]
                     }
                 }

@@ -54,7 +54,7 @@ $(function () {
     }
 
     function getProgressBar() {
-        return '<div class="progress"><div id="searchResultsProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
+        return '<div class="progress"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
     }
 
     function refreshFiles() {
@@ -64,7 +64,7 @@ $(function () {
     }
 
     function request(url, data, success = null) {
-        const searchResultsProgress = $('#searchResultsProgress')
+        const progressBar = $('#progressBar')
 
         $.ajax({
             xhr: function () {
@@ -72,8 +72,8 @@ $(function () {
                 xhr.addEventListener('progress', function (evt) {
                     if (evt.lengthComputable) {
                         const percentComplete = Math.ceil(evt.loaded / evt.total * 100)
-                        if (searchResultsProgress) {
-                            searchResultsProgress.width(percentComplete + '%')
+                        if (progressBar) {
+                            progressBar.width(percentComplete + '%')
                         }
                     }
                 }, false)
