@@ -3,7 +3,6 @@ Defines the routes of a Flask webserver for namer.
 """
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
-from htmlmin.main import minify
 
 from namer.types import NamerConfig
 from namer.web.helpers import get_failed_files, get_search_results, make_rename
@@ -49,7 +48,7 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
             data = render_template(template_file, data=data)
 
             res = {
-                'response': minify(data),
+                'response': data,
             }
 
         return jsonify(res)
