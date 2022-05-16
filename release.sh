@@ -55,6 +55,9 @@ poetry run pytest
 poetry run flakeheaven lint
 poetry build
 
+yarn install
+yarn run build
+
 echo build docker image before publishing pip
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_HASH=$(git rev-parse --verify HEAD)
