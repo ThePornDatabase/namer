@@ -1,11 +1,12 @@
 """
 A wrapper allowing shutdown of a Flask server.
 """
-from typing import Any
+from typing import Union
 
 from flask import Flask
 from flask_compress import Compress
 from waitress import create_server
+from waitress.server import BaseWSGIServer, MultiSocketServer
 
 from namer.types import NamerConfig
 from namer.web.routes import get_web_routes
@@ -18,7 +19,7 @@ class WebServer:
     """
     A wrapper allowing shutdown of a Flask server.
     """
-    __server: Any  # MultiSocketServer | BaseWSGIServer
+    __server: Union[MultiSocketServer, BaseWSGIServer]
     __config: NamerConfig
     __debug: bool
 
@@ -49,4 +50,5 @@ class WebServer:
         """
         Stop severing requests and empty threads.
         """
-        self.__server.close()
+        if self.__server:
+            self.__server.close()
