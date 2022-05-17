@@ -3,6 +3,7 @@
 <head>
     <title>{% block title %}{% endblock %} - Namer</title>
     <link href="{{ url_for('.static', filename='assets/bundle.min.css') }}" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="{{ url_for('.static', filename='favicon.png') }}"/>
 </head>
 <body>
 <div class="container">{% block content %}{% endblock %}</div>
