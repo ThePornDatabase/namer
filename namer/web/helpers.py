@@ -29,7 +29,7 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     """
     Get failed files to rename.
     """
-    files = [file for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
+    files = [file for file in config.failed_dir.rglob('*.*') if is_acceptable_file(file, config)]
     res = []
     for file in files:
         file_rel = file.relative_to(config.failed_dir)
@@ -78,7 +78,7 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     Rename selected file.
     """
     file_name = config.failed_dir / file_name_str
-    if not is_in_failed_dir(file_name, config):
+    if not is_acceptable_file(file_name, config):
         return False
 
     file_name_parts: FileNameParts = parse_file_name(file_name.name, config.name_parser)
@@ -106,7 +106,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     Delete selected file.
     """
     file_name = config.failed_dir / file_name_str
-    if not is_in_failed_dir(file_name, config):
+    if not is_acceptable_file(file_name, config):
         return False
 
     file_name.unlink(True)
@@ -114,11 +114,11 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     return not file_name.is_file()
 
 
-def is_in_failed_dir(file: Path, config: NamerConfig) -> bool:
+def is_acceptable_file(file: Path, config: NamerConfig) -> bool:
     """
     Check is file belongs to failed dirs.
     """
-    return str(config.failed_dir) in str(file.resolve())
+    return str(config.failed_dir) in str(file.resolve()) and file.is_file() and file.suffix[1:] in config.target_extensions
 
 
 def convert_size(size_bytes: int) -> str:
