@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
 
 from namer.types import NamerConfig
-from namer.web.helpers import get_failed_files, get_search_results, make_rename
+from namer.web.helpers import delete_file, get_failed_files, get_search_results, make_rename
 
 
 def get_web_routes(config: NamerConfig) -> Blueprint:
@@ -35,7 +35,7 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
         data = get_failed_files(config)
         return render_template('pages/failed.html', data=data)
 
-    @blueprint.route('/render', methods=['POST'])
+    @blueprint.route('/api/v1/render', methods=['POST'])
     def render() -> Response:
         data = request.json
 
@@ -53,12 +53,12 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
 
         return jsonify(res)
 
-    @blueprint.route('/get_files', methods=['POST'])
+    @blueprint.route('/api/v1/get_files', methods=['POST'])
     def get_files() -> Response:
         data = get_failed_files(config)
         return jsonify(data)
 
-    @blueprint.route('/get_search', methods=['POST'])
+    @blueprint.route('/api/v1/get_search', methods=['POST'])
     def get_results() -> Response:
         data = request.json
 
@@ -68,13 +68,23 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
 
         return jsonify(res)
 
-    @blueprint.route('/rename', methods=['POST'])
+    @blueprint.route('/api/v1/rename', methods=['POST'])
     def rename() -> Response:
         data = request.json
 
         res = False
         if data is not None:
             res = make_rename(data['file'], data['scene_id'], config)
+
+        return jsonify(res)
+
+    @blueprint.route('/api/v1/delete', methods=['POST'])
+    def delete() -> Response:
+        data = request.json
+
+        res = False
+        if data is not None:
+            res = delete_file(data['file'], config)
 
         return jsonify(res)
 
