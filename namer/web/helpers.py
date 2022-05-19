@@ -16,7 +16,7 @@ from namer.namer import add_extra_artifacts, move_to_final_location
 from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, ProcessingResults
 
 
-def has_no_empty_params(rule: Rule):
+def has_no_empty_params(rule: Rule) -> bool:
     """
     Currently unused, useful to inspect Flask rules.
     """
@@ -43,7 +43,7 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     return res
 
 
-def get_search_results(query: str, file: str, config: NamerConfig):
+def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
     """
     Search results for user selection.
     """
@@ -106,7 +106,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     Delete selected file.
     """
     file_name = config.failed_dir / file_name_str
-    if not is_acceptable_file(file_name, config) and config.allow_delete_files:
+    if not is_acceptable_file(file_name, config) or not config.allow_delete_files:
         return False
 
     file_name.unlink(True)
@@ -116,7 +116,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
 
 def is_acceptable_file(file: Path, config: NamerConfig) -> bool:
     """
-    Check is file belongs to failed dirs.
+    Checks if a file belong to namer.
     """
     return str(config.failed_dir) in str(file.resolve()) and file.is_file() and file.suffix[1:] in config.target_extensions
 

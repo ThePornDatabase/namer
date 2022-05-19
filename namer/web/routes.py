@@ -12,7 +12,6 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
-
     blueprint = Blueprint('/', __name__, static_url_path='/', static_folder='public', template_folder='templates')
 
     """
