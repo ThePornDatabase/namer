@@ -1,14 +1,31 @@
 {% if data %}
-    <ul class="list-group">
+    <table class="table table-sm align-middle">
+        <thead>
+        <tr>
+            <th scope="col">File</th>
+            <th scope="col">Extension</th>
+            <th scope="col">Size</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
         {% for file in data %}
-            <li class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
-                {{ file }}
-                <button type="button" class="btn btn-primary float-end match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file }}">
-                    Manual match
-                </button>
-            </li>
+            <tr>
+                <td class="col">{{ file['name'] }}</td>
+                <td class="col-1">{{ file['ext'] }}</td>
+                <td class="col-1">{{ file['size'] }}</td>
+                <td class="col-1">
+                    <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger delete" data-bs-toggle="modal" data-bs-target="#deleteConfirm" data-file="{{ file['file'] }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
+        </tbody>
+    </table>
 {% else %}
     <div class="col m-1">
         <span>No files found</span>

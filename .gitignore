@@ -1,5 +1,6 @@
 **/.DS_Store
 .vscode
+.idea
 __pycache__/
 .coverage
 /htmlcov/
@@ -11,5 +12,5 @@ creds.sh
 init
 .python-version
 node_modules
-bundle.min.*
-namer/web/templates/
+namer/web/public/assets
+namer/web/templates

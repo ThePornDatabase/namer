@@ -1,18 +1,20 @@
 {% extends "partials/base.html" %}
 {% block title %}Failed files{% endblock %}
 {% block content %}
-    <div class="card text-center mt-1 shadow-sm">
+    <div class="card text-center mt-2 shadow-sm">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="true" href="#">Files</a>
+                    <a class="nav-link active" aria-current="true" href="/">Files</a>
                 </li>
             </ul>
         </div>
         <div class="card-body">
             <h5 class="card-title d-flex justify-content-between align-items-center">
                 Unmatched Files
-                <button id="refreshFiles" type="button" class="btn btn-secondary ms-1">Refresh</button>
+                <button id="refreshFiles" type="button" class="btn btn-secondary ms-1">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
             </h5>
             <div class="card-text">
                 <div id="filesResult">
@@ -21,7 +23,7 @@
             </div>
         </div>
     </div>
-    <div id="searchForm" class="modal fade shadow-sm" tabindex="-1" aria-labelledby="searchFormLabel" aria-hidden="true">
+    <div id="searchForm" class="modal fade" tabindex="-1" aria-labelledby="searchFormLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -30,7 +32,7 @@
                 </div>
                 <div class="modal-body">
                     <label for="queryInput" class="form-label">Search query</label>
-                    <input type="text" class="form-control" id="queryInput" value="{{ file }}">
+                    <input type="text" class="form-control" id="queryInput">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -41,7 +43,7 @@
             </div>
         </div>
     </div>
-    <div id="searchResults" class="modal fade shadow-sm" tabindex="-1" aria-labelledby="modalSearchResultsLabel" aria-hidden="true">
+    <div id="searchResults" class="modal fade" tabindex="-1" aria-labelledby="modalSearchResultsLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -53,6 +55,25 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="deleteConfirm" class="modal fade" tabindex="-1" aria-labelledby="modaldeleteConfirmLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you wanted to delete this file?</p>
+                    <label for="deleteFile" class="form-label">File</label>
+                    <input id="deleteFile" type="text" class="form-control" disabled>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="deleteButton" type="button" class="btn btn-danger" data-bs-dismiss="modal">Yes</button>
                 </div>
             </div>
         </div>

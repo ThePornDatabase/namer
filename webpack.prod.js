@@ -52,9 +52,9 @@ module.exports = {
                                 browsers: targetBrowser,
                                 plugins: [
                                     'postcss-preset-env'
-                                ],
-                            },
-                        },
+                                ]
+                            }
+                        }
                     },
                     'sass-loader'
                 ]
@@ -69,6 +69,13 @@ module.exports = {
                             ['@babel/preset-env', {targets: targetBrowser}]
                         ]
                     }
+                }
+            },
+            {
+                test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/i,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'fonts/[name][ext][query]'
                 }
             },
             {

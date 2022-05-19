@@ -3,9 +3,10 @@ Helper functions to tie in to namer's functionality.
 """
 
 import json
+import math
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List
+from typing import Dict, List
 
 from werkzeug.routing import Rule
 
@@ -24,11 +25,22 @@ def has_no_empty_params(rule: Rule):
     return len(defaults) >= len(arguments)
 
 
-def get_failed_files(config: NamerConfig) -> List[str]:
+def get_failed_files(config: NamerConfig) -> List[Dict]:
     """
     Get failed files to rename.
     """
-    return [str(file) for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
+    files = [file for file in config.failed_dir.rglob('*.*') if file.is_file() and file.suffix[1:] in config.target_extensions]
+    res = []
+    for file in files:
+        file_rel = file.relative_to(config.failed_dir)
+        res.append({
+            'file': str(file_rel),
+            'name': file.stem,
+            'ext': file.suffix[1:].upper(),
+            'size': convert_size(file.stat().st_size),
+        })
+
+    return res
 
 
 def get_search_results(query: str, file: str, config: NamerConfig):
@@ -65,7 +77,10 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     """
     Rename selected file.
     """
-    file_name = Path(file_name_str)
+    file_name = config.failed_dir / file_name_str
+    if is_in_failed_dir(file_name, config):
+        return False
+
     file_name_parts: FileNameParts = parse_file_name(file_name.name, config.name_parser)
     url = f'https://api.metadataapi.net/scenes/{scene_id}'
 
@@ -84,3 +99,40 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     add_extra_artifacts(processing, config)
 
     return res is not None and res.is_file()
+
+
+def delete_file(file_name_str: str, config: NamerConfig) -> bool:
+    """
+    Delete selected file.
+    """
+
+    file_name = config.failed_dir / file_name_str
+    if is_in_failed_dir(file_name, config):
+        return False
+
+    file_name.unlink(True)
+
+    return not file_name.is_file()
+
+
+def is_in_failed_dir(file: Path, config: NamerConfig) -> bool:
+    """
+    Check is file belongs to failed dirs.
+    """
+    return str(config.failed_dir) in str(file.resolve())
+
+
+def convert_size(size_bytes: int) -> str:
+    """
+    Convert int to size string.
+    """
+    if size_bytes == 0:
+        return '0B'
+
+    size = 1024
+    size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
+    i = int(math.floor(math.log(size_bytes, size)))
+    p = math.pow(size, i)
+    s = round(size_bytes / p, 2)
+
+    return f'{s} {size_name[i]}'
