@@ -106,7 +106,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     Delete selected file.
     """
     file_name = config.failed_dir / file_name_str
-    if not is_acceptable_file(file_name, config):
+    if not is_acceptable_file(file_name, config) and config.allow_delete_files:
         return False
 
     file_name.unlink(True)

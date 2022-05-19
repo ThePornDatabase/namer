@@ -18,9 +18,11 @@
                     <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}">
                         <i class="bi bi-search"></i>
                     </button>
-                    <button type="button" class="btn btn-danger delete" data-bs-toggle="modal" data-bs-target="#deleteConfirm" data-file="{{ file['file'] }}">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                    {% if config.allow_delete_files %}
+                        <button type="button" class="btn btn-danger delete" data-bs-toggle="modal" data-bs-target="#deleteConfirm" data-file="{{ file['file'] }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

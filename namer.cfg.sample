@@ -167,3 +167,6 @@ host = 0.0.0.0
 
 #webroot (root url to place pages), useful for reverse proxies
 web_root =
+
+#Allow to delete files in web interface
+allow_delete_files = False
