@@ -33,7 +33,7 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
         Displays all failed to name files.
         """
         data = get_failed_files(config)
-        return render_template('pages/failed.html', data=data)
+        return render_template('pages/failed.html', data=data, config=config)
 
     @blueprint.route('/api/v1/render', methods=['POST'])
     def render() -> Response:

@@ -339,6 +339,11 @@ class NamerConfig:
     webroot (root url to place pages), useful for reverse proxies
     """
 
+    allow_delete_files: bool = False
+    """
+    Allow to delete files in web interface
+    """
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -384,6 +389,7 @@ class NamerConfig:
         output += f"  port: {self.port}\n"
         output += f"  host: {self.host}\n"
         output += f"  web_root: {self.web_root}\n"
+        output += f"  allow_delete_files: {self.allow_delete_files}\n"
         return output
 
     def verify_naming_config(self) -> bool:
@@ -473,6 +479,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.port = config.getint("watchdog", "port", fallback=6980)
     namer_config.host = config.get("watchdog", "host", fallback="0.0.0.0")
     namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
+    namer_config.allow_delete_files = config.getboolean("watchdog", "allow_delete_files", fallback=False)
     return namer_config
 
 
