@@ -44,7 +44,7 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
             data = data.get('data')
 
             template_file = f'render/{template}.html'
-            data = render_template(template_file, data=data)
+            data = render_template(template_file, data=data, config=config)
 
             res = {
                 'response': data,
