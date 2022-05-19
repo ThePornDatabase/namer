@@ -78,7 +78,7 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     Rename selected file.
     """
     file_name = config.failed_dir / file_name_str
-    if is_in_failed_dir(file_name, config):
+    if not is_in_failed_dir(file_name, config):
         return False
 
     file_name_parts: FileNameParts = parse_file_name(file_name.name, config.name_parser)
@@ -105,9 +105,8 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     """
     Delete selected file.
     """
-
     file_name = config.failed_dir / file_name_str
-    if is_in_failed_dir(file_name, config):
+    if not is_in_failed_dir(file_name, config):
         return False
 
     file_name.unlink(True)
