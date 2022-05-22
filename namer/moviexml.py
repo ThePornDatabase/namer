@@ -11,11 +11,11 @@ from lxml import etree, objectify
 from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
 
 
-def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
+def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
     """
     Parse an Emby/Jellyfin xml file and creates a LookedUpFileInfo from the data.
     """
-    content = xmlfile.read_text(encoding="utf8")
+    content = xml_file.read_text(encoding="utf8")
 
     movie: Any = objectify.fromstring(bytes(content, encoding="utf8"), parser=None)
     info = LookedUpFileInfo()
@@ -39,7 +39,7 @@ def parse_movie_xml_file(xmlfile: Path) -> LookedUpFileInfo:
         info.tags.append(str(genre))
     info.original_parsed_filename = None
     info.original_query = None
-    info.origninal_response = None
+    info.original_response = None
     return info
 
 
@@ -57,21 +57,21 @@ def write_movie_xml_file(info: LookedUpFileInfo,
     etree.SubElement(root, "outline", attrib=None, nsmap=None)
     etree.SubElement(root, "title", attrib=None, nsmap=None).text = info.name
     etree.SubElement(root, "dateadded", attrib=None, nsmap=None)
-    trailertag = etree.SubElement(root, "trailer", attrib=None, nsmap=None)
+    trailer_tag = etree.SubElement(root, "trailer", attrib=None, nsmap=None)
     if trailer is not None:
-        trailertag.text = str(trailer)
+        trailer_tag.text = str(trailer)
     if info.date is not None:
         etree.SubElement(root, "year", attrib=None, nsmap=None).text = info.date[:4]
     etree.SubElement(root, "premiered", attrib=None, nsmap=None).text = info.date
     etree.SubElement(root, "releasedate", attrib=None, nsmap=None).text = info.date
     etree.SubElement(root, "mpaa", attrib=None, nsmap=None).text = "XXX"
     art = etree.SubElement(root, "art", attrib=None, nsmap=None)
-    postertag = etree.SubElement(art, "poster", attrib=None, nsmap=None)
+    poster_tag = etree.SubElement(art, "poster", attrib=None, nsmap=None)
     if poster is not None:
-        postertag.text = str(poster)
-    backgroundtag = etree.SubElement(art, "background", attrib=None, nsmap=None)
+        poster_tag.text = str(poster)
+    background_tag = etree.SubElement(art, "background", attrib=None, nsmap=None)
     if background is not None:
-        backgroundtag.text = str(background)
+        background_tag.text = str(background)
     if config.enable_metadataapi_genres:
         for tag in info.tags:
             etree.SubElement(root, "genre", attrib=None, nsmap=None).text = tag
@@ -107,7 +107,7 @@ def write_nfo(results: ProcessingResults,
     """
     if results.video_file is not None and results.new_metadata is not None and namer_config.write_nfo is True:
         target = results.video_file.parent / (results.video_file.stem + ".nfo")
-        with open(target, "wt", encoding="utf-8") as nfofile:
+        with open(target, "wt", encoding="utf-8") as nfo_file:
             towrite = write_movie_xml_file(results.new_metadata, namer_config, trailer, poster, background)
-            nfofile.write(towrite)
+            nfo_file.write(towrite)
         set_permissions(target, namer_config)

@@ -55,7 +55,7 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
         found_site = re.sub(r"[\- .+_]", "", looked_up.site).upper()
         if name_parts.site is not None:
             site = name_parts.site is None or re.sub(r"[\- .+_]", "", name_parts.site.upper()) in found_site or unidecode(re.sub(r"[\- .+_]", "", name_parts.site.upper())) in found_site
-    release_date = False
+
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
@@ -94,10 +94,10 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
 def __update_results(results: List[ComparisonResult],
                      name_parts: FileNameParts,
                      namer_config: NamerConfig,
-                     skipdate: bool = False,
-                     skipname: bool = False):
+                     skip_date: bool = False,
+                     skip_name: bool = False):
     if len(results) == 0 or not results[0].is_match():
-        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skipdate, skipname):
+        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name):
             result = __evaluate_match(name_parts, match_attempt, namer_config)
             results.append(result)
         results = sorted(results, key=__match_percent, reverse=True)
@@ -106,40 +106,40 @@ def __update_results(results: List[ComparisonResult],
 def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
     results = []
     __update_results(results, name_parts, namer_config)
-    __update_results(results, name_parts, namer_config, skipdate=True)
-    __update_results(results, name_parts, namer_config, skipdate=True, skipname=True)
-    __update_results(results, name_parts, namer_config, skipname=True)
+    __update_results(results, name_parts, namer_config, skip_date=True)
+    __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True)
+    __update_results(results, name_parts, namer_config, skip_name=True)
 
     if name_parts.date is not None and (len(results) == 0 or not results[-1].is_match()):
         name_parts.date = (date.fromisoformat(name_parts.date) + timedelta(days=-1)).isoformat()
         logger.info("Not found, trying 1 day before: {}", name_parts)
         __update_results(results, name_parts, namer_config)
-        __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
+        __update_results(results, name_parts, namer_config, skip_date=False, skip_name=True)
 
     if name_parts.date is not None and (len(results) == 0 or not results[-1].is_match()):
         name_parts.date = (date.fromisoformat(name_parts.date) + timedelta(days=2)).isoformat()
         logger.info("Not found, trying 1 day after: {}", name_parts)
         __update_results(results, name_parts, namer_config)
-        __update_results(results, name_parts, namer_config, skipdate=False, skipname=True)
+        __update_results(results, name_parts, namer_config, skip_date=False, skip_name=True)
     return results
 
 
 def __match_percent(result: ComparisonResult) -> float:
-    addvalue = 0.00
+    add_value = 0.00
     if result.is_match() is True:
-        addvalue = 1000.00
-    value = (result.name_match + addvalue) if result is not None and result.name_match is not None else addvalue
+        add_value = 1000.00
+    value = (result.name_match + add_value) if result is not None and result.name_match is not None else add_value
     logger.info("Name match was {:.2f} for {}", value, result.name)
     return value
 
 
 @logger.catch
-def __get_response_json_object(url: str, authtoken: str) -> str:
+def __get_response_json_object(url: str, auth_token: str) -> str:
     """
     returns json object with info
     """
     headers = {
-        "Authorization": f"Bearer {authtoken}",
+        "Authorization": f"Bearer {auth_token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
         "User-Agent": "namer-1",
@@ -150,6 +150,23 @@ def __get_response_json_object(url: str, authtoken: str) -> str:
 
 
 @logger.catch
+def download_file(url: str, file: Path, config: NamerConfig) -> bool:
+    headers = {
+        "User-Agent": "namer-1",
+    }
+    if "metadataapi.net" in url:
+        headers["Authorization"] = f"Bearer {config.porndb_token}"
+
+    http = requests.get(url, headers=headers, stream=True)
+    if http.ok:
+        with open(file, 'wb') as io_wrapper:
+            for data in http.iter_content(1024):
+                io_wrapper.write(data)
+
+    return http.ok
+
+
+@logger.catch
 def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config: NamerConfig) -> Optional[Path]:
     """
     returns json object with info
@@ -157,19 +174,12 @@ def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config
     if url is not None and video_file is not None:
         file = video_file.parent / (video_file.stem + infix + pathlib.Path(url).suffix)
         if config.enabled_poster and url.startswith("http") and not file.exists():
-            headers = {
-                "Authorization": f"Bearer {config.porndb_token}",
-                "User-Agent": "namer-1",
-            }
             file.parent.mkdir(parents=True, exist_ok=True)
-            http = requests.get(url, headers=headers, stream=True)
-            if http.ok:
-                with open(file, 'wb') as io_wrapper:
-                    for data in http.iter_content(1024):
-                        io_wrapper.write(data)
-                    set_permissions(file, config)
-                    return file
-            return None
+            if download_file(url, file, config):
+                set_permissions(file, config)
+                return file
+            else:
+                return None
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
     return None
@@ -181,32 +191,26 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
     returns json object with info
     """
     if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0 and url is not None and len(url) > 0 and video_file is not None:
-        logger.info("Attempting to downlaod trailer: {}", url)
+        logger.info("Attempting to download trailer: {}", url)
         location = namer_config.trailer_location[:max([idx for idx, x in enumerate(namer_config.trailer_location) if x == "."])]
-        urlparts = url.split("?")[0].split(".")
+        url_parts = url.split("?")[0].split(".")
         ext = "mp4"
-        if urlparts is not None and len(urlparts) > 0 and urlparts[-1].lower() in namer_config.target_extensions:
-            ext = urlparts[-1]
-        trailerfile: Path = video_file.parent / (location + "." + ext)
-        trailerfile.parent.mkdir(parents=True, exist_ok=True)
-        if not trailerfile.exists() and url.startswith("http"):
-            headers = {"User-Agent": "namer-1"}
-            if "metadataapi.net" in url:
-                headers["Authorization"] = f"Bearer {namer_config.porndb_token}"
-            http = requests.get(url, headers=headers, stream=True)
-            if http.ok:
-                with open(trailerfile, 'wb') as io_wrapper:
-                    for data in http.iter_content(1024):
-                        io_wrapper.write(data)
-                    set_permissions(trailerfile, namer_config)
-                    return trailerfile
-            return None
+        if url_parts is not None and len(url_parts) > 0 and url_parts[-1].lower() in namer_config.target_extensions:
+            ext = url_parts[-1]
+        trailer_file: Path = video_file.parent / (location + "." + ext)
+        trailer_file.parent.mkdir(parents=True, exist_ok=True)
+        if not trailer_file.exists() and url.startswith("http"):
+            if download_file(url, trailer_file, namer_config):
+                set_permissions(trailer_file, namer_config)
+                return trailer_file
+            else:
+                return None
         trailer = (video_file.parent / url).resolve()
         return trailer if trailer.exists() and trailer.is_file() else None
     return None
 
 
-def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
+def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()
     file_info.uuid = data._id  # pylint: disable=protected-access
     file_info.name = data.title
@@ -227,7 +231,7 @@ def __jsondata_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFile
         performer.image = json_performer.image
         file_info.performers.append(performer)
     file_info.original_query = url
-    file_info.origninal_response = json_response
+    file_info.original_response = json_response
     file_info.original_parsed_filename = name_parts
     tags = []
     if hasattr(data, "tags"):
@@ -242,10 +246,10 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
     if hasattr(json_object, "data"):
         if isinstance(json_object.data, list):
             for data in json_object.data:
-                found_file_info = __jsondata_to_fileinfo(data, url, json_response, name_parts)
+                found_file_info = __json_to_fileinfo(data, url, json_response, name_parts)
                 file_infos.append(found_file_info)
         else:
-            found_file_info = __jsondata_to_fileinfo(json_object.data, url, json_response, name_parts)
+            found_file_info = __json_to_fileinfo(json_object.data, url, json_response, name_parts)
             file_infos.append(found_file_info)
     return file_infos
 
@@ -269,31 +273,30 @@ def __build_url(site: Optional[str] = None, release_date: Optional[str] = None, 
     return f"https://api.metadataapi.net/scenes{query}"
 
 
-def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: NamerConfig, skipdate: bool, skipname: bool) -> List[LookedUpFileInfo]:
-    release_date = name_parts.date if not skipdate else None
-    name = name_parts.name if not skipname else None
-    url = __build_url(name_parts.site, release_date, name)
+def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config: NamerConfig):
     logger.info("Querying: {}", url)
     json_response = __get_response_json_object(url, namer_config.porndb_token)
     file_infos = []
     if json_response is not None and json_response.strip() != "":
-        logger.debug("json_repsonse: \n{}", json_response)
+        logger.debug("json_response: \n{}", json_response)
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
+
+    return file_infos
+
+
+def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: NamerConfig, skip_date: bool, skip_name: bool) -> List[LookedUpFileInfo]:
+    release_date = name_parts.date if not skip_date else None
+    name = name_parts.name if not skip_name else None
+    url = __build_url(name_parts.site, release_date, name)
+    file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
     return file_infos
 
 
 def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
     url = __build_url(uuid=uuid)
-    logger.info("Querying: {}", url)
-    json_response = __get_response_json_object(url, namer_config.porndb_token)
-    file_infos = []
-    if json_response is not None and json_response.strip() != "":
-        logger.debug("json_repsonse: \n{}", json_response)
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
+    file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
     if len(file_infos) > 0:
         return file_infos[0]
     return None
@@ -319,7 +322,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     return comparison_results
 
 
-def main(argslist: List[str]):
+def main(args_list: List[str]):
     """
     Looks up metadata from metadataapi.net base on file name.
     """
@@ -328,11 +331,11 @@ def main(argslist: List[str]):
     that is parsable by namer_file_parser.py
     """
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-c", "--configfile", help="override location for a configuraion file.", type=pathlib.Path)
+    parser.add_argument("-c", "--configfile", help="override location for a configuration file.", type=pathlib.Path)
     parser.add_argument("-f", "--file", help="File we want to provide a match name for.", required=True, type=pathlib.Path)
     parser.add_argument("-j", "--jsonfile", help="write returned json to this file.", type=pathlib.Path)
     parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
-    args = parser.parse_args(args=argslist)
+    args = parser.parse_args(args=args_list)
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
@@ -343,8 +346,8 @@ def main(argslist: List[str]):
         match_results = match(file_name.parsed_file, config)
     if len(match_results) > 0 and match_results[0].is_match() is True:
         print(match_results[0].looked_up.new_file_name(config.inplace_name))
-        if args.jsonfile is not None and match_results[0].looked_up is not None and match_results[0].looked_up.origninal_response is not None:
-            Path(args.jsonfile).write_text(match_results[0].looked_up.origninal_response, encoding="UTF-8")
+        if args.jsonfile is not None and match_results[0].looked_up is not None and match_results[0].looked_up.original_response is not None:
+            Path(args.jsonfile).write_text(match_results[0].looked_up.original_response, encoding="UTF-8")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ porndb_token = ****************************************
 # (next to the file to be processed).
 # If you are running watchdog see new_relative_path_name in the watchdog section.
 #
-# Supports stand python 3 formating, as well as: 
+# Supports stand python 3 formatting, as well as:
 # * a prefix:
 # {site: 1p} - in this case put one space in front of the 'site', so ' Vixen'
 # * a suffix:
@@ -38,7 +38,7 @@ porndb_token = ****************************************
 # This should not contain paths, as files will be processed in place when called on the command line from namer.  
 inplace_name={site} - {date} - {name}.{ext}
 
-# If a directory name is to be prefered over a file name.
+# If a directory name is to be preferred over a file name.
 # Directories are calculated by taking the first part of a relative path
 # to the watch_dir location, or as input to namer via -d parameter.
 prefer_dir_name_if_available = True
@@ -100,18 +100,18 @@ enabled_tagging = True
 
 # Should the poster fetched from the porn db be written in to the metadata of the mp4.
 # This poster will be displayed in Plex, Jellyfin and Apple TV app.
-# Controls downloading of images for .nfo and mp4 taggign.
+# Controls downloading of images for .nfo and mp4 tagging.
 enabled_poster = True
 
 # These genres are noisey and not recommend for use.  If this is false a single default
-# genere will be used.  These are called Tags on the porndb json response objects, genre's
+# genre will be used.  These are called Tags on the porndb json response objects, genre's
 # in plex/jellyfin - and could be added as Tags to jellyfin.  Unfortunately jellyfin doesn't
 # support searching tags, so tpdb jellyfin plugin writes tags to genres, this flag will
 # mirror that behavior for mp4s and .nfo files.   It does appear jellyfin will get tag filtering 
 # in the 10.8 release due to a few prs out there. 
 enable_metadataapi_genres = False
 
-# If genre's are not copied this is the default genere added to files.
+# If genre's are not copied this is the default genre added to files.
 # Default value is adult.
 default_genre = Adult
 
@@ -142,11 +142,11 @@ new_relative_path_name={site} - {date} - {name}/{site} - {date} - {name}.{ext}
 watch_dir = ./test/watch
 
 # temporary directory where work is done.
-# a log file shows attempted matchs and match closeness.
+# a log file shows attempted matches and match closeness.
 work_dir = ./test/work
 
 # Should processing fail the file or directory is moved here.
-# retries occur every 12 hours.   Files can be manually moved to watchdir
+# retries occur every 12 hours.   Files can be manually moved to watch-dir
 # to force reprocessing.
 failed_dir = ./test/failed
 

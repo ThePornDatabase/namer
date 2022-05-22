@@ -1,4 +1,4 @@
-FROM ubuntu:impish as BASE
+FROM ubuntu:impish as base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -12,7 +12,7 @@ RUN apt-get update \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
-FROM BASE AS BUILD
+FROM base AS build
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential \
@@ -50,8 +50,8 @@ RUN cd /work/ \
     && yarn run build \
     && poetry build
 
-FROM BASE
-COPY --from=BUILD /work/dist/namer-*.tar.gz /
+FROM base
+COPY --from=build /work/dist/namer-*.tar.gz /
 RUN pip3 install /namer-*.tar.gz \
     && rm /namer-*.tar.gz
 

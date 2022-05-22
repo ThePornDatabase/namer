@@ -20,7 +20,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
-    def test_target_filedeterminitatin(self):
+    def test_target_file_determination(self):
         """
         Verify artificial names for directories are built correctly.
         """
@@ -28,9 +28,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             config = sample_config()
             config.watch_dir = tempdir
-            dirtoprocess = (tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum")
-            new_ea(dirtoprocess, use_dir=True)
-            results = determine_target_file(dirtoprocess, config)
+            dir_to_process = (tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum")
+            new_ea(dir_to_process, use_dir=True)
+            results = determine_target_file(dir_to_process, config)
             self.assertIsNotNone(results.parsed_file)
             if results.parsed_file is not None:
                 self.assertEqual(results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum")
@@ -44,12 +44,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             target_dir = tempdir / "path/"
             file = tempdir / "file"
             config = tempdir / "config"
-            error = check_arguments(dir_to_process=target_dir, file_to_process=file, config_overide=config)
+            error = check_arguments(dir_to_process=target_dir, file_to_process=file, config_override=config)
             self.assertTrue(error)
             target_dir.mkdir()
             file.write_text("test")
             config.write_text("test")
-            error = check_arguments(dir_to_process=target_dir, file_to_process=file, config_overide=config)
+            error = check_arguments(dir_to_process=target_dir, file_to_process=file, config_override=config)
             self.assertFalse(error)
 
     @patch("namer.metadataapi.__get_response_json_object")
@@ -102,7 +102,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     def test_writing_metadata_from_nfo(self):
         """
-        Test renaming and writing a movie's metadata from an nfo file.
+        Test renaming and writing a movie's metadata from a nfo file.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             current = Path(__file__).resolve().parent
@@ -126,7 +126,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     def test_writing_metadata_all_dirs_files(self, mock_poster, mock_response):
         """
         Test multiple directories are processed when -d (directory) and -m are passed.
-        Process all subdirs of -d.
+        Process all sub-dirs of -d.
         """
         os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:

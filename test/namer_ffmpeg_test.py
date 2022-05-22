@@ -40,7 +40,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     def test_update_audio_stream(self):
         """
-        Verifies we can change default audio stream languages for mp4s.
+        Verifies we can change default audio stream languages for mp4's.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)

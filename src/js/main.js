@@ -1,5 +1,4 @@
 require('bootstrap/js/dist/modal')
-require('bootstrap/js/dist/tooltip')
 const $ = require('jquery')
 
 const filesResult = $('#filesResult')

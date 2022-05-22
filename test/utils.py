@@ -81,7 +81,7 @@ class ProcessingTarget:
     expect_match: bool
 
 
-def new_ea(targetdir: Path, use_dir: bool = True, post_stem: str = "", match: bool = True):
+def new_ea(target_dir: Path, use_dir: bool = True, post_stem: str = "", match: bool = True):
     """
     Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
     optionally, names the dir and not the mp4 file to match.
@@ -94,9 +94,9 @@ def new_ea(targetdir: Path, use_dir: bool = True, post_stem: str = "", match: bo
     exact_json_file = current / "ea.full.json"
     test_poster = current / "poster.png"
     name = "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" + post_stem
-    target_file = targetdir / (name + ".mp4")
+    target_file = target_dir / (name + ".mp4")
     if use_dir is True:
-        target_file = targetdir / name / "qwerty.mp4"
+        target_file = target_dir / name / "qwerty.mp4"
     os.makedirs(target_file.parent, exist_ok=True)
     target_file.parent.chmod(int("700", base=8))
     shutil.copy(test_mp4, target_file)

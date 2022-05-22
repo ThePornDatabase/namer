@@ -2,7 +2,7 @@
 ffmpeg is access through this file, it is used to find the video streams resolution,
 and update audio streams "Default" setting.   Apple video players require there be
 only one default audio stream, and this script lets you set it with the correct language
-code their are more than one audio streams and if they are correctly labeled.
+code there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/
 """
 
@@ -20,7 +20,7 @@ from loguru import logger
 
 def get_resolution(file: Path) -> int:
     """
-    Gets the vertical resolution of an mp4 file.  For example, 720, 1080, 2160...
+    Gets the vertical resolution of a mp4 file.  For example, 720, 1080, 2160...
     Returns zero if resolution can not be determined.
     """
     logger.info("resolution stream of file {}", file)
@@ -48,7 +48,7 @@ def get_resolution(file: Path) -> int:
             output = process.stdout.read()
             process.stdout.close()
         if not success:
-            logger.warning("Error gettng resolution of file {}", file)
+            logger.warning("Error getting resolution of file {}", file)
             if process.stderr is not None:
                 logger.warning(process.stderr.read())
                 process.stderr.close()
@@ -60,7 +60,7 @@ def get_resolution(file: Path) -> int:
 
 def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
     """
-    given an mp4 input file and a desired language will return the stream position of that language in the mp4.
+    given a mp4 input file and a desired language will return the stream position of that language in the mp4.
     if the language is None, or the stream is not found, or the desired stream is the only default stream, None is returned.
     See: https://iso639-3.sil.org/code_tables/639/data/
 
@@ -88,7 +88,7 @@ def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
             audio_streams_str = process.stdout.read()
             process.stdout.close()
         if not success:
-            logger.warning("Error gettng audio streams of file {}", mp4_file)
+            logger.warning("Error getting audio streams of file {}", mp4_file)
             if process.stderr is not None:
                 logger.warning(process.stderr.read())
                 process.stderr.close()
@@ -122,7 +122,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
     Copies, and potentially updates the default audio stream of a video file.
     """
     random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
+    work_file = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
     stream = None if language is None else get_audio_stream_for_lang(mp4_file, language)
     if stream is not None and stream >= 0:
         logger.info("Attempt to alter default audio stream of {}", mp4_file)
@@ -139,8 +139,8 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
                 f"-disposition:a:{stream}",
                 "default",
                 "-c",
-                "copy",  # don't reencode anything.
-                workfile,
+                "copy",  # don't re-encode anything.
+                work_file,
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
@@ -155,7 +155,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
             else:
                 logger.warning("Return code: {}", process.returncode)
                 mp4_file.unlink()
-                shutil.move(workfile, mp4_file)
+                shutil.move(work_file, mp4_file)
             return success
     return True
 
@@ -165,7 +165,7 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
     Attempt to fix corrupt mp4 files.
     """
     random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    workfile = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
+    work_file = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
     logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
     with subprocess.Popen(
         [
@@ -173,8 +173,8 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
             "-i",
             mp4_file,  # input file
             "-c",
-            "copy",  # don't reencode anything.
-            workfile,
+            "copy",  # don't re-encode anything.
+            work_file,
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
@@ -189,5 +189,5 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         else:
             logger.warning("Return code: {}", process.returncode)
             mp4_file.unlink()
-            shutil.move(workfile, mp4_file)
+            shutil.move(work_file, mp4_file)
         return success

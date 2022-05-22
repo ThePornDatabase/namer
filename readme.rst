@@ -60,7 +60,7 @@ Why should I use this?
 How successful at matching videos is this tool?
 ------------------------------------------------
 
-For data pulled from the interet with rss feeds (which are often in the file format listed below) .... perfect.  The author and others have only experienced one mismatch, and that type of failure can never occur again.   
+For data pulled from the internet with rss feeds (which are often in the file format listed below) .... perfect.  The author and others have only experienced one mismatch, and that type of failure can never occur again.
 
 If running in a background watchdog mode, files that were failed to match are retried every 24 hours, letting the PornDB_ scrapers catch up with any metadata they may be missing.
 
@@ -70,7 +70,7 @@ Optionally, a log file can be enabled to show the original file name parts, what
 For the curious, how is a match made?
 ------------------------------------------------
 
-It assumes that file names exist as in a format like ```sitename-[YY]YY-MM-DD-Scene.and.or.performer.name.mp4.```.  A powerful regex tries to determine the various parts of a file's name.   Note that the seperating dashes and dots above are interchangable, and spaces may also be used as seperators (or any number of any combo of the three.)   This regex is overriddable, but you really need to know what you're doing and if you don't have all the match groups for the regex, the match from the the PornDB_ will likely not be any where near as robust as it is with a site, a date, and a scene/perform name section.
+It assumes that file names exist as in a format like ```sitename-[YY]YY-MM-DD-Scene.and.or.performer.name.mp4.```.  A powerful regex tries to determine the various parts of a file's name.   Note that the separating dashes and dots above are interchangeable, and spaces may also be used as separators (or any number of any combo of the three.)   This regex is overridable, but you really need to know what you're doing and if you don't have all the match groups for the regex, the match from the the PornDB_ will likely not be any where near as robust as it is with a site, a date, and a scene/perform name section.
 You'll have to read the code to figure out how to set this.   You really shouldn't do it.
 
 When determining a possible queried match from the PornDB_:
@@ -113,7 +113,7 @@ Running a service will occur automatically once you call ``docker-compose up``. 
 Pip/Python usage
 --------------------
 
-What if you don't want to use docker and/or containers?  Do you have python 3 and pip (sometimes pip3) and the command line tool ``ffmpeg`` installed locally?  If so,  ``pip install namer`` get's the job done.  If
+What if you don't want to use docker and/or containers?  Do you have python 3 and pip (sometimes pip3) and the command line tool ``ffmpeg`` installed locally?  If so,  ``pip install namer`` gets the job done.  If
 you don't have python (3), pip and ``ffmpeg`` installed Homebrew_ can help you on Mac, and Chocolatey_ can help you on windows
 
 
@@ -128,7 +128,7 @@ you don't have python (3), pip and ``ffmpeg`` installed Homebrew_ can help you o
   # Run the watchdog service:
   python3 -m namer watchdog
 
-  # Or manually rename a file, dir, or all subdirs/subfiles of a dir:
+  # Or manually rename a file, dir, or all sub-dirs/sub-files of a dir:
   # This calls the help method so that you can see the options.
   python3 -m namer rename -h
 
@@ -142,9 +142,9 @@ and finally one related to the watchdog process `watchdog section`_.
 Please note that the `namer section`_ section and the `watchdog section`_ 
 section both have a field to describe the new name of a file based on looked up metadata from the PornDB_.   
 They differ because when run from the command line namer will keep the file "in place".  
-If namer is passed a dir on the command line as input it can opperate in one of two modes,
+If namer is passed a dir on the command line as input it can operate in one of two modes,
 the default mode is to look for the largest mp4 file, or other configured movie file extension if no mp4 exists,
-and rename and move that file to the root of the folder (if it's in a subfolder).
+and rename and move that file to the root of the folder (if it's in a sub-folder).
 In this case, by default the assumption is the name of the folder should be parsed to look for information to
 search the PornDB_ for matching rather than the file name.   Meaning,
 if you pass a file to namer on the commandline it will be renamed but stay in the same directory.
@@ -156,7 +156,7 @@ Typical Watchdog Behavior:
 The watchdog process will watch a single folder, configured with watch_dir_ in the ``namer.cfg`` file.   Any new files and directories that appear in the watch_dir_
 will be processed once an mp4/mkv/avi/mov/flv file has been fully copied in to it.  
 
-The first step in processing is to moce the newly appearing directory or file in to the work_dir_.  
+The first step in processing is to more the newly appearing directory or file in to the work_dir_.
 
 Once moved the processing is highly dependant on the namer.cfg file, but in general, the name of video file or the directory file (configured with ``prefer_dir_name_if_available`` flag)
 is parsed and matched with a scene from the PornDB_.   See `For the curious, how is a match made?`_.  If a match cannot be made the general assumption is that the PornDB_ doesn't have metadata for that file yet.
@@ -164,7 +164,7 @@ The file is move to the failed dir fail_dir_ to be retried once a day at a time 
 which by default will be a random selected minute in the 3am hour of your timezone.   If enabled_tagging_ flag is set to true then
 the metadata (including cover art if enable_poster_ is set) will be embedded in the mp4 file.  Please read the comments in the namer.cfg to find out about genres, tags, performers, etc.
 
-Finally, the file is movied to a location defined by dest_dir_ and new_relative_path_name_.
+Finally, the file is moved to a location defined by dest_dir_ and new_relative_path_name_.
 
 
 Development
