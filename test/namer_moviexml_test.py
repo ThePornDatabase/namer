@@ -9,7 +9,8 @@ from shutil import copytree
 from unittest import mock
 from test.utils import sample_config
 
-from namer.metadataapi import match, parse_file_name
+from namer.filenameparser import parse_file_name
+from namer.metadataapi import match
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.types import Performer
 

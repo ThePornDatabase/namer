@@ -18,6 +18,7 @@ from loguru import logger
 from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
+from namer.fileexplorer import is_interesting_movie
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
 from namer.types import default_config, NamerConfig, write_log_file
 from namer.web.main import WebServer
@@ -142,7 +143,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         if file_path is not None:
             path = Path(file_path)
             relative_path = str(path.relative_to(self.namer_config.watch_dir))
-            if re.search(self.namer_config.ignored_dir_regex, relative_path) is None and path.exists() and path.suffix.lower()[1:] in self.namer_config.target_extensions and done_copying(path) and path.stat().st_size / (1024 * 1024) > self.namer_config.min_file_size:
+            if re.search(self.namer_config.ignored_dir_regex, relative_path) is None and done_copying(path) and is_interesting_movie(path, self.namer_config):
                 logger.info("watchdog process called for {}", relative_path)
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:

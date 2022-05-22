@@ -10,6 +10,7 @@ from typing import Dict, List
 
 from werkzeug.routing import Rule
 
+from namer.fileexplorer import gather_target_files_from_dir, is_interesting_movie
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import __build_url, __get_response_json_object, __jsondata_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import add_extra_artifacts, move_to_final_location
@@ -29,17 +30,16 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     """
     Get failed files to rename.
     """
-    files = [file for file in config.failed_dir.rglob('*.*') if is_acceptable_file(file, config)]
+    files = [file for file in gather_target_files_from_dir(config.failed_dir, config)]
     res = []
     for file in files:
-        file_rel = file.relative_to(config.failed_dir)
+        file_rel = file.target_movie_file.relative_to(config.failed_dir)
         res.append({
             'file': str(file_rel),
-            'name': file.stem,
-            'ext': file.suffix[1:].upper(),
-            'size': convert_size(file.stat().st_size),
+            'name': file.target_directory.stem if file.parsed_dir_name else file.target_movie_file.stem,
+            'ext': file.target_movie_file.suffix[1:].upper(),
+            'size': convert_size(file.target_movie_file.stat().st_size),
         })
-
     return res
 
 
@@ -118,7 +118,7 @@ def is_acceptable_file(file: Path, config: NamerConfig) -> bool:
     """
     Checks if a file belong to namer.
     """
-    return str(config.failed_dir) in str(file.resolve()) and file.is_file() and file.suffix[1:] in config.target_extensions
+    return str(config.failed_dir) in str(file.resolve()) and file.is_file() and is_interesting_movie(file, config)
 
 
 def convert_size(size_bytes: int) -> str:

@@ -1,11 +1,8 @@
 """
 Parse string in to FileNamePart define in namer_types.
 """
-import argparse
 import re
-import sys
 from pathlib import PurePath
-from typing import List
 
 from loguru import logger
 
@@ -94,18 +91,3 @@ def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> 
     else:
         logger.warning("Could not parse target name which may be a file (or directory) name depending on settings and input: {}", filename)
     return file_name_parts
-
-
-def main(arglist: List[str]):
-    """
-    Attempt to parse a name.
-    """
-    description = "You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileNameParts, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileNameParts.\n"
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
-    args = parser.parse_args(arglist)
-    print(parse_file_name(args.file, DEFAULT_REGEX_TOKENS))
-
-
-if __name__ == "__main__":
-    main(arglist=sys.argv[1:])

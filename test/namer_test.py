@@ -58,6 +58,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         test namer main method renames and tags in place when -f (video file) is passed
         """
+        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=False)]

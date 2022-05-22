@@ -20,7 +20,7 @@ import requests
 from loguru import logger
 from unidecode import unidecode
 
-from namer.filenameparser import parse_file_name
+from namer.fileexplorer import attempt_analyze
 from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer, set_permissions
 
 
@@ -299,11 +299,13 @@ def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str,
     return None
 
 
-def match(file_name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
+def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -> List[ComparisonResult]:
     """
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
     Matches will appear first.
     """
+    if file_name_parts is None:
+        return []
     comparison_results = __metadata_api_lookup(file_name_parts, namer_config)
     comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
     # Works around the porndb not returning all info on search queries by looking up the full data
@@ -335,8 +337,10 @@ def main(argslist: List[str]):
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     config = default_config()
-    file_name = parse_file_name(args.file.name, config.name_parser)
-    match_results = match(file_name, config)
+    file_name = attempt_analyze(Path(args.file), config)
+    match_results = []
+    if file_name is not None and file_name.parsed_file is not None:
+        match_results = match(file_name.parsed_file, config)
     if len(match_results) > 0 and match_results[0].is_match() is True:
         print(match_results[0].looked_up.new_file_name(config.inplace_name))
         if args.jsonfile is not None and match_results[0].looked_up is not None and match_results[0].looked_up.origninal_response is not None:

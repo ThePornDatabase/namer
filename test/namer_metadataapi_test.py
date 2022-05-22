@@ -2,11 +2,13 @@
 Test namer_metadataapi_test.py
 """
 import io
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 from test.utils import sample_config
 
+from namer.fileexplorer import attempt_analyze
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import main, match
 
@@ -174,41 +176,78 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         verify an empty response from porndb is properly handled.
         """
+        config = sample_config()
+        config.min_file_size = 0
         mock_response.return_value = "{}"
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 0)
+        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            with open((tempdir / filename), 'w'):
+                pass
+            name = attempt_analyze((tempdir / filename), config)
+            self.assertIsNotNone(name)
+            if name is not None:
+                results = match(name.parsed_file, config)
+                self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_message(self, mock_response):
         """
         failed response (empty) is properly handled
         """
+        config = sample_config()
+        config.min_file_size = 0
         mock_response.return_value = ""
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 0)
+        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            with open((tempdir / filename), 'w'):
+                pass
+            name = attempt_analyze((tempdir / filename), config)
+            self.assertIsNotNone(name)
+            if name is not None:
+                results = match(name.parsed_file, config)
+                self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_none_message(self, mock_response):
         """
         failed response (None) is properly handled
         """
+        config = sample_config()
+        config.min_file_size = 0
         mock_response.return_value = None
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 0)
+        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            with open((tempdir / filename), 'w'):
+                pass
+            name = attempt_analyze((tempdir / filename), config)
+            self.assertIsNotNone(name)
+            if name is not None:
+                results = match(name.parsed_file, config)
+                self.assertEqual(len(results), 0)
 
     @mock.patch("sys.stdout", new_callable=io.StringIO)
     @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_main_metadataapi_net(self, mock_response, mock_stdout):
+    @mock.patch("namer.metadataapi.default_config")
+    def test_main_metadataapi_net(self, mock_config, mock_response, mock_stdout):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
+        config = sample_config()
+        config.min_file_size = 0
+        mock_config.side_effect = [config]
         response = Path(__file__).resolve().parent / "ea.json"
-        mock_response.return_value = response.read_text()
-        main(["-f", "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4"])
-        self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4", mock_stdout.getvalue())
+        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            tmp_file = tempdir / filename
+            with open(tmp_file, 'w'):
+                pass
+            mock_response.return_value = response.read_text()
+            main(["-f", str(tmp_file)])
+            self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4", mock_stdout.getvalue())
 
 
 if __name__ == "__main__":

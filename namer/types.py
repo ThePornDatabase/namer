@@ -172,7 +172,7 @@ class NamerConfig:
 
     target_extensions: List[str]
     """
-    File types namer targets, only 'mp4's are can be tagged.
+    File types namer targets, only 'mp4's can be tagged, others can be renamed.
     """
 
     write_namer_log: bool = False
@@ -525,18 +525,13 @@ class FileNameParts:
     it will be stripped out and placed in a seperate location, aids in matching, useable to genre mark content.
     """
     name: Optional[str] = None
-    act: Optional[str] = None
     """
-    If the name originally ended with an "act ###" or "part ###"
-    it will be stripped out and placed in a seperate location, aids in matching.
+    The remained of a file, usually between the date and video markers such as XXX, 4k, etc.   Heavy lifting
+    occurs to match this to a scene name, perform names, or a combo of both.
     """
     extension: Optional[str] = None
     """
     The file's extension .mp4 or .mkv
-    """
-    resolution: Optional[str] = None
-    """
-    Resolution, if the file name makes a claim about resolution. (480p, 720p, 1080p, 4k)
     """
     source_file_name: Optional[str] = None
     """
@@ -548,7 +543,6 @@ class FileNameParts:
         date: {self.date}
         trans: {self.trans}
         name: {self.name}
-        act: {self.act}
         extension: {self.extension}
         original full name: {self.source_file_name}
         """
@@ -689,9 +683,6 @@ class LookedUpFileInfo:
             "all_performers": " ".join(map(lambda p: p.name, self.performers))
             if self.performers is not None
             else None,
-            "act": self.original_parsed_filename.act
-            if self.original_parsed_filename is not None
-            else None,
             "ext": self.original_parsed_filename.extension
             if self.original_parsed_filename is not None
             else None,
@@ -764,6 +755,33 @@ class ComparisonResult:
         actors and scene name).
         """
         return self.sitematch and self.datematch and self.name_match is not None and self.name_match >= 89.9
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class TargetFile:
+    input_file: Path
+    """
+    This is the original user/machine input of a target path.
+    If this path is a directory a movie is found within it (recursively).
+    If this file is a the movie file itself, the parent directory is calculated.
+    """
+    target_movie_file: Path
+    """
+    The movie file this name is targeting.
+    """
+    target_directory: Path
+    """
+    The containing directory of a File.  This may be the immediate parent directory, or higher up, depending
+    on whether a directory was selected as the input to a naming process.
+    """
+    parsed_dir_name: bool
+    """
+    Was the input file a directory and is parsing directory names configured?
+    """
+    parsed_file: Optional[FileNameParts] = None
+    """
+    The parsed file name.
+    """
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
