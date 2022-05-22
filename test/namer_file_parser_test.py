@@ -171,7 +171,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             target = (tempdir / filename)
             with open(target, 'w'):
                 pass
-            main(arglist=["-f", str(target)])
+            main(arg_list=["-f", str(target)])
             self.assertIn("site: EvilAngel", mock_stdout.getvalue())
 
 

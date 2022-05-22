@@ -12,7 +12,7 @@ from werkzeug.routing import Rule
 
 from namer.fileexplorer import gather_target_files_from_dir, is_interesting_movie
 from namer.filenameparser import parse_file_name
-from namer.metadataapi import __build_url, __get_response_json_object, __jsondata_to_fileinfo, __metadataapi_response_to_data  # type: ignore
+from namer.metadataapi import __build_url, __get_response_json_object, __json_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import add_extra_artifacts, move_to_final_location
 from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, ProcessingResults
 
@@ -87,7 +87,7 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     data: str = __get_response_json_object(url, config.porndb_token)
     data_res = json.loads(data)
     data_obj = json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
-    result: LookedUpFileInfo = __jsondata_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
+    result: LookedUpFileInfo = __json_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
 
     res = move_to_final_location(file_name, config.dest_dir, config.new_relative_path_name, result, config)
 

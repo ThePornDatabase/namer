@@ -1,5 +1,5 @@
 """
-Namer, the porn db file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
+Namer, the porn db file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4's,
 or a watchdog service to do the above watching a directory for new files.  File names are assumed to be of
 the form SITE.[YY]YY.MM.DD.String.of.performers.and.or.scene.name.<IGNORED_INFO>.[mp4|mkv|...].   In the name, read the
 periods, ".", as any number of spaces " ", dashes "-", or periods ".".
@@ -38,24 +38,24 @@ def create_default_config_if_missing():
     """
     Find or create config.
     """
-    conffile = pathlib.Path(".namer.conf")
-    print("Creating default config file here: {}", conffile)
+    config_file = pathlib.Path(".namer.conf")
+    print("Creating default config file here: {}", config_file)
     print("please edit the token or any other settings whose defaults you want changed.")
 
 
-def main(arglist: List[str]):
+def main(arg_list: List[str]):
     """
     Call main method in namer.namer or namer.watchdog.
     """
-    arg1 = None if len(arglist) == 0 else arglist[0]
+    arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == "watchdog":
         namer.watchdog.create_watcher(default_config()).run()
     elif arg1 == "rename":
-        namer.namer.main(arglist[1:])
+        namer.namer.main(arg_list[1:])
     elif arg1 == "suggest":
-        namer.metadataapi.main(arglist[1:])
+        namer.metadataapi.main(arg_list[1:])
     elif arg1 == "web":
-        namer.web.main(arglist[1:])
+        namer.web.main(arg_list[1:])
     elif arg1 in ["-h", "help", None]:
         print(DESCRIPTION)
 

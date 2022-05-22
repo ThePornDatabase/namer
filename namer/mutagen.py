@@ -14,7 +14,7 @@ from namer.types import LookedUpFileInfo, NamerConfig
 
 def resolution_to_hdv_setting(resolution: Optional[int]) -> int:
     """
-    Using the resolution (height) of an video stream return the atom value for hdvideo
+    Using the resolution (height) of a video stream return the atom value for hd video
     """
     if resolution is None:
         return 0
@@ -118,7 +118,7 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Pat
         video.save()
         logger.info("Updated atom tags: {}", mp4)
     else:
-        logger.warning("Can not update tags of a non-existant file: {}", mp4)
+        logger.warning("Can not update tags of a non-existent file: {}", mp4)
 
 
 def add_poster(poster, video):
@@ -128,10 +128,10 @@ def add_poster(poster, video):
     if poster is not None:
         with open(poster, "rb") as file:
             ext = poster.suffix.upper()
-            imageformat = None
+            image_format = None
             if ext in [".JPEG", ".JPG"]:
-                imageformat = MP4Cover.FORMAT_JPEG
+                image_format = MP4Cover.FORMAT_JPEG
             elif ext == ".PNG":
-                imageformat = MP4Cover.FORMAT_PNG
-            if imageformat:
-                video["covr"] = [MP4Cover(file.read(), imageformat)]
+                image_format = MP4Cover.FORMAT_PNG
+            if image_format:
+                video["covr"] = [MP4Cover(file.read(), image_format)]

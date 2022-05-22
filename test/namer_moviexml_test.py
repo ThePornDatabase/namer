@@ -46,7 +46,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertListEqual(info.performers, expected_performers)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_writing_xml_metadata_genere_flag(self, mock_response):
+    def test_writing_xml_metadata_genre_flag(self, mock_response):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """

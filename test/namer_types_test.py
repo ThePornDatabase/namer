@@ -30,7 +30,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     def test_local_config(self):
         """
-        Verify the namer.cfg exmple in this directory is loaded.
+        Verify the namer.cfg example in this directory is loaded.
         """
         config = sample_config()
         self.assertEqual(config.del_other_files, False)
@@ -68,8 +68,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Verify that partial formatter can handle missing fields gracefully,
         and it's prefix, postfix, and infix capabilities work.
         """
-        badfmt = "---"
-        fmt = PartialFormatter(missing="", bad_fmt=badfmt)
+        bad_fmt = "---"
+        fmt = PartialFormatter(missing="", bad_fmt=bad_fmt)
         name = fmt.format("{name}{act: 1p}", name="scene1", act="act1")
         self.assertEqual(name, "scene1 act1")
         name = fmt.format("{name}{act: 1p}", name="scene1", act=None)
@@ -97,7 +97,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertTrue("name1" in str(error1.exception))
         self.assertTrue("all_performers" in str(error1.exception))
 
-        self.assertEqual(fmt.format_field(format_spec="adsfadsf", value="fmt"), badfmt)
+        self.assertEqual(fmt.format_field(format_spec="adsfadsf", value="fmt"), bad_fmt)
 
         with self.assertRaises(Exception) as error2:
             fmt1 = PartialFormatter(missing="", bad_fmt=None)
@@ -213,21 +213,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         if system() != "Windows":
             with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
                 tempdir = Path(tmpdir)
-                targetdir = tempdir / "targetdir"
-                targetdir.mkdir()
-                testfile = targetdir / "testfile.txt"
+                target_dir = tempdir / "target_dir"
+                target_dir.mkdir()
+                testfile = target_dir / "test_file.txt"
                 with open(testfile, "w", encoding="utf-8") as file:
                     file.write("Create a new text file!")
                 self.assertEqual(oct(testfile.stat().st_mode)[-3:], "644")
-                self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "755")
-                self.assertNotEqual(targetdir.stat().st_gid, "1234567890")
+                self.assertEqual(oct(target_dir.stat().st_mode)[-3:], "755")
+                self.assertNotEqual(target_dir.stat().st_gid, "1234567890")
                 config = sample_config()
                 config.set_dir_permissions = 777
                 config.set_file_permissions = 666
                 set_permissions(testfile, config)
                 self.assertEqual(oct(testfile.stat().st_mode)[-3:], "666")
-                set_permissions(targetdir, config)
-                self.assertEqual(oct(targetdir.stat().st_mode)[-3:], "777")
+                set_permissions(target_dir, config)
+                self.assertEqual(oct(target_dir.stat().st_mode)[-3:], "777")
 
 
 if __name__ == "__main__":

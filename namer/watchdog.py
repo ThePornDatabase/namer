@@ -1,6 +1,6 @@
 """
 A file watching service to rename movie files and move them
-to revelant locations after match the file against the porndb.
+to relevant locations after match the file against the porndb.
 """
 
 import os
@@ -26,7 +26,7 @@ from namer.web.main import WebServer
 
 def done_copying(file: Optional[Path]) -> bool:
     """
-    Determines if a file is being copied by checking it's size in 2 second
+    Determines if a file is being copied by checking its size in 2 second
     increments and seeing if the size has stayed the same.
     """
     if file is None or file.exists() is False:
@@ -55,47 +55,46 @@ def handle(target_file: Path, namer_config: NamerConfig):
     detected = PurePath(relative_path).parts[0]
     dir_path = namer_config.watch_dir / detected
 
-    to_process = None
-    workingdir = None
-    workingfile = None
+    working_dir = None
+    working_file = None
     if dir_path.is_dir():
-        workingdir = Path(namer_config.work_dir) / detected
-        logger.info("Moving {} to {} for processing", dir_path, workingdir)
-        shutil.move(dir_path, workingdir)
-        to_process = workingdir
+        working_dir = Path(namer_config.work_dir) / detected
+        logger.info("Moving {} to {} for processing", dir_path, working_dir)
+        shutil.move(dir_path, working_dir)
+        to_process = working_dir
     else:
-        workingfile = Path(namer_config.work_dir) / relative_path
-        target_file.rename(workingfile)
-        logger.info("Moving {} to {} for processing", target_file, workingfile)
-        to_process = workingfile
+        working_file = Path(namer_config.work_dir) / relative_path
+        target_file.rename(working_file)
+        logger.info("Moving {} to {} for processing", target_file, working_file)
+        to_process = working_file
     result = process_file(to_process, namer_config)
 
     if result.new_metadata is None:
-        if workingdir is not None:
-            workingdir.rename(namer_config.failed_dir / detected)
-            logger.info("Moving failed processing {} to {} to retry later", workingdir, namer_config.failed_dir / detected)
+        if working_dir is not None:
+            working_dir.rename(namer_config.failed_dir / detected)
+            logger.info("Moving failed processing {} to {} to retry later", working_dir, namer_config.failed_dir / detected)
         else:
-            newvideo = namer_config.failed_dir / relative_path
-            if workingfile is not None:
-                workingfile.rename(newvideo)
-            logger.info("Moving failed processing {} to {} to retry later", workingfile, newvideo)
+            new_video = namer_config.failed_dir / relative_path
+            if working_file is not None:
+                working_file.rename(new_video)
+            logger.info("Moving failed processing {} to {} to retry later", working_file, new_video)
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
         # Move the directory if desired.
-        if result.final_name_relative is not None and len(PurePath(result.final_name_relative).parts) > 1 and workingdir is not None and namer_config.del_other_files is False:
+        if result.final_name_relative is not None and len(PurePath(result.final_name_relative).parts) > 1 and working_dir is not None and namer_config.del_other_files is False:
             target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
             if not target.exists():
-                shutil.move(workingdir, target)
-                logger.info("Moving success processed dir {} to {}", workingdir, target)
+                shutil.move(working_dir, target)
+                logger.info("Moving success processed dir {} to {}", working_dir, target)
                 result.video_file = namer_config.dest_dir / result.final_name_relative
         # Rename the file to dest name.
         newfile = move_to_final_location(result.video_file, namer_config.dest_dir, namer_config.new_relative_path_name, result.new_metadata, namer_config)
         result.video_file = newfile
         logger.info("Moving success processed file {} to {}", result.video_file, newfile)
 
-        # Delete the workingdir if it still exists.
-        if workingdir is not None and workingdir.exists():
-            shutil.rmtree(workingdir, ignore_errors=True)
+        # Delete the working_dir if it still exists.
+        if working_dir is not None and working_dir.exists():
+            shutil.rmtree(working_dir, ignore_errors=True)
 
         # Generate/aggregate extra artifacts if desired.
         add_extra_artifacts(result, namer_config)
@@ -116,7 +115,7 @@ def retry_failed(namer_config: NamerConfig):
 
 def is_fs_case_sensitive():
     """
-    Create a temporary file to determine if a filesystem is case sensitive, or not.
+    Create a temporary file to determine if a filesystem is case-sensitive, or not.
     """
     with tempfile.NamedTemporaryFile(prefix="TmP") as tmp_file:
         return not Path(tmp_file.name.lower()).is_file()
@@ -156,7 +155,7 @@ class MovieWatcher:
     Watches a configured dir for new files and attempts
     to process them and move to a destination dir.
 
-    If a failure occures moves the new files to a failed dir.
+    If a failure occurs moves the new files to a failed dir.
 
     See NamerConfig
     """

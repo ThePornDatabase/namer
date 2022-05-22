@@ -39,59 +39,59 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            testdir = Path(__file__).resolve().parent
-            mock_response.return_value = (testdir / "dc.json").read_text()
-            targetfile = (tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
-            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
+            test_dir = Path(__file__).resolve().parent
+            mock_response.return_value = (test_dir / "dc.json").read_text()
+            target_file = (tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = tempdir / "poster.png"
-            shutil.copy(testdir / "poster.png", poster)
-            name_parts = parse_file_name(targetfile.name)
+            shutil.copy(test_dir / "poster.png", poster)
+            name_parts = parse_file_name(target_file.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
-            output = MP4(targetfile)
+            update_mp4_file(target_file, info[0].looked_up, poster, NamerConfig())
+            output = MP4(target_file)
             self.assertEqual(output.get("\xa9nam"), ["Peeping Tom"])
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_writing_full_metadata(self, mock_response):
         """
-        Test writing metadata to an mp4, including tag information, which is only
+        Test writing metadata to a mp4, including tag information, which is only
         available on scene requests to the porndb using uuid to request scene information.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            testdir = Path(__file__).resolve().parent
-            response = testdir / "ea.full.json"
+            test_dir = Path(__file__).resolve().parent
+            response = test_dir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            targetfile = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
+            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = tempdir / "poster.png"
-            shutil.copy(testdir / "poster.png", poster)
-            name_parts = parse_file_name(targetfile.name)
+            shutil.copy(test_dir / "poster.png", poster)
+            name_parts = parse_file_name(target_file.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
-            validate_mp4_tags(self, targetfile)
+            update_mp4_file(target_file, info[0].looked_up, poster, NamerConfig())
+            validate_mp4_tags(self, target_file)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_non_existant_poster(self, mock_response):
+    def test_non_existent_poster(self, mock_response):
         """
         Test writing metadata to an mp4, including tag information, which is only
         available on scene requests to the porndb using uuid to request scene information.
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            testdir = Path(__file__).resolve().parent
-            response = testdir / "ea.full.json"
+            test_dir = Path(__file__).resolve().parent
+            response = test_dir / "ea.full.json"
             mock_response.return_value = response.read_text()
-            targetfile = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
+            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = None
-            name_parts = parse_file_name(targetfile.name)
+            name_parts = parse_file_name(target_file.name)
             info = match(name_parts, sample_config())
-            update_mp4_file(targetfile, info[0].looked_up, poster, NamerConfig())
-            validate_mp4_tags(self, targetfile)
+            update_mp4_file(target_file, info[0].looked_up, poster, NamerConfig())
+            validate_mp4_tags(self, target_file)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_non_existant_file(self, mock_response):
+    def test_non_existent_file(self, mock_response):
         """
         Test writing metadata to an mp4, including tag information, which is only
         available on scene requests to the porndb using uuid to request scene information.
@@ -115,14 +115,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
-            targetfile = (tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-            targetfile.parent.mkdir(parents=True, exist_ok=True)
-            testdir = Path(__file__).resolve().parent
-            shutil.copy(testdir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", targetfile)
+            target_file = (tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            target_file.parent.mkdir(parents=True, exist_ok=True)
+            test_dir = Path(__file__).resolve().parent
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             info = LookedUpFileInfo()
-            update_mp4_file(targetfile, info, None, NamerConfig())
-            self.assertTrue(targetfile.exists())
-            mp4 = MP4(targetfile)
+            update_mp4_file(target_file, info, None, NamerConfig())
+            self.assertTrue(target_file.exists())
+            mp4 = MP4(target_file)
             self.assertEqual(mp4.get("\xa9nam"), [])
             self.assertEqual(mp4.get("\xa9day"), [])
             self.assertEqual(mp4.get("\xa9alb"), [])

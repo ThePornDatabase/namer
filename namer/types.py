@@ -26,7 +26,7 @@ def _verify_name_string(name: str, name_string: str) -> bool:
     info = LookedUpFileInfo()
     try:
         formatter = PartialFormatter()
-        formatter.format(name_string, **info.asdict())
+        formatter.format(name_string, **info.as_dict())
         return True
     except KeyError as key_error:
         logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
@@ -36,7 +36,7 @@ def _verify_name_string(name: str, name_string: str) -> bool:
 
 class PartialFormatter(string.Formatter):
     """
-    Used for formating NamerConfig.inplace_name and NamerConfig.
+    Used for formatting NamerConfig.inplace_name and NamerConfig.
     """
 
     supported_keys = [
@@ -129,9 +129,9 @@ class NamerConfig:
     """
     How to write output file name.  When namer.py is run this is applied in place
     (next to the file to be processed).
-    When run from namer_watchdog.py this will be written in to the successdir.
+    When run from namer_watchdog.py this will be written in to the success dir.
 
-    Supports stand python 3 formating, as well as:
+    Supports stand python 3 formatting, as well as:
     * a prefix:
     {site: 1p} - in this case put one space in front of the 'site', so ' Vixen'
     * a suffix:
@@ -253,13 +253,13 @@ class NamerConfig:
 
     enable_metadataapi_genres: bool = False
     """
-    Should genres pulled from the porndb be added to the file?   These genres are noisey and
-    not recommend for use.  If this is false a single default genere will be used.
+    Should genres pulled from the porndb be added to the file?   These genres are noisy and
+    not recommend for use.  If this is false a single default genre will be used.
     """
 
     default_genre: str = "Adult"
     """
-    If genre's are not copied this is the default genere added to files.
+    If genre's are not copied this is the default genre added to files.
     Default value is adult.
     """
 
@@ -275,7 +275,7 @@ class NamerConfig:
     If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
     """
 
-    new_relative_path_name: str = ("{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
+    new_relative_path_name: str = "{site} - {date} - {name}/{site} - {date} - {name}.{ext}"
     """
     like inplace_name above used for local call for renaming, this instead is used to move a file/dir to a location relative
     to the dest_dir below on successful matching/tagging.
@@ -295,13 +295,13 @@ class NamerConfig:
     work_dir: Path
     """
     If running in watchdog mode, temporary directory where work is done.
-    a log file shows attempted matchs and match closeness.
+    a log file shows attempted matches and match closeness.
     """
 
     failed_dir: Path
     """
     If running in watchdog mode, Should processing fail the file or directory is moved here.
-    Files can be manually moved to watchdir to force reprocessing.
+    Files can be manually moved to watch-dir to force reprocessing.
     """
 
     dest_dir: Path
@@ -398,7 +398,7 @@ class NamerConfig:
         """
         success = True
         if self.enable_metadataapi_genres is not True and self.default_genre is None:
-            logger.error("Sinse enable_metadataapi_genres is not True, you must specify a default_genre")
+            logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
             success = False
         success = _verify_name_string("inplace_name", self.inplace_name) and success
         return success
@@ -409,7 +409,7 @@ class NamerConfig:
         """
         success = True
         if self.enable_metadataapi_genres is not True and self.default_genre is None:
-            logger.error("Sinse enable_metadataapi_genres is not True, you must specify a default_genre")
+            logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
             success = False
         success = self._verify_dir("watch_dir") and success
         success = self._verify_dir("work_dir") and success
@@ -503,7 +503,7 @@ def default_config() -> NamerConfig:
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FileNameParts:
     """
-    Represents info parsed from a file name, usually of an nzb, named something like:
+    Represents info parsed from a file name, usually of a nzb, named something like:
     'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.2160p.MP4-GAYME-xpost'
     or
     'DorcelClub.20.12..Aya.Benetti.Megane.Lopez.And.Bella.Tina.2160p.MP4-GAYME-xpost'
@@ -522,7 +522,7 @@ class FileNameParts:
     trans: bool = False
     """
     If the name originally started with an "TS" or "ts"
-    it will be stripped out and placed in a seperate location, aids in matching, useable to genre mark content.
+    it will be stripped out and placed in a separate location, aids in matching, usable to genre mark content.
     """
     name: Optional[str] = None
     """
@@ -551,7 +551,7 @@ class FileNameParts:
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class Performer:
     """
-    Minimal info about a perform, name, and role.
+    Minimal info about a performer, name, and role.
     """
 
     name: str
@@ -598,7 +598,7 @@ class LookedUpFileInfo:
     """
     date: Optional[str] = None
     """
-    date of initial release, formated YYYY-mm-dd
+    date of initial release, formatted YYYY-mm-dd
     """
     name: Optional[str] = None
     """
@@ -622,9 +622,9 @@ class LookedUpFileInfo:
     """
     genres: List[str]
     """
-    List of genres, per porndb.  Tends to be noisey.
+    List of genres, per porndb.  Tends to be noisy.
     """
-    origninal_response: Optional[str] = None
+    original_response: Optional[str] = None
     """
     json reponse parsed in to this object.
     """
@@ -634,7 +634,7 @@ class LookedUpFileInfo:
     """
     original_parsed_filename: Optional[FileNameParts]
     """
-    The FileNameParts used to build the orignal_query
+    The FileNameParts used to build the original_query
     """
     look_up_site_id: Optional[str] = None
     """
@@ -658,7 +658,7 @@ class LookedUpFileInfo:
         self.tags = []
         self.original_parsed_filename = FileNameParts()
 
-    def asdict(self):
+    def as_dict(self):
         """
         Converts the info in to a dict that can be used
         by PartialFormatter to return a new path for a file.
@@ -695,7 +695,7 @@ class LookedUpFileInfo:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
-        dictionary = self.asdict()
+        dictionary = self.as_dict()
         clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) for k, v in dictionary.items()}
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
@@ -714,8 +714,8 @@ class LookedUpFileInfo:
 class ComparisonResult:
     """
     Represents the comparison from a FileNameParts and a LookedUpFileInfo, it will be
-    consider a match if the creation dates match, the studio matches, and the original
-    scene/perform part of a the file name can match any combination of the metadata about
+    considered a match if the creation dates match, the studio matches, and the original
+    scene/perform part of a file name can match any combination of the metadata about
     actor names and/or scene name.   RapidFuzz is used to make the comparison.
     """
 
@@ -729,12 +729,12 @@ class ComparisonResult:
 
     sitematch: bool
     """
-    Did the studios match between filenameparts and lookedup
+    Did the studios match between filenameparts and looked up
     """
 
     datematch: bool
     """
-    Did the dates match between filenameparts and lookedup
+    Did the dates match between filenameparts and looked up
     """
 
     name_parts: FileNameParts
@@ -744,14 +744,14 @@ class ComparisonResult:
 
     looked_up: LookedUpFileInfo
     """
-    Info pulled from the porndb.  When doing searchs it will not include tags, only included when
+    Info pulled from the porndb.  When doing searches it will not include tags, only included when
     performing a lookup by id (which is done only after a match is made.)
     """
 
     def is_match(self) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
-        the metadate to 90% or more (via RapidFuzz, and various concatinations of metadata about
+        the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name).
         """
         return self.sitematch and self.datematch and self.name_match is not None and self.name_match >= 89.9
@@ -788,7 +788,7 @@ class TargetFile:
 class ProcessingResults:
     """
     Returned from the namer.py's process() function.   It contains information about if a match
-    was found, and of so, where files were placed.  It also tracks if a directory was inputed
+    was found, and of so, where files were placed.  It also tracks if a directory was inputted
     to namer (rather than the exact movie file.)  That knowledge can be used to move directories
     and preserve relative files, or to delete left over artifacts.
     """
@@ -802,11 +802,11 @@ class ProcessingResults:
     """
     New metadata found for the file being processed.
     Sourced including queries against the porndb, which would be stored in search_results,
-    or reading a .nfo xml file next to the video, with the file name identical exept for
+    or reading a .nfo xml file next to the video, with the file name identical except for
     the extension, which would be .nfo instead of .mp4,.mkv,.avi,.mov,.flv.
     """
 
-    dirfile: Optional[Path] = None
+    dir_file: Optional[Path] = None
     """
     Set if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
     or all files can be moved to a destination specified in the field final_name_relative.
@@ -858,11 +858,11 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
     Given porndb scene results sorted by how closely they match a file,  write the contents
     of the result matches to a log file.
     """
-    logname = None
+    log_name = None
     if movie_file is not None:
-        logname = movie_file.with_name(movie_file.stem + "_namer.log")
-        logger.info("Writing log to {}", logname)
-        with open(logname, "wt", encoding="utf-8") as log_file:
+        log_name = movie_file.with_name(movie_file.stem + "_namer.log")
+        logger.info("Writing log to {}", log_name)
+        with open(log_name, "wt", encoding="utf-8") as log_file:
             if match_attempts is None or len(match_attempts) == 0:
                 log_file.write("No search results returned.\n")
             else:
@@ -878,8 +878,8 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
                         attempt.name_parts.date = "None"
                     if attempt.name_parts.date is None:
                         attempt.name_parts.name = "None"
-                    log_file.write(f"{str(attempt.sitematch):5} Found Sitename: {attempt.looked_up.site:50.50} Parsed Sitename: {attempt.name_parts.site:50.50}\n")
+                    log_file.write(f"{str(attempt.sitematch):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
                     log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    : {attempt.name_parts.date:50.50}\n")
                     log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    : {attempt.name_parts.name:50.50}\n")
-        set_permissions(logname, namer_config)
-    return logname
+        set_permissions(log_name, namer_config)
+    return log_name

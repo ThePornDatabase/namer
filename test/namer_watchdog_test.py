@@ -47,7 +47,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
-    def test_done_copying_non_existant_file(self):
+    def test_done_copying_non_existent_file(self):
         """
         Test negatives.
         """
@@ -78,19 +78,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            outputfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            output = MP4(outputfile)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            output = MP4(output_file)
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
-            outputfile2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
-            output2 = MP4(outputfile2)
+            output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
+            output2 = MP4(output_file2)
             self.assertEqual(output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
-    def test_eventlisterner_success(self, mock_poster, mock_response):
+    def test_event_listener_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
         """
@@ -109,8 +109,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            outputfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            output = MP4(outputfile)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            output = MP4(output_file)
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
@@ -140,12 +140,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            outputfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            validate_mp4_tags(self, outputfile)
-            self.assertTrue((outputfile.parent / (outputfile.stem + "_namer.log")).exists())
-            outputfile2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
-            validate_mp4_tags(self, outputfile2)
-            validate_permissions(self, outputfile2, 664)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            validate_mp4_tags(self, output_file)
+            self.assertTrue((output_file.parent / (output_file.stem + "_namer.log")).exists())
+            output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
+            validate_mp4_tags(self, output_file2)
+            validate_permissions(self, output_file2, 664)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
@@ -174,9 +174,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            outputfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            validate_mp4_tags(self, outputfile)
-            validate_permissions(self, outputfile, 600)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            validate_mp4_tags(self, output_file)
+            validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
@@ -261,8 +261,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             wait_until_processed(config)
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
-            outputfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            validate_mp4_tags(self, outputfile)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            validate_mp4_tags(self, output_file)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
@@ -293,9 +293,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             wait_until_processed(config)
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
-            outputfile = (config.failed_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way")
-            self.assertTrue(outputfile.exists() and outputfile.is_dir())
-            validate_permissions(self, outputfile, 775)
+            output_file = (config.failed_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way")
+            self.assertTrue(output_file.exists() and output_file.is_dir())
+            validate_permissions(self, output_file, 775)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 1)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
@@ -326,13 +326,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            outputfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            nfofile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.nfo"
-            output = MP4(outputfile)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            nfo_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.nfo"
+            output = MP4(output_file)
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-            self.assertTrue(nfofile.exists() and nfofile.is_file() and nfofile.stat().st_size != 0)
+            self.assertTrue(nfo_file.exists() and nfo_file.is_file() and nfo_file.stat().st_size != 0)
 
 
 if __name__ == "__main__":
