@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from namer.fileexplorer import attempt_analyze, main
+from namer.fileutils import attempt_analyze, main
 from namer.filenameparser import parse_file_name
 from test.utils import sample_config
 
@@ -157,7 +157,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                     self.assertEqual(name.parsed_file.extension, "mp4")
 
     @patch("sys.stdout", new_callable=io.StringIO)
-    @patch("namer.fileexplorer.default_config")
+    @patch("namer.fileutils.default_config")
     def test_main_method(self, config_mock, mock_stdout):
         """
         Test the main method.

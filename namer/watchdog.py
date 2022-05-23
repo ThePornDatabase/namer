@@ -18,9 +18,9 @@ from loguru import logger
 from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
-from namer.fileexplorer import is_interesting_movie
+from namer.fileutils import is_interesting_movie, write_log_file
 from namer.namer import add_extra_artifacts, move_to_final_location, process_file
-from namer.types import default_config, NamerConfig, write_log_file
+from namer.types import default_config, NamerConfig
 from namer.web.main import WebServer
 
 

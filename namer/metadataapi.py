@@ -20,8 +20,8 @@ import requests
 from loguru import logger
 from unidecode import unidecode
 
-from namer.fileexplorer import attempt_analyze
-from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer, set_permissions
+from namer.fileutils import attempt_analyze, set_permissions
+from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:

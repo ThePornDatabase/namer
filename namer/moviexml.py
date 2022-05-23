@@ -8,7 +8,8 @@ from typing import Any, Optional
 
 from lxml import etree, objectify
 
-from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
+from namer.fileutils import set_permissions
+from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults
 
 
 def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:

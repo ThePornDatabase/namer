@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest import mock
 from test.utils import sample_config
 
-from namer.fileexplorer import attempt_analyze
+from namer.fileutils import attempt_analyze
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import main, match
 

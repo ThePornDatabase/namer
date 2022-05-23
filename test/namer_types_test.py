@@ -11,7 +11,8 @@ from pathlib import Path
 from platform import system
 from test.utils import sample_config
 
-from namer.types import (from_config, NamerConfig, PartialFormatter, Performer, set_permissions)
+from namer.fileutils import set_permissions
+from namer.types import from_config, NamerConfig, PartialFormatter, Performer
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

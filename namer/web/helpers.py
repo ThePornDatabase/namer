@@ -10,7 +10,7 @@ from typing import Dict, List
 
 from werkzeug.routing import Rule
 
-from namer.fileexplorer import gather_target_files_from_dir, is_interesting_movie
+from namer.fileutils import gather_target_files_from_dir, is_interesting_movie
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import __build_url, __get_response_json_object, __json_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import add_extra_artifacts, move_to_final_location
