@@ -464,16 +464,16 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.extra_sleep_time = config.getint("watchdog", "extra_sleep_time", fallback=30)
     watch_dir = config.get("watchdog", "watch_dir", fallback=None)
     if watch_dir is not None:
-        namer_config.watch_dir = Path(watch_dir)
+        namer_config.watch_dir = Path(watch_dir).resolve()
     work_dir = config.get("watchdog", "work_dir", fallback=None)
     if work_dir is not None:
-        namer_config.work_dir = Path(work_dir)
+        namer_config.work_dir = Path(work_dir).resolve()
     failed_dir = config.get("watchdog", "failed_dir", fallback=None)
     if failed_dir is not None:
-        namer_config.failed_dir = Path(failed_dir)
+        namer_config.failed_dir = Path(failed_dir).resolve()
     dest_dir = config.get("watchdog", "dest_dir", fallback=None)
     if dest_dir is not None:
-        namer_config.dest_dir = Path(dest_dir)
+        namer_config.dest_dir = Path(dest_dir).resolve()
     namer_config.retry_time = config.get("watchdog", "retry_time", fallback=f"03:{random.randint(0, 59):0>2}")
     namer_config.web = config.getboolean("watchdog", "web", fallback=False)
     namer_config.port = config.getint("watchdog", "port", fallback=6980)
@@ -517,7 +517,7 @@ class FileNameParts:
     """
     date: Optional[str] = None
     """
-    formated: YYYY-mm-dd
+    formatted: YYYY-mm-dd
     """
     trans: bool = False
     """
@@ -727,12 +727,12 @@ class ComparisonResult:
     and scene namer are used for attempted matching.
     """
 
-    sitematch: bool
+    site_match: bool
     """
     Did the studios match between filenameparts and looked up
     """
 
-    datematch: bool
+    date_match: bool
     """
     Did the dates match between filenameparts and looked up
     """
@@ -754,7 +754,7 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name).
         """
-        return self.sitematch and self.datematch and self.name_match is not None and self.name_match >= 89.9
+        return self.site_match and self.date_match and self.name_match is not None and self.name_match >= 89.9
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -787,7 +787,7 @@ class TargetFile:
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ProcessingResults:
     """
-    Returned from the namer.py's process() function.   It contains information about if a match
+    Returned from the namer.py process() function.   It contains information about if a match
     was found, and of so, where files were placed.  It also tracks if a directory was inputted
     to namer (rather than the exact movie file.)  That knowledge can be used to move directories
     and preserve relative files, or to delete left over artifacts.
@@ -829,16 +829,16 @@ class ProcessingResults:
 
 
 def _set_perms(target: Path, config: NamerConfig):
-    fileperm: Optional[int] = (None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8))
-    dirperm: Optional[int] = (None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8))
+    file_perm: Optional[int] = (None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8))
+    dir_perm: Optional[int] = (None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8))
     if config.set_gid is not None:
         os.lchown(target, uid=-1, gid=config.set_gid)
     if config.set_uid is not None:
         os.lchown(target, uid=config.set_uid, gid=-1)
-    if target.is_dir() and dirperm is not None:
-        target.chmod(dirperm)
-    elif target.is_file() and fileperm is not None:
-        target.chmod(fileperm)
+    if target.is_dir() and dir_perm is not None:
+        target.chmod(dir_perm)
+    elif target.is_file() and file_perm is not None:
+        target.chmod(file_perm)
 
 
 def set_permissions(file: Optional[Path], config: NamerConfig):
@@ -878,8 +878,8 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
                         attempt.name_parts.date = "None"
                     if attempt.name_parts.date is None:
                         attempt.name_parts.name = "None"
-                    log_file.write(f"{str(attempt.sitematch):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
-                    log_file.write(f"{str(attempt.datematch):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    : {attempt.name_parts.date:50.50}\n")
+                    log_file.write(f"{str(attempt.site_match):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
+                    log_file.write(f"{str(attempt.date_match):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    : {attempt.name_parts.date:50.50}\n")
                     log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    : {attempt.name_parts.name:50.50}\n")
         set_permissions(log_name, namer_config)
     return log_name

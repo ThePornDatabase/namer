@@ -37,8 +37,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(config.inplace_name, "{site} - {date} - {name}.{ext}")
         self.assertEqual(config.new_relative_path_name, "{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
         self.assertEqual(config.new_relative_path_name, "{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
-        self.assertEqual(config.dest_dir.parts, ("test", "dest"))
-        self.assertEqual(config.failed_dir.parts, ("test", "failed"))
+        self.assertEqual(config.dest_dir.relative_to(Path().resolve()).parts, ("test", "dest"))
+        self.assertEqual(config.failed_dir.relative_to(Path().resolve()).parts, ("test", "failed"))
         self.assertEqual(config.min_file_size, 300)
         self.assertEqual(config.language, "eng")
 
@@ -191,10 +191,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(namer_config.language, "rus")
         self.assertEqual(namer_config.del_other_files, True)
         self.assertEqual(namer_config.new_relative_path_name, "{site} - {name}/{site} - {name}.{ext}")
-        self.assertEqual(namer_config.watch_dir, Path("/notarealplace/watch"))
-        self.assertEqual(namer_config.work_dir, Path("/notarealplace/work"))
-        self.assertEqual(namer_config.dest_dir, Path("/notarealplace/dest"))
-        self.assertEqual(namer_config.failed_dir, Path("/notarealplace/failed"))
+        self.assertEqual(namer_config.watch_dir, Path().resolve() / "/notarealplace/watch")
+        self.assertEqual(namer_config.work_dir, Path().resolve() / "/notarealplace/work")
+        self.assertEqual(namer_config.dest_dir, Path().resolve() / "/notarealplace/dest")
+        self.assertEqual(namer_config.failed_dir, Path().resolve() / "/notarealplace/failed")
         self.assertEqual(namer_config.retry_time, "02:16")
 
     def test_main_method(self):

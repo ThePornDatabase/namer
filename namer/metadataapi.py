@@ -84,8 +84,8 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
     return ComparisonResult(
         name=result[0],
         name_match=result[1],
-        datematch=release_date,
-        sitematch=site,
+        date_match=release_date,
+        site_match=site,
         name_parts=name_parts,
         looked_up=looked_up,
     )

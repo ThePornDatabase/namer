@@ -91,8 +91,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
-        self.assertTrue(result.datematch)
-        self.assertTrue(result.sitematch)
+        self.assertTrue(result.date_match)
+        self.assertTrue(result.site_match)
         self.assertGreaterEqual(result.name_match, 90.0)
         info = results[0].looked_up
         self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
@@ -131,8 +131,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
-        self.assertTrue(result.datematch)
-        self.assertTrue(result.sitematch)
+        self.assertTrue(result.date_match)
+        self.assertTrue(result.site_match)
         self.assertGreaterEqual(result.name_match, 90.0)
         info = results[0].looked_up
         self.assertEqual(info.name, "Suck, Suck, Blow")
@@ -150,8 +150,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         results = match(name, sample_config())
         self.assertEqual(len(results), 1)
         result = results[0]
-        self.assertTrue(result.datematch)
-        self.assertTrue(result.sitematch)
+        self.assertTrue(result.date_match)
+        self.assertTrue(result.site_match)
         self.assertGreaterEqual(result.name_match, 90.0)
         info = results[0].looked_up
         self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
