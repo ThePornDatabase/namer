@@ -15,11 +15,11 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.filenameparser import parse_file_name
-from namer.fileutils import find_target_file, set_permissions, write_log_file
+from namer.fileutils import find_target_file, move_to_final_location, set_permissions, write_log_file
 from namer.metadataapi import get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.mutagen import update_mp4_file
-from namer.types import default_config, from_config, LookedUpFileInfo, NamerConfig, ProcessingResults
+from namer.types import TargetFile, default_config, from_config, LookedUpFileInfo, NamerConfig, ProcessingResults
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -117,33 +117,7 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     return None
 
 
-def move_to_final_location(to_move: Optional[Path],
-                           target_dir: Path,
-                           template: str,
-                           new_metadata: LookedUpFileInfo,
-                           config: NamerConfig) -> Optional[Path]:
-    """
-    Moves a file or directory to its final location after verifying there is no collision.
-    Should a collision occur, the file is appropriately renamed to avoid collision.
-    """
-    infix = 0
-    newname = None
-    if to_move is not None:
-        while True:
-            relative_path = Path(new_metadata.new_file_name(template, f"({infix})"))
-            newname = target_dir / relative_path
-            newname = newname.resolve()
-            infix += 1
-            if not newname.exists() or to_move.samefile(newname):
-                break
-        newname.parent.mkdir(exist_ok=True, parents=True)
-        set_permissions(target_dir / relative_path.parts[0], config)
-        to_move.rename(newname)
-        set_permissions(newname, config)
-    return newname
-
-
-def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
+def process_file(file_to_process: Path, config: NamerConfig, inplace: bool = True, infos: bool = False) -> ProcessingResults:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -188,13 +162,19 @@ def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False
         target_dir = output.dir_file if output.dir_file is not None else output.video_file.parent
         set_permissions(target_dir, config)
         if output.new_metadata is not None:
-            output.video_file = move_to_final_location(
-                to_move=output.video_file,
-                target_dir=output.video_file.parent,
-                template=config.inplace_name,
+            target_files = TargetFile()
+            target_files.input_file = output.dir_file if output.dir_file else output.video_file
+            target_files.target_directory = output.dir_file if output.dir_file else output.video_file.parent
+            target_files.target_movie_file = output.video_file
+            target_files.parsed_dir_name = output.dir_file is not None
+            target_files.parsed_file = output.parsed_file
+            target = move_to_final_location(
+                target_files=target_files,
                 new_metadata=output.new_metadata,
+                inplace=inplace,
                 config=config,
             )
+            output.video_file = target.target_movie_file
             tag_in_place(output.video_file, config, output.new_metadata)
             logger.info("Done processing file: {}, moved to {}", file_to_process, output.video_file)
     return output
@@ -205,7 +185,7 @@ def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> 
     Fully process (match, tag, rename) a single file in place and download any extra artifacts requested.
     trailer, .nfo file, logs.
     """
-    results = process_file(file_to_process, config, infos)
+    results = process_file(file_to_process, config, inplace=True, infos=infos)
     add_extra_artifacts(results, config)
     return results
 

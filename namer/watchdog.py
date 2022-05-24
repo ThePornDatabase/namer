@@ -19,7 +19,7 @@ from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEven
 from watchdog.observers.polling import PollingObserver
 
 from namer.fileutils import is_interesting_movie, write_log_file
-from namer.namer import add_extra_artifacts, move_to_final_location, process_file
+from namer.namer import add_extra_artifacts, process_file
 from namer.types import default_config, NamerConfig
 from namer.web.main import WebServer
 
@@ -67,7 +67,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
         target_file.rename(working_file)
         logger.info("Moving {} to {} for processing", target_file, working_file)
         to_process = working_file
-    result = process_file(to_process, namer_config)
+    result = process_file(to_process, namer_config, inplace=False)
 
     if result.new_metadata is None:
         if working_dir is not None:
@@ -80,18 +80,6 @@ def handle(target_file: Path, namer_config: NamerConfig):
             logger.info("Moving failed processing {} to {} to retry later", working_file, new_video)
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
     else:
-        # Move the directory if desired.
-        if result.final_name_relative is not None and len(PurePath(result.final_name_relative).parts) > 1 and working_dir is not None and namer_config.del_other_files is False:
-            target = namer_config.dest_dir / PurePath(result.final_name_relative).parts[0]
-            if not target.exists():
-                shutil.move(working_dir, target)
-                logger.info("Moving success processed dir {} to {}", working_dir, target)
-                result.video_file = namer_config.dest_dir / result.final_name_relative
-        # Rename the file to dest name.
-        newfile = move_to_final_location(result.video_file, namer_config.dest_dir, namer_config.new_relative_path_name, result.new_metadata, namer_config)
-        result.video_file = newfile
-        logger.info("Moving success processed file {} to {}", result.video_file, newfile)
-
         # Delete the working_dir if it still exists.
         if working_dir is not None and working_dir.exists():
             shutil.rmtree(working_dir, ignore_errors=True)

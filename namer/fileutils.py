@@ -101,7 +101,7 @@ def move_to_final_location(target_files: TargetFile,
     # determine where to move the movie file.
     if target_files.target_movie_file is not None:
         while True:
-            relative_path = Path(new_metadata.new_file_name(name_template, f"[{infix}]"))
+            relative_path = Path(new_metadata.new_file_name(name_template, f"({infix})"))
             movie_name = target_dir / relative_path
             movie_name = movie_name.resolve()
             infix += 1
@@ -129,7 +129,7 @@ def move_to_final_location(target_files: TargetFile,
                     dest_file.parent.mkdir(parents=True, exist_ok=True)
                     full_file.rename(dest_file)
 
-    if relative_path is not None and len(relative_path.parts) > 0:
+    if relative_path is not None and len(relative_path.parts) > 1:
         set_permissions(target_dir / relative_path.parts[0], config)
     else:
         set_permissions(movie_name, config)

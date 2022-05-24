@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from namer.fileutils import attempt_analyze, main
+from namer.fileutils import attempt_analyze
 from namer.filenameparser import parse_file_name
 from test.utils import sample_config
 
@@ -155,24 +155,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                     self.assertEqual(name.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
                     self.assertEqual(name.parsed_file.trans, False)
                     self.assertEqual(name.parsed_file.extension, "mp4")
-
-    @patch("sys.stdout", new_callable=io.StringIO)
-    @patch("namer.fileutils.default_config")
-    def test_main_method(self, config_mock, mock_stdout):
-        """
-        Test the main method.
-        """
-        config = sample_config()
-        config.min_file_size = 0
-        config_mock.side_effect = [config]
-        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(tmpdir)
-            target = (tempdir / filename)
-            with open(target, 'w'):
-                pass
-            main(arg_list=["-f", str(target)])
-            self.assertIn("site: EvilAngel", mock_stdout.getvalue())
 
 
 if __name__ == "__main__":

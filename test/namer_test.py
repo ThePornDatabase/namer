@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, Mock, patch
 from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 from mutagen.mp4 import MP4
@@ -54,11 +54,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
-    def test_writing_metadata_file(self, mock_poster, mock_response):
+    @patch("namer.namer.default_config")
+    def test_writing_metadata_file(self: unittest.TestCase, mock_config: MagicMock, mock_poster: MagicMock, mock_response: MagicMock):
         """
         test namer main method renames and tags in place when -f (video file) is passed
         """
-        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+        mock_config.return_value = sample_config()
+        mock_config.return_value.write_nfo = False
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=False)]
@@ -69,11 +71,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
-    def test_writing_metadata_dir(self, mock_poster, mock_response):
+    @patch("namer.namer.default_config")
+    def test_writing_metadata_dir(self: unittest.TestCase, mock_config: MagicMock, mock_poster: MagicMock, mock_response: MagicMock):
         """
         test namer main method renames and tags in place when -d (directory) is passed
         """
-        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+        mock_config.return_value = sample_config()
+        mock_config.return_value.write_nfo = False
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True)]
@@ -84,20 +88,22 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
-    def test_writing_metadata_all_dirs(self, mock_poster, mock_response):
+    @patch("namer.namer.default_config")
+    def test_writing_metadata_all_dirs(self: unittest.TestCase, mock_config: Mock, mock_poster: Mock, mock_response: Mock):
         """
         Test multiple directories are processed when -d (directory) and -m are passed.
         Process all subdirs of -d.
         """
-        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+        mock_config.return_value = sample_config()
+        mock_config.return_value.write_nfo = False
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True, post_stem="1"), new_ea(tempdir, use_dir=True, post_stem="2"), ]
             prepare(targets, mock_poster, mock_response)
             main(["-d", str(targets[0].file.parent.parent), "-m"])
-            output = MP4(targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output = MP4(targets[0].file.parent.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
-            output = MP4(targets[1].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output = MP4(targets[1].file.parent.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     def test_writing_metadata_from_nfo(self):
