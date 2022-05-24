@@ -5,6 +5,7 @@ Tools for working with files and directories in namer.
 import argparse
 from platform import system
 import os
+import shutil
 import sys
 from pathlib import Path
 from typing import Iterable, List, Optional
@@ -111,6 +112,9 @@ def move_to_final_location(target_files: TargetFile,
         movie_name.parent.mkdir(exist_ok=True, parents=True)
         target_files.target_movie_file.rename(movie_name)
 
+    if relative_path is not None:
+        containing_dir = target_dir / relative_path.parts[0]
+
     # we want to retain files if asked and if a directory will exist.
     if ((inputed_dir and inplace) or not inplace) and relative_path is not None:
         if not config.del_other_files and len(relative_path.parts) > 1:
@@ -143,6 +147,8 @@ def move_to_final_location(target_files: TargetFile,
         if containing_dir != target_dir:
             output.input_file = containing_dir
 
+    if target_files.input_file == target_files.target_directory and not output.target_directory.is_relative_to(target_files.target_directory):
+        shutil.rmtree(target_files.target_directory)
     return output
 
 

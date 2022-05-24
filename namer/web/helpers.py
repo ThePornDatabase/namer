@@ -14,7 +14,7 @@ from namer.fileutils import gather_target_files_from_dir, is_interesting_movie
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import __build_url, __get_response_json_object, __json_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import add_extra_artifacts, move_to_final_location
-from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, ProcessingResults
+from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, ProcessingResults, TargetFile
 
 
 def has_no_empty_params(rule: Rule) -> bool:
@@ -89,7 +89,13 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     data_obj = json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
     result: LookedUpFileInfo = __json_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
 
-    res = move_to_final_location(file_name, config.dest_dir, config.new_relative_path_name, result, config)
+    target_files = TargetFile()
+    target_files.input_file = output.dir_file if output.dir_file else output.video_file
+    target_files.target_directory = output.dir_file if output.dir_file else output.video_file.parent
+    target_files.target_movie_file = output.video_file
+    target_files.parsed_dir_name = output.dir_file is not None
+    target_files.parsed_file = output.parsed_file
+    res = move_to_final_location(file_name, config.dest_dir, result, config)
 
     processing: ProcessingResults = ProcessingResults()
     processing.new_metadata = result

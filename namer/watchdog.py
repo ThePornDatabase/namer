@@ -67,7 +67,7 @@ def handle(target_file: Path, namer_config: NamerConfig):
         target_file.rename(working_file)
         logger.info("Moving {} to {} for processing", target_file, working_file)
         to_process = working_file
-    result = process_file(to_process, namer_config, inplace=False)
+    result = process_file(to_process, namer_config, inplace=False, infos=False)
 
     if result.new_metadata is None:
         if working_dir is not None:
@@ -79,13 +79,6 @@ def handle(target_file: Path, namer_config: NamerConfig):
                 working_file.rename(new_video)
             logger.info("Moving failed processing {} to {} to retry later", working_file, new_video)
         write_log_file(namer_config.failed_dir / relative_path, result.search_results, namer_config)
-    else:
-        # Delete the working_dir if it still exists.
-        if working_dir is not None and working_dir.exists():
-            shutil.rmtree(working_dir, ignore_errors=True)
-
-        # Generate/aggregate extra artifacts if desired.
-        add_extra_artifacts(result, namer_config)
 
 
 def retry_failed(namer_config: NamerConfig):

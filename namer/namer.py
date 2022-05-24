@@ -49,7 +49,7 @@ def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: 
         for file in files:
             fullpath_file = dir_to_scan / file
             if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4", ".MKV"]:
-                process(fullpath_file, config, infos)
+                process_file(fullpath_file, config, inplace=True, infos=infos)
 
 
 def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: LookedUpFileInfo):
@@ -176,18 +176,9 @@ def process_file(file_to_process: Path, config: NamerConfig, inplace: bool = Tru
             )
             output.video_file = target.target_movie_file
             tag_in_place(output.video_file, config, output.new_metadata)
+            add_extra_artifacts(output, config)
             logger.info("Done processing file: {}, moved to {}", file_to_process, output.video_file)
     return output
-
-
-def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
-    """
-    Fully process (match, tag, rename) a single file in place and download any extra artifacts requested.
-    trailer, .nfo file, logs.
-    """
-    results = process_file(file_to_process, config, inplace=True, infos=infos)
-    add_extra_artifacts(results, config)
-    return results
 
 
 def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
@@ -264,7 +255,7 @@ def main(arg_list: List[str]):
     if args.many is True:
         dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
     else:
-        process(target.absolute(), config, args.infos)
+        process_file(target.absolute(), config, inplace=True, infos=args.infos)
 
 
 if __name__ == "__main__":
