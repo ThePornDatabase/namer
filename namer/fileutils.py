@@ -147,9 +147,13 @@ def move_to_final_location(target_files: TargetFile,
         if containing_dir != target_dir:
             output.input_file = containing_dir
 
-    if target_files.input_file == target_files.target_directory and not output.target_directory.is_relative_to(target_files.target_directory):
+    if target_files.input_file == target_files.target_directory and not subpath_or_equal(output.target_directory, target_files.target_directory):
         shutil.rmtree(target_files.target_directory)
     return output
+
+
+def subpath_or_equal(potential_sub: Path, potential_parent: Path) -> bool:
+    return potential_sub == potential_parent or str(potential_sub.absolute()).startswith(str(potential_parent.absolute()))
 
 
 def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
