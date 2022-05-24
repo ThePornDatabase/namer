@@ -19,7 +19,7 @@ from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEven
 from watchdog.observers.polling import PollingObserver
 
 from namer.fileutils import is_interesting_movie, write_log_file
-from namer.namer import add_extra_artifacts, process_file
+from namer.namer import process_file
 from namer.types import default_config, NamerConfig
 from namer.web.main import WebServer
 

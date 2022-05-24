@@ -90,21 +90,23 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     result: LookedUpFileInfo = __json_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
 
     target_files = TargetFile()
-    target_files.input_file = output.dir_file if output.dir_file else output.video_file
-    target_files.target_directory = output.dir_file if output.dir_file else output.video_file.parent
-    target_files.target_movie_file = output.video_file
-    target_files.parsed_dir_name = output.dir_file is not None
-    target_files.parsed_file = output.parsed_file
-    res = move_to_final_location(file_name, config.dest_dir, result, config)
+    rel_path = Path(file_name_str)
+    dir_file = config.failed_dir / (rel_path.parts[0] if len(rel_path.parts) > 1 else "")
+    target_files.input_file = dir_file if dir_file else file_name
+    target_files.target_directory = dir_file if dir_file else file_name.parent
+    target_files.target_movie_file = file_name
+    target_files.parsed_dir_name = dir_file is not None
+    target_files.parsed_file = file_name_parts
+    res = move_to_final_location(target_files, result, inplace=False, config=config)
 
     processing: ProcessingResults = ProcessingResults()
     processing.new_metadata = result
     processing.parsed_file = file_name_parts
-    processing.video_file = res
+    processing.video_file = res.target_movie_file
 
     add_extra_artifacts(processing, config)
 
-    return res is not None and res.is_file()
+    return res.target_movie_file is not None and res.target_movie_file.is_file()
 
 
 def delete_file(file_name_str: str, config: NamerConfig) -> bool:
