@@ -11,7 +11,7 @@ from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 from mutagen.mp4 import MP4
 
-from namer.namer import check_arguments, determine_target_file, find_target_file, main, set_permissions
+from namer.namer import check_arguments, determine_target_file, main, set_permissions
 from namer.types import NamerConfig
 
 
@@ -30,7 +30,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.watch_dir = tempdir
             dir_to_process = (tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum")
             new_ea(dir_to_process, use_dir=True)
-            results = determine_target_file(dir_to_process, config)
+            results = determine_target_file(dir_to_process, config, nfo=False, inplace=True)
             self.assertIsNotNone(results.parsed_file)
             if results.parsed_file is not None:
                 self.assertEqual(results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum")
@@ -145,17 +145,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output2 = (targets[1].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
             validate_mp4_tags(self, output2)
 
-    def test_find_target_file(self):
-        """
-        Test set permissions
-        """
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            path = Path(tmpdir)
-            test_file = path / "test_file.avi"
-            test_file.write_text("test")
-            config = sample_config()
-            target = find_target_file(path, config)
-            self.assertEqual(target, test_file)
+#    def test_find_target_file(self):
+#        """
+#        Test set permissions
+#        """
+#        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+#            path = Path(tmpdir)
+#            test_file = path / "test_file.avi"
+#            test_file.write_text("test")
+#            config = sample_config()
+#            target = find_target_file(path, config)
+#            self.assertEqual(target, test_file)
 
     def test_set_permissions(self):
         """

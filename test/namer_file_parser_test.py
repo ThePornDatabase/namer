@@ -7,8 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from namer.fileutils import attempt_analyze
 from namer.filenameparser import parse_file_name
+from namer.fileutils import attempt_analyze
 from test.utils import sample_config
 
 REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"

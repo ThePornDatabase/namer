@@ -757,7 +757,7 @@ class ComparisonResult:
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class TargetFile:
+class Command:
     input_file: Path
     """
     This is the original user/machine input of a target path.
@@ -768,7 +768,7 @@ class TargetFile:
     """
     The movie file this name is targeting.
     """
-    target_directory: Path
+    target_directory: Optional[Path] = None
     """
     The containing directory of a File.  This may be the immediate parent directory, or higher up, depending
     on whether a directory was selected as the input to a naming process.
@@ -781,6 +781,11 @@ class TargetFile:
     """
     The parsed file name.
     """
+    inplace: bool = False
+
+    write_from_nfos: bool = False
+
+    config: NamerConfig
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
