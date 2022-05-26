@@ -10,11 +10,11 @@ from typing import Dict, List
 
 from werkzeug.routing import Rule
 
-from namer.fileexplorer import gather_target_files_from_dir, is_interesting_movie
+from namer.fileutils import gather_target_files_from_dir, is_interesting_movie
 from namer.filenameparser import parse_file_name
 from namer.metadataapi import __build_url, __get_response_json_object, __json_to_fileinfo, __metadataapi_response_to_data  # type: ignore
 from namer.namer import add_extra_artifacts, move_to_final_location
-from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, ProcessingResults
+from namer.types import FileNameParts, LookedUpFileInfo, NamerConfig, Command
 
 
 def has_no_empty_params(rule: Rule) -> bool:
@@ -36,7 +36,7 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
         file_rel = file.target_movie_file.relative_to(config.failed_dir)
         res.append({
             'file': str(file_rel),
-            'name': file.target_directory.stem if file.parsed_dir_name else file.target_movie_file.stem,
+            'name': file.target_directory.stem if file.parsed_dir_name and file.target_directory is not None else file.target_movie_file.stem,
             'ext': file.target_movie_file.suffix[1:].upper(),
             'size': convert_size(file.target_movie_file.stat().st_size),
         })
@@ -89,16 +89,21 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     data_obj = json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
     result: LookedUpFileInfo = __json_to_fileinfo(data_obj.data, url, data_res, file_name_parts)
 
-    res = move_to_final_location(file_name, config.dest_dir, config.new_relative_path_name, result, config)
+    command = Command()
+    rel_path = Path(file_name_str)
+    dir_file = config.failed_dir / rel_path.parts[0] if len(rel_path.parts) > 1 else None
+    command.input_file = dir_file if dir_file else file_name
+    command.target_directory = dir_file
+    command.target_movie_file = file_name
+    command.parsed_dir_name = dir_file is not None
+    command.parsed_file = file_name_parts
+    command.inplace = False
+    command.config = config
 
-    processing: ProcessingResults = ProcessingResults()
-    processing.new_metadata = result
-    processing.parsed_file = file_name_parts
-    processing.video_file = res
+    moved = move_to_final_location(command, result)
+    add_extra_artifacts(moved.target_movie_file, result, [], config)
 
-    add_extra_artifacts(processing, config)
-
-    return res is not None and res.is_file()
+    return moved.target_movie_file is not None and moved.target_movie_file.is_file()
 
 
 def delete_file(file_name_str: str, config: NamerConfig) -> bool:

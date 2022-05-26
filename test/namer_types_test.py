@@ -4,14 +4,12 @@ Test namer_types.py
 import logging
 import os
 import sys
-import tempfile
 import unittest
 from configparser import ConfigParser
 from pathlib import Path
-from platform import system
 from test.utils import sample_config
 
-from namer.types import (from_config, NamerConfig, PartialFormatter, Performer, set_permissions)
+from namer.types import from_config, NamerConfig, PartialFormatter, Performer
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -205,29 +203,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         conf = str(config)
         self.assertIn("Namer Config", conf)
         self.assertIn("Watchdog Config", conf)
-
-    def test_set_permission(self):
-        """
-        Verify set permission.
-        """
-        if system() != "Windows":
-            with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-                tempdir = Path(tmpdir)
-                target_dir = tempdir / "target_dir"
-                target_dir.mkdir()
-                testfile = target_dir / "test_file.txt"
-                with open(testfile, "w", encoding="utf-8") as file:
-                    file.write("Create a new text file!")
-                self.assertEqual(oct(testfile.stat().st_mode)[-3:], "644")
-                self.assertEqual(oct(target_dir.stat().st_mode)[-3:], "755")
-                self.assertNotEqual(target_dir.stat().st_gid, "1234567890")
-                config = sample_config()
-                config.set_dir_permissions = 777
-                config.set_file_permissions = 666
-                set_permissions(testfile, config)
-                self.assertEqual(oct(testfile.stat().st_mode)[-3:], "666")
-                set_permissions(target_dir, config)
-                self.assertEqual(oct(target_dir.stat().st_mode)[-3:], "777")
 
 
 if __name__ == "__main__":

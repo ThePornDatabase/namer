@@ -14,12 +14,12 @@ from typing import List, Optional
 
 from loguru import logger
 
-from namer.fileexplorer import find_target_file
 from namer.filenameparser import parse_file_name
+from namer.fileutils import find_target_file, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.metadataapi import get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.mutagen import update_mp4_file
-from namer.types import default_config, from_config, LookedUpFileInfo, NamerConfig, ProcessingResults, set_permissions, write_log_file
+from namer.types import ComparisonResult, Command, default_config, from_config, LookedUpFileInfo, NamerConfig
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -49,7 +49,8 @@ def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: 
         for file in files:
             fullpath_file = dir_to_scan / file
             if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4", ".MKV"]:
-                process(fullpath_file, config, infos)
+                command = determine_target_file(fullpath_file, config, nfo=infos, inplace=True)
+                process_file(command)
 
 
 def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: LookedUpFileInfo):
@@ -70,7 +71,7 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
             poster.unlink()
 
 
-def determine_target_file(file_to_process: Path, config: NamerConfig) -> ProcessingResults:
+def determine_target_file(file_to_process: Path, config: NamerConfig, nfo: bool, inplace: bool) -> Command:
     """
     Base on the file to process - which may be a file or a dir, and configuration, determine
     the file if needed (largest mp4, or mkv in a directory), or the directory (parent dir of file),
@@ -79,31 +80,29 @@ def determine_target_file(file_to_process: Path, config: NamerConfig) -> Process
     If config.prefer_dir_name_if_available is set to True and a directory was passed as file_to_process
     then the directory's name will be returned as name, else the found file's name is used.
     """
-    results = ProcessingResults()
-
+    command = Command()
     containing_dir = None
     if file_to_process.is_dir():
         logger.info("Target dir: {}", file_to_process)
         containing_dir = file_to_process
-        results.dir_file = containing_dir
-        results.video_file = find_target_file(file_to_process, config)
+        command.target_directory = containing_dir
+        command.target_movie_file = find_target_file(file_to_process, config)
     else:
-        results.video_file = file_to_process
+        command.target_movie_file = file_to_process
+        command.target_directory = None
 
     if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.name + results.video_file.suffix
+        name = containing_dir.name + command.target_movie_file.suffix
     else:
-        name = results.video_file.name
-
-    logger.info("file: {}", results.video_file)
+        name = command.target_movie_file.name
+    logger.info("file: {}", command.target_movie_file)
     logger.info("dir : {}", containing_dir)
-
-    results.parsed_file = parse_file_name(name, config.name_parser)
-    if containing_dir is True:
-        results.final_name_relative = results.video_file.relative_to(containing_dir)
-    else:
-        results.final_name_relative = results.video_file.parent
-    return results
+    command.input_file = file_to_process
+    command.parsed_file = parse_file_name(name, config.name_parser)
+    command.inplace = inplace
+    command.write_from_nfos = nfo
+    command.config = config
+    return command
 
 
 def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileInfo]:
@@ -117,33 +116,7 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     return None
 
 
-def move_to_final_location(to_move: Optional[Path],
-                           target_dir: Path,
-                           template: str,
-                           new_metadata: LookedUpFileInfo,
-                           config: NamerConfig) -> Optional[Path]:
-    """
-    Moves a file or directory to its final location after verifying there is no collision.
-    Should a collision occur, the file is appropriately renamed to avoid collision.
-    """
-    infix = 0
-    newname = None
-    if to_move is not None:
-        while True:
-            relative_path = Path(new_metadata.new_file_name(template, f"({infix})"))
-            newname = target_dir / relative_path
-            newname = newname.resolve()
-            infix += 1
-            if not newname.exists() or to_move.samefile(newname):
-                break
-        newname.parent.mkdir(exist_ok=True, parents=True)
-        set_permissions(target_dir / relative_path.parts[0], config)
-        to_move.rename(newname)
-        set_permissions(newname, config)
-    return newname
-
-
-def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
+def process_file(command: Command) -> Optional[Command]:
     """
     Bread and butter method.
     Given a file, determines if it's a dir, if so, the dir name may be used
@@ -160,73 +133,61 @@ def process_file(file_to_process: Path, config: NamerConfig, infos: bool = False
 
     The file is then update based on the metadata from the porndb if a mp4.
     """
-    logger.info("Analyzing: {}", file_to_process)
-    output: ProcessingResults = determine_target_file(file_to_process, config)
-    if output.video_file is not None:
-        logger.info("Processing: {}", output.video_file)
+    logger.info("Processing: {}", command.input_file)
+    if command.target_movie_file is not None:
+        new_metadata: Optional[LookedUpFileInfo] = None
+        search_results: List[ComparisonResult] = []
         # Match to nfo files, if enabled and found.
-        if infos is True:
-            output.new_metadata = get_local_metadata_if_requested(output.video_file)
-            if output.new_metadata is not None:
-                output.new_metadata.original_parsed_filename = output.parsed_file
-        if output.new_metadata is None and output.parsed_file is not None and output.parsed_file.name is not None:
-            output.search_results = match(output.parsed_file, config)
-            if len(output.search_results) > 0 and output.search_results[0].is_match() is True:
-                output.new_metadata = output.search_results[0].looked_up
-        else:
-            if not infos:
-                if file_to_process != output.video_file:
-                    logger.error("""
-                        Could not process file in directory: {}
-                        Likely attempted to use the directory's name as the name to parse.
-                        In general the dir or file's name should start with a site, a date and end with an extension
-                        Target video file in dir was: {}""", file_to_process, output.video_file)
-                else:
-                    logger.error("""
+        if command.write_from_nfos is True:
+            new_metadata = get_local_metadata_if_requested(command.target_movie_file)
+            if new_metadata is not None:
+                new_metadata.original_parsed_filename = command.parsed_file
+            else:
+                logger.error("""
                         Could not process files: {}
-                        In the file's name should start with a site, a date and end with an extension""", file_to_process)
-        target_dir = output.dir_file if output.dir_file is not None else output.video_file.parent
-        set_permissions(target_dir, config)
-        if output.new_metadata is not None:
-            output.video_file = move_to_final_location(
-                to_move=output.video_file,
-                target_dir=output.video_file.parent,
-                template=config.inplace_name,
-                new_metadata=output.new_metadata,
-                config=config,
-            )
-            tag_in_place(output.video_file, config, output.new_metadata)
-            logger.info("Done processing file: {}, moved to {}", file_to_process, output.video_file)
-    return output
+                        In the file's name should start with a site, a date and end with an extension""", command.input_file)
+        elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:
+            search_results = match(command.parsed_file, command.config)
+            if len(search_results) > 0 and search_results[0].is_match() is True:
+                new_metadata = search_results[0].looked_up
+            if not command.target_movie_file:
+                logger.error("""
+                    Could not process file or directory: {}
+                    Likely attempted to use the directory's name as the name to parse.
+                    In general the dir or file's name should start with a site, a date and end with an extension
+                    Target video file in dir was: {}""", command.input_file, command.target_movie_file)
+        target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
+        set_permissions(target_dir, command.config)
+        if new_metadata is not None:
+            target = move_to_final_location(command, new_metadata)
+            tag_in_place(target.target_movie_file, command.config, new_metadata)
+            add_extra_artifacts(target.target_movie_file, new_metadata, search_results, command.config)
+            logger.info("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
+            return target
+        elif command.inplace is False:
+            failed = move_command_files(command, command.config.failed_dir)
+            if failed is not None and search_results is not None:
+                write_log_file(failed.target_movie_file, search_results, failed.config)
+    return None
 
 
-def process(file_to_process: Path, config: NamerConfig, infos: bool = False) -> ProcessingResults:
-    """
-    Fully process (match, tag, rename) a single file in place and download any extra artifacts requested.
-    trailer, .nfo file, logs.
-    """
-    results = process_file(file_to_process, config, infos)
-    add_extra_artifacts(results, config)
-    return results
-
-
-def add_extra_artifacts(results: ProcessingResults, config: NamerConfig):
+def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: List[ComparisonResult], config: NamerConfig):
     """
     Once the file is in its final location we will grab other relevant output if requested.
     """
     trailer = None
     if config.write_namer_log is True:
-        write_log_file(results.video_file, results.search_results, config)
-    if config.trailer_location is not None and not len(config.trailer_location) == 0 and results.new_metadata is not None:
-        trailer = get_trailer(results.new_metadata.trailer_url, results.video_file, config)
-    if config.write_nfo and results.new_metadata is not None:
-        poster = get_image(results.new_metadata.poster_url, "-poster", results.video_file, config)
-        background = get_image(results.new_metadata.background_url, "-background", results.video_file, config)
-        for performer in results.new_metadata.performers:
-            poster = get_image(performer.image, performer.name.replace(" ", "-") + "-image", results.video_file, config)
+        write_log_file(video_file, search_results, config)
+    if config.trailer_location is not None and not len(config.trailer_location) == 0 and new_metadata is not None:
+        trailer = get_trailer(new_metadata.trailer_url, video_file, config)
+    if config.write_nfo and new_metadata is not None:
+        poster = get_image(new_metadata.poster_url, "-poster", video_file, config)
+        background = get_image(new_metadata.background_url, "-background", video_file, config)
+        for performer in new_metadata.performers:
+            poster = get_image(performer.image, performer.name.replace(" ", "-") + "-image", video_file, config)
             if poster is not None:
                 performer.image = str(poster)
-        write_nfo(results, config, trailer, poster, background)
+        write_nfo(video_file, new_metadata, config, trailer, poster, background)
 
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_override: Path):
@@ -284,7 +245,8 @@ def main(arg_list: List[str]):
     if args.many is True:
         dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
     else:
-        process(target.absolute(), config, args.infos)
+        command = determine_target_file(target.absolute(), config, inplace=True, nfo=args.infos)
+        process_file(command)
 
 
 if __name__ == "__main__":

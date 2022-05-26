@@ -11,7 +11,6 @@ import sys
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path, PurePath
-from platform import system
 from typing import List, Optional, Sequence
 
 from loguru import logger
@@ -758,7 +757,7 @@ class ComparisonResult:
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class TargetFile:
+class Command:
     input_file: Path
     """
     This is the original user/machine input of a target path.
@@ -769,7 +768,7 @@ class TargetFile:
     """
     The movie file this name is targeting.
     """
-    target_directory: Path
+    target_directory: Optional[Path] = None
     """
     The containing directory of a File.  This may be the immediate parent directory, or higher up, depending
     on whether a directory was selected as the input to a naming process.
@@ -782,6 +781,11 @@ class TargetFile:
     """
     The parsed file name.
     """
+    inplace: bool = False
+
+    write_from_nfos: bool = False
+
+    config: NamerConfig
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -826,60 +830,3 @@ class ProcessingResults:
     """
     This is the full NamerConfig.new_relative_path_name string with all substitutions made.
     """
-
-
-def _set_perms(target: Path, config: NamerConfig):
-    file_perm: Optional[int] = (None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8))
-    dir_perm: Optional[int] = (None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8))
-    if config.set_gid is not None:
-        os.lchown(target, uid=-1, gid=config.set_gid)
-    if config.set_uid is not None:
-        os.lchown(target, uid=config.set_uid, gid=-1)
-    if target.is_dir() and dir_perm is not None:
-        target.chmod(dir_perm)
-    elif target.is_file() and file_perm is not None:
-        target.chmod(file_perm)
-
-
-def set_permissions(file: Optional[Path], config: NamerConfig):
-    """
-    Given a file or dir, set permissions from NamerConfig.set_file_permissions,
-    NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
-    """
-    if system() != "Windows" and file is not None and file.exists() and config.update_permissions_ownership is True:
-        _set_perms(file, config)
-        if file.is_dir():
-            for target in file.rglob("*.*"):
-                _set_perms(target, config)
-
-
-def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[ComparisonResult]], namer_config: NamerConfig) -> Optional[Path]:
-    """
-    Given porndb scene results sorted by how closely they match a file,  write the contents
-    of the result matches to a log file.
-    """
-    log_name = None
-    if movie_file is not None:
-        log_name = movie_file.with_name(movie_file.stem + "_namer.log")
-        logger.info("Writing log to {}", log_name)
-        with open(log_name, "wt", encoding="utf-8") as log_file:
-            if match_attempts is None or len(match_attempts) == 0:
-                log_file.write("No search results returned.\n")
-            else:
-                for attempt in match_attempts:
-                    log_file.write("\n")
-                    log_file.write(f"File                : {attempt.name_parts.source_file_name}\n")
-                    log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
-                    log_file.write(f"Match               : {attempt.is_match()}\n")
-                    log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
-                    if attempt.name_parts.site is None:
-                        attempt.name_parts.site = "None"
-                    if attempt.name_parts.date is None:
-                        attempt.name_parts.date = "None"
-                    if attempt.name_parts.date is None:
-                        attempt.name_parts.name = "None"
-                    log_file.write(f"{str(attempt.site_match):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
-                    log_file.write(f"{str(attempt.date_match):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    : {attempt.name_parts.date:50.50}\n")
-                    log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    : {attempt.name_parts.name:50.50}\n")
-        set_permissions(log_name, namer_config)
-    return log_name

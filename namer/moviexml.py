@@ -8,7 +8,8 @@ from typing import Any, Optional
 
 from lxml import etree, objectify
 
-from namer.types import LookedUpFileInfo, NamerConfig, Performer, ProcessingResults, set_permissions
+from namer.fileutils import set_permissions
+from namer.types import LookedUpFileInfo, NamerConfig, Performer
 
 
 def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
@@ -97,7 +98,8 @@ def write_movie_xml_file(info: LookedUpFileInfo,
     return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="UTF-8").decode(encoding="UTF-8")  # type: ignore
 
 
-def write_nfo(results: ProcessingResults,
+def write_nfo(video_file: Path,
+              new_metadata: LookedUpFileInfo,
               namer_config: NamerConfig,
               trailer: Optional[Path],
               poster: Optional[Path],
@@ -105,9 +107,9 @@ def write_nfo(results: ProcessingResults,
     """
     Writes an .nfo to the correct place for a video file.
     """
-    if results.video_file is not None and results.new_metadata is not None and namer_config.write_nfo is True:
-        target = results.video_file.parent / (results.video_file.stem + ".nfo")
+    if video_file is not None and new_metadata is not None and namer_config.write_nfo is True:
+        target = video_file.parent / (video_file.stem + ".nfo")
         with open(target, "wt", encoding="utf-8") as nfo_file:
-            towrite = write_movie_xml_file(results.new_metadata, namer_config, trailer, poster, background)
+            towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background)
             nfo_file.write(towrite)
         set_permissions(target, namer_config)
