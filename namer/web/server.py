@@ -1,14 +1,15 @@
 """
 A wrapper allowing shutdown of a Flask server.
 """
-from typing import Union
+from queue import Queue
+from typing import Optional, Union
 
 from flask import Flask
 from flask_compress import Compress
 from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
-from namer.types import NamerConfig
+from namer.types import Command, NamerConfig
 from namer.web.routes import get_web_routes
 
 app = Flask(__name__)
@@ -22,16 +23,17 @@ class WebServer:
     __server: Union[MultiSocketServer, BaseWSGIServer]
     __config: NamerConfig
     __debug: bool
+    __command_queue: Optional[Queue[Optional[Command]]] = None
 
-    def __init__(self, config: NamerConfig, debug: bool = False):
+    def __init__(self, config: NamerConfig, debug: bool = False, command_queue: Optional[Queue[Optional[Command]]] = None):
         self.__config = config
         self.__debug = debug
-
+        self.__command_queue = command_queue
         self.__make_server()
 
     def __make_server(self):
         path = '/' if self.__config.web_root is None else self.__config.web_root
-        blueprint = get_web_routes(self.__config)
+        blueprint = get_web_routes(self.__config, self.__command_queue)
         app.register_blueprint(blueprint, url_prefix=path, root_path=path)
         if not self.__debug:
             compress.init_app(app)
