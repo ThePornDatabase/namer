@@ -294,7 +294,7 @@ def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: Name
     return file_infos
 
 
-def __get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
+def get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
     url = __build_url(uuid=uuid)
     file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
     if len(file_infos) > 0:
@@ -316,7 +316,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     if len(comparison_results) > 0 and comparison_results[0].is_match() is True:
         uuid = comparison_results[0].looked_up.uuid
         if uuid is not None:
-            file_infos = __get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
+            file_infos = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
             if file_infos is not None:
                 comparison_results[0].looked_up = file_infos
     return comparison_results

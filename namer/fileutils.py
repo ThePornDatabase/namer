@@ -19,18 +19,24 @@ from namer.types import ComparisonResult, LookedUpFileInfo, default_config, Name
 def move_command_files(target: Optional[Command], newTarget: Path) -> Optional[Command]:
     working_dir = None
     working_file = None
+    output: Optional[Command] = None
     if target is None:
         return None
     if target.input_file == target.target_directory and target.target_directory is not None:
         working_dir = Path(newTarget) / target.target_directory.name
         logger.info("Moving {} to {} for processing", target.target_directory, working_dir)
         shutil.move(target.target_directory, working_dir)
-        return analyze(working_dir, target.config)
+        output = analyze(working_dir, target.config)
     else:
         working_file = Path(newTarget) / target.target_movie_file.name
         target.target_movie_file.rename(working_file)
         logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
-        return analyze(working_file, target.config)
+        output = analyze(working_file, target.config)
+    if output is not None:
+        output.tpdbid = target.tpdbid
+        output.inplace = target.inplace
+        output.write_from_nfos = target.write_from_nfos
+    return output
 
 
 def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[ComparisonResult]], namer_config: NamerConfig) -> Optional[Path]:

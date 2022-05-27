@@ -16,7 +16,7 @@ from loguru import logger
 
 from namer.filenameparser import parse_file_name
 from namer.fileutils import find_target_file, move_command_files, move_to_final_location, set_permissions, write_log_file
-from namer.metadataapi import get_image, get_trailer, match
+from namer.metadataapi import get_image, get_trailer, match, get_complete_metadatapi_net_fileinfo
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.mutagen import update_mp4_file
 from namer.types import ComparisonResult, Command, default_config, from_config, LookedUpFileInfo, NamerConfig
@@ -146,6 +146,11 @@ def process_file(command: Command) -> Optional[Command]:
                 logger.error("""
                         Could not process files: {}
                         In the file's name should start with a site, a date and end with an extension""", command.input_file)
+        elif new_metadata is None and command.tpdbid is not None and command.parsed_file is not None:
+            search_results = []
+            file_infos = get_complete_metadatapi_net_fileinfo(command.parsed_file, command.tpdbid, command.config)
+            if file_infos is not None:
+                new_metadata = file_infos
         elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:
             search_results = match(command.parsed_file, command.config)
             if len(search_results) > 0 and search_results[0].is_match() is True:

@@ -85,6 +85,7 @@ def get_web_routes(config: NamerConfig, command_queue: Optional[Queue]) -> Bluep
                 logger.error(f"moving movie {movie}")
                 command = analyze_relative_to(movie, config.failed_dir, config=config)
                 if command is not None:
+                    command.tpdbid = data['scene_id']
                     command_queue.put(command)  # Todo pass selection
             else:
                 res = make_rename(data['file'], data['scene_id'], config)

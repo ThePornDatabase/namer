@@ -785,6 +785,8 @@ class Command:
 
     write_from_nfos: bool = False
 
+    tpdbid: Optional[str] = None
+
     config: NamerConfig
 
 

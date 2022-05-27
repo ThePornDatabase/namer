@@ -82,7 +82,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     namer_config: NamerConfig
 
-    def __init__(self, namer_config: NamerConfig, queue: Optional[Queue]):
+    def __init__(self, namer_config: NamerConfig, queue: Queue):
         super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.namer_config = namer_config
         self.command_queue = queue
@@ -130,7 +130,7 @@ class MovieWatcher:
         self.__src_path = namer_config.watch_dir
         self.__event_observer = PollingObserver()
         self.__webserver: Optional[WebServer] = None
-        self.__command_queue: Optional[Queue] = Queue()
+        self.__command_queue: Queue = Queue()
         self.__workerthread: Thread = Thread(target=self.__processing_thread, daemon=True)
         self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
 

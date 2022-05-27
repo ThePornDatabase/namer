@@ -99,6 +99,7 @@ def make_rename(file_name_str: str, scene_id: str, config: NamerConfig) -> bool:
     command.parsed_file = file_name_parts
     command.inplace = False
     command.config = config
+    command.tpdbid = result.uuid
 
     moved = move_to_final_location(command, result)
     add_extra_artifacts(moved.target_movie_file, result, [], config)
