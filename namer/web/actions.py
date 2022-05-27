@@ -84,7 +84,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
         target_name = config.failed_dir / Path(file_name_str).parts[0]
         shutil.rmtree(target_name)
     else:
-        file_name.unlink()    
+        file_name.unlink()
 
     return not file_name.is_file()
 
