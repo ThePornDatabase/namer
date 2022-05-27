@@ -19,10 +19,10 @@ from loguru import logger
 from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
-from namer.fileutils import analyze_relative_to, is_interesting_movie, move_command_files
+from namer.fileutils import make_command_relative_to, is_interesting_movie, move_command_files
 from namer.namer import process_file
 from namer.types import Command, default_config, NamerConfig
-from namer.web.main import WebServer
+from namer.web.server import WebServer
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -48,9 +48,7 @@ def handle(command: Command):
     """
     Responsible for processing and moving new movie files.
     """
-    working = move_command_files(command, command.config.work_dir)
-    if working is not None:
-        process_file(working)
+    process_file(command)
 
 
 def retry_failed(namer_config: NamerConfig):
@@ -101,9 +99,10 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:
                     time.sleep(self.namer_config.extra_sleep_time)
-                command = analyze_relative_to(input_dir=path, relative_to=self.namer_config.watch_dir, config=self.namer_config)
-                if command is not None:
-                    self.command_queue.put(command)
+                command = make_command_relative_to(input_dir=path, relative_to=self.namer_config.watch_dir, config=self.namer_config)
+                working_command = move_command_files(command, self.namer_config.work_dir)
+                if working_command is not None:
+                    self.command_queue.put(working_command)
 
 
 class MovieWatcher:
@@ -176,9 +175,10 @@ class MovieWatcher:
                 files.append(file)
         for file in files:
             if file.exists() and file.is_file():
-                command = analyze_relative_to(file, self.__namer_config.watch_dir, self.__namer_config)
-                if command is not None:
-                    self.__command_queue.put(command)
+                command = make_command_relative_to(file, self.__namer_config.watch_dir, self.__namer_config)
+                working_command = move_command_files(command, self.__namer_config.work_dir)
+                if working_command is not None:
+                    self.__command_queue.put(working_command)
 
     def stop(self):
         """

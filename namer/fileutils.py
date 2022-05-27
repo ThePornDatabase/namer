@@ -26,12 +26,12 @@ def move_command_files(target: Optional[Command], newTarget: Path) -> Optional[C
         working_dir = Path(newTarget) / target.target_directory.name
         logger.info("Moving {} to {} for processing", target.target_directory, working_dir)
         shutil.move(target.target_directory, working_dir)
-        output = analyze(working_dir, target.config)
+        output = make_command(working_dir, target.config)
     else:
         working_file = Path(newTarget) / target.target_movie_file.name
         target.target_movie_file.rename(working_file)
         logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
-        output = analyze(working_file, target.config)
+        output = make_command(working_file, target.config)
     if output is not None:
         output.tpdbid = target.tpdbid
         output.inplace = target.inplace
@@ -188,31 +188,33 @@ def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iter
     """
     if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
-        mapped: Iterable = map(lambda file: analyze((dir_to_scan / file), config), dir_to_scan.iterdir())
+        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
     return []
 
 
-def __exact_parse(target_movie_file: Path, target_dir: Optional[Path], parse_dir: bool, config: NamerConfig) -> Command:
+def __exact_command(target_movie_file: Path, target_dir: Optional[Path], config: NamerConfig) -> Command:
     """
     Given a target movie file and a target containing directory, parse appropriate names as determined by
     config, aka, "prefer_dir_name_if_available".
     """
-    target_file = Command()
-    target_file.target_directory = target_dir
-    target_file.target_movie_file = target_movie_file
-    target_file.parsed_dir_name = parse_dir
-    target_file.config = config
-    if target_movie_file is not None:
-        name = target_movie_file.name
-        if target_dir is not None and parse_dir:
-            name = target_dir.name + target_movie_file.suffix
-        target_file.parsed_file = parse_file_name(name, config.name_parser)
-    return target_file
+    command = Command()
+    command.target_directory = target_dir
+    command.target_movie_file = target_movie_file
+    command.parsed_dir_name = target_dir is not None and config.prefer_dir_name_if_available
+    command.config = config
+    name = target_movie_file.name
+    parsed_dir_name = False
+    if target_dir is not None and config.prefer_dir_name_if_available:
+        name = target_dir.name + target_movie_file.suffix
+        parsed_dir_name = True
+    command.parsed_file = parse_file_name(name, config.name_parser)
+    command.parsed_dir_name = parsed_dir_name
+    return command
 
 
-def find_target_file(root_dir: Path, config: NamerConfig) -> Path:
+def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     """
     returns largest matching file
     """
@@ -226,20 +228,24 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Path:
     return file
 
 
-def analyze(input_file: Path, config: NamerConfig) -> Optional[Command]:
+def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None) -> Optional[Command]:
     """
     after finding target directory and target movie from input, returns file name descriptors.
     """
     target_dir = input_file if input_file.is_dir() else None
     target_movie = input_file if not input_file.is_dir() else find_target_file(input_file, config)
-    parse_dir = input_file.is_dir() and config.prefer_dir_name_if_available
-    target_file = __exact_parse(target_movie, target_dir, parse_dir, config)
+    if target_movie is None:
+        return None
+    target_file = __exact_command(target_movie, target_dir, config)
     target_file.input_file = input_file
+    target_file.tpdbid = uuid
+    target_file.write_from_nfos = nfo
+    target_file.inplace = inplace
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) else None
     return output
 
 
-def analyze_relative_to(input_dir: Path, relative_to: Path, config: NamerConfig) -> Optional[Command]:
+def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None) -> Optional[Command]:
     """
     Ensure we are going to handle the directory relative to another directory, rather than just the file
     specified
@@ -248,15 +254,8 @@ def analyze_relative_to(input_dir: Path, relative_to: Path, config: NamerConfig)
         relative_path = input_dir.absolute().relative_to(relative_to.absolute())
         if relative_path is not None:
             target_file = relative_to / relative_path.parts[0]
-            return analyze(target_file, config)
+            return make_command(target_file, config, nfo, inplace, uuid)
     return None
-
-
-def attempt_analyze(input_dir: Optional[Path], config: NamerConfig) -> Optional[Command]:
-    """
-    Attempts to parse an input path after determining target movies/directories
-    """
-    return None if input_dir is None else analyze(input_dir, config)
 
 
 def main(arg_list: List[str]):
@@ -268,7 +267,7 @@ def main(arg_list: List[str]):
     parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
     args = parser.parse_args(arg_list)
     target = Path(args.file).absolute()
-    target_file = attempt_analyze(target, default_config())
+    target_file = make_command(target, default_config())
     if target_file is not None:
         print(target_file.parsed_file)
 

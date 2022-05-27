@@ -14,12 +14,11 @@ from typing import List, Optional
 
 from loguru import logger
 
-from namer.filenameparser import parse_file_name
-from namer.fileutils import find_target_file, move_command_files, move_to_final_location, set_permissions, write_log_file
+from namer.fileutils import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.metadataapi import get_image, get_trailer, match, get_complete_metadatapi_net_fileinfo
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.mutagen import update_mp4_file
-from namer.types import ComparisonResult, Command, default_config, from_config, LookedUpFileInfo, NamerConfig
+from namer.types import Command, ComparisonResult, default_config, from_config, LookedUpFileInfo, NamerConfig
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -49,8 +48,9 @@ def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: 
         for file in files:
             fullpath_file = dir_to_scan / file
             if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4", ".MKV"]:
-                command = determine_target_file(fullpath_file, config, nfo=infos, inplace=True)
-                process_file(command)
+                command = make_command(fullpath_file, config, nfo=infos, inplace=True)
+                if command is not None:
+                    process_file(command)
 
 
 def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: LookedUpFileInfo):
@@ -69,40 +69,6 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
         logger.info("Done tagging file: {}", video)
         if poster is not None and new_metadata.poster_url is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
-
-
-def determine_target_file(file_to_process: Path, config: NamerConfig, nfo: bool, inplace: bool) -> Command:
-    """
-    Base on the file to process - which may be a file or a dir, and configuration, determine
-    the file if needed (largest mp4, or mkv in a directory), or the directory (parent dir of file),
-    as well as determine which should be used for attempted naming.
-
-    If config.prefer_dir_name_if_available is set to True and a directory was passed as file_to_process
-    then the directory's name will be returned as name, else the found file's name is used.
-    """
-    command = Command()
-    containing_dir = None
-    if file_to_process.is_dir():
-        logger.info("Target dir: {}", file_to_process)
-        containing_dir = file_to_process
-        command.target_directory = containing_dir
-        command.target_movie_file = find_target_file(file_to_process, config)
-    else:
-        command.target_movie_file = file_to_process
-        command.target_directory = None
-
-    if config.prefer_dir_name_if_available and containing_dir is not None:
-        name = containing_dir.name + command.target_movie_file.suffix
-    else:
-        name = command.target_movie_file.name
-    logger.info("file: {}", command.target_movie_file)
-    logger.info("dir : {}", containing_dir)
-    command.input_file = file_to_process
-    command.parsed_file = parse_file_name(name, config.name_parser)
-    command.inplace = inplace
-    command.write_from_nfos = nfo
-    command.config = config
-    return command
 
 
 def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileInfo]:
@@ -250,8 +216,9 @@ def main(arg_list: List[str]):
     if args.many is True:
         dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
     else:
-        command = determine_target_file(target.absolute(), config, inplace=True, nfo=args.infos)
-        process_file(command)
+        command = make_command(target.absolute(), config, inplace=True, nfo=args.infos)
+        if command is not None:
+            process_file(command)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 A wrapper allowing shutdown of a Flask server.
 """
 from queue import Queue
-from typing import Optional, Union
+from typing import Union
 
 from flask import Flask
 from flask_compress import Compress
@@ -23,9 +23,9 @@ class WebServer:
     __server: Union[MultiSocketServer, BaseWSGIServer]
     __config: NamerConfig
     __debug: bool
-    __command_queue: Optional[Queue] = None
+    __command_queue: Queue
 
-    def __init__(self, config: NamerConfig, debug: bool = False, command_queue: Optional[Queue] = None):
+    def __init__(self, config: NamerConfig, command_queue: Queue, debug: bool = False):
         self.__config = config
         self.__debug = debug
         self.__command_queue = command_queue

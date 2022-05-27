@@ -20,7 +20,7 @@ import requests
 from loguru import logger
 from unidecode import unidecode
 
-from namer.fileutils import attempt_analyze, set_permissions
+from namer.fileutils import make_command, set_permissions
 from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer
 
 
@@ -340,7 +340,7 @@ def main(args_list: List[str]):
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     config = default_config()
-    file_name = attempt_analyze(Path(args.file), config)
+    file_name = make_command(Path(args.file), config)
     match_results = []
     if file_name is not None and file_name.parsed_file is not None:
         match_results = match(file_name.parsed_file, config)

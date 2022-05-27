@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
-from namer.fileutils import attempt_analyze
+from namer.fileutils import make_command
 from test.utils import sample_config
 
 from namer.filenameparser import parse_file_name
@@ -184,10 +184,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             with open((tempdir / filename), 'w'):
                 pass
-            name = attempt_analyze((tempdir / filename), config)
-            self.assertIsNotNone(name)
-            if name is not None:
-                results = match(name.parsed_file, config)
+            command = make_command((tempdir / filename), config)
+            self.assertIsNotNone(command)
+            if command is not None:
+                results = match(command.parsed_file, config)
                 self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -203,10 +203,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             with open((tempdir / filename), 'w'):
                 pass
-            name = attempt_analyze((tempdir / filename), config)
-            self.assertIsNotNone(name)
-            if name is not None:
-                results = match(name.parsed_file, config)
+            command = make_command((tempdir / filename), config)
+            self.assertIsNotNone(command)
+            if command is not None:
+                results = match(command.parsed_file, config)
                 self.assertEqual(len(results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
@@ -222,10 +222,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             with open((tempdir / filename), 'w'):
                 pass
-            name = attempt_analyze((tempdir / filename), config)
-            self.assertIsNotNone(name)
-            if name is not None:
-                results = match(name.parsed_file, config)
+            command = make_command((tempdir / filename), config)
+            self.assertIsNotNone(command)
+            if command is not None:
+                results = match(command.parsed_file, config)
                 self.assertEqual(len(results), 0)
 
     @mock.patch("sys.stdout", new_callable=io.StringIO)

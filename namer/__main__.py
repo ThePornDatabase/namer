@@ -54,8 +54,6 @@ def main(arg_list: List[str]):
         namer.namer.main(arg_list[1:])
     elif arg1 == "suggest":
         namer.metadataapi.main(arg_list[1:])
-    elif arg1 == "web":
-        namer.web.main(arg_list[1:])
     elif arg1 in ["-h", "help", None]:
         print(DESCRIPTION)
 

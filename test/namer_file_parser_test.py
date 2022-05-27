@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from namer.filenameparser import parse_file_name
-from namer.fileutils import attempt_analyze
+from namer.fileutils import make_command
 from test.utils import sample_config
 
 REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
@@ -119,16 +119,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 pass
             config = sample_config()
             config.min_file_size = 0
-            name = attempt_analyze((tempdir / filename), config)
-            self.assertIsNotNone(name)
-            if name is not None:
-                self.assertIsNotNone(name.parsed_file)
-                if name.parsed_file is not None:
-                    self.assertEqual(name.parsed_file.site, "EvilAngel")
-                    self.assertEqual(name.parsed_file.date, "2022-01-03")
-                    self.assertEqual(name.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
-                    self.assertEqual(name.parsed_file.trans, False)
-                    self.assertEqual(name.parsed_file.extension, "mp4")
+            command = make_command((tempdir / filename), config)
+            self.assertIsNotNone(command)
+            if command is not None:
+                self.assertIsNotNone(command.parsed_file)
+                if command.parsed_file is not None:
+                    self.assertEqual(command.parsed_file.site, "EvilAngel")
+                    self.assertEqual(command.parsed_file.date, "2022-01-03")
+                    self.assertEqual(command.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
+                    self.assertEqual(command.parsed_file.trans, False)
+                    self.assertEqual(command.parsed_file.extension, "mp4")
 
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_parse_dir_name(self, mock_stdout):
@@ -145,16 +145,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config = sample_config()
             config.min_file_size = 0
             config.prefer_dir_name_if_available = True
-            name = attempt_analyze(target_file.parent, config)
-            self.assertIsNotNone(name)
-            if name is not None:
-                self.assertIsNotNone(name.parsed_file)
-                if name.parsed_file is not None:
-                    self.assertEqual(name.parsed_file.site, "EvilAngel")
-                    self.assertEqual(name.parsed_file.date, "2022-01-03")
-                    self.assertEqual(name.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
-                    self.assertEqual(name.parsed_file.trans, False)
-                    self.assertEqual(name.parsed_file.extension, "mp4")
+            command = make_command(target_file.parent, config)
+            self.assertIsNotNone(command)
+            if command is not None:
+                self.assertIsNotNone(command.parsed_file)
+                if command.parsed_file is not None:
+                    self.assertEqual(command.parsed_file.site, "EvilAngel")
+                    self.assertEqual(command.parsed_file.date, "2022-01-03")
+                    self.assertEqual(command.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
+                    self.assertEqual(command.parsed_file.trans, False)
+                    self.assertEqual(command.parsed_file.extension, "mp4")
 
 
 if __name__ == "__main__":

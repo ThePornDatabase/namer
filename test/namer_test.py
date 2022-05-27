@@ -11,7 +11,7 @@ from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 from mutagen.mp4 import MP4
 
-from namer.namer import check_arguments, determine_target_file, main, set_permissions
+from namer.namer import check_arguments, main, set_permissions
 from namer.types import NamerConfig
 
 
@@ -19,21 +19,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-
-    def test_target_file_determination(self):
-        """
-        Verify artificial names for directories are built correctly.
-        """
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(tmpdir)
-            config = sample_config()
-            config.watch_dir = tempdir
-            dir_to_process = (tempdir / "BrazzersExxtra - 2021-12-07 - Dr. Polla & the Chronic Discharge Conundrum")
-            new_ea(dir_to_process, use_dir=True)
-            results = determine_target_file(dir_to_process, config, nfo=False, inplace=True)
-            self.assertIsNotNone(results.parsed_file)
-            if results.parsed_file is not None:
-                self.assertEqual(results.parsed_file.name, "Dr  Polla & the Chronic Discharge Conundrum")
 
     def test_check_arguments(self):
         """
@@ -61,6 +46,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         mock_config.return_value = sample_config()
         mock_config.return_value.write_nfo = False
+        mock_config.return_value.min_file_size = 0
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=False)]
@@ -78,6 +64,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         mock_config.return_value = sample_config()
         mock_config.return_value.write_nfo = False
+        mock_config.return_value.min_file_size = 0
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True)]
@@ -96,6 +83,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         mock_config.return_value = sample_config()
         mock_config.return_value.write_nfo = False
+        mock_config.return_value.min_file_size = 0
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=True, post_stem="1"), new_ea(tempdir, use_dir=True, post_stem="2"), ]
@@ -106,10 +94,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output = MP4(targets[1].file.parent.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
-    def test_writing_metadata_from_nfo(self):
+    @patch("namer.namer.default_config")
+    def test_writing_metadata_from_nfo(self, mock_config: Mock):
         """
         Test renaming and writing a movie's metadata from a nfo file.
         """
+        mock_config.return_value = sample_config()
+        mock_config.return_value.write_nfo = False
+        mock_config.return_value.min_file_size = 0
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             current = Path(__file__).resolve().parent
             tempdir = Path(tmpdir)
@@ -129,12 +121,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
-    def test_writing_metadata_all_dirs_files(self, mock_poster, mock_response):
+    @patch("namer.namer.default_config")
+    def test_writing_metadata_all_dirs_files(self, mock_config: Mock, mock_poster, mock_response):
         """
         Test multiple directories are processed when -d (directory) and -m are passed.
         Process all sub-dirs of -d.
         """
-        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+        mock_config.return_value = sample_config()
+        mock_config.return_value.write_nfo = False
+        mock_config.return_value.min_file_size = 0
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             targets = [new_ea(tempdir, use_dir=False, post_stem="1"), new_ea(tempdir, use_dir=False, post_stem="2")]
