@@ -8,7 +8,7 @@ from pathlib import Path
 from queue import Queue
 import shutil
 from types import SimpleNamespace
-from typing import Dict, Iterable, List
+from typing import Dict, List
 
 from werkzeug.routing import Rule
 
