@@ -5,15 +5,16 @@ Helper functions to tie in to namer's functionality.
 import json
 import math
 from pathlib import Path
+from queue import Queue
 import shutil
 from types import SimpleNamespace
-from typing import Dict, List
+from typing import Dict, Iterable, List
 
 from werkzeug.routing import Rule
 
 from namer.fileutils import gather_target_files_from_dir, is_interesting_movie
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
-from namer.types import NamerConfig
+from namer.types import Command, NamerConfig
 
 
 def has_no_empty_params(rule: Rule) -> bool:
@@ -29,17 +30,23 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     """
     Get failed files to rename.
     """
-    files = [file for file in gather_target_files_from_dir(config.failed_dir, config)]
-    res = []
-    for file in files:
-        file_rel = file.target_movie_file.relative_to(config.failed_dir)
-        res.append({
-            'file': str(file_rel),
-            'name': file.target_directory.stem if file.parsed_dir_name and file.target_directory is not None else file.target_movie_file.stem,
-            'ext': file.target_movie_file.suffix[1:].upper(),
-            'size': convert_size(file.target_movie_file.stat().st_size),
-        })
-    return res
+    return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config)))
+
+
+def get_queued_files(config: NamerConfig, queue: Queue) -> List[Dict]:
+    """
+    Get failed files to rename.
+    """
+    return list(map(command_to_file_info, filter(lambda i: i is not None, queue.queue)))
+
+
+def command_to_file_info(command: Command) -> Dict:
+    return {
+        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)),
+        'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory is not None else command.target_movie_file.stem,
+        'ext': command.target_movie_file.suffix[1:].upper(),
+        'size': convert_size(command.target_movie_file.stat().st_size),
+    }
 
 
 def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
