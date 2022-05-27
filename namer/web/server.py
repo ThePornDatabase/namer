@@ -9,7 +9,7 @@ from flask_compress import Compress
 from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
-from namer.types import Command, NamerConfig
+from namer.types import NamerConfig
 from namer.web.routes import get_web_routes
 
 app = Flask(__name__)
@@ -23,9 +23,9 @@ class WebServer:
     __server: Union[MultiSocketServer, BaseWSGIServer]
     __config: NamerConfig
     __debug: bool
-    __command_queue: Optional[Queue[Optional[Command]]] = None
+    __command_queue: Optional[Queue] = None
 
-    def __init__(self, config: NamerConfig, debug: bool = False, command_queue: Optional[Queue[Optional[Command]]] = None):
+    def __init__(self, config: NamerConfig, debug: bool = False, command_queue: Optional[Queue] = None):
         self.__config = config
         self.__debug = debug
         self.__command_queue = command_queue

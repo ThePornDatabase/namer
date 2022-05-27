@@ -9,11 +9,11 @@ from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
 
 from namer.fileutils import analyze_relative_to
-from namer.types import Command, NamerConfig
+from namer.types import NamerConfig
 from namer.web.helpers import delete_file, get_failed_files, get_search_results, make_rename
 
 
-def get_web_routes(config: NamerConfig, command_queue: Optional[Queue[Optional[Command]]]) -> Blueprint:
+def get_web_routes(config: NamerConfig, command_queue: Optional[Queue]) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
