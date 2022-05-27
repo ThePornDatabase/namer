@@ -214,7 +214,7 @@ def __exact_command(target_movie_file: Path, target_dir: Optional[Path], config:
     return command
 
 
-def find_target_file(root_dir: Path, config: NamerConfig) -> Path:
+def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     """
     returns largest matching file
     """
@@ -234,6 +234,8 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     """
     target_dir = input_file if input_file.is_dir() else None
     target_movie = input_file if not input_file.is_dir() else find_target_file(input_file, config)
+    if target_movie is None:
+        return None
     target_file = __exact_command(target_movie, target_dir, config)
     target_file.input_file = input_file
     target_file.tpdbid = uuid

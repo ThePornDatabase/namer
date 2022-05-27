@@ -7,7 +7,7 @@ from queue import Queue
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
 
-from namer.fileutils import make_command_relative_to
+from namer.fileutils import make_command_relative_to, move_command_files
 from namer.types import NamerConfig
 from namer.web.actions import delete_file, get_failed_files, get_search_results
 
@@ -79,13 +79,13 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         res = False
         if data is not None:
             res = False
-            if command_queue is not None:
-                movie = config.failed_dir / Path(data['file'])
-                logger.error(f"moving movie {movie}")
-                command = make_command_relative_to(movie, config.failed_dir, config=config)
-                if command is not None:
-                    command.tpdbid = data['scene_id']
-                    command_queue.put(command)  # Todo pass selection
+            movie = config.failed_dir / Path(data['file'])
+            logger.error(f"moving movie {movie}")
+            command = make_command_relative_to(movie, config.failed_dir, config=config)
+            moved_command = move_command_files(command, config.work_dir)
+            if moved_command is not None:
+                moved_command.tpdbid = data['scene_id']
+                command_queue.put(moved_command)  # Todo pass selection
         return jsonify(res)
 
     @blueprint.route('/api/v1/delete', methods=['POST'])
