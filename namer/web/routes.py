@@ -1,18 +1,24 @@
 """
 Defines the routes of a Flask webserver for namer.
 """
+from loguru import logger
+from pathlib import Path
+from queue import Queue
+from typing import Optional
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
 
+from namer.fileutils import analyze_relative_to
 from namer.types import NamerConfig
 from namer.web.helpers import delete_file, get_failed_files, get_search_results, make_rename
 
 
-def get_web_routes(config: NamerConfig) -> Blueprint:
+def get_web_routes(config: NamerConfig, command_queue: Optional[Queue]) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
     blueprint = Blueprint('/', __name__, static_url_path='/', static_folder='public', template_folder='templates')
+    command_queue = command_queue
 
     """
     @blueprint.route('/')
@@ -73,8 +79,15 @@ def get_web_routes(config: NamerConfig) -> Blueprint:
 
         res = False
         if data is not None:
-            res = make_rename(data['file'], data['scene_id'], config)
-
+            res = False
+            if command_queue is not None:
+                movie = config.failed_dir / Path(data['file'])
+                logger.error(f"moving movie {movie}")
+                command = analyze_relative_to(movie, config.failed_dir, config=config)
+                if command is not None:
+                    command_queue.put(command)  # Todo pass selection
+            else:
+                res = make_rename(data['file'], data['scene_id'], config)
         return jsonify(res)
 
     @blueprint.route('/api/v1/delete', methods=['POST'])

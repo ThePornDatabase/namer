@@ -4,6 +4,7 @@ to relevant locations after match the file against the porndb.
 """
 
 import os
+from queue import Queue
 import re
 import shutil
 import sys
@@ -81,9 +82,10 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     namer_config: NamerConfig
 
-    def __init__(self, namer_config: NamerConfig):
+    def __init__(self, namer_config: NamerConfig, queue: Optional[Queue]):
         super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.namer_config = namer_config
+        self.command_queue = queue
 
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
@@ -101,7 +103,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
                     time.sleep(self.namer_config.extra_sleep_time)
                 command = analyze_relative_to(input_dir=path, relative_to=self.namer_config.watch_dir, config=self.namer_config)
                 if command is not None:
-                    handle(command)
+                    self.command_queue.put(command)
 
 
 class MovieWatcher:
@@ -114,12 +116,23 @@ class MovieWatcher:
     See NamerConfig
     """
 
+    def __processing_thread(self):
+        while True:
+            command = self.__command_queue.get()
+            if command is None:
+                break
+            handle(command)
+            self.__command_queue.task_done()
+        self.__command_queue.task_done()
+
     def __init__(self, namer_config: NamerConfig):
         self.__namer_config = namer_config
         self.__src_path = namer_config.watch_dir
-        self.__event_handler = MovieEventHandler(namer_config)
         self.__event_observer = PollingObserver()
         self.__webserver: Optional[WebServer] = None
+        self.__command_queue: Optional[Queue] = Queue()
+        self.__workerthread: Thread = Thread(target=self.__processing_thread, daemon=True)
+        self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
 
     def run(self):
         """
@@ -128,7 +141,7 @@ class MovieWatcher:
         """
         self.start()
         if self.__namer_config.web is True:
-            self.__webserver = WebServer(self.__namer_config)
+            self.__webserver = WebServer(self.__namer_config, command_queue=self.__command_queue)
             if self.__webserver:
                 Thread(target=self.__webserver.run).start()
         try:
@@ -155,6 +168,7 @@ class MovieWatcher:
             print(f"Git Hash: {git_hash}")
         self.__schedule()
         self.__event_observer.start()
+        self.__workerthread.start()
         # touch all existing movie files.
         files: List[Path] = []
         for file in self.__namer_config.watch_dir.rglob("**/*.*"):
@@ -164,7 +178,7 @@ class MovieWatcher:
             if file.exists() and file.is_file():
                 command = analyze_relative_to(file, self.__namer_config.watch_dir, self.__namer_config)
                 if command is not None:
-                    handle(command)
+                    self.__command_queue.put(command)
 
     def stop(self):
         """
@@ -176,6 +190,8 @@ class MovieWatcher:
         self.__event_observer.join()
         if self.__webserver is not None:
             self.__webserver.stop()
+        self.__command_queue.put(None)
+        self.__command_queue.join()
         logger.info("exited")
 
     def __schedule(self):
