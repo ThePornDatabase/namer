@@ -2,7 +2,7 @@
 A wrapper allowing shutdown of a Flask server.
 """
 from queue import Queue
-from typing import Optional, Union
+from typing import Union
 
 from flask import Flask
 from flask_compress import Compress
