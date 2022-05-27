@@ -10,10 +10,10 @@ from flask.wrappers import Response
 
 from namer.fileutils import analyze_relative_to
 from namer.types import NamerConfig
-from namer.web.helpers import delete_file, get_failed_files, get_search_results, make_rename
+from namer.web.actions import delete_file, get_failed_files, get_search_results, make_rename
 
 
-def get_web_routes(config: NamerConfig, command_queue: Optional[Queue]) -> Blueprint:
+def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
@@ -87,8 +87,6 @@ def get_web_routes(config: NamerConfig, command_queue: Optional[Queue]) -> Bluep
                 if command is not None:
                     command.tpdbid = data['scene_id']
                     command_queue.put(command)  # Todo pass selection
-            else:
-                res = make_rename(data['file'], data['scene_id'], config)
         return jsonify(res)
 
     @blueprint.route('/api/v1/delete', methods=['POST'])

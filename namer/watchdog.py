@@ -22,7 +22,7 @@ from watchdog.observers.polling import PollingObserver
 from namer.fileutils import analyze_relative_to, is_interesting_movie, move_command_files
 from namer.namer import process_file
 from namer.types import Command, default_config, NamerConfig
-from namer.web.main import WebServer
+from namer.web.server import WebServer
 
 
 def done_copying(file: Optional[Path]) -> bool:
