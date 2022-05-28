@@ -4,14 +4,14 @@ to relevant locations after match the file against the porndb.
 """
 
 import os
-from queue import Queue
 import re
 import shutil
 import sys
 import tempfile
-from threading import Thread
 import time
 from pathlib import Path
+from queue import Queue
+from threading import Thread
 from typing import List, Optional
 
 import schedule
@@ -130,7 +130,7 @@ class MovieWatcher:
         self.__event_observer = PollingObserver()
         self.__webserver: Optional[WebServer] = None
         self.__command_queue: Queue = Queue()
-        self.__workerthread: Thread = Thread(target=self.__processing_thread, daemon=True)
+        self.__worker_thread: Thread = Thread(target=self.__processing_thread, daemon=True)
         self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
 
     def run(self):
@@ -167,7 +167,7 @@ class MovieWatcher:
             print(f"Git Hash: {git_hash}")
         self.__schedule()
         self.__event_observer.start()
-        self.__workerthread.start()
+        self.__worker_thread.start()
         # touch all existing movie files.
         files: List[Path] = []
         for file in self.__namer_config.watch_dir.rglob("**/*.*"):
