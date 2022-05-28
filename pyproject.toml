@@ -26,7 +26,7 @@ Flask-Compress = "^1.12"
 pytest = "^7.0.0"
 pytest-cov = "^3.0.0"
 coverage = "^6.3.2"
-flakeheaven = "^0.11.1"
+flakeheaven = "^1.0.1"
 
 [tool.flakeheaven]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]

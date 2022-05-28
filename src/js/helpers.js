@@ -5,8 +5,17 @@ class Helpers {
         return '<div class="progress"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
     }
 
-    static refreshFailedFiles(selector) {
-        Helpers.request('./api/v1/get_files', null, function (data) {
+    static refreshFiles(selector, target='files') {
+        let url
+        switch (target) {
+            case 'queue':
+                url = 'get_queued'
+                break
+            default:
+                url = 'get_files'
+        }
+
+        Helpers.request(`./api/v1/${url}`, null, function (data) {
             Helpers.render('failedFiles', data, selector)
         })
     }

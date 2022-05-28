@@ -1,5 +1,5 @@
 """
-ffmpeg is access through this file, it is used to find the video streams resolution,
+ffmpeg is access through this file, it is used to find the video stream's resolution,
 and update audio streams "Default" setting.   Apple video players require there be
 only one default audio stream, and this script lets you set it with the correct language
 code there are more than one audio streams and if they are correctly labeled.

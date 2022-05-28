@@ -112,9 +112,9 @@ def process_file(command: Command) -> Optional[Command]:
                 logger.error("""
                         Could not process files: {}
                         In the file's name should start with a site, a date and end with an extension""", command.input_file)
-        elif new_metadata is None and command.tpdbid is not None and command.parsed_file is not None:
+        elif new_metadata is None and command.tpdb_id is not None and command.parsed_file is not None:
             search_results = []
-            file_infos = get_complete_metadatapi_net_fileinfo(command.parsed_file, command.tpdbid, command.config)
+            file_infos = get_complete_metadatapi_net_fileinfo(command.parsed_file, command.tpdb_id, command.config)
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:

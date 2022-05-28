@@ -5,6 +5,7 @@ const filesResult = $('#filesResult')
 const resultBody = $('#searchResults .modal-body')
 const queryInput = $('#queryInput')
 const deleteFile = $('#deleteFile')
+const queueSize = $('#queueSize')
 
 const Helpers = require('./helpers')
 
@@ -23,7 +24,7 @@ $('.search').on('click', function () {
 
 $('#refreshFiles').on('click', function () {
     filesResult.html(Helpers.getProgressBar())
-    Helpers.refreshFailedFiles(filesResult)
+    Helpers.refreshFiles(filesResult, $(this).data('target'))
 })
 
 filesResult.on('click', '.match', function () {
@@ -39,7 +40,7 @@ $('#searchResults').on('click', '.rename', function () {
     }
 
     Helpers.request('./api/v1/rename', data, function () {
-        Helpers.refreshFailedFiles(filesResult)
+        Helpers.refreshFiles(filesResult)
     })
 })
 
@@ -55,6 +56,19 @@ $('#deleteButton').on('click', function () {
     }
 
     Helpers.request('./api/v1/delete', data, function () {
-        Helpers.refreshFailedFiles(filesResult)
+        Helpers.refreshFiles(filesResult)
     })
 })
+
+function updateQueueSize() {
+    Helpers.request('./api/v1/get_queue', null, function (data) {
+        Helpers.render('queueSize', data, queueSize)
+    })
+}
+
+if (queueSize) {
+    updateQueueSize()
+    setInterval(function () {
+        updateQueueSize()
+    }, 5000)
+}

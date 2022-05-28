@@ -43,7 +43,7 @@ def set_array_if_not_none(video: MP4, atom: str, value: List[str]):
 
 def get_mp4_if_possible(mp4: Path) -> MP4:
     """
-    Attempt to read an mp4 file to prepare for edit.
+    Attempt to read a mp4 file to prepare for edit.
     """
     try:
         video = MP4(mp4)

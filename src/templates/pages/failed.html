@@ -1,18 +1,15 @@
 {% extends "partials/base.html" %}
 {% block title %}Failed files{% endblock %}
+{% set active_page = "index" %}
 {% block content %}
     <div class="card text-center mt-2 shadow-sm">
         <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="true" href="./">Files</a>
-                </li>
-            </ul>
+            {% include 'components/navigations.html' %}
         </div>
         <div class="card-body">
             <h5 class="card-title d-flex justify-content-between align-items-center">
                 Unmatched Files
-                <button id="refreshFiles" type="button" class="btn btn-secondary ms-1">
+                <button id="refreshFiles" type="button" class="btn btn-secondary ms-1" data-target="files">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
             </h5>

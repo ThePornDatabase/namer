@@ -3,37 +3,38 @@ Tools for working with files and directories in namer.
 """
 
 import argparse
-from platform import system
 import os
 import shutil
 import sys
 from pathlib import Path
+from platform import system
 from typing import Iterable, List, Optional
 
 from loguru import logger
 
 from namer.filenameparser import parse_file_name
-from namer.types import ComparisonResult, LookedUpFileInfo, default_config, NamerConfig, Command
+from namer.types import Command, ComparisonResult, default_config, LookedUpFileInfo, NamerConfig
 
 
-def move_command_files(target: Optional[Command], newTarget: Path) -> Optional[Command]:
+def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
     working_dir = None
     working_file = None
     output: Optional[Command] = None
     if target is None:
         return None
+
     if target.input_file == target.target_directory and target.target_directory is not None:
-        working_dir = Path(newTarget) / target.target_directory.name
+        working_dir = Path(new_target) / target.target_directory.name
         logger.info("Moving {} to {} for processing", target.target_directory, working_dir)
         shutil.move(target.target_directory, working_dir)
         output = make_command(working_dir, target.config)
     else:
-        working_file = Path(newTarget) / target.target_movie_file.name
+        working_file = Path(new_target) / target.target_movie_file.name
         target.target_movie_file.rename(working_file)
         logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
         output = make_command(working_file, target.config)
     if output is not None:
-        output.tpdbid = target.tpdbid
+        output.tpdb_id = target.tpdb_id
         output.inplace = target.inplace
         output.write_from_nfos = target.write_from_nfos
     return output
@@ -96,10 +97,9 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
                 _set_perms(target, config)
 
 
-def move_to_final_location(command: Command,
-                           new_metadata: LookedUpFileInfo) -> Command:
+def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
     """
-    Moves a file or directory to it's final location after verifying there is no collision.
+    Moves a file or directory to its final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
     """
     infix = 0
@@ -107,7 +107,7 @@ def move_to_final_location(command: Command,
     # determine where we will move the movie, and how we will name it.
     # if in_place is False we will move it to the config defined destination dir.
     # if a directory name was passed in we will rename the dir with the relative_path_name from the config
-    # else we will just rename the movie in it's current location (as all that was defined in the command was the movie file.)
+    # else we will just rename the movie in its current location (as all that was defined in the command was the movie file.)
     name_template = command.config.inplace_name
     target_dir = command.target_movie_file.parent
     if command.target_directory is not None:
@@ -136,7 +136,7 @@ def move_to_final_location(command: Command,
         containing_dir = target_dir / relative_path.parts[0]
 
     # we want to retain files if asked and if a directory will exist.
-    if (command.target_directory and not command.config.del_other_files and containing_dir is not None):
+    if command.target_directory and not command.config.del_other_files and containing_dir is not None:
         containing_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"moving other files to new dir: {containing_dir} from {command.target_directory}")
         # first remove namer log if exists
@@ -238,7 +238,7 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
         return None
     target_file = __exact_command(target_movie, target_dir, config)
     target_file.input_file = input_file
-    target_file.tpdbid = uuid
+    target_file.tpdb_id = uuid
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) else None

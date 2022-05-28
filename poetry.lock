@@ -103,7 +103,7 @@ pyflakes = ">=2.4.0,<2.5.0"
 
 [[package]]
 name = "flakeheaven"
-version = "0.11.1"
+version = "1.0.1"
 description = "FlakeHeaven is a [Flake8](https://gitlab.com/pycqa/flake8) wrapper to make it cool."
 category = "dev"
 optional = false
@@ -119,6 +119,7 @@ urllib3 = "*"
 
 [package.extras]
 docs = ["alabaster", "pygments-github-lexers", "recommonmark", "sphinx"]
+dev = ["commitizen (>=2.22)"]
 
 [[package]]
 name = "flask"
@@ -516,7 +517,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "e85e0000c8be7906ac63e867f8fb2e60b41357a00a12c2d239714f8e7d320b70"
+content-hash = "bfdf936f3ee37a86298e7e9e0f7c4a982419f4f3732956d0ab437ce7244b2f3b"
 
 [metadata.files]
 atomicwrites = [
@@ -659,8 +660,8 @@ flake8 = [
     {file = "flake8-4.0.1.tar.gz", hash = "sha256:806e034dda44114815e23c16ef92f95c91e4c71100ff52813adf7132a6ad870d"},
 ]
 flakeheaven = [
-    {file = "flakeheaven-0.11.1-py3-none-any.whl", hash = "sha256:5614165d95bf26c46af22db4e0ccc90e475c286f902c473de16730fad4735e5d"},
-    {file = "flakeheaven-0.11.1.tar.gz", hash = "sha256:20f5a573b8e85be5a73fed2e3967f7ab8b5e77714a5898d8b634dd31a0b75f9b"},
+    {file = "flakeheaven-1.0.1-py3-none-any.whl", hash = "sha256:00bc43b63c35b4dd9b662251a557659dd334a7f233693a3d6409a18ceed3d822"},
+    {file = "flakeheaven-1.0.1.tar.gz", hash = "sha256:7cc00df80e3c7f3188ea6525e3040c47968547b453ddc0bfa27389b333124463"},
 ]
 flask = [
     {file = "Flask-2.1.2-py3-none-any.whl", hash = "sha256:fad5b446feb0d6db6aec0c3184d16a8c1f6c3e464b511649c8918a9be100b4fe"},
