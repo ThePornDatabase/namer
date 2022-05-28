@@ -12,7 +12,7 @@ from typing import Dict, List
 
 from werkzeug.routing import Rule
 
-from namer.fileutils import gather_target_files_from_dir, is_interesting_movie
+from namer.fileutils import gather_target_files_from_dir, is_interesting_movie, subpath_or_equal
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
 from namer.types import Command, NamerConfig
 
@@ -46,7 +46,7 @@ def get_queue_size(queue: Queue) -> int:
 
 def command_to_file_info(command: Command) -> Dict:
     return {
-        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if command.target_movie_file.is_relative_to(command.config.failed_dir) else None,
+        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if subpath_or_equal(command.target_movie_file, command.config.failed_dir ) else None,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory is not None else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
         'size': convert_size(command.target_movie_file.stat().st_size),
