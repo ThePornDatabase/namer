@@ -170,7 +170,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
 def subpath_or_equal(potential_sub: Optional[Path], potential_parent: Optional[Path]) -> bool:
     if potential_parent is None or potential_sub is None:
         return False
-    return len(potential_parent.parts) <= len(potential_sub.parts) and all(i==j for i, j in zip(potential_parent.parts, potential_sub.parts))    
+    return len(potential_parent.parts) <= len(potential_sub.parts) and all(i == j for i, j in zip(potential_parent.parts, potential_sub.parts))
 
 
 def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
