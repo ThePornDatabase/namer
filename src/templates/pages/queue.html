@@ -1,0 +1,23 @@
+{% extends "partials/base.html" %}
+{% block title %}Failed files{% endblock %}
+{% set active_page = "queue" %}
+{% block content %}
+    <div class="card text-center mt-2 shadow-sm">
+        <div class="card-header">
+            {% include 'components/navigations.html' %}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title d-flex justify-content-between align-items-center">
+                Queued Files
+                <button id="refreshFiles" type="button" class="btn btn-secondary ms-1" data-target="queue">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </h5>
+            <div class="card-text">
+                <div id="filesResult">
+                    {% include 'render/failedFiles.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

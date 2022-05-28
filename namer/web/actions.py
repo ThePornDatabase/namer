@@ -4,9 +4,9 @@ Helper functions to tie in to namer's functionality.
 
 import json
 import math
+import shutil
 from pathlib import Path
 from queue import Queue
-import shutil
 from types import SimpleNamespace
 from typing import Dict, List
 
@@ -33,16 +33,20 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config)))
 
 
-def get_queued_files(config: NamerConfig, queue: Queue) -> List[Dict]:
+def get_queued_files(queue: Queue) -> List[Dict]:
     """
-    Get failed files to rename.
+    Get queued files.
     """
     return list(map(command_to_file_info, filter(lambda i: i is not None, queue.queue)))
 
 
+def get_queue_size(queue: Queue) -> int:
+    return queue.qsize()
+
+
 def command_to_file_info(command: Command) -> Dict:
     return {
-        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)),
+        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if command.target_movie_file.is_relative_to(command.config.failed_dir) else None,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory is not None else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
         'size': convert_size(command.target_movie_file.stat().st_size),

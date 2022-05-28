@@ -1,15 +1,16 @@
 """
 Defines the routes of a Flask webserver for namer.
 """
-from loguru import logger
 from pathlib import Path
 from queue import Queue
+
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
+from loguru import logger
 
 from namer.fileutils import make_command_relative_to, move_command_files
 from namer.types import NamerConfig
-from namer.web.actions import delete_file, get_failed_files, get_search_results
+from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results
 
 
 def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
@@ -39,6 +40,14 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = get_failed_files(config)
         return render_template('pages/failed.html', data=data, config=config)
 
+    @blueprint.route('/queue')
+    def queue() -> str:
+        """
+        Displays all queued files.
+        """
+        data = get_queued_files(command_queue)
+        return render_template('pages/queue.html', data=data, config=config)
+
     @blueprint.route('/api/v1/render', methods=['POST'])
     def render() -> Response:
         data = request.json
@@ -62,13 +71,24 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = get_failed_files(config)
         return jsonify(data)
 
+    @blueprint.route('/api/v1/get_queued', methods=['POST'])
+    def get_queued() -> Response:
+        data = get_queued_files(command_queue)
+        return jsonify(data)
+
     @blueprint.route('/api/v1/get_search', methods=['POST'])
-    def get_results() -> Response:
+    def get_search() -> Response:
         data = request.json
 
         res = False
         if data is not None:
             res = get_search_results(data['query'], data['file'], config)
+
+        return jsonify(res)
+
+    @blueprint.route('/api/v1/get_queue', methods=['POST'])
+    def get_queue() -> Response:
+        res = get_queue_size(command_queue)
 
         return jsonify(res)
 
@@ -84,7 +104,7 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
             command = make_command_relative_to(movie, config.failed_dir, config=config)
             moved_command = move_command_files(command, config.work_dir)
             if moved_command is not None:
-                moved_command.tpdbid = data['scene_id']
+                moved_command.tpdb_id = data['scene_id']
                 command_queue.put(moved_command)  # Todo pass selection
         return jsonify(res)
 
