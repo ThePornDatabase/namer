@@ -42,16 +42,15 @@ def get_resolution(file: Path) -> int:
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as process:
-        success = process.wait() == 0
+        stdout, stderr = process.communicate()
+        success = process.returncode == 0
         output = 0
-        if process.stdout is not None:
-            output = process.stdout.read()
-            process.stdout.close()
+        if stdout is not None:
+            output = stdout
         if not success:
             logger.warning("Error getting resolution of file {}", file)
-            if process.stderr is not None:
-                logger.warning(process.stderr.read())
-                process.stderr.close()
+            if stderr is not None:
+                logger.warning(stderr)
         if output is not None:
             logger.info("output {}", output)
             return int(output)
@@ -82,16 +81,15 @@ def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as process:
-        success = process.wait() == 0
+        stdout, stderr = process.communicate()
+        success = process.returncode == 0
         audio_streams_str = None
-        if process.stdout is not None:
-            audio_streams_str = process.stdout.read()
-            process.stdout.close()
+        if stdout is not None:
+            audio_streams_str = stdout
         if not success:
             logger.warning("Error getting audio streams of file {}", mp4_file)
-            if process.stderr is not None:
-                logger.warning(process.stderr.read())
-                process.stderr.close()
+            if stderr is not None:
+                logger.warning(stderr)
         logger.info("Target for audio: {}", mp4_file)
         audio_streams = None
         if audio_streams_str is not None:
@@ -146,12 +144,12 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
             stderr=subprocess.PIPE,
             universal_newlines=True,
         ) as process:
-            success = process.wait() == 0
+            stdout, stderr = process.communicate()
+            success = process.returncode == 0
             if not success:
                 logger.info("Could not update audio stream for {}", mp4_file)
-                if process.stderr is not None:
-                    logger.info(process.stderr.read())
-                    process.stderr.close()
+                if stderr is not None:
+                    logger.info(stderr)
             else:
                 logger.warning("Return code: {}", process.returncode)
                 mp4_file.unlink()
@@ -180,12 +178,12 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as process:
-        success = process.wait() == 0
+        stdout, stderr = process.communicate()
+        success = process.returncode == 0
         if not success:
             logger.info("Could not fix mp4 files {}", mp4_file)
-            if process.stderr is not None:
-                logger.info(process.stderr.read())
-                process.stderr.close()
+            if stderr is not None:
+                logger.info(stderr)
         else:
             logger.warning("Return code: {}", process.returncode)
             mp4_file.unlink()
