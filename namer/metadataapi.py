@@ -52,9 +52,11 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
     site = False
     found_site = None
     if looked_up.site is not None:
-        found_site = re.sub(r"[\- .+_]", "", looked_up.site).upper()
-        if name_parts.site is not None:
-            site = name_parts.site is None or re.sub(r"[\- .+_]", "", name_parts.site.upper()) in found_site or unidecode(re.sub(r"[\- .+_]", "", name_parts.site.upper())) in found_site
+        found_site = re.sub(r"[^a-z0-9]", "", looked_up.site.lower())
+        if name_parts.site is None:
+            site = True
+        else:
+            site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode((name_parts.site).lower())) in found_site
 
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
@@ -264,7 +266,7 @@ def __build_url(site: Optional[str] = None, release_date: Optional[str] = None, 
             # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
             # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
             # Hense, the hack of lower casing the site.
-            query += quote(re.sub(r" ", ".", site.lower())) + "."
+            query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
         if release_date is not None:
             query += release_date + "."
         if name is not None:

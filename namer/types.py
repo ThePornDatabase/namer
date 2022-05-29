@@ -443,9 +443,10 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.set_uid = config.getint("namer", "set_uid", fallback=None)
     namer_config.set_gid = config.getint("namer", "set_gid", fallback=None)
     namer_config.trailer_location = config.get("namer", "trailer_location", fallback=None)
-    namer_config.sites_with_no_date_info = [x.strip().upper() for x in config.get("namer", "sites_with_no_date_info", fallback="").split(",")]
+    namer_config.sites_with_no_date_info = [re.sub(r"[^a-z0-9]", "", x.strip().lower()) for x in config.get("namer", "sites_with_no_date_info", fallback="").split(",")]
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")
+
     namer_config.write_namer_log = config.getboolean("namer", "write_namer_log", fallback=False)
     namer_config.update_permissions_ownership = config.getboolean("namer", "update_permissions_ownership", fallback=False)
     namer_config.set_dir_permissions = config.getint("namer", "set_dir_permissions", fallback=775)

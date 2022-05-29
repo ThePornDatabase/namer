@@ -181,7 +181,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(namer_config.set_file_permissions, 700)
         self.assertEqual(namer_config.trailer_location, "trailer/default.{ext}")
         self.assertEqual(namer_config.write_nfo, True)
-        self.assertEqual(namer_config.sites_with_no_date_info, ["MILF", "TEAMWHATEVER"])
+        self.assertEqual(namer_config.sites_with_no_date_info, ["milf", "teamwhatever"])
         self.assertEqual(namer_config.enabled_tagging, False)
         self.assertEqual(namer_config.enabled_poster, False)
         self.assertEqual(namer_config.enable_metadataapi_genres, True)
