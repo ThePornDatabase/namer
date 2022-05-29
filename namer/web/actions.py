@@ -57,7 +57,7 @@ def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
     """
     Search results for user selection.
     """
-    url = __build_url(query)
+    url = __build_url(name=query)
     json_response = __get_response_json_object(url, config.porndb_token)
     file_infos = []
     if json_response is not None and json_response.strip() != '':
