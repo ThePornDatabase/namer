@@ -10,7 +10,6 @@ import pathlib
 import re
 import sys
 from datetime import date, timedelta
-from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
