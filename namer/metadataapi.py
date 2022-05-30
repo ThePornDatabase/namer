@@ -18,6 +18,7 @@ from urllib.parse import quote
 import rapidfuzz
 import requests
 from loguru import logger
+from PIL import Image
 from unidecode import unidecode
 
 from namer.fileutils import make_command, set_permissions
@@ -174,10 +175,12 @@ def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config
     returns json object with info
     """
     if url is not None and video_file is not None:
-        file = video_file.parent / (video_file.stem + infix + pathlib.Path(url).suffix)
+        file = video_file.parent / (video_file.stem + infix + '.png')
         if config.enabled_poster and url.startswith("http") and not file.exists():
             file.parent.mkdir(parents=True, exist_ok=True)
             if download_file(url, file, config):
+                with Image.open(file) as img:
+                    img.save(file, 'png')
                 set_permissions(file, config)
                 return file
             else:
