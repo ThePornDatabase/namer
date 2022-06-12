@@ -503,7 +503,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
     namer_config.allow_delete_files = config.getboolean("watchdog", "allow_delete_files", fallback=False)
 
-    #create a CachedSession objects for request caching.
+    # create a CachedSession objects for request caching.
     if namer_config.enabled_requests_cache:
         cache_file = Path(tempfile.gettempdir()) / "namer_cache"
         expire_time = timedelta(minutes=namer_config.requests_cache_expire_minutes)

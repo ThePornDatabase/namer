@@ -3,6 +3,7 @@ from typing import Optional
 import requests
 import requests_cache
 
+
 class Http:
     @staticmethod
     def request(cache_session: Optional[requests_cache.CachedSession], method, url, **kwargs):
