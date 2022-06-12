@@ -17,11 +17,11 @@ if config.enabled_requests_cache:
 class Http:
     @staticmethod
     def request(method, url, **kwargs):
-        if kwargs.get('stream', False):
-            return requests.request(method, url, **kwargs)
-        else:
+        if kwargs.get("stream", False):
             with requests_cache.disabled():
-                requests.request(method, url, **kwargs)
+                return requests.request(method, url, **kwargs)
+        else:
+            return requests.request(method, url, **kwargs)
 
     @staticmethod
     def get(url: str, **kwargs):
