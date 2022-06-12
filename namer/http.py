@@ -11,7 +11,7 @@ config = default_config()
 if config.enabled_requests_cache:
     cache_file = Path(tempfile.gettempdir()) / "namer_cache"
     expire_time = timedelta(minutes=config.requests_cache_expire_minutes)
-    requests_cache.install_cache(str(cache_file), expire_after=expire_time, serializer="json", ignored_parameters=["Authorization"])
+    requests_cache.install_cache(str(cache_file), expire_after=expire_time, ignored_parameters=["Authorization"])
 
 
 class Http:
