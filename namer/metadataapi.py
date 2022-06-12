@@ -9,7 +9,6 @@ import json
 import pathlib
 import re
 import sys
-import tempfile
 from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -17,19 +16,14 @@ from typing import List, Optional, Tuple
 from urllib.parse import quote
 
 import rapidfuzz
-import requests
-import requests_cache
+
 from loguru import logger
 from PIL import Image
 from unidecode import unidecode
 
 from namer.fileutils import make_command, set_permissions
+from namer.http import Http
 from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer
-
-config = default_config()
-if config.enabled_requests_cache:
-    cache_file = Path(tempfile.gettempdir()) / 'namer_cache'
-    requests_cache.install_cache(str(cache_file), expire_after=timedelta(minutes=config.requests_cache_expire_minutes))
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
@@ -154,7 +148,7 @@ def __get_response_json_object(url: str, auth_token: str) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    with requests.get(url, headers=headers) as response:
+    with Http.get(url, headers=headers) as response:
         response.raise_for_status()
         return response.text
 
@@ -167,7 +161,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = requests.get(url, headers=headers, stream=True)
+    http = Http.get(url, headers=headers, stream=True)
     if http.ok:
         with open(file, 'wb') as io_wrapper:
             for data in http.iter_content(1024):
@@ -351,6 +345,7 @@ def main(args_list: List[str]):
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
+    config = default_config()
     file_name = make_command(Path(args.file), config)
     match_results = []
     if file_name is not None and file_name.parsed_file is not None:
