@@ -2,6 +2,7 @@
 A wrapper allowing shutdown of a Flask server.
 """
 from queue import Queue
+from threading import Thread
 from typing import Union
 
 from flask import Flask
@@ -21,6 +22,7 @@ class WebServer:
     A wrapper allowing shutdown of a Flask server.
     """
     __server: Union[MultiSocketServer, BaseWSGIServer]
+    __thread: Thread
     __config: NamerConfig
     __debug: bool
     __command_queue: Queue
@@ -38,6 +40,10 @@ class WebServer:
         if not self.__debug:
             compress.init_app(app)
             self.__server = create_server(app, host=self.__config.host, port=self.__config.port)
+            self.__thread = Thread(target=self.run, daemon=True)
+
+    def start(self):
+        self.__thread.start()
 
     def run(self):
         """

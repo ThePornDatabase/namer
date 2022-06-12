@@ -142,7 +142,7 @@ class MovieWatcher:
         if self.__namer_config.web is True:
             self.__webserver = WebServer(self.__namer_config, command_queue=self.__command_queue)
             if self.__webserver:
-                Thread(target=self.__webserver.run).start()
+                self.__webserver.start()
         try:
             while True:
                 schedule.run_pending()
