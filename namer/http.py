@@ -17,16 +17,17 @@ if config.enabled_requests_cache:
 class Http:
     @staticmethod
     def request(method, url, **kwargs):
-        return requests.request(method, url, **kwargs)
+        if kwargs.get('stream', False):
+            return requests.request(method, url, **kwargs)
+        else:
+            with requests_cache.disabled():
+                requests.request(method, url, **kwargs)
 
     @staticmethod
     def get(url: str, **kwargs):
-        return Http.request('GET', url, **kwargs)
 
     @staticmethod
     def post(url: str, **kwargs):
-        return Http.request('POST', url, **kwargs)
 
     @staticmethod
     def head(url: str, **kwargs):
-        return Http.request('HEAD', url, **kwargs)
