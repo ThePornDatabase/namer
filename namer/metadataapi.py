@@ -137,17 +137,17 @@ def __match_percent(result: ComparisonResult) -> float:
 
 
 @logger.catch
-def __get_response_json_object(url: str, auth_token: str) -> str:
+def __get_response_json_object(url: str, config: NamerConfig) -> str:
     """
     returns json object with info
     """
     headers = {
-        "Authorization": f"Bearer {auth_token}",
+        "Authorization": f"Bearer {config.porndb_token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    with Http.get(url, headers=headers) as response:
+    with Http.get(config.cache_session, url, headers=headers) as response:
         response.raise_for_status()
         return response.text
 
@@ -160,7 +160,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = Http.get(url, headers=headers, stream=True)
+    http = Http.get(config.cache_session, url, headers=headers, stream=True)
     if http.ok:
         with open(file, 'wb') as io_wrapper:
             for data in http.iter_content(1024):
@@ -280,7 +280,7 @@ def __build_url(site: Optional[str] = None, release_date: Optional[str] = None, 
 
 def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config: NamerConfig):
     logger.info("Querying: {}", url)
-    json_response = __get_response_json_object(url, namer_config.porndb_token)
+    json_response = __get_response_json_object(url, namer_config)
     file_infos = []
     if json_response is not None and json_response.strip() != "":
         logger.debug("json_response: \n{}", json_response)

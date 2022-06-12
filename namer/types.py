@@ -3,14 +3,17 @@ Types shared by all the files in this project, used as interfaces for moving dat
 """
 
 import configparser
+from datetime import timedelta
 import os
 import random
 import re
+import requests_cache
 import string
 import sys
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path, PurePath
+import tempfile
 from typing import List, Optional, Sequence
 
 from loguru import logger
@@ -353,6 +356,11 @@ class NamerConfig:
     Allow to delete files in web interface
     """
 
+    cache_session: Optional[requests_cache.CachedSession]
+    """
+    If enabled_requests_cache is true this http.session will be constructed and used for requests to tpdb.
+    """
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -494,6 +502,12 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.host = config.get("watchdog", "host", fallback="0.0.0.0")
     namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
     namer_config.allow_delete_files = config.getboolean("watchdog", "allow_delete_files", fallback=False)
+
+    # create a CachedSession objects for request caching.
+    if namer_config.enabled_requests_cache:
+        cache_file = Path(tempfile.gettempdir()) / "namer_cache"
+        expire_time = timedelta(minutes=namer_config.requests_cache_expire_minutes)
+        namer_config.cache_session = requests_cache.CachedSession(str(cache_file), backend='filesystem', expire_after=expire_time, ignored_parameters=["Authorization"])
     return namer_config
 
 
