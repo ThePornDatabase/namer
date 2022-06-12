@@ -1,7 +1,7 @@
 #!/bin/bash
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 CLEAN=$(git diff-index --quiet HEAD; echo $?)
-version=$(cat pyproject.toml | grep "version = " | sed 's/.* = //' | sed 's/"//g')
+version=$(cat pyproject.toml | grep -m1 "version = " | sed 's/.* = //' | sed 's/"//g')
 if [[ "${CLEAN}" == "0" ]]; then
   export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
   export GIT_HASH=$(git rev-parse --verify HEAD)
