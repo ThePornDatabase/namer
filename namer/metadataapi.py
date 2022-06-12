@@ -16,7 +16,6 @@ from typing import List, Optional, Tuple
 from urllib.parse import quote
 
 import rapidfuzz
-
 from loguru import logger
 from PIL import Image
 from unidecode import unidecode
