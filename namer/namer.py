@@ -15,7 +15,7 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.fileutils import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
-from namer.metadataapi import get_image, get_trailer, match, get_complete_metadatapi_net_fileinfo
+from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.mutagen import update_mp4_file
 from namer.types import Command, ComparisonResult, default_config, from_config, LookedUpFileInfo, NamerConfig

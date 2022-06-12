@@ -19,7 +19,7 @@ from loguru import logger
 from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
-from namer.fileutils import make_command_relative_to, is_interesting_movie, move_command_files
+from namer.fileutils import is_interesting_movie, make_command_relative_to, move_command_files
 from namer.namer import process_file
 from namer.types import Command, default_config, NamerConfig
 from namer.web.server import WebServer
@@ -142,7 +142,7 @@ class MovieWatcher:
         if self.__namer_config.web is True:
             self.__webserver = WebServer(self.__namer_config, command_queue=self.__command_queue)
             if self.__webserver:
-                Thread(target=self.__webserver.run).start()
+                self.__webserver.start()
         try:
             while True:
                 schedule.run_pending()

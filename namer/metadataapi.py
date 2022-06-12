@@ -16,12 +16,12 @@ from typing import List, Optional, Tuple
 from urllib.parse import quote
 
 import rapidfuzz
-import requests
 from loguru import logger
 from PIL import Image
 from unidecode import unidecode
 
 from namer.fileutils import make_command, set_permissions
+from namer.http import Http
 from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer
 
 
@@ -147,7 +147,7 @@ def __get_response_json_object(url: str, auth_token: str) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    with requests.get(url, headers=headers) as response:
+    with Http.get(url, headers=headers) as response:
         response.raise_for_status()
         return response.text
 
@@ -160,7 +160,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = requests.get(url, headers=headers, stream=True)
+    http = Http.get(url, headers=headers, stream=True)
     if http.ok:
         with open(file, 'wb') as io_wrapper:
             for data in http.iter_content(1024):

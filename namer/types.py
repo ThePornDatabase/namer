@@ -232,6 +232,16 @@ class NamerConfig:
     scrapers/storage mechanisms.
     """
 
+    enabled_requests_cache: bool = True
+    """
+    Amount of minutes that http request would be in cache
+    """
+
+    requests_cache_expire_minutes: int = 10
+    """
+    Amount of minutes that http request would be in cache
+    """
+
     enabled_tagging: bool = True
     """
     Currently metadata pulled from the porndb can be added to mp4 files.
@@ -366,6 +376,8 @@ class NamerConfig:
         output += f"  set_uid: {self.set_file_permissions}\n"
         output += f"  set_gid: {self.set_file_permissions}\n"
         output += f"  max_performer_names: {self.set_file_permissions}\n"
+        output += f"  enabled_requests_cache: {self.enabled_requests_cache}\n"
+        output += f"  requests_cache_expire_minutes: {self.requests_cache_expire_minutes}\n"
         output += "Tagging Config:\n"
         output += f"  write_nfo: {self.write_nfo}\n"
         output += f"  enabled_tagging: {self.enabled_tagging}\n"
@@ -452,6 +464,8 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.set_dir_permissions = config.getint("namer", "set_dir_permissions", fallback=775)
     namer_config.set_file_permissions = config.getint("namer", "set_file_permissions", fallback=664)
     namer_config.max_performer_names = config.getint("namer", "max_performer_names", fallback=6)
+    namer_config.enabled_requests_cache = config.getboolean("namer", "use_requests_cache", fallback=True)
+    namer_config.requests_cache_expire_minutes = config.getint("namer", "requests_cache_expire_minutes", fallback=10)
     namer_config.write_nfo = config.getboolean("metadata", "write_nfo", fallback=False)
     namer_config.enabled_tagging = config.getboolean("metadata", "enabled_tagging", fallback=True)
     namer_config.enabled_poster = config.getboolean("metadata", "enabled_poster", fallback=True)

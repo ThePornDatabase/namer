@@ -85,6 +85,12 @@ sites_with_no_date_info =
 # rapidly (combinatorial)
 max_performer_names = 6
 
+# Cache http requests
+use_requests_cache = True
+
+# Amount of minutes that http request would be in cache
+requests_cache_expire_minutes = 10
+
 [metadata]
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
 # MP4 metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).
