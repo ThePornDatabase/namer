@@ -99,10 +99,14 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 # Extra wait time in case other files are copies in as well.
                 if self.namer_config.del_other_files is True:
                     time.sleep(self.namer_config.extra_sleep_time)
-                command = make_command_relative_to(input_dir=path, relative_to=self.namer_config.watch_dir, config=self.namer_config)
-                working_command = move_command_files(command, self.namer_config.work_dir)
-                if working_command is not None:
-                    self.command_queue.put(working_command)
+                self.prepare_file_for_processing(path)
+
+    @logger.catch
+    def prepare_file_for_processing(self, path: Path):
+        command = make_command_relative_to(input_dir=path, relative_to=self.namer_config.watch_dir, config=self.namer_config)
+        working_command = move_command_files(command, self.namer_config.work_dir)
+        if working_command is not None:
+            self.command_queue.put(working_command)
 
 
 class MovieWatcher:
@@ -175,10 +179,7 @@ class MovieWatcher:
                 files.append(file)
         for file in files:
             if file.exists() and file.is_file():
-                command = make_command_relative_to(file, self.__namer_config.watch_dir, self.__namer_config)
-                working_command = move_command_files(command, self.__namer_config.work_dir)
-                if working_command is not None:
-                    self.__command_queue.put(working_command)
+                self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
         """
