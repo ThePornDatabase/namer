@@ -237,7 +237,7 @@ class NamerConfig:
 
     enabled_requests_cache: bool = True
     """
-    Amount of minutes that http request would be in cache
+    Cache http requests
     """
 
     requests_cache_expire_minutes: int = 10

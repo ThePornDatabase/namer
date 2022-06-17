@@ -1,34 +1,25 @@
 from typing import Optional
 
 import requests
-import requests_cache
+from requests_cache import CachedSession
 
 
 class Http:
     @staticmethod
-    def request(cache_session: Optional[requests_cache.CachedSession], method, url, **kwargs):
+    def request(method, url, cache_session: Optional[CachedSession] = None, **kwargs):
         if kwargs.get("stream", False) or cache_session is None:
             return requests.request(method, url, **kwargs)
         else:
             return cache_session.request(method, url, **kwargs)
 
     @staticmethod
-    def get(cache_session: Optional[requests_cache.CachedSession], url: str, **kwargs):
-        if cache_session is None:
-            return requests.request("GET", url, **kwargs)
-        else:
-            return cache_session.request("GET", url, **kwargs)
+    def get(url: str, cache_session: Optional[CachedSession] = None, **kwargs):
+        return Http.request("GET", url, cache_session, **kwargs)
 
     @staticmethod
-    def post(cache_session: Optional[requests_cache.CachedSession], url: str, **kwargs):
-        if cache_session is None:
-            return requests.request("POST", url, **kwargs)
-        else:
-            return cache_session.request("POST", url, **kwargs)
+    def post(url: str, cache_session: Optional[CachedSession] = None, **kwargs):
+        return Http.request("POST", url, cache_session, **kwargs)
 
     @staticmethod
-    def head(cache_session: Optional[requests_cache.CachedSession], url: str, **kwargs):
-        if cache_session is None:
-            return requests.request("HEAD", url, **kwargs)
-        else:
-            return cache_session.request("HEAD", url, **kwargs)
+    def head(url: str, cache_session: Optional[CachedSession] = None, **kwargs):
+        return Http.request("HEAD", url, cache_session, **kwargs)
