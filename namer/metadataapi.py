@@ -147,7 +147,7 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    with Http.get(config.cache_session, url, headers=headers) as response:
+    with Http.get(url, config.cache_session, headers=headers) as response:
         response.raise_for_status()
         return response.text
 
@@ -160,7 +160,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = Http.get(config.cache_session, url, headers=headers, stream=True)
+    http = Http.get(url, config.cache_session, headers=headers, stream=True)
     if http.ok:
         with open(file, 'wb') as io_wrapper:
             for data in http.iter_content(1024):
