@@ -7,6 +7,9 @@ const logBody = $('#logFile .modal-body')
 const queryInput = $('#queryInput')
 const deleteFile = $('#deleteFile')
 const queueSize = $('#queueSize')
+const refreshFiles = $('#refreshFiles')
+const searchResults = $('#searchResults')
+const deleteButton = $('#deleteButton')
 
 const Helpers = require('./helpers')
 
@@ -47,7 +50,7 @@ filesResult.on('click', '.match', function () {
     queryInput.data('file', file)
 })
 
-$('#searchResults').on('click', '.rename', function () {
+searchResults.on('click', '.rename', function () {
     const data = {
         'file': $(this).data('file'),
         'scene_id': $(this).data('scene-id'),
@@ -64,7 +67,7 @@ filesResult.on('click', '.delete', function () {
     deleteFile.data('file', file)
 })
 
-$('#deleteButton').on('click', function () {
+deleteButton.on('click', function () {
     const data = {
         'file': deleteFile.data('file'),
     }
