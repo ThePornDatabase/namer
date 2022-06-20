@@ -10,7 +10,7 @@ from loguru import logger
 
 from namer.fileutils import make_command_relative_to, move_command_files
 from namer.types import NamerConfig
-from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results
+from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results, read_failed_log_file
 
 
 def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
@@ -115,6 +115,16 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         res = False
         if data is not None:
             res = delete_file(data['file'], config)
+
+        return jsonify(res)
+
+    @blueprint.route('/api/v1/read_failed_log', methods=['POST'])
+    def read_failed_log() -> Response:
+        data = request.json
+
+        res = False
+        if data is not None:
+            res = read_failed_log_file(data['file'], config)
 
         return jsonify(res)
 

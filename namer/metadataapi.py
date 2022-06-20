@@ -57,7 +57,7 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
         if name_parts.site is None:
             site = True
         else:
-            site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode((name_parts.site).lower())) in found_site
+            site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode(name_parts.site.lower())) in found_site
 
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
@@ -132,7 +132,7 @@ def __match_percent(result: ComparisonResult) -> float:
     if result.is_match() is True:
         add_value = 1000.00
     value = (result.name_match + add_value) if result is not None and result.name_match is not None else add_value
-    logger.info("Name match was {:.2f} for {}", value, result.name)
+    logger.debug("Name match was {:.2f} for {}", value, result.name)
     return value
 
 
@@ -147,7 +147,7 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    with Http.get(url, config.cache_session, headers=headers) as response:
+    with Http.get(url, cache_session=config.cache_session, headers=headers) as response:
         response.raise_for_status()
         return response.text
 
@@ -160,7 +160,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = Http.get(url, config.cache_session, headers=headers, stream=True)
+    http = Http.get(url, cache_session=config.cache_session, headers=headers, stream=True)
     if http.ok:
         with open(file, 'wb') as io_wrapper:
             for data in http.iter_content(1024):

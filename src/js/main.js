@@ -3,9 +3,13 @@ const $ = require('jquery')
 
 const filesResult = $('#filesResult')
 const resultBody = $('#searchResults .modal-body')
+const logBody = $('#logFile .modal-body')
 const queryInput = $('#queryInput')
 const deleteFile = $('#deleteFile')
 const queueSize = $('#queueSize')
+const refreshFiles = $('#refreshFiles')
+const searchResults = $('#searchResults')
+const deleteButton = $('#deleteButton')
 
 const Helpers = require('./helpers')
 
@@ -22,9 +26,22 @@ $('.search').on('click', function () {
     })
 })
 
-$('#refreshFiles').on('click', function () {
+$('.log').on('click', function () {
+    logBody.html(Helpers.getProgressBar())
+
+    const data = {
+        'file': $(this).data('file'),
+    }
+
+    Helpers.request('./api/v1/read_failed_log', data, function (data) {
+        Helpers.render('logFile', data, logBody)
+    })
+})
+
+refreshFiles.on('click', function () {
     filesResult.html(Helpers.getProgressBar())
     Helpers.refreshFiles(filesResult, $(this).data('target'))
+    updateQueueSize()
 })
 
 filesResult.on('click', '.match', function () {
@@ -33,7 +50,7 @@ filesResult.on('click', '.match', function () {
     queryInput.data('file', file)
 })
 
-$('#searchResults').on('click', '.rename', function () {
+searchResults.on('click', '.rename', function () {
     const data = {
         'file': $(this).data('file'),
         'scene_id': $(this).data('scene-id'),
@@ -50,7 +67,7 @@ filesResult.on('click', '.delete', function () {
     deleteFile.data('file', file)
 })
 
-$('#deleteButton').on('click', function () {
+deleteButton.on('click', function () {
     const data = {
         'file': deleteFile.data('file'),
     }

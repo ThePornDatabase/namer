@@ -100,6 +100,16 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     return not file_name.is_file()
 
 
+def read_failed_log_file(name: str, config: NamerConfig) -> str:
+    name = Path(name)
+    file_name = config.failed_dir / f'{name.stem}_namer.log'
+    data = ''
+    if file_name.is_file():
+        data = file_name.read_text('UTF-8')
+
+    return data
+
+
 def is_acceptable_file(file: Path, config: NamerConfig) -> bool:
     """
     Checks if a file belong to namer.
