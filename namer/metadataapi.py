@@ -132,7 +132,7 @@ def __match_percent(result: ComparisonResult) -> float:
     if result.is_match() is True:
         add_value = 1000.00
     value = (result.name_match + add_value) if result is not None and result.name_match is not None else add_value
-    logger.info("Name match was {:.2f} for {}", value, result.name)
+    logger.debug("Name match was {:.2f} for {}", value, result.name)
     return value
 
 
