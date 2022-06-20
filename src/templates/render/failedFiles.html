@@ -16,6 +16,9 @@
                 <td class="col-1">{{ file['size'] }}</td>
                 <td class="col-2 text-end">
                 {% if file['file'] %}
+                    <button type="button" class="btn btn-secondary log" data-bs-toggle="modal" data-bs-target="#logFile" data-file="{{ file['file'] }}">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
                     <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}">
                         <i class="bi bi-search"></i>
                     </button>

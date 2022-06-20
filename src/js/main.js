@@ -3,6 +3,7 @@ const $ = require('jquery')
 
 const filesResult = $('#filesResult')
 const resultBody = $('#searchResults .modal-body')
+const logBody = $('#logFile .modal-body')
 const queryInput = $('#queryInput')
 const deleteFile = $('#deleteFile')
 const queueSize = $('#queueSize')
@@ -22,7 +23,19 @@ $('.search').on('click', function () {
     })
 })
 
-$('#refreshFiles').on('click', function () {
+$('.log').on('click', function () {
+    logBody.html(Helpers.getProgressBar())
+
+    const data = {
+        'file': $(this).data('file'),
+    }
+
+    Helpers.request('./api/v1/read_failed_log', data, function (data) {
+        Helpers.render('logFile', data, logBody)
+    })
+})
+
+refreshFiles.on('click', function () {
     filesResult.html(Helpers.getProgressBar())
     Helpers.refreshFiles(filesResult, $(this).data('target'))
 })
