@@ -55,10 +55,10 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
             else:
                 for attempt in match_attempts:
                     log_file.write("\n")
-                    log_file.write(f"File                : {attempt.name_parts.source_file_name}\n")
-                    log_file.write(f"Scene Name          : {attempt.looked_up.name}\n")
-                    log_file.write(f"Match               : {attempt.is_match()}\n")
-                    log_file.write(f"Query URL           : {attempt.looked_up.original_query}\n")
+                    log_file.write(f"File                 : {attempt.name_parts.source_file_name}\n")
+                    log_file.write(f"Scene Name           : {attempt.looked_up.name}\n")
+                    log_file.write(f"Match                : {attempt.is_match()}\n")
+                    log_file.write(f"Query URL            : {attempt.looked_up.original_query}\n")
                     if attempt.name_parts.site is None:
                         attempt.name_parts.site = "None"
                     if attempt.name_parts.date is None:
@@ -66,8 +66,8 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
                     if attempt.name_parts.date is None:
                         attempt.name_parts.name = "None"
                     log_file.write(f"{str(attempt.site_match):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
-                    log_file.write(f"{str(attempt.date_match):5} Found Date    : {attempt.looked_up.date:50.50} Parsed Date    : {attempt.name_parts.date:50.50}\n")
-                    log_file.write(f"{attempt.name_match:5.1f} Found Name    : {attempt.name:50.50} Parsed Name    : {attempt.name_parts.name:50.50}\n")
+                    log_file.write(f"{str(attempt.date_match):5} Found Date     : {attempt.looked_up.date:50.50} Parsed Date     : {attempt.name_parts.date:50.50}\n")
+                    log_file.write(f"{attempt.name_match:5.1f} Found Name     : {attempt.name:50.50} Parsed Name     : {attempt.name_parts.name:50.50}\n")
         set_permissions(log_name, namer_config)
     return log_name
 
