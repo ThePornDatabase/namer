@@ -3,22 +3,21 @@ Types shared by all the files in this project, used as interfaces for moving dat
 """
 
 import configparser
-from datetime import timedelta
 import os
 import random
 import re
-import requests_cache
 import string
 import sys
+import tempfile
 from configparser import ConfigParser
 from dataclasses import dataclass
+from datetime import timedelta
 from pathlib import Path, PurePath
-import tempfile
 from typing import List, Optional, Sequence
 
+from requests_cache import CachedSession
 from loguru import logger
-from pathvalidate._common import Platform
-from pathvalidate._filename import sanitize_filename
+from pathvalidate import Platform, sanitize_filename
 
 
 def _verify_name_string(name: str, name_string: str) -> bool:
@@ -87,6 +86,7 @@ class PartialFormatter(string.Formatter):
             raise
 
 
+# noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class NamerConfig:
     """
@@ -169,7 +169,7 @@ class NamerConfig:
 
     prefer_dir_name_if_available: bool = True
     """
-    If a directory name is to be prefered over a file name.
+    If a directory name is to be preferred over a file name.
     """
 
     target_extensions: List[str]
@@ -356,7 +356,7 @@ class NamerConfig:
     Allow to delete files in web interface
     """
 
-    cache_session: Optional[requests_cache.CachedSession]
+    cache_session: Optional[CachedSession]
     """
     If enabled_requests_cache is true this http.session will be constructed and used for requests to tpdb.
     """
@@ -369,16 +369,16 @@ class NamerConfig:
     def __str__(self):
         token = "None In Set, Go to https://metadatapi.net/ to get one!"
         if self.porndb_token is not None:
-            token = re.sub(r".", "*", self.porndb_token)
+            token = "*" * len(self.porndb_token)
         output = "Namer Config:\n"
-        output += f"porndb_token: {token}\n"
+        output += f"  porndb_token: {token}\n"
         output += f"  inplace_name: {self.inplace_name}\n"
         output += f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
         output += f"  target_extensions: {self.target_extensions}\n"
         output += f"  write_namer_log: {self.write_namer_log}\n"
         output += f"  trailer_location: {self.trailer_location}\n"
         output += f"  sites_with_no_date_info: {self.sites_with_no_date_info}\n"
-        output += f"  update_permissions_ownership: {self.update_permissions_ownership}"
+        output += f"  update_permissions_ownership: {self.update_permissions_ownership}\n"
         output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
         output += f"  set_file_permissions: {self.set_file_permissions}\n"
         output += f"  set_uid: {self.set_file_permissions}\n"
@@ -507,7 +507,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     if namer_config.enabled_requests_cache:
         cache_file = Path(tempfile.gettempdir()) / "namer_cache"
         expire_time = timedelta(minutes=namer_config.requests_cache_expire_minutes)
-        namer_config.cache_session = requests_cache.CachedSession(str(cache_file), backend='filesystem', expire_after=expire_time, ignored_parameters=["Authorization"])
+        namer_config.cache_session = CachedSession(str(cache_file), backend='filesystem', expire_after=expire_time, ignored_parameters=["Authorization"])
     return namer_config
 
 
@@ -607,6 +607,7 @@ class Performer:
         return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
 
 
+# noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo:
     """
@@ -654,7 +655,7 @@ class LookedUpFileInfo:
     """
     original_response: Optional[str] = None
     """
-    json reponse parsed in to this object.
+    json response parsed in to this object.
     """
     original_query: Optional[str] = None
     """
@@ -785,6 +786,7 @@ class ComparisonResult:
         return self.site_match and self.date_match and self.name_match is not None and self.name_match >= 89.9
 
 
+# noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class Command:
     input_file: Path

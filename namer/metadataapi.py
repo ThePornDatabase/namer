@@ -57,7 +57,7 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
         if name_parts.site is None:
             site = True
         else:
-            site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode((name_parts.site).lower())) in found_site
+            site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode(name_parts.site.lower())) in found_site
 
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
