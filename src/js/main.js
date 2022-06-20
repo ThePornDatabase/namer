@@ -38,6 +38,7 @@ $('.log').on('click', function () {
 refreshFiles.on('click', function () {
     filesResult.html(Helpers.getProgressBar())
     Helpers.refreshFiles(filesResult, $(this).data('target'))
+    updateQueueSize()
 })
 
 filesResult.on('click', '.match', function () {
