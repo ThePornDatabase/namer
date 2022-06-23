@@ -102,7 +102,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
 
 def read_failed_log_file(name: str, config: NamerConfig) -> str:
     file_name = config.failed_dir / name
-    file_name = file_name.parent / ( file_name.stem + '_namer.log' )
+    file_name = file_name.parent / (file_name.stem + '_namer.log')
     data = ''
     if file_name.is_file():
         data = file_name.read_text('UTF-8')

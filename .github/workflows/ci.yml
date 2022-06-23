@@ -40,8 +40,21 @@ jobs:
           elif [ "$RUNNER_OS" == "macOS" ]; then
               env HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg
           fi
-        shell: bash 
+        shell: bash
+
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          node-version: '16'
+
+      - name: Install Node packages
+        run: yarn install
+
+      - name: Build Assets
+        run: yarn run build
+
       - run: poetry install
+
       - run: poetry run pytest
 
   linting:
@@ -93,10 +106,25 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
-          poetry-version: '1.1.13'  
+          poetry-version: '1.1.13'
+
       - run: poetry install
+      
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          node-version: '16'
+
+      - name: Install Node packages
+        run: yarn install
+
+      - name: Build Assets
+        run: yarn run build
+
       - run: poetry run pytest --cov
+
       - run: poetry run coverage xml
+
       - uses: codecov/codecov-action@v2
         with:
           files: ./coverage.xml

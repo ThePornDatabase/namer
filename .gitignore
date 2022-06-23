@@ -12,5 +12,6 @@ creds.sh
 init
 .python-version
 node_modules
+.env
 namer/web/public/assets
 namer/web/templates

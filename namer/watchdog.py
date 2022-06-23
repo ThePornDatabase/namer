@@ -129,6 +129,8 @@ class MovieWatcher:
         self.__command_queue.task_done()
 
     def __init__(self, namer_config: NamerConfig):
+        self.__started = False
+        self.__stopped = False
         self.__namer_config = namer_config
         self.__src_path = namer_config.watch_dir
         self.__event_observer = PollingObserver()
@@ -136,23 +138,45 @@ class MovieWatcher:
         self.__command_queue: Queue = Queue()
         self.__worker_thread: Thread = Thread(target=self.__processing_thread, daemon=True)
         self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
+        self.__background_thread: Optional[Thread] = None
 
     def run(self):
         """
         Checks for new files in 3 second intervals,
         needed if running in docker as events aren't properly passed in.
         """
-        self.start()
-        if self.__namer_config.web is True:
-            self.__webserver = WebServer(self.__namer_config, command_queue=self.__command_queue)
-            if self.__webserver:
+        if not self.__started:
+            self.__starting = True
+            self.start()
+            if self.__namer_config.web is True:
+                self.__webserver = WebServer(self.__namer_config, command_queue=self.__command_queue)
                 self.__webserver.start()
-        try:
-            while True:
-                schedule.run_pending()
-                time.sleep(3)
-        except KeyboardInterrupt:
-            self.stop()
+            try:
+                while True and not self.__stopped:
+                    schedule.run_pending()
+                    time.sleep(3)
+                self.stop()
+            except KeyboardInterrupt:
+                self.stop()
+            self.__started = False
+            self.__stopped = False
+
+    def __enter__(self):
+        self.__background_thread = Thread(target=self.run)
+        self.__background_thread.start()
+        tries = 0
+        while self.get_web_port() is None and tries < 20:
+            time.sleep(0.2)
+            tries += 1
+        if self.get_web_port is None:
+            raise RuntimeError("application did not get assigned a port within 4 seconds.")
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()
+        if self.__background_thread is not None:
+            self.__background_thread.join()
+            self.__background_thread = None
 
     def start(self):
         """
@@ -186,14 +210,20 @@ class MovieWatcher:
         stops a background thread to check for files.
         Waits for the event processor to complete.
         """
-        logger.info("exiting")
-        self.__event_observer.stop()
-        self.__event_observer.join()
+        if not self.__stopped:
+            self.__stopped = True
+            logger.info("exiting")
+            self.__event_observer.stop()
+            self.__event_observer.join()
+            if self.__webserver is not None:
+                self.__webserver.stop()
+            self.__command_queue.put(None)
+            self.__command_queue.join()
+            logger.info("exited")
+
+    def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:
-            self.__webserver.stop()
-        self.__command_queue.put(None)
-        self.__command_queue.join()
-        logger.info("exited")
+            return self.__webserver.get_effective_port()
 
     def __schedule(self):
         self.__event_observer.schedule(self.__event_handler, str(self.__src_path), recursive=True)
