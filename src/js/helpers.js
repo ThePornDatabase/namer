@@ -23,7 +23,15 @@ class Helpers {
     }
 
     static setTableSort(selector) {
-        $(selector).children('table').DataTable()
+        $(selector).children('table').DataTable({
+            stateSave: true,
+            stateSaveCallback: function (settings, data) {
+                localStorage.setItem('DataTables', JSON.stringify(data))
+            },
+            stateLoadCallback: function () {
+                return JSON.parse(localStorage.getItem('DataTables'))
+            }
+        })
     }
 
     static render(template, res, selector, afterRender = null) {
