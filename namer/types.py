@@ -15,9 +15,9 @@ from datetime import timedelta
 from pathlib import Path, PurePath
 from typing import List, Optional, Sequence
 
-from requests_cache import CachedSession
 from loguru import logger
 from pathvalidate import Platform, sanitize_filename
+from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 
 def _verify_name_string(name: str, name_string: str) -> bool:
@@ -506,8 +506,10 @@ def from_config(config: ConfigParser) -> NamerConfig:
     # create a CachedSession objects for request caching.
     if namer_config.enabled_requests_cache:
         cache_file = Path(tempfile.gettempdir()) / "namer_cache"
+        sqlite_supported = issubclass(BACKEND_CLASSES['sqlite'], BaseCache)
+        backend = 'sqlite' if sqlite_supported else 'filesystem'
         expire_time = timedelta(minutes=namer_config.requests_cache_expire_minutes)
-        namer_config.cache_session = CachedSession(str(cache_file), backend='filesystem', expire_after=expire_time, ignored_parameters=["Authorization"])
+        namer_config.cache_session = CachedSession(str(cache_file), backend=backend, expire_after=expire_time, ignored_parameters=["Authorization"])
     return namer_config
 
 
