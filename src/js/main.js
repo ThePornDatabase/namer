@@ -1,5 +1,6 @@
 require('bootstrap/js/dist/modal')
 const $ = require('jquery')
+import 'datatables.net-bs5'
 
 const filesResult = $('#filesResult')
 const resultBody = $('#searchResults .modal-body')
@@ -82,6 +83,8 @@ function updateQueueSize() {
         Helpers.render('queueSize', data, queueSize)
     })
 }
+
+Helpers.setTableSort(filesResult)
 
 if (queueSize) {
     updateQueueSize()
