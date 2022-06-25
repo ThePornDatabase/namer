@@ -1,11 +1,11 @@
-const $ = require('jquery');
+const $ = require('jquery')
 
 class Helpers {
     static getProgressBar() {
         return '<div class="progress"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
     }
 
-    static refreshFiles(selector, target='files') {
+    static refreshFiles(selector, target = 'files') {
         let url
         switch (target) {
             case 'queue':
@@ -16,11 +16,17 @@ class Helpers {
         }
 
         Helpers.request(`./api/v1/${url}`, null, function (data) {
-            Helpers.render('failedFiles', data, selector)
+            Helpers.render('failedFiles', data, selector, function (selector) {
+                Helpers.setTableSort(selector)
+            })
         })
     }
 
-    static render(template, res, selector) {
+    static setTableSort(selector) {
+        $(selector).children('table').DataTable()
+    }
+
+    static render(template, res, selector, afterRender = null) {
         const data = {
             'template': template,
             'data': res,
@@ -28,6 +34,7 @@ class Helpers {
 
         Helpers.request('./api/v1/render', data, function (data) {
             selector.html(data.response)
+            afterRender?.(selector)
         })
     }
 
