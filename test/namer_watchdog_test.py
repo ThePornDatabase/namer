@@ -22,13 +22,13 @@ def make_locations(tempdir: Path) -> NamerConfig:
     """
     config = sample_config()
     config.watch_dir = tempdir / "watch"
-    config.watch_dir.mkdir()
+    config.watch_dir.mkdir(parents=True, exist_ok=True)
     config.work_dir = tempdir / "work"
-    config.work_dir.mkdir()
+    config.work_dir.mkdir(parents=True, exist_ok=True)
     config.dest_dir = tempdir / "dest"
-    config.dest_dir.mkdir()
+    config.dest_dir.mkdir(parents=True, exist_ok=True)
     config.failed_dir = tempdir / "failed"
-    config.failed_dir.mkdir()
+    config.failed_dir.mkdir(parents=True, exist_ok=True)
     config.del_other_files = True
     config.extra_sleep_time = 1
     return config

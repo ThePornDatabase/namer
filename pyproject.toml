@@ -29,6 +29,8 @@ pytest = "^7.0.0"
 pytest-cov = "^3.0.0"
 coverage = "^6.3.2"
 flakeheaven = "^1.0.1"
+selenium = "^4.2.0"
+webdriver-manager = "^3.7.0"
 
 [tool.flakeheaven]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]

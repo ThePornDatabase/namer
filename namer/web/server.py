@@ -3,7 +3,7 @@ A wrapper allowing shutdown of a Flask server.
 """
 from queue import Queue
 from threading import Thread
-from typing import Union
+from typing import Optional, Union
 
 from flask import Flask
 from flask_compress import Compress
@@ -60,3 +60,9 @@ class WebServer:
         """
         if self.__server:
             self.__server.close()
+
+    def get_effective_port(self) -> Optional[int]:
+        port = None
+        if hasattr(self.__server, "effective_port"):
+            port = self.__server.effective_port
+        return port
