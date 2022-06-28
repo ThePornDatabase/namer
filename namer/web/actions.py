@@ -130,4 +130,4 @@ def convert_size(size_bytes: int) -> str:
     p = math.pow(size, i)
     s = round(size_bytes / p, 2)
 
-    return f'{s} {size_name[i]}'
+    return f'{s:.2f} {size_name[i]}'
