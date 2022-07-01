@@ -75,7 +75,7 @@ module.exports = {
                 test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/i,
                 type: 'asset/resource',
                 generator: {
-                    filename: 'fonts/[name][ext][query]'
+                    filename: 'fonts/[name][ext]'
                 }
             },
             {

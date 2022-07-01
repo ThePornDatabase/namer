@@ -146,10 +146,9 @@ class MovieWatcher:
         needed if running in docker as events aren't properly passed in.
         """
         if not self.__started:
-            self.__starting = True
             self.start()
             if self.__namer_config.web is True:
-                self.__webserver = WebServer(self.__namer_config, command_queue=self.__command_queue)
+                self.__webserver = WebServer(self.__namer_config, self.__command_queue)
                 self.__webserver.start()
             try:
                 while True and not self.__stopped:

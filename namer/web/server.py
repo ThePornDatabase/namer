@@ -70,7 +70,4 @@ class WebServer:
             self.__server.close()
 
     def get_effective_port(self) -> Optional[int]:
-        port = None
-        if hasattr(self.__server, "effective_port"):
-            port = self.__server.effective_port  # type: ignore
-        return port
+        return getattr(self.__server, "effective_port", None)
