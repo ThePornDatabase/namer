@@ -9,7 +9,6 @@ const HtmlMinimizerPlugin = require('html-minimizer-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 
 const targetPath = path.resolve(__dirname, 'namer', 'web')
-const targetBrowser = 'last 2 versions'
 
 module.exports = {
     entry: [
@@ -49,7 +48,6 @@ module.exports = {
                         loader: 'postcss-loader',
                         options: {
                             postcssOptions: {
-                                browsers: targetBrowser,
                                 plugins: [
                                     'postcss-preset-env'
                                 ]
@@ -66,7 +64,7 @@ module.exports = {
                     loader: 'babel-loader',
                     options: {
                         presets: [
-                            ['@babel/preset-env', {targets: targetBrowser}]
+                            ['@babel/preset-env']
                         ]
                     }
                 }
