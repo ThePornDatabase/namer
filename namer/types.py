@@ -366,50 +366,69 @@ class NamerConfig:
             self.set_uid = os.getuid()
             self.set_gid = os.getgid()
 
-    def __str__(self):
-        token = "None In Set, Go to https://metadatapi.net/ to get one!"
+    def __dict__(self):
+        porndb_token = "None In Set, Go to https://metadatapi.net/ to get one!"
         if self.porndb_token is not None:
-            token = "*" * len(self.porndb_token)
-        output = "Namer Config:\n"
-        output += f"  porndb_token: {token}\n"
-        output += f"  inplace_name: {self.inplace_name}\n"
-        output += f"  prefer_dir_name_if_available: {self.prefer_dir_name_if_available}\n"
-        output += f"  target_extensions: {self.target_extensions}\n"
-        output += f"  write_namer_log: {self.write_namer_log}\n"
-        output += f"  trailer_location: {self.trailer_location}\n"
-        output += f"  sites_with_no_date_info: {self.sites_with_no_date_info}\n"
-        output += f"  update_permissions_ownership: {self.update_permissions_ownership}\n"
-        output += f"  set_dir_permissions: {self.set_dir_permissions}\n"
-        output += f"  set_file_permissions: {self.set_file_permissions}\n"
-        output += f"  set_uid: {self.set_file_permissions}\n"
-        output += f"  set_gid: {self.set_file_permissions}\n"
-        output += f"  max_performer_names: {self.set_file_permissions}\n"
-        output += f"  enabled_requests_cache: {self.enabled_requests_cache}\n"
-        output += f"  requests_cache_expire_minutes: {self.requests_cache_expire_minutes}\n"
-        output += "Tagging Config:\n"
-        output += f"  write_nfo: {self.write_nfo}\n"
-        output += f"  enabled_tagging: {self.enabled_tagging}\n"
-        output += f"  enabled_poster: {self.enabled_poster}\n"
-        output += f"  enable_metadataapi_genres: {self.enable_metadataapi_genres}\n"
-        output += f"  default_genre: {self.default_genre}\n"
-        output += f"  language: {self.language}\n"
-        output += "Watchdog Config:\n"
-        output += f"  ignored_dir_regex: {self.ignored_dir_regex}\n"
-        output += f"  min_file_size: {self.min_file_size}mb\n"
-        output += f"  del_other_files: {self.del_other_files}\n"
-        output += f"  new_relative_path_name: {self.new_relative_path_name}\n"
-        output += f"  watch_dir: {self.watch_dir}\n"
-        output += f"  work_dir: {self.work_dir}\n"
-        output += f"  failed_dir: {self.failed_dir}\n"
-        output += f"  dest_dir: {self.dest_dir}\n"
-        output += f"  retry_time: {self.retry_time}\n"
-        output += f"  extra_sleep_time: {self.extra_sleep_time}\n"
-        output += f"  web: {self.web}\n"
-        output += f"  port: {self.port}\n"
-        output += f"  host: {self.host}\n"
-        output += f"  web_root: {self.web_root}\n"
-        output += f"  allow_delete_files: {self.allow_delete_files}\n"
-        return output
+            porndb_token = "*" * len(self.porndb_token)
+
+        config = {
+            "Namer Config": {
+                "porndb_token": porndb_token,
+                "inplace_name": self.inplace_name,
+                "prefer_dir_name_if_available": self.prefer_dir_name_if_available,
+                "target_extensions": self.target_extensions,
+                "write_namer_log": self.write_namer_log,
+                "trailer_location": self.trailer_location,
+                "sites_with_no_date_info": self.sites_with_no_date_info,
+                "update_permissions_ownership": self.update_permissions_ownership,
+                "set_dir_permissions": self.set_dir_permissions,
+                "set_file_permissions": self.set_file_permissions,
+                "set_uid": self.set_file_permissions,
+                "set_gid": self.set_file_permissions,
+                "max_performer_names": self.set_file_permissions,
+                "enabled_requests_cache": self.enabled_requests_cache,
+                "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
+            },
+            "Tagging Config": {
+                "write_nfo": self.write_nfo,
+                "enabled_tagging": self.enabled_tagging,
+                "enabled_poster": self.enabled_poster,
+                "enable_metadataapi_genres": self.enable_metadataapi_genres,
+                "default_genre": self.default_genre,
+                "language": self.language,
+            },
+            "Watchdog Config": {
+                "ignored_dir_regex": self.ignored_dir_regex,
+                "min_file_size": f"{self.min_file_size} MB",
+                "del_other_files": self.del_other_files,
+                "new_relative_path_name": self.new_relative_path_name,
+                "watch_dir": str(self.watch_dir),
+                "work_dir": str(self.work_dir),
+                "failed_dir": str(self.failed_dir),
+                "dest_dir": str(self.dest_dir),
+                "retry_time": self.retry_time,
+                "extra_sleep_time": self.extra_sleep_time,
+                "web": self.web,
+                "port": self.port,
+                "host": self.host,
+                "web_root": self.web_root,
+                "allow_delete_files": self.allow_delete_files,
+            }
+        }
+
+        return config
+
+    def __str__(self):
+        config = self.__dict__()
+
+        output = []
+        for key in config:
+            output.append(f"{key}:")
+            for value in config[key]:
+                output.append(f"  {value}: {config[key][value]}")
+
+        # return json.dumps(config, indent=2)
+        return '\n'.join(output)
 
     def verify_naming_config(self) -> bool:
         """
