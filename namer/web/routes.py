@@ -30,7 +30,7 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
     @blueprint.route('/')
     def index() -> Response:
-        return redirect('/failed', code=302)
+        return redirect('failed', code=302)  # type: ignore
 
     @blueprint.route('/failed')
     def failed() -> str:

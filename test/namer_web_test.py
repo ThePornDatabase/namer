@@ -57,6 +57,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 service = Service(_manager().install(), log_path=os.devnull)
                 with _browser(service=service, options=options) as browser:
                     browser.get(url)
-                    element = browser.find_element(by=By.ID, value="refreshFiles")
-                    element.click()
+                    # reload = browser.find_element(by=By.ID, value="refreshFiles")
+                    info = browser.find_element(by=By.CSS_SELECTOR, value='button[data-file="EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"][data-bs-target="#logFile"]')
+                    info.click()
         print("done")
