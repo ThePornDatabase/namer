@@ -4,7 +4,7 @@ Defines the routes of a Flask webserver for namer.
 from pathlib import Path
 from queue import Queue
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, redirect, render_template, request
 from flask.wrappers import Response
 from loguru import logger
 
@@ -33,6 +33,10 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
      """
 
     @blueprint.route('/')
+    def index() -> Response:
+        return redirect('/failed', code=302)
+
+    @blueprint.route('/failed')
     def failed() -> str:
         """
         Displays all failed to name files.
@@ -54,14 +58,16 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         res = False
         if data is not None:
-            template = data.get('template')
-            data = data.get('data')
+            template: str = data.get('template')
+            client_data = data.get('data')
+            active_page: str = data.get('url')
+            active_page = active_page.lstrip('/') if active_page else active_page
 
             template_file = f'render/{template}.html'
-            data = render_template(template_file, data=data, config=config)
+            response = render_template(template_file, data=client_data, config=config, active_page=active_page)
 
             res = {
-                'response': data,
+                'response': response,
             }
 
         return jsonify(res)
@@ -106,6 +112,7 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
             if moved_command is not None:
                 moved_command.tpdb_id = data['scene_id']
                 command_queue.put(moved_command)  # Todo pass selection
+
         return jsonify(res)
 
     @blueprint.route('/api/v1/delete', methods=['POST'])

@@ -47,6 +47,8 @@ class WebServer:
         self.__thread = Thread(target=self.__run, daemon=True)
 
     def __add_mime_types(self):
+        app.config['JSONIFY_MIMETYPE'] = 'application/json; charset=utf-8'
+
         for mime, ext in self.__mime_types.items():
             test_mime, test_ext = mimetypes.guess_type(f'0{ext}')
             if test_mime is None:
