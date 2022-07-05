@@ -13,6 +13,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 from test.namer_watchdog_test import make_locations, new_ea, prepare
 from namer.watchdog import create_watcher
 
+_browser = Chrome
+_options = ChromeOptions
+_manager = ChromeDriverManager
+
 
 def isdebugging():
     return sys_gettrace() is not None
@@ -44,14 +48,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             targets = [new_ea(config.failed_dir, use_dir=False)]
             prepare(targets, mock_poster, mock_response)
             with create_watcher(config) as watcher:
-                url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}"
-                options = ChromeOptions()
+                url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
+                options = _options()
                 if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not isdebugging():
                     options.headless = True
                 if system() != 'Windows' and os.geteuid() == 0:
                     options.add_argument("--no-sandbox")
-                service = Service(ChromeDriverManager().install(), log_path=os.devnull)
-                with Chrome(service=service, options=options) as browser:
+                service = Service(_manager().install(), log_path=os.devnull)
+                with _browser(service=service, options=options) as browser:
                     browser.get(url)
                     element = browser.find_element(by=By.ID, value="refreshFiles")
                     element.click()
