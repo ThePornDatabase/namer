@@ -93,7 +93,7 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
     if system() != "Windows" and file is not None and file.exists() and config.update_permissions_ownership is True:
         _set_perms(file, config)
         if file.is_dir():
-            for target in file.rglob("*.*"):
+            for target in file.rglob("**/*"):
                 _set_perms(target, config)
 
 
@@ -150,7 +150,8 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
                 dest_file = containing_dir / file
                 dest_file.parent.mkdir(parents=True, exist_ok=True)
                 full_file.rename(dest_file)
-        set_permissions(target_dir / relative_path.parts[0], command.config)
+    if command.target_directory and containing_dir:
+        set_permissions(containing_dir, command.config)
     else:
         set_permissions(movie_name, command.config)
 
