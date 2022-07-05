@@ -16,9 +16,9 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
     """
     Parse an Emby/Jellyfin xml file and creates a LookedUpFileInfo from the data.
     """
-    content = xml_file.read_text(encoding="utf8")
+    content = xml_file.read_text(encoding="UTF-8")
 
-    movie: Any = objectify.fromstring(bytes(content, encoding="utf8"), parser=None)
+    movie: Any = objectify.fromstring(bytes(content, encoding="UTF-8"), parser=None)
     info = LookedUpFileInfo()
     info.name = str(movie.title)
     info.site = str(movie.studio[0])
@@ -109,7 +109,7 @@ def write_nfo(video_file: Path,
     """
     if video_file is not None and new_metadata is not None and namer_config.write_nfo is True:
         target = video_file.parent / (video_file.stem + ".nfo")
-        with open(target, "wt", encoding="utf-8") as nfo_file:
+        with open(target, "wt", encoding="UTF-8") as nfo_file:
             towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background)
             nfo_file.write(towrite)
         set_permissions(target, namer_config)
