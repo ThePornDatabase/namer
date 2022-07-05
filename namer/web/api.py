@@ -18,7 +18,6 @@ def get_web_api(config: NamerConfig, command_queue: Queue) -> Blueprint:
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
     blueprint = Blueprint('api', __name__, static_url_path='/', static_folder='public', template_folder='templates')
-    command_queue = command_queue
 
     @blueprint.route('/api/v1/render', methods=['POST'])
     def render() -> Response:

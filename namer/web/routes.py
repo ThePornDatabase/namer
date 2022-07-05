@@ -15,7 +15,6 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
     blueprint = Blueprint('web', __name__, static_url_path='/', static_folder='public', template_folder='templates')
-    command_queue = command_queue
 
     """
     @blueprint.route('/')
@@ -27,7 +26,7 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
                  data.append((url, rule.endpoint))
 
          return render_template('pages/index.html', links=data)
-     """
+    """
 
     @blueprint.route('/')
     def index() -> Response:

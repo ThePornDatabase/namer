@@ -49,7 +49,7 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
     if movie_file is not None:
         log_name = movie_file.with_name(movie_file.stem + "_namer.log")
         logger.info("Writing log to {}", log_name)
-        with open(log_name, "wt", encoding="utf-8") as log_file:
+        with open(log_name, "wt", encoding="UTF-8") as log_file:
             if match_attempts is None or len(match_attempts) == 0:
                 log_file.write("No search results returned.\n")
             else:
