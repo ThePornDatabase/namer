@@ -26,10 +26,10 @@ class Helpers {
         $(selector).children('table').DataTable({
             stateSave: true,
             stateSaveCallback: function (settings, data) {
-                localStorage.setItem('DataTables', JSON.stringify(data))
+                localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
             },
-            stateLoadCallback: function () {
-                return JSON.parse(localStorage.getItem('DataTables'))
+            stateLoadCallback: function (settings) {
+                return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
             }
         })
     }
@@ -38,6 +38,7 @@ class Helpers {
         const data = {
             'template': template,
             'data': res,
+            'url': new URL(window.document.URL).pathname
         }
 
         Helpers.request('./api/v1/render', data, function (data) {
