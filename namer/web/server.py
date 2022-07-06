@@ -14,7 +14,7 @@ from waitress.server import BaseWSGIServer, MultiSocketServer
 from namer.types import NamerConfig
 from namer.web.routes import api, web
 
-app = Flask(__name__, static_folder='public', template_folder='templates')
+app = Flask(__name__, static_url_path='/', static_folder='public', template_folder='templates')
 compress = Compress()
 
 
@@ -46,7 +46,6 @@ class WebServer:
 
     def __register_blueprints(self):
         path = '/' if self.__config.web_root is None else self.__config.web_root
-        app.static_url_path = path
 
         blueprints = [
             web.get_routes(self.__config, self.__command_queue),
