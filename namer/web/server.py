@@ -12,10 +12,9 @@ from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
 from namer.types import NamerConfig
-from namer.web.api import get_web_api
-from namer.web.routes import get_web_routes
+from namer.web.routes import api, web
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/', static_folder='public', template_folder='templates')
 compress = Compress()
 
 
@@ -49,12 +48,13 @@ class WebServer:
         path = '/' if self.__config.web_root is None else self.__config.web_root
 
         blueprints = [
-            get_web_routes(self.__config, self.__command_queue),
-            get_web_api(self.__config, self.__command_queue),
+            web.get_routes(self.__config, self.__command_queue),
+            api.get_routes(self.__config, self.__command_queue),
         ]
 
         for blueprint in blueprints:
-            app.register_blueprint(blueprint, url_prefix=path, root_path=path)
+            blueprint_path = path + blueprint.url_prefix if blueprint.url_prefix else path
+            app.register_blueprint(blueprint, url_prefix=blueprint_path)
 
     def __add_mime_types(self):
         app.config['JSONIFY_MIMETYPE'] = 'application/json; charset=utf-8'

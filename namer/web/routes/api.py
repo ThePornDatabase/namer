@@ -13,13 +13,13 @@ from namer.types import NamerConfig
 from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results, read_failed_log_file
 
 
-def get_web_api(config: NamerConfig, command_queue: Queue) -> Blueprint:
+def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
-    blueprint = Blueprint('api', __name__, static_url_path='/', static_folder='public', template_folder='templates')
+    blueprint = Blueprint('api', __name__, url_prefix='/api')
 
-    @blueprint.route('/api/v1/render', methods=['POST'])
+    @blueprint.route('/v1/render', methods=['POST'])
     def render() -> Response:
         data = request.json
 
@@ -39,17 +39,17 @@ def get_web_api(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         return jsonify(res)
 
-    @blueprint.route('/api/v1/get_files', methods=['POST'])
+    @blueprint.route('/v1/get_files', methods=['POST'])
     def get_files() -> Response:
         data = get_failed_files(config)
         return jsonify(data)
 
-    @blueprint.route('/api/v1/get_queued', methods=['POST'])
+    @blueprint.route('/v1/get_queued', methods=['POST'])
     def get_queued() -> Response:
         data = get_queued_files(command_queue)
         return jsonify(data)
 
-    @blueprint.route('/api/v1/get_search', methods=['POST'])
+    @blueprint.route('/v1/get_search', methods=['POST'])
     def get_search() -> Response:
         data = request.json
 
@@ -59,13 +59,13 @@ def get_web_api(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         return jsonify(res)
 
-    @blueprint.route('/api/v1/get_queue', methods=['POST'])
+    @blueprint.route('/v1/get_queue', methods=['POST'])
     def get_queue() -> Response:
         res = get_queue_size(command_queue)
 
         return jsonify(res)
 
-    @blueprint.route('/api/v1/rename', methods=['POST'])
+    @blueprint.route('/v1/rename', methods=['POST'])
     def rename() -> Response:
         data = request.json
 
@@ -82,7 +82,7 @@ def get_web_api(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         return jsonify(res)
 
-    @blueprint.route('/api/v1/delete', methods=['POST'])
+    @blueprint.route('/v1/delete', methods=['POST'])
     def delete() -> Response:
         data = request.json
 
@@ -92,7 +92,7 @@ def get_web_api(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         return jsonify(res)
 
-    @blueprint.route('/api/v1/read_failed_log', methods=['POST'])
+    @blueprint.route('/v1/read_failed_log', methods=['POST'])
     def read_failed_log() -> Response:
         data = request.json
 

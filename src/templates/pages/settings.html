@@ -1,0 +1,11 @@
+{% extends "partials/base.html" %}
+{% block title %}Settings{% endblock %}
+{% set active_page = "settings" %}
+{% block content %}
+    <h5 class="card-title d-flex justify-content-between align-items-center">
+        Settings
+    </h5>
+    <div class="card-text">
+        <pre><code>{{ config }}</code></pre>
+    </div>
+{% endblock %}
