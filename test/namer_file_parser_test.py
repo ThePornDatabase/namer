@@ -2,9 +2,9 @@
 Tests for namer_file_parser.py
 """
 import io
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from namer.filenameparser import parse_file_name

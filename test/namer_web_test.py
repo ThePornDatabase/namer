@@ -1,17 +1,18 @@
 import os
-from pathlib import Path
-from platform import system
 import tempfile
 import unittest
+from pathlib import Path
+from platform import system
 from sys import gettrace as sys_gettrace
 from unittest.mock import MagicMock, patch
-from selenium.webdriver.chrome.service import Service
+
 from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-from test.namer_watchdog_test import make_locations, new_ea, prepare
 from namer.watchdog import create_watcher
+from test.namer_watchdog_test import make_locations, new_ea, prepare
 
 _browser = Chrome
 _options = ChromeOptions

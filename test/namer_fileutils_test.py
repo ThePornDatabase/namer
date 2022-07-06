@@ -2,10 +2,10 @@
 Tests for namer_file_parser.py
 """
 import io
-from pathlib import Path
-from platform import system
 import tempfile
 import unittest
+from pathlib import Path
+from platform import system
 from unittest.mock import patch
 
 from namer.fileutils import main, set_permissions

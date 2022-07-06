@@ -10,11 +10,11 @@ from namer.types import NamerConfig
 from namer.web.actions import get_failed_files, get_queued_files
 
 
-def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
+def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
     """
     Builds a blueprint for flask with passed in context, the NamerConfig.
     """
-    blueprint = Blueprint('web', __name__, static_url_path='/', static_folder='public', template_folder='templates')
+    blueprint = Blueprint('web', __name__)
 
     """
     @blueprint.route('/')
@@ -47,5 +47,12 @@ def get_web_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         """
         data = get_queued_files(command_queue)
         return render_template('pages/queue.html', data=data, config=config)
+
+    @blueprint.route('/settings')
+    def settings() -> str:
+        """
+        Displays namer settings.
+        """
+        return render_template('pages/settings.html', config=config)
 
     return blueprint

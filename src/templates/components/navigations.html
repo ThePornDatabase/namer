@@ -2,10 +2,13 @@
     <li class="nav-item">
         <a class="nav-link{% if active_page == 'failed' %} active{% endif %}" href="./failed">Files</a>
     </li>
-    <li>
+    <li class="nav-item">
         <a class="nav-link{% if active_page == 'queue' %} active{% endif %}" href="./queue">
             Queue
             <span id="queueSize" class="badge text-bg-secondary"></span>
         </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link{% if active_page == 'settings' %} active{% endif %}" href="./settings">Settings</a>
     </li>
 </ul>

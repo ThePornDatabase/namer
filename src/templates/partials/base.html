@@ -5,13 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>{% block title %}{% endblock %} - Namer</title>
-    <link href="{{ url_for('.static', filename='assets/bundle.min.css') }}" rel="stylesheet"/>
-    <link rel="icon" type="image/png" href="{{ url_for('.static', filename='favicon.png') }}"/>
+    <link href="{{ url_for('static', filename='assets/bundle.min.css') }}" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}"/>
 </head>
 <body>
 <div class="container-lg">
-    {% block content %}{% endblock %}
+    <div class="card mt-2 shadow-sm">
+        <div class="card-header">
+            {% include 'components/navigations.html' %}
+        </div>
+        <div class="card-body">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
 </div>
-<script src="{{ url_for('.static', filename='assets/bundle.min.js') }}"></script>
+{% block external %}{% endblock %}
+<script src="{{ url_for('static', filename='assets/bundle.min.js') }}"></script>
 </body>
 </html>
