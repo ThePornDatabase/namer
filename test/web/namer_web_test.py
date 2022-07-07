@@ -8,11 +8,11 @@ from unittest.mock import MagicMock, patch
 
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 from namer.watchdog import create_watcher
 from test.namer_watchdog_test import make_locations, new_ea, prepare
+from test.web.namer_web_pageobjects import FailedPage
 
 _browser = Chrome
 _options = ChromeOptions
@@ -58,7 +58,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 service = Service(_manager().install(), log_path=os.devnull)
                 with _browser(service=service, options=options) as browser:
                     browser.get(url)
-                    # reload = browser.find_element(by=By.ID, value="refreshFiles")
-                    info = browser.find_element(by=By.CSS_SELECTOR, value='button[data-file="EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"][data-bs-target="#logFile"]')
-                    info.click()
+                    fialedPage = FailedPage(browser)
+                    firstItem = (fialedPage
+                                 .navigate_to().queue_page()
+                                 .navigate_to().failed_page().items()[0])
+                    self.assertEqual(firstItem.file_extension(), "MP4")
+                    self.assertEqual(firstItem.file_name(), "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!")
         print("done")

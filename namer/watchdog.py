@@ -171,11 +171,14 @@ class MovieWatcher:
             raise RuntimeError("application did not get assigned a port within 4 seconds.")
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __simple_exit__(self):
         self.stop()
         if self.__background_thread is not None:
             self.__background_thread.join()
             self.__background_thread = None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.__simple_exit__()
 
     def start(self):
         """
