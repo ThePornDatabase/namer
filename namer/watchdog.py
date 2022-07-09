@@ -23,6 +23,7 @@ from namer.fileutils import is_interesting_movie, make_command_relative_to, move
 from namer.namer import process_file
 from namer.types import Command, default_config, NamerConfig
 from namer.web.server import WebServer
+from namer.web.routes import api, web
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -148,7 +149,14 @@ class MovieWatcher:
         if not self.__started:
             self.start()
             if self.__namer_config.web is True:
-                self.__webserver = WebServer(self.__namer_config, self.__command_queue)
+                blueprints = [
+                    web.get_routes(self.__namer_config, self.__command_queue),
+                    api.get_routes(self.__namer_config, self.__command_queue),
+                ]
+                host = self.__namer_config.host
+                port = self.__namer_config.port
+                webroot = "/" if not self.__namer_config.web_root else self.__namer_config.web_root
+                self.__webserver = WebServer(host, port, webroot, blueprints)
                 self.__webserver.start()
             try:
                 while True and not self.__stopped:
