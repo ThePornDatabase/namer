@@ -1,7 +1,28 @@
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.by import By
+from assertpy import assert_that, fail
+from assertpy.assertpy import AssertionBuilder
+
+T = TypeVar("T")
+
+
+class Assertion(Generic[T], AssertionBuilder):
+    def __init__(self, page_object: T, target):
+        self.target = target
+        self.page_object: T = page_object
+        self.assertion_builder = assert_that(target)
+
+    def on_success(self) -> T:
+        return self.page_object
+
+    def __getattr__(self, attr):
+        out = getattr(self.assertion_builder, attr)
+        if out == self.assertion_builder:
+            return self
+        else:
+            return out
 
 
 class NavElements():
@@ -98,8 +119,8 @@ class LogModal():
         self.__close.click()
         return FailedPage(self.__driver)
 
-    def log_text(self) -> str:
-        return self.__log_item.text
+    def log_text(self) -> Assertion['LogModal']:
+        return Assertion(self, self.__log_item.text)
 
 
 class FailedItem():
@@ -132,28 +153,28 @@ class FailedItem():
         self.__button_search_modal.click()
         return SearchInputModal(self.__parent.parent)
 
-    def file_name(self) -> str:
-        return self.__file_name.text
+    def file_name(self) -> Assertion['FailedItem']:
+        return Assertion(self, self.__file_name.text)
 
-    def file_extension(self) -> str:
-        return self.__file_extension.text
+    def file_extension(self) -> Assertion['FailedItem']:
+        return Assertion(self, self.__file_extension.text)
 
-    def file_size(self) -> str:
-        return self.__file_size.text
+    def file_size(self) -> Assertion['FailedItem']:
+        return Assertion(self, self.__file_size.text)
 
 
 class FailedPage():
     __driver = WebDriver
     __refresh: WebElement
-    __search: WebElement
-    __failed_table: WebElement
+    __search: Optional[WebElement]
+    __failed_table: Optional[WebElement]
     __items: List[WebElement]
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
         self.__refresh = self.__driver.find_element(by=By.ID, value='refreshFiles')
-        self.__search = self.__driver.find_element(by=By.CSS_SELECTOR, value='input[type="search"]')
-        self.__failed_table = self.__driver.find_element(by=By.CSS_SELECTOR, value='table[id="failed"]')
+        self.__search = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='input[type="search"]')), None)
+        self.__failed_table = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"]')), None)
         self.__items = self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"] tbody tr')
 
     def navigate_to(self) -> NavElements:
@@ -167,9 +188,12 @@ class FailedPage():
         return [FailedItem(item) for item in self.__items]
 
     def search(self, search_term: Optional[str]) -> 'FailedPage':
-        if search_term:
-            self.__search.send_keys(search_term)
-        return FailedPage(self.__driver)
+        if not self.__search:
+            fail("no search item on page, happens on purpose if there are no items")
+        else:
+            if search_term:
+                self.__search.send_keys(search_term)
+            return FailedPage(self.__driver)
 
 
 class QueuePage():
