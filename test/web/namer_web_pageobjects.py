@@ -164,7 +164,7 @@ class FailedItem():
 
 
 class FailedPage():
-    __driver = WebDriver
+    __driver: WebDriver
     __refresh: WebElement
     __search: Optional[WebElement]
     __failed_table: Optional[WebElement]
@@ -174,7 +174,6 @@ class FailedPage():
         self.__driver = driver
         self.__refresh = self.__driver.find_element(by=By.ID, value='refreshFiles')
         self.__search = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='input[type="search"]')), None)
-        self.__failed_table = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"]')), None)
         self.__items = self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"] tbody tr')
 
     def navigate_to(self) -> NavElements:

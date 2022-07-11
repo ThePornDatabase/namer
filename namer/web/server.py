@@ -32,21 +32,22 @@ class WebServer:
         'font/woff2': '.woff2',
     }
 
-    def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint]):
+    def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_url: Optional[str] = 'public'):
         self.__host = host
         self.__port = port
         self.__webroot = webroot
         self.__path = '/' if not self.__webroot else self.__webroot
-        self.__app = Flask(__name__, static_url_path=self.__path, static_folder='public', template_folder='templates')
+        self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_url, template_folder='templates')
         self.__blueprints = blueprints
 
         self.__add_mime_types()
         self.__register_blueprints()
         self.__make_server()
+        print(self.__app.url_map)
 
     def __make_server(self):
         self.__compress.init_app(self.__app)
-        self.__server = create_server(self.__app, host=self.__host, port=self.__port)
+        self.__server = create_server(self.__app, host=self.__host, port=self.__port, clear_untrusted_proxy_headers=True)
         self.__thread = Thread(target=self.__run, daemon=True)
 
     def __register_blueprints(self):
@@ -81,3 +82,6 @@ class WebServer:
 
     def get_effective_port(self) -> Optional[int]:
         return getattr(self.__server, "effective_port", None)
+
+    def get_url(self) -> str:
+        return f"http://{self.__host}:{self.get_effective_port()}{self.__webroot}"

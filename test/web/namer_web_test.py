@@ -2,6 +2,7 @@ import contextlib
 import os
 import tempfile
 import unittest
+import requests
 from pathlib import Path
 from platform import system
 from sys import gettrace as sys_gettrace
@@ -15,10 +16,7 @@ from namer.watchdog import create_watcher
 from test.namer_watchdog_test import make_locations, new_ea, prepare
 from test.web.namer_web_pageobjects import FailedPage
 from namer.types import NamerConfig, default_config
-
-_browser = Chrome
-_options = ChromeOptions
-_manager = ChromeDriverManager
+from test.web.parrot_webserver import ParrotWebserver
 
 
 def isdebugging():
@@ -36,13 +34,13 @@ def make_test_context(config: NamerConfig):
         config.work_dir = new_config.work_dir
         with create_watcher(config) as watcher:
             url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
-            options = _options()
+            options = ChromeOptions()
             if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not isdebugging():
                 options.headless = True
             if system() != 'Windows' and os.geteuid() == 0:
                 options.add_argument("--no-sandbox")
-            service = Service(_manager().install(), log_path=os.devnull)
-            with _browser(service=service, options=options) as browser:
+            service = Service(executable_path=ChromeDriverManager().install(), log_path=os.devnull)  # type: ignore
+            with Chrome(service=service, options=options) as browser:
                 browser.get(url)
                 yield (tempdir, watcher, browser)
 
@@ -66,7 +64,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.allow_delete_files = True
         config.write_nfo = False
         config.min_file_size = 0
-        with make_test_context(config) as (__tempdir, __watcher, browser):
+        with make_test_context(config) as (_tempdir, _watcher, browser):
             targets = [new_ea(config.failed_dir, use_dir=False)]
             prepare(targets, mock_poster, mock_response)
             (FailedPage(browser).refresh_items()
@@ -74,6 +72,24 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 .navigate_to().failed_page()
                 .items()[0]
                 .file_name().is_equal_to("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!").on_success()
-                .file_extension().is_equal_to("MP4").does_not_contain("XYZ").on_success()
+                .file_extension().is_equal_to("MP4").on_success()
                 .show_log_modal().log_text().is_empty())
         print("done")
+
+    def test_parrot(self):
+        parrot = ParrotWebserver()
+        with ParrotWebserver() as parrot:
+            parrot.set_response("test", bytearray("response", 'utf-8'))
+            url = parrot.get_url()
+
+            headers = {
+                "Authorization": "Bearer token",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": "namer-1",
+            }
+            # while True:
+            #    time.sleep(.2)
+            with requests.request("GET", f"{url}/test", headers=headers) as response:
+                response.raise_for_status()
+                self.assertEqual(response.text, "response")
