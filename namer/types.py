@@ -16,7 +16,7 @@ from pathlib import Path, PurePath
 from typing import List, Optional, Sequence
 
 from loguru import logger
-from pathvalidate import Platform, sanitize_filename 
+from pathvalidate import Platform, sanitize_filename
 from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 
