@@ -16,10 +16,8 @@ from pathlib import Path, PurePath
 from typing import List, Optional, Sequence
 
 from loguru import logger
-from pathvalidate._common import Platform
-from pathvalidate._filename import sanitize_filename
-from requests_cache import BACKEND_CLASSES, CachedSession
-from requests_cache.backends.base import BaseCache
+from pathvalidate import Platform, sanitize_filename 
+from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 
 def _verify_name_string(name: str, name_string: str) -> bool:

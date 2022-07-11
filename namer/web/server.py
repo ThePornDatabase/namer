@@ -39,11 +39,9 @@ class WebServer:
         self.__path = '/' if not self.__webroot else self.__webroot
         self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_url, template_folder='templates')
         self.__blueprints = blueprints
-
         self.__add_mime_types()
         self.__register_blueprints()
         self.__make_server()
-        print(self.__app.url_map)
 
     def __make_server(self):
         self.__compress.init_app(self.__app)
