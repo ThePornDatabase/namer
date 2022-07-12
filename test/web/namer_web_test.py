@@ -8,9 +8,15 @@ from platform import system
 from sys import gettrace as sys_gettrace
 from unittest.mock import MagicMock, patch
 
-from selenium.webdriver import Chrome, ChromeOptions
-from selenium.webdriver.chrome.service import Service
+
+from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
+from selenium.webdriver.safari.options import Options as SafariOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.edge.service import Service as EdgeService
+
+from selenium.webdriver.remote.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from namer.watchdog import create_watcher
 from test.namer_watchdog_test import make_locations, new_ea, prepare
@@ -21,6 +27,36 @@ from test.web.parrot_webserver import ParrotWebserver
 
 def isdebugging():
     return sys_gettrace() is not None
+
+
+def chrome_factory(debug: bool) -> WebDriver:
+    options = ChromeOptions()
+    if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not debug:
+        options.headless = True
+    if system() != 'Windows' and os.geteuid() == 0:
+        options.add_argument("--no-sandbox")
+    service = ChromeService(executable_path=ChromeDriverManager().install(), log_path=os.devnull)  # type: ignore
+    return Chrome(service=service, options=options)
+
+
+def edge_factory(debug: bool) -> WebDriver:
+    options = EdgeOptions()
+    service = EdgeService(executable_path=EdgeChromiumDriverManager().install(), log_path=os.devnull)  # type: ignore
+    webdriver = Edge(service=service, options=options)
+    return webdriver
+
+
+def safari_factory(debug: bool) -> WebDriver:
+    options = SafariOptions()
+    return Safari(options=options)
+
+
+def default_os_browser(debug: bool) -> WebDriver:
+    if (system() == 'Windows'):
+        return edge_factory(debug)
+    if (system() == 'macOS'):
+        return safari_factory(debug)
+    return chrome_factory(debug)
 
 
 @contextlib.contextmanager
@@ -34,13 +70,7 @@ def make_test_context(config: NamerConfig):
         config.work_dir = new_config.work_dir
         with create_watcher(config) as watcher:
             url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
-            options = ChromeOptions()
-            if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not isdebugging():
-                options.headless = True
-            if system() != 'Windows' and os.geteuid() == 0:
-                options.add_argument("--no-sandbox")
-            service = Service(executable_path=ChromeDriverManager().install(), log_path=os.devnull)  # type: ignore
-            with Chrome(service=service, options=options) as browser:
+            with default_os_browser(isdebugging()) as browser:
                 browser.get(url)
                 yield (tempdir, watcher, browser)
 
