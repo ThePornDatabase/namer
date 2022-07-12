@@ -1,6 +1,8 @@
 from typing import Generic, List, Optional, TypeVar
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from assertpy import assert_that, fail
 from assertpy.assertpy import AssertionBuilder
@@ -32,7 +34,10 @@ class NavElements():
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href="./settings"]')))
+        # wait until loaded
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="./settings"]')))
+
         self.__failed: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./failed"]')
         self.__queue: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./queue"]')
         self.__config: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./settings"]')
@@ -164,7 +169,7 @@ class FailedItem():
 
 
 class FailedPage():
-    __driver = WebDriver
+    __driver: WebDriver
     __refresh: WebElement
     __search: Optional[WebElement]
     __failed_table: Optional[WebElement]
@@ -174,7 +179,6 @@ class FailedPage():
         self.__driver = driver
         self.__refresh = self.__driver.find_element(by=By.ID, value='refreshFiles')
         self.__search = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='input[type="search"]')), None)
-        self.__failed_table = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"]')), None)
         self.__items = self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"] tbody tr')
 
     def navigate_to(self) -> NavElements:
@@ -198,9 +202,11 @@ class FailedPage():
 
 class QueuePage():
     __driver: WebDriver
+    __refresh: WebElement
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
+        self.__refresh = self.__driver.find_element(by=By.ID, value='refreshFiles')
 
     def navigate_to(self) -> NavElements:
         return NavElements(self.__driver)
