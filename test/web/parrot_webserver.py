@@ -1,7 +1,7 @@
 from threading import Thread
 from time import time
 from typing import Dict, Optional
-from namer.web.server import WebServer
+from namer.web.server import GenericWebServer
 from flask import Blueprint, make_response
 from flask.wrappers import Response
 
@@ -23,7 +23,7 @@ def get_routes(responses: Dict[str, bytes]) -> Blueprint:
     return blueprint
 
 
-class ParrotWebserver(WebServer):
+class ParrotWebserver(GenericWebServer):
     __responses: Dict[str, bytes]
     __background_thread: Optional[Thread]
 

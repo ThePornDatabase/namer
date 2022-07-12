@@ -2,6 +2,7 @@
 A wrapper allowing shutdown of a Flask server.
 """
 import mimetypes
+from queue import Queue
 from threading import Thread
 from typing import List, Optional, Union
 
@@ -10,8 +11,11 @@ from flask_compress import Compress
 from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
+from namer.types import NamerConfig
+from namer.web.routes import api, web
 
-class WebServer:
+
+class GenericWebServer:
     """
     A wrapper allowing shutdown of a Flask server.
     """
@@ -83,3 +87,19 @@ class WebServer:
 
     def get_url(self) -> str:
         return f"http://{self.__host}:{self.get_effective_port()}{self.__webroot}"
+
+
+class NamerWebServer(GenericWebServer):
+    __namer_config: NamerConfig
+    __command_queue: Queue
+
+    def __init__(self, namer_config: NamerConfig, command_queue: Queue):
+        self.__namer_config = namer_config
+        self.__command_queue = command_queue
+        webroot = "/" if not self.__namer_config.web_root else self.__namer_config.web_root
+        blueprints = [
+            web.get_routes(self.__namer_config, self.__command_queue),
+            api.get_routes(self.__namer_config, self.__command_queue),
+        ]
+        webroot = "/" if not self.__namer_config.web_root else self.__namer_config.web_root
+        super().__init__(self.__namer_config.host, self.__namer_config.port, webroot, blueprints)

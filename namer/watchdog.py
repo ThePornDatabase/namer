@@ -22,8 +22,7 @@ from watchdog.observers.polling import PollingObserver
 from namer.fileutils import is_interesting_movie, make_command_relative_to, move_command_files
 from namer.namer import process_file
 from namer.types import Command, default_config, NamerConfig
-from namer.web.server import WebServer
-from namer.web.routes import api, web
+from namer.web.server import NamerWebServer
 
 
 def done_copying(file: Optional[Path]) -> bool:
@@ -135,7 +134,7 @@ class MovieWatcher:
         self.__namer_config = namer_config
         self.__src_path = namer_config.watch_dir
         self.__event_observer = PollingObserver()
-        self.__webserver: Optional[WebServer] = None
+        self.__webserver: Optional[NamerWebServer] = None
         self.__command_queue: Queue = Queue()
         self.__worker_thread: Thread = Thread(target=self.__processing_thread, daemon=True)
         self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
@@ -149,14 +148,7 @@ class MovieWatcher:
         if not self.__started:
             self.start()
             if self.__namer_config.web is True:
-                blueprints = [
-                    web.get_routes(self.__namer_config, self.__command_queue),
-                    api.get_routes(self.__namer_config, self.__command_queue),
-                ]
-                host = self.__namer_config.host
-                port = self.__namer_config.port
-                webroot = "/" if not self.__namer_config.web_root else self.__namer_config.web_root
-                self.__webserver = WebServer(host, port, webroot, blueprints)
+                self.__webserver = NamerWebServer(self.__namer_config, self.__command_queue)
                 self.__webserver.start()
             try:
                 while True and not self.__stopped:
