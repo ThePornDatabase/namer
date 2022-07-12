@@ -1,11 +1,12 @@
 from typing import Generic, List, Optional, TypeVar
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+
 from assertpy import assert_that, fail
 from assertpy.assertpy import AssertionBuilder
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
 T = TypeVar("T")
 
@@ -27,7 +28,7 @@ class Assertion(Generic[T], AssertionBuilder):
             return out
 
 
-class NavElements():
+class NavElements:
     __failed: WebElement
     __queue: WebElement
     __config: WebElement
@@ -36,7 +37,7 @@ class NavElements():
         self.__driver = driver
         # wait until loaded
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="./settings"]')))
+        wait.until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="./settings"]')))
 
         self.__failed: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./failed"]')
         self.__queue: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./queue"]')
@@ -55,7 +56,7 @@ class NavElements():
         return ConfigPage(self.__driver)
 
 
-class SearchSelection():
+class SearchSelection:
     __driver: WebDriver
     __dismissal: WebElement
     __close: WebElement
@@ -80,7 +81,7 @@ class SearchSelection():
         return self.__items
 
 
-class SearchInputModal():
+class SearchInputModal:
     __driver: WebDriver
     __button_close: WebElement
     __search_input: WebElement
@@ -110,7 +111,7 @@ class SearchInputModal():
         return SearchSelection(self.__driver)
 
 
-class LogModal():
+class LogModal:
     __driver: WebDriver
     __close: WebElement
     __log_item: WebElement
@@ -128,7 +129,7 @@ class LogModal():
         return Assertion(self, self.__log_item.text)
 
 
-class FailedItem():
+class FailedItem:
     __parent: WebElement
     __file_name: WebElement
     __file_extension: WebElement
@@ -168,7 +169,7 @@ class FailedItem():
         return Assertion(self, self.__file_size.text)
 
 
-class FailedPage():
+class FailedPage:
     __driver: WebDriver
     __refresh: WebElement
     __search: Optional[WebElement]
@@ -200,7 +201,7 @@ class FailedPage():
             return FailedPage(self.__driver)
 
 
-class QueuePage():
+class QueuePage:
     __driver: WebDriver
     __refresh: WebElement
 
@@ -212,7 +213,7 @@ class QueuePage():
         return NavElements(self.__driver)
 
 
-class ConfigPage():
+class ConfigPage:
     __driver: WebDriver
 
     def __init__(self, driver: WebDriver):

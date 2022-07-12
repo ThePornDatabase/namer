@@ -2,27 +2,25 @@ import contextlib
 import os
 import tempfile
 import unittest
-import requests
 from pathlib import Path
 from platform import system
 from sys import gettrace as sys_gettrace
 from unittest.mock import MagicMock, patch
 
-
+import requests
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
-from selenium.webdriver.safari.options import Options as SafariOptions
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.edge.service import Service as EdgeService
-
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.safari.options import Options as SafariOptions
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
+from namer.types import default_config, NamerConfig
 from namer.watchdog import create_watcher
 from test.namer_watchdog_test import make_locations, new_ea, prepare
 from test.web.namer_web_pageobjects import FailedPage
-from namer.types import NamerConfig, default_config
-from test.web.parrot_webserver import ParrotWebserver
+from test.web.parrot_webserver import ParrotWebServer
 
 
 def isdebugging():
@@ -41,6 +39,10 @@ def chrome_factory(debug: bool) -> WebDriver:
 
 def edge_factory(debug: bool) -> WebDriver:
     options = EdgeOptions()
+    if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not debug:
+        options.headless = True
+    if system() != 'Windows' and os.geteuid() == 0:
+        options.add_argument("--no-sandbox")
     service = EdgeService(executable_path=EdgeChromiumDriverManager().install(), log_path=os.devnull)  # type: ignore
     webdriver = Edge(service=service, options=options)
     return webdriver
@@ -52,9 +54,9 @@ def safari_factory(debug: bool) -> WebDriver:
 
 
 def default_os_browser(debug: bool) -> WebDriver:
-    if (system() == 'Windows'):
+    if system() == 'Windows':
         return edge_factory(debug)
-    if (system() == 'macOS'):
+    if system() == 'macOS':
         return safari_factory(debug)
     return chrome_factory(debug)
 
@@ -72,7 +74,7 @@ def make_test_context(config: NamerConfig):
             url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
             with default_os_browser(isdebugging()) as browser:
                 browser.get(url)
-                yield (tempdir, watcher, browser)
+                yield tempdir, watcher, browser
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -107,8 +109,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         print("done")
 
     def test_parrot(self):
-        parrot = ParrotWebserver()
-        with ParrotWebserver() as parrot:
+        with ParrotWebServer() as parrot:
             parrot.set_response("test", bytearray("response", 'utf-8'))
             url = parrot.get_url()
 

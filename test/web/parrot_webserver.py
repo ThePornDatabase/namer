@@ -1,9 +1,11 @@
+import time
 from threading import Thread
-from time import time
 from typing import Dict, Optional
-from namer.web.server import GenericWebServer
+
 from flask import Blueprint, make_response
 from flask.wrappers import Response
+
+from namer.web.server import GenericWebServer
 
 
 def get_routes(responses: Dict[str, bytes]) -> Blueprint:
@@ -23,7 +25,7 @@ def get_routes(responses: Dict[str, bytes]) -> Blueprint:
     return blueprint
 
 
-class ParrotWebserver(GenericWebServer):
+class ParrotWebServer(GenericWebServer):
     __responses: Dict[str, bytes]
     __background_thread: Optional[Thread]
 
@@ -34,19 +36,22 @@ class ParrotWebserver(GenericWebServer):
     def __enter__(self):
         self.__background_thread = Thread(target=self.start)
         self.__background_thread.start()
+
         tries = 0
         while super().get_effective_port() is None and tries < 20:
             time.sleep(0.2)
             tries += 1
+
         if super().get_effective_port is None:
             raise RuntimeError("application did not get assigned a port within 4 seconds.")
+
         return self
 
     def __simple_exit__(self):
         self.stop()
         if self.__background_thread is not None:
             self.__background_thread.join()
-            self.__background_thread = None
+            del self.__background_thread
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.__simple_exit__()
