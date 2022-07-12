@@ -22,10 +22,9 @@ class GenericWebServer:
     __app: Flask
     __compress = Compress()
 
-    __path: str
     __port: int
     __host: str
-    __webroot: Optional[str]
+    __path: str
     __blueprints: List[Blueprint]
 
     __server: Union[MultiSocketServer, BaseWSGIServer]
@@ -39,10 +38,10 @@ class GenericWebServer:
     def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_url: Optional[str] = 'public'):
         self.__host = host
         self.__port = port
-        self.__webroot = webroot
-        self.__path = '/' if not self.__webroot else self.__webroot
+        self.__path = '/' if not webroot else webroot
         self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_url, template_folder='templates')
         self.__blueprints = blueprints
+
         self.__add_mime_types()
         self.__register_blueprints()
         self.__make_server()
@@ -86,7 +85,7 @@ class GenericWebServer:
         return getattr(self.__server, "effective_port", None)
 
     def get_url(self) -> str:
-        return f"http://{self.__host}:{self.get_effective_port()}{self.__webroot}"
+        return f"http://{self.__host}:{self.get_effective_port()}{self.__path}"
 
 
 class NamerWebServer(GenericWebServer):
@@ -101,5 +100,5 @@ class NamerWebServer(GenericWebServer):
             web.get_routes(self.__namer_config, self.__command_queue),
             api.get_routes(self.__namer_config, self.__command_queue),
         ]
-        webroot = "/" if not self.__namer_config.web_root else self.__namer_config.web_root
+
         super().__init__(self.__namer_config.host, self.__namer_config.port, webroot, blueprints)

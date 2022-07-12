@@ -1,8 +1,8 @@
-from test.web.parrot_webserver import ParrotWebserver
+from test.web.parrot_webserver import ParrotWebServer
 
 
-def make_fake_tpbd() -> ParrotWebserver:
-    server = ParrotWebserver()
+def make_fake_tpbd() -> ParrotWebServer:
+    server = ParrotWebServer()
     # start setting up the server
     # server.set_response( url, bytearray())
     return server
