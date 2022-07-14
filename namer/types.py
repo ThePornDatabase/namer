@@ -361,6 +361,13 @@ class NamerConfig:
     If enabled_requests_cache is true this http.session will be constructed and used for requests to tpdb.
     """
 
+    diagnose_errors: bool = False
+    """
+    Errors may be raised by the program, and when they are loguru may be used to help explain them, showing 
+    values in the stack trace, potentially including the porndb token, this setting should only be turned on
+    if you are going to check an logs you share for your token.
+    """
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -425,6 +432,7 @@ class NamerConfig:
                 "host": self.host,
                 "web_root": self.web_root,
                 "allow_delete_files": self.allow_delete_files,
+                "diagnose_errors": self.diagnose_errors,
             }
         }
 
@@ -521,6 +529,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.host = config.get("watchdog", "host", fallback="0.0.0.0")
     namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
     namer_config.allow_delete_files = config.getboolean("watchdog", "allow_delete_files", fallback=False)
+    namer_config.diagnose_errors = config.getboolean("watchdog", "diagnose_errors", fallback=False)
 
     # create a CachedSession objects for request caching.
     if namer_config.enabled_requests_cache:

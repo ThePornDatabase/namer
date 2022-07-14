@@ -236,7 +236,7 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     Configure and start a watchdog looking for new Movies.
     """
     logger.remove()
-    logger.add(sys.stdout, format="{time} {level} {message}", level="INFO")
+    logger.add(sys.stdout, format="{time} {level} {message}", level="INFO", diagnose=False)
     logger.info(str(namer_watchdog_config))
     if not namer_watchdog_config.verify_watchdog_config():
         sys.exit(-1)
