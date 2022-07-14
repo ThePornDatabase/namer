@@ -363,7 +363,7 @@ class NamerConfig:
 
     diagnose_errors: bool = False
     """
-    Errors may be raised by the program, and when they are loguru may be used to help explain them, showing 
+    Errors may be raised by the program, and when they are loguru may be used to help explain them, showing
     values in the stack trace, potentially including the porndb token, this setting should only be turned on
     if you are going to check an logs you share for your token.
     """
