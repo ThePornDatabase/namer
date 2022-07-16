@@ -36,12 +36,9 @@ class NavElements:
     def __init__(self, driver: WebDriver):
         self.__driver = driver
         # wait until loaded
-        wait = WebDriverWait(driver, 10)
-        wait.until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, 'a[href="./settings"]')))
-
-        self.__failed: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./failed"]')
-        self.__queue: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./queue"]')
-        self.__config: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./settings"]')
+        self.__config = waitForAndFind(driver, By.ID, 'navSettings')
+        self.__failed: WebElement = self.__driver.find_element(by=By.ID, value='navFailed')
+        self.__queue: WebElement = self.__driver.find_element(by=By.ID, value='navQueue')
 
     def failed_page(self):
         self.__failed.click()
@@ -56,58 +53,95 @@ class NavElements:
         return ConfigPage(self.__driver)
 
 
+class SearchSelectionItem:
+    __parent: WebElement
+    __show: WebElement
+    __select: WebElement
+    __date: WebElement
+    __title: WebElement
+
+    def __init__(self, parent: WebElement):
+        self.__parent = parent
+
+        self.__title = waitForAndFind(self.__parent, By.CLASS_NAME, 'card-title')
+        if self.__title.text is None or self.__title.text == "":
+            waitUntilPresent(self.__parent.parent, By.CSS_SELECTOR, 'button[class="btn btn-primary float-end rename"]')
+            self.__title = self.__parent.find_element(By.CLASS_NAME, 'card-title')
+        self.__date = self.__parent.find_element(By.CLASS_NAME, 'card-text')
+        self.__show = self.__parent.find_element(By.CSS_SELECTOR, 'a[class="btn btn-secondary"]')
+        self.__select = self.__parent.find_element(By.CSS_SELECTOR, 'button[class="btn btn-primary float-end rename"]')
+
+    def title_text(self) -> Assertion['SearchSelectionItem']:
+        return Assertion(self, self.__title.text)
+
+    def date_text(self) -> Assertion['SearchSelectionItem']:
+        return Assertion(self, self.__date.text)
+
+    def show(self) -> 'SearchSelectionItem':
+        self.__show.click()
+        return self
+
+    def select(self) -> 'FailedPage':
+        self.__select.click()
+        waitUntilInvisible(self.__select)
+        return FailedPage(self.__parent.parent).refresh_items()
+
+
 class SearchSelection:
     __driver: WebDriver
-    __dismissal: WebElement
+    __cancel: WebElement
     __close: WebElement
     __items: List[WebElement]
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        self.__dismissal = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Close"]')
-        self.__close = self.__driver.find_element(By.CSS_SELECTOR, 'button[data-bs-dismiss="modal"]')
-        self.items = self.__driver.find_elements(By.CLASS_NAME, 'col m-1')
+        self.__cancel = self.__driver.find_element(By.ID, 'searchResultCancel')
+        self.__close = self.__driver.find_element(By.ID, 'searchResultClose')
+        findAndWaitUntilStale(driver, By.ID, "progressBar")
+        self.__items = self.__driver.find_elements(By.CSS_SELECTOR, 'div[class="card h-100"]')
 
-    def dismiss(self) -> 'FailedPage':
-        self.__dismissal.click()
+    def cancel(self) -> 'FailedPage':
+        self.__cancel.click()
         return FailedPage(self.__driver)
 
     def close(self) -> 'FailedPage':
         self.__close.click()
         return FailedPage(self.__driver)
 
-    def results(self) -> List:
-        # todo result items
-        return self.__items
+    def results(self) -> List[SearchSelectionItem]:
+        return [SearchSelectionItem(item) for item in self.__items]
 
 
 class SearchInputModal:
     __driver: WebDriver
-    __button_close: WebElement
+    __cancel: WebElement
     __search_input: WebElement
     __search_submit: WebElement
     __search_close: WebElement
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        self.__button_close = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="close"]')
+        waitUntilPresent(driver, By.CSS_SELECTOR, 'button[data-bs-target="#searchResults"]')
+        self.__cancel = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Close"]')
         self.__search_input = self.__driver.find_element(By.ID, 'queryInput')
-        self.__search_submit = self.__driver.find_element(By.CSS_SELECTOR, 'button[data-bs-dismiss="modal"]')
-        self.__search_close = self.__driver.find_element(By.CSS_SELECTOR, 'button[data-bs-target="#searchResults"]')
+        self.__search_submit = self.__driver.find_element(By.CSS_SELECTOR, 'button[data-bs-target="#searchResults"]')
+        self.__search_close = self.__driver.find_element(By.CSS_SELECTOR, 'button[class="btn btn-secondary"]')
 
     def dismiss(self) -> 'FailedPage':
-        self.__button_close.click()
+        self.__cancel.click()
         return FailedPage(self.__driver)
 
     def close(self) -> 'FailedPage':
         self.__search_close.click()
         return FailedPage(self.__driver)
 
-    def search(self, override_term: Optional[str]) -> SearchSelection:
-        self.__search_close.click()
+    def search(self, override_term: Optional[str] = None) -> SearchSelection:
         if override_term:
+            self.__search_input.clear()
             self.__search_input.send_keys(override_term)
+
         self.__search_submit.click()
+        waitUntilInvisible(self.__search_submit)
         return SearchSelection(self.__driver)
 
 
@@ -118,11 +152,15 @@ class LogModal:
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        self.__close = self.__driver.find_element(by=By.ID, value='refreshFiles')
-        self.__log_item = self.__driver.find_element(by=By.ID, value='refreshFiles')
+        wait = WebDriverWait(driver, 10)
+        wait.until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, 'button[class="btn btn-secondary"]')))
+        self.__close = self.__driver.find_element(By.ID, "logFileFormClose")
+        self.__cancel = self.__driver.find_element(By.ID, "logFileFormCancel")
+        self.__log_item = self.__driver.find_element(By.ID, value='logContents')
 
     def close(self) -> 'FailedPage':
         self.__close.click()
+        waitUntilInvisible(self.__close)
         return FailedPage(self.__driver)
 
     def log_text(self) -> Assertion['LogModal']:
@@ -140,6 +178,7 @@ class FailedItem:
 
     def __init__(self, parent: WebElement):
         self.__parent = parent
+        waitUntilPresent(parent.parent, By.CSS_SELECTOR, 'button[title="Search"]')
         self.__file_name = self.__parent.find_element(By.CSS_SELECTOR, ':nth-child(1)')
         self.__file_extension = self.__parent.find_element(By.CSS_SELECTOR, ':nth-child(2)')
         self.__file_size = self.__parent.find_element(By.CSS_SELECTOR, ':nth-child(3)')
@@ -169,18 +208,49 @@ class FailedItem:
         return Assertion(self, self.__file_size.text)
 
 
+def waitForAndFind(driver, by: str, value: str) -> WebElement:
+    wait = WebDriverWait(driver, 10)
+    wait.until(expected_conditions.presence_of_element_located((by, value)))
+    return driver.find_element(by, value)
+
+
+def findIfPresent(driver, by: str, value: str) -> Optional[WebElement]:
+    return next(iter(driver.find_elements(by, value)), None)
+
+
+def waitUntilPresent(driver, by: str, value: str) -> Optional[WebElement]:
+    wait = WebDriverWait(driver, 10)
+    wait.until(expected_conditions.visibility_of_any_elements_located((by, value)))
+
+
+def findAndWaitUntilStale(driver, by: str, value: str):
+    wait = WebDriverWait(driver, 10)
+    element = findIfPresent(driver, by, value)
+    if element:
+        wait.until(expected_conditions.invisibility_of_element(element))
+
+
+def waitUntilInvisible(element: WebElement):
+    if element:
+        wait = WebDriverWait(element.parent, 10)
+        wait.until(expected_conditions.invisibility_of_element(element))
+
+
 class FailedPage:
     __driver: WebDriver
     __refresh: WebElement
     __search: Optional[WebElement]
-    __failed_table: Optional[WebElement]
+    __noFailedFiles: Optional[WebElement]
     __items: List[WebElement]
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        self.__refresh = self.__driver.find_element(by=By.ID, value='refreshFiles')
-        self.__search = next(iter(self.__driver.find_elements(by=By.CSS_SELECTOR, value='input[type="search"]')), None)
-        self.__items = self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"] tbody tr')
+        self.__refresh = waitForAndFind(driver, By.ID, 'refreshFiles')
+        self.__noFailedFiles = findIfPresent(driver, By.ID, 'noFailedFiles')
+        if self.__noFailedFiles is None:
+            # waitUntilPresent(driver, By.CSS_SELECTOR, 'table[id="failed"] tbody tr')
+            self.__search = waitForAndFind(driver, by=By.CSS_SELECTOR, value='input[type="search"]')
+            self.__items = self.__driver.find_elements(by=By.CSS_SELECTOR, value='table[id="failed"] tbody tr')
 
     def navigate_to(self) -> NavElements:
         return NavElements(self.__driver)
@@ -191,6 +261,10 @@ class FailedPage:
 
     def items(self) -> List[FailedItem]:
         return [FailedItem(item) for item in self.__items]
+
+    def assert_has_no_files(self) -> 'FailedPage':
+        assert_that(self.__noFailedFiles).is_not_none()
+        return self
 
     def search(self, search_term: Optional[str]) -> 'FailedPage':
         if not self.__search:

@@ -1,6 +1,7 @@
 """
 A wrapper allowing shutdown of a Flask server.
 """
+from asyncio.log import logger
 import mimetypes
 from queue import Queue
 from threading import Thread
@@ -72,7 +73,12 @@ class GenericWebServer:
         Start server on existing thread.
         """
         if self.__server:
-            self.__server.run()
+            try:
+                self.__server.run()
+            except OSError:
+                logger.error("Stopping server")
+            finally:
+                self.stop()
 
     def stop(self):
         """
@@ -85,6 +91,9 @@ class GenericWebServer:
         return getattr(self.__server, "effective_port", None)
 
     def get_url(self) -> str:
+        """
+        Returns the full url to access this server, usually http://127.0.0.1:<os assigned port>/
+        """
         return f"http://{self.__host}:{self.get_effective_port()}{self.__path}"
 
 

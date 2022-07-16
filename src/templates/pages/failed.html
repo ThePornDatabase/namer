@@ -20,13 +20,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalLogsLabel">Failed Log</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button id="logFileFormCancel" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="progress"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="logFileFormClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -36,15 +36,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="searchFormLabel">Search</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button id="searchFormCancel" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <label for="queryInput" class="form-label">Search query</label>
                     <input type="text" class="form-control" id="queryInput">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary search" data-bs-target="#searchResults" data-bs-toggle="modal" data-bs-dismiss="modal">
+                    <button id="searchFormClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="searchFormSubmit" type="button" class="btn btn-primary search" data-bs-target="#searchResults" data-bs-toggle="modal" data-bs-dismiss="modal">
                         Submit
                     </button>
                 </div>
@@ -56,13 +56,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalSearchResultsLabel">Search Result</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button id="searchResultCancel" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="progress"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="searchResultClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

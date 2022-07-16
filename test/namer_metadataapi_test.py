@@ -1,6 +1,7 @@
 """
 Test namer_metadataapi_test.py
 """
+import contextlib
 import io
 import tempfile
 import unittest
@@ -10,7 +11,70 @@ from unittest import mock
 from namer.filenameparser import parse_file_name
 from namer.fileutils import make_command
 from namer.metadataapi import main, match
+from namer.types import NamerConfig
 from test.utils import sample_config
+from test.web.parrot_webserver import ParrotWebServer
+
+
+class FakeTPDB(ParrotWebServer):
+
+    def __init__(self):
+        super().__init__()
+        self.default_additions()
+
+    def __enter__(self):
+        super().__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        return super().__exit__(exc_type, exc_value, traceback)
+
+    def get_url(self) -> str:
+        return super().get_url()
+
+    def addExampleEvilAngel(self, target_url: str):
+        test_dir = Path(__file__).resolve().parent
+        return_value = (test_dir / "ea.full.json").read_text()
+        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
+        super().set_response(target_url, modified_value)
+
+    def addExampleDorcelClub(self, target_url: str):
+        test_dir = Path(__file__).resolve().parent
+        return_value = (test_dir / "dc.json").read_text()
+        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
+        super().set_response(target_url, modified_value)
+
+    def addPoster(self, target_url: str) -> None:
+        test_dir = Path(__file__).resolve().parent
+        return_value = (test_dir / "poster.png").read_bytes()
+        super().set_response(target_url, bytearray(return_value))
+
+    def default_additions(self):
+        # Evil Angel:
+        # Search Results
+        self.addExampleEvilAngel("/scenes?parse=evilangel.2022-01-03.Carmela.Clutch.Fabulous.Anal.3-Way&limit=25")
+        # Extra Metadata Lookup
+        self.addExampleEvilAngel("/scenes/1678283?")
+        # UI Tests
+        self.addExampleEvilAngel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
+        # Image for UI Test:
+        self.addPoster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
+        # DorcelClub
+        # Search Results
+        self.addExampleDorcelClub("/scenes?parse=dorcelclub.2021-12-23.Aya.Benetti.Megane.Lopez.And.Bella.Tina&limit=25")
+        # Extra Metadata Lookup
+        self.addExampleDorcelClub("/scenes/1674059?")
+        # with utf8 characters
+        self.addExampleDorcelClub("/scenes?parse=dorcelclub.2021-12-23.Aya.B%D0%B5n%D0%B5tti.M%D0%B5gane.Lop%D0%B5z.And.B%D0%B5lla.Tina&limit=25")
+
+
+@contextlib.contextmanager
+def environment(config: NamerConfig = sample_config()):
+    with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+        with FakeTPDB() as fakeTpdb:
+            tempdir = Path(tmpdir)
+            config.override_tpdb_address = fakeTpdb.get_url()
+            yield tempdir, fakeTpdb, config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -18,107 +82,100 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
-    @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_parse_response_metadataapi_net_dorcel(self, mock_response):
+    def test_parse_response_metadataapi_net_dorcel(self):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "dc.json"
-        mock_response.return_value = response.read_text()
-        name = parse_file_name("DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 1)
-        result = results[0]
-        info = result.looked_up
-        self.assertEqual(info.name, "Peeping Tom")
-        self.assertEqual(info.date, "2021-12-23")
-        self.assertEqual(info.site, "Dorcel Club")
-        self.assertIsNotNone(info.description)
-        if info.description is not None:
-            self.assertRegex(info.description, r"kissing in a parking lot")
-        self.assertEqual(
-            info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
-        )
-        self.assertEqual(
-            info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
-        )
-        self.assertEqual(info.performers[0].name, "Ryan Benetti")
-        self.assertEqual(info.performers[1].name, "Aya Benetti")
-        self.assertEqual(info.performers[2].name, "Bella Tina")
-        self.assertEqual(info.performers[3].name, "Megane Lopez")
-
-    @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_parse_response_metadataapi_net_dorcel_unicode_cruft(self, mock_response):
-        """
-        Test parsing a stored response as a LookedUpFileInfo
-        """
-        response = Path(__file__).resolve().parent / "dc.json"
-        mock_response.return_value = response.read_text()
-        # the "e"s in the string below are unicode е (0x435), not asci e (0x65).
-        name = parse_file_name("DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 1)
-        result = results[0]
-        self.assertTrue(result.is_match())
-        info = result.looked_up
-        self.assertEqual(info.name, "Peeping Tom")
-        self.assertEqual(info.date, "2021-12-23")
-        self.assertEqual(info.site, "Dorcel Club")
-        self.assertIsNotNone(info.description)
-        if info.description is not None:
-            self.assertRegex(info.description, r"kissing in a parking lot")
-        self.assertEqual(
-            info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
-        )
-        self.assertEqual(
-            info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
-        )
-        self.assertEqual(info.performers[0].name, "Ryan Benetti")
-        self.assertEqual(info.performers[1].name, "Aya Benetti")
-        self.assertEqual(info.performers[2].name, "Bella Tina")
-        self.assertEqual(info.performers[3].name, "Megane Lopez")
-
-    @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_call_metadataapi_net(self, mock_response):
-        """
-        Test parsing a stored response as a LookedUpFileInfo
-        """
-        response = Path(__file__).resolve().parent / "ea.json"
-        mock_response.return_value = response.read_text()
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 1)
-        result = results[0]
-        self.assertTrue(result.date_match)
-        self.assertTrue(result.site_match)
-        self.assertGreaterEqual(result.name_match, 90.0)
-        info = results[0].looked_up
-        self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
-        self.assertEqual(info.date, "2022-01-03")
-        self.assertEqual(info.site, "Evil Angel")
-        self.assertIsNotNone(info.description)
-        if info.description is not None:
-            self.assertRegex(
-                info.description, r"brunette Carmela Clutch positions her big, juicy"
+        with environment() as (_path, _parrot, config):
+            name = parse_file_name("DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4")
+            results = match(name, config)
+            self.assertEqual(len(results), 1)
+            result = results[0]
+            info = result.looked_up
+            self.assertEqual(info.name, "Peeping Tom")
+            self.assertEqual(info.date, "2021-12-23")
+            self.assertEqual(info.site, "Dorcel Club")
+            self.assertIsNotNone(info.description)
+            if info.description is not None:
+                self.assertRegex(info.description, r"kissing in a parking lot")
+            self.assertEqual(
+                info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
             )
-        self.assertEqual(
-            info.source_url,
-            "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543",
-        )
-        self.assertEqual(
-            info.poster_url,
-            "https://thumb.metadataapi.net/unsafe/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Fe6%2Fb9%2F5b%2F066589730107dcfd6b656a398a584b5%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
-        )
-        self.assertEqual(info.performers[0].name, "Carmela Clutch")
-        self.assertEqual(info.performers[0].role, "Female")
-        self.assertEqual(info.performers[1].name, "Francesca Le")
-        self.assertEqual(info.performers[1].role, "Female")
-        self.assertEqual(info.performers[2].name, "Mark Wood")
-        self.assertEqual(info.performers[2].role, "Male")
+            self.assertIn(
+                "/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
+                info.poster_url if info.poster_url else "",
+            )
+            self.assertEqual(info.performers[0].name, "Ryan Benetti")
+            self.assertEqual(info.performers[1].name, "Aya Benetti")
+            self.assertEqual(info.performers[2].name, "Bella Tina")
+            self.assertEqual(info.performers[3].name, "Megane Lopez")
 
-        self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
+    def test_parse_response_metadataapi_net_dorcel_unicode_cruft(self):
+        """
+        Test parsing a stored response as a LookedUpFileInfo
+        """
+        with environment() as (_path, _parrot, config):
+            # the "e"s in the string below are unicode е (0x435), not asci e (0x65).
+            name = parse_file_name("DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4")
+            results = match(name, config)
+            self.assertEqual(len(results), 1)
+            result = results[0]
+            self.assertTrue(result.is_match())
+            info = result.looked_up
+            self.assertEqual(info.name, "Peeping Tom")
+            self.assertEqual(info.date, "2021-12-23")
+            self.assertEqual(info.site, "Dorcel Club")
+            self.assertIsNotNone(info.description)
+            if info.description is not None:
+                self.assertRegex(info.description, r"kissing in a parking lot")
+            self.assertEqual(
+                info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
+            )
+            self.assertIn(
+                "/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
+                info.poster_url if info.poster_url else "",
+            )
+            self.assertEqual(info.performers[0].name, "Ryan Benetti")
+            self.assertEqual(info.performers[1].name, "Aya Benetti")
+            self.assertEqual(info.performers[2].name, "Bella Tina")
+            self.assertEqual(info.performers[3].name, "Megane Lopez")
+
+    def test_call_metadataapi_net(self):
+        """
+        Test parsing a stored response as a LookedUpFileInfo
+        """
+        with environment() as (_path, _parrot, config):
+            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            results = match(name, config)
+            self.assertEqual(len(results), 1)
+            result = results[0]
+            self.assertTrue(result.date_match)
+            self.assertTrue(result.site_match)
+            self.assertGreaterEqual(result.name_match, 90.0)
+            info = results[0].looked_up
+            self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
+            self.assertEqual(info.date, "2022-01-03")
+            self.assertEqual(info.site, "Evil Angel")
+            self.assertIsNotNone(info.description)
+            if info.description is not None:
+                self.assertRegex(
+                    info.description, r"brunette Carmela Clutch positions her big, juicy"
+                )
+            self.assertEqual(
+                info.source_url,
+                "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543",
+            )
+            self.assertIn(
+                "/unsafe/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F01%2F92%2F04%2F76e780fd19c4306bc744f79b5cb4bce%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
+                info.poster_url if info.poster_url else ""
+            )
+            self.assertEqual(info.performers[0].name, "Carmela Clutch")
+            self.assertEqual(info.performers[0].role, "Female")
+            self.assertEqual(info.performers[1].name, "Francesca Le")
+            self.assertEqual(info.performers[1].role, "Female")
+            self.assertEqual(info.performers[2].name, "Mark Wood")
+            self.assertEqual(info.performers[2].role, "Male")
+            self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net2(self, mock_response):
@@ -139,37 +196,35 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(info.date, "2022-02-28")
         self.assertEqual(info.site, "Brazzers Exxtra")
 
-    @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_call_full_metadataapi_net(self, mock_response):
+    def test_call_full_metadataapi_net(self):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "ea.json"
-        mock_response.return_value = response.read_text()
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-        results = match(name, sample_config())
-        self.assertEqual(len(results), 1)
-        result = results[0]
-        self.assertTrue(result.date_match)
-        self.assertTrue(result.site_match)
-        self.assertGreaterEqual(result.name_match, 90.0)
-        info = results[0].looked_up
-        self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
-        self.assertEqual(info.date, "2022-01-03")
-        self.assertEqual(info.site, "Evil Angel")
-        self.assertIsNotNone(info.description)
-        if info.description is not None:
-            self.assertRegex(info.description, r"brunette Carmela Clutch positions her big, juicy")
-        self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
-        self.assertIsNotNone(info.poster_url)
-        if info.poster_url is not None:
-            self.assertRegex(info.poster_url, "https://thumb.metadataapi.net/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
-        self.assertEqual(info.performers[0].name, "Carmela Clutch")
-        self.assertEqual(info.performers[0].role, "Female")
-        self.assertEqual(info.performers[1].name, "Francesca Le")
-        self.assertEqual(info.performers[1].role, "Female")
-        self.assertEqual(info.performers[2].name, "Mark Wood")
-        self.assertEqual(info.performers[2].role, "Male")
+        with environment() as (_path, _parrot, config):
+            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            results = match(name, config)
+            self.assertEqual(len(results), 1)
+            result = results[0]
+            self.assertTrue(result.date_match)
+            self.assertTrue(result.site_match)
+            self.assertGreaterEqual(result.name_match, 90.0)
+            info = results[0].looked_up
+            self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
+            self.assertEqual(info.date, "2022-01-03")
+            self.assertEqual(info.site, "Evil Angel")
+            self.assertIsNotNone(info.description)
+            if info.description is not None:
+                self.assertRegex(info.description, r"brunette Carmela Clutch positions her big, juicy")
+            self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
+            self.assertIsNotNone(info.poster_url)
+            if info.poster_url is not None:
+                self.assertRegex(info.poster_url, "http.*/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
+            self.assertEqual(info.performers[0].name, "Carmela Clutch")
+            self.assertEqual(info.performers[0].role, "Female")
+            self.assertEqual(info.performers[1].name, "Francesca Le")
+            self.assertEqual(info.performers[1].role, "Female")
+            self.assertEqual(info.performers[2].name, "Mark Wood")
+            self.assertEqual(info.performers[2].role, "Male")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_data(self, mock_response):
@@ -229,23 +284,18 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 self.assertEqual(len(results), 0)
 
     @mock.patch("sys.stdout", new_callable=io.StringIO)
-    @mock.patch("namer.metadataapi.__get_response_json_object")
     @mock.patch("namer.metadataapi.default_config")
-    def test_main_metadataapi_net(self, mock_config, mock_response, mock_stdout):
+    def test_main_metadataapi_net(self, mock_config, mock_stdout):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
-        config = sample_config()
-        config.min_file_size = 0
-        mock_config.side_effect = [config]
-        response = Path(__file__).resolve().parent / "ea.json"
-        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-            tempdir = Path(tmpdir)
+        with environment() as (tempdir, _parrot, config):
+            config.min_file_size = 0
+            mock_config.side_effect = [config]
+            filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             tmp_file = tempdir / filename
             with open(tmp_file, 'w'):
                 pass
-            mock_response.return_value = response.read_text()
             main(["-f", str(tmp_file)])
             self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4", mock_stdout.getvalue())
 
