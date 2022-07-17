@@ -36,9 +36,9 @@ class NavElements:
     def __init__(self, driver: WebDriver):
         self.__driver = driver
         # wait until loaded
-        self.__config = waitForAndFind(driver, By.ID, 'navSettings')
-        self.__failed: WebElement = self.__driver.find_element(by=By.ID, value='navFailed')
-        self.__queue: WebElement = self.__driver.find_element(by=By.ID, value='navQueue')
+        self.__config = waitForAndFind(driver, By.CSS_SELECTOR, value='a[href="./settings"]')
+        self.__failed: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./failed"]')
+        self.__queue: WebElement = self.__driver.find_element(by=By.CSS_SELECTOR, value='a[href="./queue"]')
 
     def failed_page(self):
         self.__failed.click()
@@ -98,8 +98,8 @@ class SearchSelection:
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        self.__cancel = self.__driver.find_element(By.ID, 'searchResultCancel')
-        self.__close = self.__driver.find_element(By.ID, 'searchResultClose')
+        self.__cancel = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Close"]')
+        self.__close = self.__driver.find_element(By.CSS_SELECTOR, 'div[class="modal-footer"] button[class="btn btn-secondary"]')
         findAndWaitUntilStale(driver, By.ID, "progressBar")
         self.__items = waitForAndFindAll(driver, By.CSS_SELECTOR, 'div[class="card h-100"]')
 
@@ -156,8 +156,8 @@ class LogModal:
         self.__driver = driver
         wait = WebDriverWait(driver, 10)
         wait.until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, 'button[class="btn btn-secondary"]')))
-        self.__close = self.__driver.find_element(By.ID, "logFileFormClose")
-        self.__cancel = self.__driver.find_element(By.ID, "logFileFormCancel")
+        self.__close = self.__driver.find_element(By.CSS_SELECTOR, 'button[data-bs-dismiss="modal"]')
+        self.__cancel = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Close"]')
         self.__log_item = self.__driver.find_element(By.ID, value='logContents')
 
     def close(self) -> 'FailedPage':
