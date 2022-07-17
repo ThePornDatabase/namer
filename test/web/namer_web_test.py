@@ -107,8 +107,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 .items()[0]
                 .show_search_modal()
                 .search()
-                .results()[0]
-                .title_text().is_equal_to('Carmela Clutch: Fabulous Anal 3-Way!').on_success()
+                .results()[0].title_text().is_equal_to('Carmela Clutch: Fabulous Anal 3-Way!').on_success()
                 .date_text().is_equal_to('2022-01-03').on_success()
                 .select()  # returns to failed page
                 .assert_has_no_files())
