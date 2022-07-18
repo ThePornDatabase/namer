@@ -19,7 +19,7 @@
 .. image:: https://static.pepy.tech/personalized-badge/namer?period=month&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads/Month
   :target: https://pepy.tech/project/namer
 
-Namer is a powerful command line tool for renaming and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
+Namer is a powerful command line tool and web app for renaming and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
 Namer is easily installed as a python pip and can:
 
 * can be used to name and embed tags in individual files with metadata from porndb:
@@ -45,6 +45,10 @@ Namer is easily installed as a python pip and can:
 * can be run watching a directory for new files to name, tag and move to an output location, possible setting file permissions, writing .nfo files with downloaded images, attempting to grab trailers, and retrying failed files nightly.
 
   ``python -m namer watchdog``  
+
+* while running watchdog, will also have a webui that can be used to manually match and rename any failed files.  You can set the webroot, port, bound ip, enable/disable in the namer.cfg file.
+
+  ``http:\\<ip>:6980\``
 
 For all of the above it's recommended to have a config file in your home directory (copied from namer.cfg.sample in this git repo)
 
@@ -175,6 +179,16 @@ Development
 .. code-block:: sh
 
   # Building:
+  # install yarn deps
+  yarn intall   
+
+  # build css/js/copy templates
+  yarn run build
+
+  # install poetry dependencies
+  poetry install
+
+  # build python package in dist dir
   poetry build
 
   # Linting:
@@ -183,14 +197,17 @@ Development
   # Testing:
   poetry run pytest
 
+  # Formatting, maybe....:
+  poetry run autopep8 --in-place namer/*.py test/*.py
+
   # Code Coverage:
   poetry run pytest --cov
 
-  # Formatting:
-  poetry run autopep8 --in-place namer/*.py test/*.py
-
   # Html Coverage report:
   poetry run coverage html
+
+  # Local python install
+  pip install ./dist/namer-<version>.tar.gz
 
   # Publishing:
   # First make sure you have set gotten a token from pypi and set it on your machine.
