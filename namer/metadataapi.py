@@ -259,7 +259,7 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
     return file_infos
 
 
-def __build_url(site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None) -> str:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None) -> str:
     if uuid is not None:
         query = "/" + str(uuid)
     else:
@@ -275,7 +275,7 @@ def __build_url(site: Optional[str] = None, release_date: Optional[str] = None, 
         if name is not None:
             query += quote(re.sub(r" ", ".", name))
         query += "&limit=25"
-    return f"https://api.metadataapi.net/scenes{query}"
+    return f"{namer_config.override_tpdb_address}scenes{query}"
 
 
 def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config: NamerConfig):
@@ -294,13 +294,13 @@ def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config
 def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: NamerConfig, skip_date: bool, skip_name: bool) -> List[LookedUpFileInfo]:
     release_date = name_parts.date if not skip_date else None
     name = name_parts.name if not skip_name else None
-    url = __build_url(name_parts.site, release_date, name)
+    url = __build_url(namer_config, name_parts.site, release_date, name, )
     file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
     return file_infos
 
 
 def get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
-    url = __build_url(uuid=uuid)
+    url = __build_url(namer_config, uuid=uuid)
     file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
     if len(file_infos) > 0:
         return file_infos[0]

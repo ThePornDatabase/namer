@@ -245,6 +245,12 @@ class NamerConfig:
     Amount of minutes that http request would be in cache
     """
 
+    override_tpdb_address: str = "https://api.metadataapi.net"
+    """
+    Used only for testing, can override the location of the porn database - usually to point at a locally
+    running server that responds like tpdb to predefined queries.
+    """
+
     enabled_tagging: bool = True
     """
     Currently metadata pulled from the porndb can be added to mp4 files.
@@ -402,11 +408,12 @@ class NamerConfig:
                 "update_permissions_ownership": self.update_permissions_ownership,
                 "set_dir_permissions": self.set_dir_permissions,
                 "set_file_permissions": self.set_file_permissions,
-                "set_uid": self.set_file_permissions,
-                "set_gid": self.set_file_permissions,
+                "set_uid": self.set_uid,
+                "set_gid": self.set_gid,
                 "max_performer_names": self.set_file_permissions,
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
+                "override_tpdb_address": self.override_tpdb_address
             },
             "Tagging Config": {
                 "write_nfo": self.write_nfo,
@@ -493,6 +500,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.sites_with_no_date_info = [re.sub(r"[^a-z0-9]", "", x.strip().lower()) for x in config.get("namer", "sites_with_no_date_info", fallback="").split(",")]
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")
+    namer_config.override_tpdb_address = config.get("namer", "override_tpdb_address", fallback="https://api.metadataapi.net/")
 
     namer_config.write_namer_log = config.getboolean("namer", "write_namer_log", fallback=False)
     namer_config.update_permissions_ownership = config.getboolean("namer", "update_permissions_ownership", fallback=False)

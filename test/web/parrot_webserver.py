@@ -1,8 +1,8 @@
+from pathlib import Path
 import time
 from threading import Thread
 from typing import Dict, Optional
-
-from flask import Blueprint, make_response
+from flask import Blueprint, make_response, request
 from flask.wrappers import Response
 
 from namer.web.server import GenericWebServer
@@ -17,7 +17,8 @@ def get_routes(responses: Dict[str, bytes]) -> Blueprint:
     @blueprint.route('/', defaults={'path': ''})
     @blueprint.route('/<path:path>')
     def get_files(path) -> Response:
-        output = responses[path]
+        # args = request.args
+        output = responses[request.full_path]
         response = make_response(output, 200)
         # response.mimetype = "text/plain"
         return response
@@ -56,5 +57,14 @@ class ParrotWebServer(GenericWebServer):
     def __exit__(self, exc_type, exc_value, traceback):
         self.__simple_exit__()
 
-    def set_response(self, url: str, response: bytearray):
-        self.__responses[url] = response
+    def set_response(self, url: str, response):
+        value: Optional[bytearray] = None
+        if isinstance(response, bytearray):
+            value = response
+        if isinstance(response, Path):
+            file: Path = response
+            value = bytearray(file.read_bytes())
+        if isinstance(response, str):
+            value = bytearray(response, "utf-8")
+        if value:
+            self.__responses[url] = value

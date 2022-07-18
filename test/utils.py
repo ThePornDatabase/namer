@@ -127,8 +127,10 @@ def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):
             responses.append("{}")
             responses.append("{}")
             responses.append("{}")
-    mock_poster.side_effect = posters
-    mock_response.side_effect = responses
+    if mock_poster:
+        mock_poster.side_effect = posters
+    if mock_response:
+        mock_response.side_effect = responses
 
 
 def sample_config() -> NamerConfig:
