@@ -58,8 +58,9 @@ def default_os_browser(debug: bool) -> WebDriver:
     name = system()
     if name == 'Windows':
         return edge_factory(debug)
-    if name in ['Darwin', 'macOS']:
-        return safari_factory(debug)
+    # until github actions 
+    # if name in ['Darwin', 'macOS']:
+    #    return safari_factory(debug)
     return chrome_factory(debug)
 
 
