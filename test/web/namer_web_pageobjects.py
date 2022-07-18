@@ -259,12 +259,12 @@ class FailedPage:
         self.__driver = driver
         findAndWaitUntilStale(driver, By.ID, "progressBar")
         self.__refresh = waitForAndFind(driver, By.ID, 'refreshFiles')
-        self.__noFailedFiles = findIfPresent(driver, By.ID, 'noFailedFiles')
+        self.__noFailedFiles = findIfPresent(driver, By.CSS_SELECTOR, 'div[class="col m-1 text-center"] span')
         if self.__noFailedFiles is None:
             self.__page_links = waitForAndFindAll(driver, by=By.CSS_SELECTOR, value='a[class="page-link"]')
             self.__search = waitForAndFind(driver, by=By.CSS_SELECTOR, value='input[type="search"]')
-            waitForAndFind(driver, by=By.CSS_SELECTOR, value='tbody[id="failedFileItems"]')
-            self.__items = waitForAndFindAll(driver, by=By.CSS_SELECTOR, value='tbody[id="failedFileItems"] tr')
+            waitForAndFind(driver, by=By.CSS_SELECTOR, value='table[id*="failed"] tbody')
+            self.__items = waitForAndFindAll(driver, by=By.CSS_SELECTOR, value='table[id*="failed"] tbody tr')
 
     def navigate_to(self) -> NavElements:
         return NavElements(self.__driver)
