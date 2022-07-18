@@ -28,7 +28,9 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
             template: str = data.get('template')
             client_data = data.get('data')
             active_page: str = data.get('url')
-            active_page = active_page.lstrip('/') if active_page else active_page
+            if config.web_root:
+                active_page = active_page.replace(config.web_root, '') if active_page.startswith(config.web_root) else active_page
+            active_page = active_page.lstrip('/')
 
             template_file = f'render/{template}.html'
             response = render_template(template_file, data=client_data, config=config, active_page=active_page)
