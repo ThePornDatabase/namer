@@ -32,19 +32,19 @@ class FakeTPDB(ParrotWebServer):
     def get_url(self) -> str:
         return super().get_url()
 
-    def addExampleEvilAngel(self, target_url: str):
+    def add_example_evil_angel(self, target_url: str):
         test_dir = Path(__file__).resolve().parent
         return_value = (test_dir / "ea.full.json").read_text()
         modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
 
-    def addExampleDorcelClub(self, target_url: str):
+    def add_example_dorcel_club(self, target_url: str):
         test_dir = Path(__file__).resolve().parent
         return_value = (test_dir / "dc.json").read_text()
         modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
 
-    def addPoster(self, target_url: str) -> None:
+    def add_poster(self, target_url: str) -> None:
         test_dir = Path(__file__).resolve().parent
         return_value = (test_dir / "poster.png").read_bytes()
         super().set_response(target_url, bytearray(return_value))
@@ -52,20 +52,20 @@ class FakeTPDB(ParrotWebServer):
     def default_additions(self):
         # Evil Angel:
         # Search Results
-        self.addExampleEvilAngel("/scenes?parse=evilangel.2022-01-03.Carmela.Clutch.Fabulous.Anal.3-Way&limit=25")
+        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela.Clutch.Fabulous.Anal.3-Way&limit=25")
         # Extra Metadata Lookup
-        self.addExampleEvilAngel("/scenes/1678283?")
+        self.add_example_evil_angel("/scenes/1678283?")
         # UI Tests
-        self.addExampleEvilAngel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
+        self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
         # Image for UI Test:
-        self.addPoster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
+        self.add_poster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
         # DorcelClub
         # Search Results
-        self.addExampleDorcelClub("/scenes?parse=dorcelclub.2021-12-23.Aya.Benetti.Megane.Lopez.And.Bella.Tina&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya.Benetti.Megane.Lopez.And.Bella.Tina&limit=25")
         # Extra Metadata Lookup
-        self.addExampleDorcelClub("/scenes/1674059?")
+        self.add_example_dorcel_club("/scenes/1674059?")
         # with utf8 characters
-        self.addExampleDorcelClub("/scenes?parse=dorcelclub.2021-12-23.Aya.B%D0%B5n%D0%B5tti.M%D0%B5gane.Lop%D0%B5z.And.B%D0%B5lla.Tina&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya.B%D0%B5n%D0%B5tti.M%D0%B5gane.Lop%D0%B5z.And.B%D0%B5lla.Tina&limit=25")
 
 
 @contextlib.contextmanager

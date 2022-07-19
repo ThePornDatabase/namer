@@ -1,7 +1,8 @@
-from pathlib import Path
 import time
+from pathlib import Path
 from threading import Thread
 from typing import Dict, Optional
+
 from flask import Blueprint, make_response, request
 from flask.wrappers import Response
 
