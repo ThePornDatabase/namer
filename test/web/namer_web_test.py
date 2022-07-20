@@ -1,9 +1,9 @@
 import contextlib
 import os
 import unittest
+import warnings
 from platform import system
 from sys import gettrace as sys_gettrace
-import warnings
 
 import requests
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
@@ -16,13 +16,13 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from namer.types import default_config, NamerConfig
 from namer.watchdog import create_watcher
+from test.namer_metadataapi_test import environment
 from test.namer_watchdog_test import make_locations, new_ea
 from test.web.namer_web_pageobjects import FailedPage
 from test.web.parrot_webserver import ParrotWebServer
-from test.namer_metadataapi_test import environment
 
 
-def isdebugging():
+def is_debugging():
     return sys_gettrace() is not None
 
 
@@ -74,7 +74,7 @@ def make_test_context(config: NamerConfig):
         config.work_dir = new_config.work_dir
         with create_watcher(config) as watcher:
             url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
-            with default_os_browser(isdebugging()) as browser:
+            with default_os_browser(is_debugging()) as browser:
                 browser.get(url)
                 yield tempdir, watcher, browser, mock_tpdb
 
