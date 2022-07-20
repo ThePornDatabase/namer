@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+import hashlib
 
 from mutagen.mp4 import MP4
 
@@ -63,6 +64,39 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             info = match(name_parts, config)
             update_mp4_file(target_file, info[0].looked_up, poster, NamerConfig())
             validate_mp4_tags(self, target_file)
+
+    def test_sha_sum_two_identical_transformations(self):
+        """
+        Test that adding metadata to two identical files on two different systems, at two different times
+        produces the shame bytes (via sha256)
+        """
+        expected_on_all_oses = '8f5d649c470a350154a69762b2de17d7ba25492abd93a83ed780ab41c1d5f208'
+        sha_1 = None
+        sha_2 = None
+        with environment() as (tempdir, _parrot, config):
+            test_dir = Path(__file__).resolve().parent
+            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
+            poster = tempdir / "poster.png"
+            shutil.copy(test_dir / "poster.png", poster)
+            name_parts = parse_file_name(target_file.name)
+            info = match(name_parts, config)
+            update_mp4_file(target_file, info[0].looked_up, poster, NamerConfig())
+            validate_mp4_tags(self, target_file)
+            sha_1 = hashlib.sha256(target_file.read_bytes()).digest().hex()
+        with environment() as (tempdir, _parrot, config):
+            test_dir = Path(__file__).resolve().parent
+            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
+            poster = tempdir / "poster.png"
+            shutil.copy(test_dir / "poster.png", poster)
+            name_parts = parse_file_name(target_file.name)
+            info = match(name_parts, config)
+            update_mp4_file(target_file, info[0].looked_up, poster, NamerConfig())
+            validate_mp4_tags(self, target_file)
+            sha_2 = hashlib.sha256(target_file.read_bytes()).digest().hex()
+        self.assertEqual(str(sha_1), str(sha_2))
+        self.assertEqual(sha_1, expected_on_all_oses)
 
     def test_non_existent_poster(self):
         """
