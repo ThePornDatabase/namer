@@ -20,7 +20,7 @@ class VideoPerceptualHash:
         thumbnail_list = self.__generate_thumbnails(video)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
-            phash = imagehash.phash(thumbnail_image)
+            phash = imagehash.phash(thumbnail_image, hash_size=8, highfreq_factor=8)
 
         return phash
 

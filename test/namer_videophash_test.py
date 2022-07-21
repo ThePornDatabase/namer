@@ -28,7 +28,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
             res = self.__generator.get_phash(file)
 
-        expected_hash = imagehash.hex_to_hash('88b82aebd3552d9c')
+        expected_hash = imagehash.hex_to_hash('88982eebd3552d9c')
         self.assertEqual(res, expected_hash)
 
 
