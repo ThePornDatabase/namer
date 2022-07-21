@@ -2,8 +2,8 @@
 ffmpeg is access through this file, it is used to find the video stream's resolution,
 and update audio streams "Default" setting.   Apple video players require there be
 only one default audio stream, and this script lets you set it with the correct language
-code there are more than one audio streams and if they are correctly labeled.
-See:  https://iso639-3.sil.org/code_tables/639/data/
+code if there are more than one audio streams and if they are correctly labeled.
+See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
 
 import json
@@ -14,11 +14,13 @@ from io import BytesIO
 from pathlib import Path
 from random import choices
 from types import SimpleNamespace
-from typing import Optional
+from typing import List, Optional
 
 import ffmpeg
 from loguru import logger
-from PIL import Image
+from PIL.Image import Image, open
+
+from namer.types import FFProbeResults, FFProbeStream
 
 
 def get_resolution(file: Path) -> int:
@@ -58,6 +60,63 @@ def get_resolution(file: Path) -> int:
             logger.info("output {}", output)
             return int(output)
     return 0
+
+
+def ffprobe(file: Path) -> Optional[FFProbeResults]:
+    """
+    Gets the vertical resolution of a mp4 file.  For example, 720, 1080, 2160...
+    Returns zero if resolution can not be determined.
+    """
+    logger.info("resolution stream of file {}", file)
+
+    with subprocess.Popen(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            file,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    ) as process:
+        stdout, stderr = process.communicate()
+        success = process.returncode == 0
+        if not success:
+            logger.warning("Error getting info from file {}", file)
+            if stderr is not None:
+                logger.warning(stderr)
+        if stdout:
+            ffprobe_out = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
+            output: List[FFProbeStream] = []
+            if hasattr(ffprobe_out, "streams"):
+                for stream in ffprobe_out.streams:
+                    ffstream = FFProbeStream()
+                    ffstream.bit_rate = int(stream.bit_rate)
+                    ffstream.codec_name = str(stream.codec_name)
+                    ffstream.codec_type = str(stream.codec_type)
+                    if hasattr(stream, "disposition"):
+                        ffstream.disposition_attached_pic = stream.disposition.attached_pic == 1
+                        ffstream.disposition_default = stream.disposition.default == 1
+                    ffstream.index = int(stream.index)
+                    ffstream.duration = float(stream.duration)
+                    if hasattr(stream, "avg_frame_rate"):
+                        numer = int(str(stream.avg_frame_rate).split('/')[0])
+                        denom = int(str(stream.avg_frame_rate).split('/')[1])
+                        if numer != 0 and denom != 0:
+                            ffstream.avg_frame_rate = numer / denom
+                    if hasattr(stream, "height"):
+                        ffstream.height = int(stream.height)
+                    if hasattr(stream, "width"):
+                        ffstream.width = int(stream.width)
+                    if hasattr(stream, "tags"):
+                        ffstream.tags_language = str(stream.tags.language)
+                    output.append(ffstream)
+                return FFProbeResults(output)
 
 
 def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
@@ -203,6 +262,6 @@ def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> I
         .run(quiet=True, capture_stdout=True)
     )
     out = BytesIO(out)
-    image = Image.open(out)
+    image = open(out)
 
     return image

@@ -615,6 +615,65 @@ class FileNameParts:
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class FFProbeStream:
+    index: int                      # stream numer
+    codec_name: str                 # "mp3", "h264", "hvec", "png"
+    codec_type: str                 # "audio" or "video"
+    codec_name: str                 # hevc
+    disposition_default: bool       # default stream of this type
+    disposition_attached_pic: bool  # is the "video" stream an attached picture.
+    duration: float                 # seconds
+    bit_rate: int                   # bitrate of the track
+    # video only
+    width: Optional[int] = None
+    height: Optional[int] = None            # 720 1080 2160
+    avg_frame_rate: Optional[float] = None  # average frames per second
+    # audio
+    tags_language: Optional[str]            # 3 letters representing language of track (only matters for audio)
+
+    def __str__(self) -> str:
+        return f"""codec_name: {self.codec_name}
+        width: {self.width}
+        height: {self.height}
+        codec_type: {self.codec_type}
+        framerate: {self.avg_frame_rate}
+        duration: {self.duration}
+        disposition_default: {self.disposition_default}
+        """
+
+    def is_audio(self) -> bool:
+        return self.codec_type == "audio"
+
+    def is_video(self) -> bool:
+        return self.codec_type == "video" and (not self.disposition_attached_pic or self.disposition_attached_pic is False)
+
+
+class FFProbeResults:
+    results: List[FFProbeStream]
+
+    def __init__(self, data: List[FFProbeStream]):
+        self.results = data
+
+    def get_default_video_stream(self) -> Optional[FFProbeStream]:
+        for result in self.results:
+            if result.is_video() and result.disposition_default:
+                return result
+
+    def get_default_audio_stream(self) -> Optional[FFProbeStream]:
+        for result in self.results:
+            if result.is_audio() and result.disposition_default:
+                return result
+
+    def get_audio_stream(self, language_code: str) -> Optional[FFProbeStream]:
+        for result in self.results:
+            if result.is_audio() and result.tags_language == language_code:
+                return result
+
+    def all_streams(self) -> List[FFProbeStream]:
+        return self.results
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class Performer:
     """
     Minimal info about a performer, name, and role.
@@ -850,6 +909,9 @@ class Command:
     """
     The parsed file name.
     """
+
+    ff_probe_results: Optional[FFProbeResults] = None
+
     inplace: bool = False
 
     write_from_nfos: bool = False

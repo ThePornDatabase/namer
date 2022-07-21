@@ -6,7 +6,7 @@ from typing import Optional
 
 import ffmpeg
 import imagehash
-from PIL import Image
+from PIL.Image import Image, new
 
 from namer.ffmpeg import extract_screenshot
 
@@ -60,7 +60,7 @@ class VideoPerceptualHash:
         width, height = images[0].size
 
         image_size = (width * self.__columns, height * self.__rows)
-        image = Image.new('RGB', image_size)
+        image = new('RGB', image_size)
 
         for row in range(self.__rows):
             for col in range(self.__columns):

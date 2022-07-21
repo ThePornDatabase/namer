@@ -12,6 +12,7 @@ from typing import Iterable, List, Optional
 
 from loguru import logger
 
+from namer.ffmpeg import ffprobe
 from namer.filenameparser import parse_file_name
 from namer.types import Command, ComparisonResult, default_config, LookedUpFileInfo, NamerConfig
 
@@ -242,6 +243,7 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.tpdb_id = uuid
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
+    target_file.ff_probe_results = ffprobe(target_movie)
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) else None
     return output
 
