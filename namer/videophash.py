@@ -24,7 +24,7 @@ class VideoPerceptualHash:
 
         return phash
 
-    def __generate_thumbnails(self, file: Path) -> List[Image]:
+    def __generate_thumbnails(self, file: Path) -> list:
         probe = ffmpeg.probe(file)
         if not probe:
             return []
@@ -58,7 +58,7 @@ class VideoPerceptualHash:
 
         return images
 
-    def __concat_images(self, images: List[Image]) -> Image:
+    def __concat_images(self, images: list) -> Image:
         width, height = images[0].size
 
         image_size = (width * self.__columns, height * self.__rows)
