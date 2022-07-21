@@ -10,7 +10,7 @@ from PIL import Image
 
 
 class VideoPerceptualHash:
-    __screenshotSize: int = 160
+    __screenshot_size: int = 160
     __columns: int = 5
     __rows: int = 5
 
@@ -20,12 +20,15 @@ class VideoPerceptualHash:
         thumbnail_list = self.__generate_thumbnails(video)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
-            phash = imagehash.phash(thumbnail_image)
+            phash = imagehash.phash(thumbnail_image, hash_size=8, highfreq_factor=8)
 
         return phash
 
-    def __generate_thumbnails(self, file: Path) -> list[Image]:
+    def __generate_thumbnails(self, file: Path) -> list:
         probe = ffmpeg.probe(file)
+        if not probe:
+            return []
+
         video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
         if video_stream is None:
             return []
@@ -46,7 +49,7 @@ class VideoPerceptualHash:
             out, _ = (
                 ffmpeg
                 .input(file, ss=time)
-                .filter('scale', self.__screenshotSize, -1)
+                .filter('scale', self.__screenshot_size, -1)
                 .output('pipe:', vframes=1, format='apng')
                 .run(quiet=True, capture_stdout=True)
             )
@@ -55,7 +58,7 @@ class VideoPerceptualHash:
 
         return images
 
-    def __concat_images(self, images: list[Image]) -> Image:
+    def __concat_images(self, images: list) -> Image:
         width, height = images[0].size
 
         image_size = (width * self.__columns, height * self.__rows)
