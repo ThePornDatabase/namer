@@ -2,7 +2,7 @@ import math
 from io import BytesIO
 from pathlib import Path
 
-from typing import Optional
+from typing import List, Optional
 
 import ffmpeg
 import imagehash
@@ -24,7 +24,7 @@ class VideoPerceptualHash:
 
         return phash
 
-    def __generate_thumbnails(self, file: Path) -> list[Image]:
+    def __generate_thumbnails(self, file: Path) -> List[Image]:
         probe = ffmpeg.probe(file)
         if not probe:
             return []
@@ -58,7 +58,7 @@ class VideoPerceptualHash:
 
         return images
 
-    def __concat_images(self, images: list[Image]) -> Image:
+    def __concat_images(self, images: List[Image]) -> Image:
         width, height = images[0].size
 
         image_size = (width * self.__columns, height * self.__rows)
