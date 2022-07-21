@@ -18,7 +18,7 @@ from typing import List, Optional
 
 import ffmpeg
 from loguru import logger
-from PIL import Image
+from PIL.Image import Image, open
 
 from namer.types import FFProbeResults, FFProbeStream
 
@@ -262,6 +262,6 @@ def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> I
         .run(quiet=True, capture_stdout=True)
     )
     out = BytesIO(out)
-    image = Image.open(out)
+    image = open(out)
 
     return image

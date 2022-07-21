@@ -6,7 +6,7 @@ from typing import Optional
 
 import ffmpeg
 import imagehash
-from PIL.Image import Image, open, new
+from PIL.Image import Image, new
 
 from namer.ffmpeg import extract_screenshot
 
