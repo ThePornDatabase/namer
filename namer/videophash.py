@@ -12,7 +12,7 @@ from namer.ffmpeg import extract_screenshot
 
 
 class VideoPerceptualHash:
-    __screenshot_size: int = 160
+    __screenshot_width: int = 160
     __columns: int = 5
     __rows: int = 5
 
@@ -48,7 +48,7 @@ class VideoPerceptualHash:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for idx in range(chunk_count):
                 time = offset + (idx * step_size)
-                image = executor.submit(extract_screenshot, file, time, self.__screenshot_size)
+                image = executor.submit(extract_screenshot, file, time, self.__screenshot_width)
                 images_queue.append(image)
 
         concurrent.futures.wait(images_queue)

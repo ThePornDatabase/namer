@@ -194,11 +194,11 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         return success
 
 
-def extract_screenshot(file: Path, time: float, screenshot_size: int) -> Image:
+def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> Image:
     out, _ = (
         ffmpeg
         .input(file, ss=time)
-        .filter('scale', screenshot_size, -1)
+        .filter('scale', screenshot_width, -1)
         .output('pipe:', vframes=1, format='apng')
         .run(quiet=True, capture_stdout=True)
     )
