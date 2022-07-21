@@ -1,5 +1,5 @@
+import concurrent.futures
 import math
-from io import BytesIO
 from pathlib import Path
 
 from typing import Optional
@@ -8,9 +8,11 @@ import ffmpeg
 import imagehash
 from PIL import Image
 
+from namer.ffmpeg import extract_screenshot
+
 
 class VideoPerceptualHash:
-    __screenshot_size: int = 160
+    __screenshot_width: int = 160
     __columns: int = 5
     __rows: int = 5
 
@@ -42,19 +44,15 @@ class VideoPerceptualHash:
         if duration / chunk_count < 0.03:
             return []
 
-        images = []
-        for idx in range(chunk_count):
-            time = offset + (idx * step_size)
+        images_queue = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for idx in range(chunk_count):
+                time = offset + (idx * step_size)
+                image = executor.submit(extract_screenshot, file, time, self.__screenshot_width)
+                images_queue.append(image)
 
-            out, _ = (
-                ffmpeg
-                .input(file, ss=time)
-                .filter('scale', self.__screenshot_size, -1)
-                .output('pipe:', vframes=1, format='apng')
-                .run(quiet=True, capture_stdout=True)
-            )
-            image = Image.open(BytesIO(out))
-            images.append(image)
+        concurrent.futures.wait(images_queue)
+        images = [item.result() for item in images_queue]
 
         return images
 

@@ -10,12 +10,15 @@ import json
 import shutil
 import string
 import subprocess
+from io import BytesIO
 from pathlib import Path
 from random import choices
 from types import SimpleNamespace
 from typing import Optional
 
+import ffmpeg
 from loguru import logger
+from PIL import Image
 
 
 def get_resolution(file: Path) -> int:
@@ -189,3 +192,17 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
             mp4_file.unlink()
             shutil.move(work_file, mp4_file)
         return success
+
+
+def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> Image:
+    out, _ = (
+        ffmpeg
+        .input(file, ss=time)
+        .filter('scale', screenshot_width, -1)
+        .output('pipe:', vframes=1, format='apng')
+        .run(quiet=True, capture_stdout=True)
+    )
+    out = BytesIO(out)
+    image = Image.open(out)
+
+    return image
