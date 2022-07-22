@@ -64,59 +64,43 @@ def get_resolution(file: Path) -> int:
 
 def ffprobe(file: Path) -> Optional[FFProbeResults]:
     """
-    Gets the vertical resolution of a mp4 file.  For example, 720, 1080, 2160...
-    Returns zero if resolution can not be determined.
+    Get the typed results of probing a video stream with ffprobe.
     """
-    logger.info("resolution stream of file {}", file)
+    logger.info("ffprobe file {}", file)
+    ffprobe_out = ffmpeg.probe(file)
+    if not ffprobe_out:
+        return
 
-    with subprocess.Popen(
-        [
-            "ffprobe",
-            "-v",
-            "error",
-            "-print_format",
-            "json",
-            "-show_format",
-            "-show_streams",
-            file,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    ) as process:
-        stdout, stderr = process.communicate()
-        success = process.returncode == 0
-        if not success:
-            logger.warning("Error getting info from file {}", file)
-            if stderr is not None:
-                logger.warning(stderr)
-        if stdout:
-            ffprobe_out = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
-            output: List[FFProbeStream] = []
-            if hasattr(ffprobe_out, "streams"):
-                for stream in ffprobe_out.streams:
-                    ffstream = FFProbeStream()
-                    ffstream.bit_rate = int(stream.bit_rate)
-                    ffstream.codec_name = str(stream.codec_name)
-                    ffstream.codec_type = str(stream.codec_type)
-                    if hasattr(stream, "disposition"):
-                        ffstream.disposition_attached_pic = stream.disposition.attached_pic == 1
-                        ffstream.disposition_default = stream.disposition.default == 1
-                    ffstream.index = int(stream.index)
-                    ffstream.duration = float(stream.duration)
-                    if hasattr(stream, "avg_frame_rate"):
-                        numer = int(str(stream.avg_frame_rate).split('/')[0])
-                        denom = int(str(stream.avg_frame_rate).split('/')[1])
-                        if numer != 0 and denom != 0:
-                            ffstream.avg_frame_rate = numer / denom
-                    if hasattr(stream, "height"):
-                        ffstream.height = int(stream.height)
-                    if hasattr(stream, "width"):
-                        ffstream.width = int(stream.width)
-                    if hasattr(stream, "tags"):
-                        ffstream.tags_language = str(stream.tags.language)
-                    output.append(ffstream)
-                return FFProbeResults(output)
+    streams = [stream for stream in ffprobe_out['streams'] if stream['codec_type'] in ('video', 'audio')]
+    if not streams:
+        return
+
+    output: List[FFProbeStream] = []
+    for stream in streams:
+        ff_stream = FFProbeStream()
+        ff_stream.bit_rate = int(stream['bit_rate'])
+        ff_stream.codec_name = stream['codec_name']
+        ff_stream.codec_type = stream['codec_type']
+        ff_stream.index = int(stream['index'])
+        ff_stream.duration = float(stream['duration'])
+
+        ff_stream.height = int(stream['height']) if 'height' in stream else -1
+        ff_stream.width = int(stream['width']) if 'width' in stream else -1
+        ff_stream.tags_language = stream['tags']['language'] if 'tags' in stream else None
+
+        if 'disposition' in stream:
+            ff_stream.disposition_attached_pic = stream['disposition']['attached_pic'] == 1
+            ff_stream.disposition_default = stream['disposition']['default'] == 1
+
+        if 'avg_frame_rate' in stream:
+            numer, denom = stream['avg_frame_rate'].split('/', 2)
+            numer, denom = int(numer), int(denom)
+            if numer != 0 and denom != 0:
+                ff_stream.avg_frame_rate = numer / denom
+
+        output.append(ff_stream)
+
+    return FFProbeResults(output)
 
 
 def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:

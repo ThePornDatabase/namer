@@ -5,6 +5,7 @@ the porndb, and used for renaming (in place), and updating a mp4
 file's metadata (poster, artists, etc.)
 """
 import argparse
+from email.mime import image
 import pathlib
 import string
 import sys
@@ -13,12 +14,15 @@ from random import choices
 from typing import List, Optional
 
 from loguru import logger
+from imagehash import ImageHash
 
+from namer.configuration import default_config, from_config, NamerConfig
 from namer.fileutils import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.mutagen import update_mp4_file
-from namer.types import Command, ComparisonResult, default_config, from_config, LookedUpFileInfo, NamerConfig
+from namer.types import Command, ComparisonResult, LookedUpFileInfo
+from namer.videophash import VideoPerceptualHash
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -104,6 +108,7 @@ def process_file(command: Command) -> Optional[Command]:
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: List[ComparisonResult] = []
         # Match to nfo files, if enabled and found.
+        phash: Optional[ImageHash] = None
         if command.write_from_nfos is True:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
             if new_metadata is not None:
@@ -112,6 +117,9 @@ def process_file(command: Command) -> Optional[Command]:
                 logger.error("""
                         Could not process files: {}
                         In the file's name should start with a site, a date and end with an extension""", command.input_file)
+        # elif new_metadata is None and command.stashdb_id is not None and command.ff_probe_results is not None:
+        #    phash = VideoPerceptualHash().get_phash(command.target_movie_file)
+        #    todo use phash
         elif new_metadata is None and command.tpdb_id is not None and command.parsed_file is not None:
             search_results = []
             file_infos = get_complete_metadatapi_net_fileinfo(command.parsed_file, command.tpdb_id, command.config)

@@ -8,9 +8,9 @@ import unittest
 from configparser import ConfigParser
 from pathlib import Path
 
-from namer.types import from_config, NamerConfig, PartialFormatter, Performer
+from namer.configuration import from_config, NamerConfig, PartialFormatter
+from namer.types import Performer
 from test.utils import sample_config
-
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """

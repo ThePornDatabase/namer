@@ -20,9 +20,10 @@ from loguru import logger
 from PIL import Image
 from unidecode import unidecode
 
+from namer.configuration import default_config, NamerConfig
 from namer.fileutils import make_command, set_permissions
 from namer.http import Http
-from namer.types import ComparisonResult, default_config, FileNameParts, LookedUpFileInfo, NamerConfig, Performer
+from namer.types import ComparisonResult, FileNameParts, LookedUpFileInfo, Performer
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:

@@ -2,6 +2,7 @@
 Tests for namer_file_parser.py
 """
 import io
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,6 +11,7 @@ from unittest.mock import patch
 from namer.filenameparser import parse_file_name
 from namer.fileutils import make_command
 from test.utils import sample_config
+from test.utils import environment, sample_config
 
 REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
 
@@ -112,14 +114,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test the main method.
         """
-        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+        with environment() as (tmpdir, _parrot, config):
             tempdir = Path(tmpdir)
-            with open((tempdir / filename), 'w'):
-                pass
-            config = sample_config()
+            test_dir = Path(__file__).resolve().parent
+            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             config.min_file_size = 0
-            command = make_command((tempdir / filename), config)
+            command = make_command(target_file, config)
             self.assertIsNotNone(command)
             if command is not None:
                 self.assertIsNotNone(command.parsed_file)
@@ -135,14 +136,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test the main method.
         """
-        filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX'
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+        with environment() as (tmpdir, _parrot, config):
             tempdir = Path(tmpdir)
-            target_file = tempdir / filename / "sample.mp4"
+            test_dir = Path(__file__).resolve().parent
+            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             target_file.parent.mkdir()
-            with open(target_file, 'w'):
-                pass
-            config = sample_config()
+            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             config.min_file_size = 0
             config.prefer_dir_name_if_available = True
             command = make_command(target_file.parent, config)
