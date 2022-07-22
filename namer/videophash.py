@@ -4,11 +4,10 @@ from pathlib import Path
 
 from typing import Optional
 
-import ffmpeg
 import imagehash
 from PIL.Image import Image, new
 
-from namer.ffmpeg import extract_screenshot
+from namer.ffmpeg import extract_screenshot, ffprobe
 
 
 class VideoPerceptualHash:
@@ -27,15 +26,15 @@ class VideoPerceptualHash:
         return phash
 
     def __generate_thumbnails(self, file: Path) -> list:
-        probe = ffmpeg.probe(file)
+        probe = ffprobe(file)
         if not probe:
             return []
 
-        video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
+        video_stream = probe.get_default_video_stream()
         if video_stream is None:
             return []
 
-        duration = float(probe['format']['duration'])
+        duration = float(video_stream.duration)
         duration = math.ceil(duration * 100.0) / 100.0
         chunk_count = self.__columns * self.__rows
         offset = 0.05 * duration

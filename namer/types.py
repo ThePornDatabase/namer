@@ -15,6 +15,7 @@ from datetime import timedelta
 from pathlib import Path, PurePath
 from typing import List, Optional, Sequence
 
+from imagehash import ImageHash
 from loguru import logger
 from pathvalidate import Platform, sanitize_filename
 from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
@@ -920,6 +921,7 @@ class Command:
 
     config: NamerConfig
 
+    image_hash: Optional[ImageHash]
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ProcessingResults:
