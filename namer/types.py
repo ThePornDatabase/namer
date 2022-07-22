@@ -923,6 +923,7 @@ class Command:
 
     image_hash: Optional[ImageHash]
 
+
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ProcessingResults:
     """
