@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import imagehash
-from PIL.Image import Image, new
+from PIL import Image
 
 from namer.ffmpeg import extract_screenshot, ffprobe
 
@@ -55,11 +55,11 @@ class VideoPerceptualHash:
 
         return images
 
-    def __concat_images(self, images: list) -> Image:
+    def __concat_images(self, images: list) -> Image.Image:
         width, height = images[0].size
 
         image_size = (width * self.__columns, height * self.__rows)
-        image = new('RGB', image_size)
+        image = Image.new('RGB', image_size)
 
         for row in range(self.__rows):
             for col in range(self.__columns):
