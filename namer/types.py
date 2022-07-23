@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path, PurePath
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from namer.configuration import NamerConfig, PartialFormatter
 from loguru import logger
@@ -89,11 +89,22 @@ class FFProbeStream:
         return self.codec_type == "video" and (not self.disposition_attached_pic or self.disposition_attached_pic is False)
 
 
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class FFProbeFormat:
+    duration: float
+    size: int
+    bit_rate: int
+    tags: Dict[str, str]
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FFProbeResults:
     results: List[FFProbeStream]
+    format: FFProbeFormat
 
-    def __init__(self, data: List[FFProbeStream]):
+    def __init__(self, data: List[FFProbeStream], format: FFProbeFormat):
         self.results = data
+        self.format = format
 
     def get_default_video_stream(self) -> Optional[FFProbeStream]:
         for result in self.results:

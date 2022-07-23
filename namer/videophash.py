@@ -34,7 +34,7 @@ class VideoPerceptualHash:
         if video_stream is None:
             return []
 
-        duration = float(video_stream.duration)
+        duration = float(probe.format.duration)
         duration = math.ceil(duration * 100.0) / 100.0
         chunk_count = self.__columns * self.__rows
         offset = 0.05 * duration

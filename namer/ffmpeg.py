@@ -20,7 +20,7 @@ import ffmpeg
 from loguru import logger
 from PIL.Image import Image, open
 
-from namer.types import FFProbeResults, FFProbeStream
+from namer.types import FFProbeFormat, FFProbeResults, FFProbeStream
 
 
 def get_resolution(file: Path) -> int:
@@ -99,8 +99,15 @@ def ffprobe(file: Path) -> Optional[FFProbeResults]:
                 ff_stream.avg_frame_rate = numer / denom
 
         output.append(ff_stream)
+    
+    format = FFProbeFormat()
+    if 'format' in ffprobe_out:
+        format.bit_rate = int(ffprobe_out['format']['bit_rate'])
+        format.duration = float(ffprobe_out['format']['duration'])
+        format.size = int(ffprobe_out['format']['size'])
+        format.tags = ffprobe_out['format']['tags']
 
-    return FFProbeResults(output)
+    return FFProbeResults(output, format)
 
 
 def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
