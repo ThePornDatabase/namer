@@ -116,12 +116,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
         config = NamerConfig()
         config.watch_dir = Path("/not/a/real/path")
-        success =  verify_configuration(config, PartialFormatter())
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.work_dir = Path("/not/a/real/path")
-        success =  verify_configuration(config, PartialFormatter())
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()

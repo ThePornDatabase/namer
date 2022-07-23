@@ -6,6 +6,7 @@ code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
 
+from dataclasses import dataclass
 import json
 import shutil
 import string
@@ -14,13 +15,81 @@ from io import BytesIO
 from pathlib import Path
 from random import choices
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import ffmpeg
 from loguru import logger
 from PIL.Image import Image, open
 
-from namer.types import FFProbeFormat, FFProbeResults, FFProbeStream
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class FFProbeStream:
+    index: int                      # stream numer
+    codec_name: str                 # "mp3", "h264", "hvec", "png"
+    codec_type: str                 # "audio" or "video"
+    codec_name: str                 # hevc
+    disposition_default: bool       # default stream of this type
+    disposition_attached_pic: bool  # is the "video" stream an attached picture.
+    duration: float                 # seconds
+    bit_rate: int                   # bitrate of the track
+    # video only
+    width: Optional[int] = None
+    height: Optional[int] = None            # 720 1080 2160
+    avg_frame_rate: Optional[float] = None  # average frames per second
+    # audio
+    tags_language: Optional[str]            # 3 letters representing language of track (only matters for audio)
+
+    def __str__(self) -> str:
+        return f"""codec_name: {self.codec_name}
+        width: {self.width}
+        height: {self.height}
+        codec_type: {self.codec_type}
+        framerate: {self.avg_frame_rate}
+        duration: {self.duration}
+        disposition_default: {self.disposition_default}
+        """
+
+    def is_audio(self) -> bool:
+        return self.codec_type == "audio"
+
+    def is_video(self) -> bool:
+        return self.codec_type == "video" and (not self.disposition_attached_pic or self.disposition_attached_pic is False)
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class FFProbeFormat:
+    duration: float
+    size: int
+    bit_rate: int
+    tags: Dict[str, str]
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class FFProbeResults:
+    results: List[FFProbeStream]
+    format: FFProbeFormat
+
+    def __init__(self, data: List[FFProbeStream], format: FFProbeFormat):
+        self.results = data
+        self.format = format
+
+    def get_default_video_stream(self) -> Optional[FFProbeStream]:
+        for result in self.results:
+            if result.is_video() and result.disposition_default:
+                return result
+
+    def get_default_audio_stream(self) -> Optional[FFProbeStream]:
+        for result in self.results:
+            if result.is_audio() and result.disposition_default:
+                return result
+
+    def get_audio_stream(self, language_code: str) -> Optional[FFProbeStream]:
+        for result in self.results:
+            if result.is_audio() and result.tags_language == language_code:
+                return result
+
+    def all_streams(self) -> List[FFProbeStream]:
+        return self.results
 
 
 def get_resolution(file: Path) -> int:

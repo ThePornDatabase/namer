@@ -17,6 +17,7 @@ from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 from namer.configuration import NamerConfig
 from namer.name_formatter import PartialFormatter
 
+
 def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> bool:
     """
     Verifies the contents of your config file. Returns False if configuration failed.
@@ -27,6 +28,7 @@ def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> 
         success = False
     success = __verify_name_string(formatter, "inplace_name", config.inplace_name) and success
     return success
+
 
 def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -> bool:
     """
@@ -43,6 +45,7 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
     success = __verify_name_string(formatter, "new_relative_path_name", config.new_relative_path_name) and success
     return success
 
+
 def __verify_dir(config: NamerConfig, name: str) -> bool:
     """
     verify a config directory exist. return false if verification fails
@@ -52,6 +55,7 @@ def __verify_dir(config: NamerConfig, name: str) -> bool:
         logger.error("Configured directory {}: {} is not a directory or not accessible", name, file_name)
         return False
     return True
+
 
 def __verify_name_string(formatter: PartialFormatter, name: str, name_string: str) -> bool:
     """
@@ -65,6 +69,7 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
         logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
         logger.error("Error message: {}", key_error)
         return False
+
 
 def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bool:
     """
