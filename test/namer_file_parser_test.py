@@ -3,15 +3,13 @@ Tests for namer_file_parser.py
 """
 import io
 import shutil
-import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from namer.filenameparser import parse_file_name
 from namer.fileutils import make_command
-from test.utils import sample_config
-from test.utils import environment, sample_config
+from test.utils import environment
 
 REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
 

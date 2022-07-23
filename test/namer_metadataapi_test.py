@@ -1,7 +1,6 @@
 """
 Test namer_metadataapi_test.py
 """
-import contextlib
 import io
 import tempfile
 import unittest

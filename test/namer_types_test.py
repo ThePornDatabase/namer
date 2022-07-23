@@ -12,6 +12,7 @@ from namer.configuration import from_config, NamerConfig, PartialFormatter
 from namer.types import Performer
 from test.utils import sample_config
 
+
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.

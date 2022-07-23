@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import List, Optional, Sequence
 
 from loguru import logger
-from pathvalidate import sanitize_filename
 from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 
@@ -75,13 +74,14 @@ class PartialFormatter(string.Formatter):
         Verify the name format string.
         """
         values = dict(zip(self.supported_keys, self.supported_keys))
-        try: 
+        try:
             self.format(name_string, values)
             return True
         except KeyError as key_error:
             logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
             logger.error("Error message: {}", key_error)
             return False
+
 
 # noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

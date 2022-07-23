@@ -13,8 +13,6 @@ from typing import Iterable, List, Optional
 from loguru import logger
 
 from namer.configuration import default_config, NamerConfig
-from namer.ffmpeg import ffprobe
-from namer.videophash import VideoPerceptualHash
 from namer.filenameparser import parse_file_name
 from namer.types import Command, ComparisonResult, LookedUpFileInfo
 

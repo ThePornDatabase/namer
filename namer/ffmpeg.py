@@ -99,7 +99,7 @@ def ffprobe(file: Path) -> Optional[FFProbeResults]:
                 ff_stream.avg_frame_rate = numer / denom
 
         output.append(ff_stream)
-    
+
     format = FFProbeFormat()
     if 'format' in ffprobe_out:
         format.bit_rate = int(ffprobe_out['format']['bit_rate'])
