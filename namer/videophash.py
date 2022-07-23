@@ -7,7 +7,7 @@ from typing import Optional
 import imagehash
 from PIL import Image
 
-from namer.ffmpeg import extract_screenshot, ffprobe
+from namer.ffmpeg import FFProbeResults, extract_screenshot, ffprobe
 
 
 class VideoPerceptualHash:
@@ -18,21 +18,18 @@ class VideoPerceptualHash:
     def get_phash(self, video: Path) -> Optional[imagehash.ImageHash]:
         phash = None
 
-        thumbnail_list = self.__generate_thumbnails(video)
+        probe = ffprobe(video)
+        if not probe or not probe.get_default_video_stream():
+            return None
+
+        thumbnail_list = self.__generate_thumbnails(video, probe)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
             phash = imagehash.phash(thumbnail_image, hash_size=8, highfreq_factor=8)
 
         return phash
 
-    def __generate_thumbnails(self, file: Path) -> list:
-        probe = ffprobe(file)
-        if not probe:
-            return []
-
-        video_stream = probe.get_default_video_stream()
-        if video_stream is None:
-            return []
+    def __generate_thumbnails(self, file: Path, probe: FFProbeResults) -> list:
 
         duration = float(probe.format.duration)
         duration = math.ceil(duration * 100.0) / 100.0
