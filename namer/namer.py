@@ -14,10 +14,12 @@ from typing import List, Optional
 
 from loguru import logger
 
-from namer.configuration import default_config, from_config, NamerConfig
+from namer.configuration import NamerConfig
+from namer.configuration_utils import default_config, from_config, verify_configuration
 from namer.fileutils import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
+from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
 from namer.types import Command, ComparisonResult, LookedUpFileInfo
 
@@ -213,7 +215,7 @@ def main(arg_list: List[str]):
     if args.configfile is not None and args.configfile.is_file():
         logger.info("Config override specified {}", args.configfile)
         config = from_config(args.configfile)
-    config.verify_naming_config()
+    verify_configuration(config, PartialFormatter())
     target = args.file
     if args.dir is not None:
         target = args.dir

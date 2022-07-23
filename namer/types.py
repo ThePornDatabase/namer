@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path, PurePath
 from typing import Dict, List, Optional
 
-from namer.configuration import NamerConfig, PartialFormatter
+from namer.configuration import NamerConfig
+from namer.name_formatter import PartialFormatter
 from pathvalidate import Platform, sanitize_filename
 
 

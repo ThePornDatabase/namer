@@ -12,7 +12,8 @@ from typing import List
 
 from mutagen.mp4 import MP4
 
-from namer.configuration import default_config, NamerConfig
+from namer.configuration import NamerConfig
+from namer.configuration_utils import default_config
 from test.web.parrot_webserver import ParrotWebServer
 
 

@@ -12,7 +12,8 @@ from typing import Iterable, List, Optional
 
 from loguru import logger
 
-from namer.configuration import default_config, NamerConfig
+from namer.configuration import NamerConfig
+from namer.configuration_utils import default_config
 from namer.filenameparser import parse_file_name
 from namer.types import Command, ComparisonResult, LookedUpFileInfo
 
