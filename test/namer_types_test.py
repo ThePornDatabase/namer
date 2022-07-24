@@ -8,7 +8,10 @@ import unittest
 from configparser import ConfigParser
 from pathlib import Path
 
-from namer.types import from_config, NamerConfig, PartialFormatter, Performer
+from namer.configuration import NamerConfig
+from namer.configuration_utils import from_config, verify_configuration
+from namer.name_formatter import PartialFormatter
+from namer.types import Performer
 from test.utils import sample_config
 
 
@@ -108,32 +111,32 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         logging.basicConfig(level=logging.INFO)
         config = NamerConfig()
-        success = config.verify_watchdog_config()
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, True)
 
         config = NamerConfig()
         config.watch_dir = Path("/not/a/real/path")
-        success = config.verify_watchdog_config()
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.work_dir = Path("/not/a/real/path")
-        success = config.verify_watchdog_config()
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.failed_dir = Path("/not/a/real/path")
-        success = config.verify_watchdog_config()
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
         config.inplace_name = "{sitesadf} - {date}"
-        success = config.verify_naming_config()
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config1 = NamerConfig()
         config1.new_relative_path_name = "{whahha}/{site} - {date}"
-        success = config1.verify_watchdog_config()
+        success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
     def test_from_config(self):
