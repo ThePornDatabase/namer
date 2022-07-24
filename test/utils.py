@@ -126,6 +126,14 @@ def environment(config: NamerConfig = sample_config()):
     with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
         with FakeTPDB() as fakeTpdb:
             tempdir = Path(tmpdir)
+            config.watch_dir = tempdir / "watch"
+            config.watch_dir.mkdir(parents=True, exist_ok=True)
+            config.failed_dir = tempdir / "failed"
+            config.failed_dir.mkdir(parents=True, exist_ok=True)
+            config.dest_dir = tempdir / "dest"
+            config.dest_dir.mkdir(parents=True, exist_ok=True)
+            config.work_dir = tempdir / "working"
+            config.work_dir.mkdir(parents=True, exist_ok=True)
             config.override_tpdb_address = fakeTpdb.get_url()
             yield tempdir, fakeTpdb, config
 
