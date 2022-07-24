@@ -6,6 +6,7 @@ import configparser
 import os
 import random
 import re
+import sys
 import tempfile
 from configparser import ConfigParser
 from datetime import timedelta
@@ -162,3 +163,10 @@ def default_config() -> NamerConfig:
         default_locations = [Path("./namer.cfg")]
     config.read(default_locations)
     return from_config(config)
+
+
+def configure_logging_verifier(configuration: NamerConfig, formatter: PartialFormatter) -> bool:
+    logger.remove()
+    logger.add(sys.stdout, format="{time} {level} {message}", level="INFO", diagnose=False)
+    logger.info(str(configuration))
+    return verify_configuration(configuration, formatter)
