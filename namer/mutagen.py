@@ -9,7 +9,7 @@ from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
 from namer.configuration import NamerConfig
-from namer.ffmpeg import attempt_fix_corrupt, get_resolution, update_audio_stream_if_needed
+from namer.ffmpeg import FFProbeResults, attempt_fix_corrupt, update_audio_stream_if_needed
 from namer.types import LookedUpFileInfo
 
 
@@ -55,7 +55,7 @@ def get_mp4_if_possible(mp4: Path) -> MP4:
 
 
 @logger.catch
-def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Path], config: NamerConfig):
+def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Path], ffprobe_results: Optional[FFProbeResults], config: NamerConfig):
     # pylint: disable=too-many-statements
     """
     us-tv|TV-MA|600|
@@ -93,8 +93,11 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Pat
         set_single_if_not_none(video, "tvnn", looked_up.site)
         set_single_if_not_none(video, "\xa9alb", looked_up.site)
         video["stik"] = [9]  # Movie
-        resolution = resolution_to_hdv_setting(get_resolution(mp4))
-        set_single_if_not_none(video, "hdvd", resolution)
+        if ffprobe_results:
+            stream = ffprobe_results.get_default_video_stream()
+            if stream:
+                resolution = resolution_to_hdv_setting(stream.height)
+                set_single_if_not_none(video, "hdvd", resolution)
         set_single_if_not_none(video, "ldes", looked_up.description)
         set_single_if_not_none(video, "\xa9cmt", looked_up.source_url)
         video["----:com.apple.iTunes:iTunEXTC"] = "mpaa|XXX|0|".encode("UTF-8", errors="ignore")
