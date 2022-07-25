@@ -9,7 +9,7 @@ from typing import Any, Optional
 from lxml import etree, objectify
 
 from namer.configuration import NamerConfig
-from namer.fileutils import set_permissions
+from namer.command import set_permissions
 from namer.types import LookedUpFileInfo, Performer
 
 

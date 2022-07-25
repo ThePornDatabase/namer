@@ -12,7 +12,7 @@ from flask_compress import Compress
 from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
-from namer.types import NamerConfig
+from namer.configuration import NamerConfig
 from namer.web.routes import api, web
 
 

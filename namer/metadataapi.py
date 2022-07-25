@@ -22,7 +22,7 @@ from unidecode import unidecode
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
-from namer.fileutils import make_command, set_permissions
+from namer.command import make_command, set_permissions
 from namer.http import Http
 from namer.types import ComparisonResult, FileNameParts, LookedUpFileInfo, Performer
 
