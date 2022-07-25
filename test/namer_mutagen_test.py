@@ -9,10 +9,11 @@ import hashlib
 
 from mutagen.mp4 import MP4
 
-from namer.filenameparser import parse_file_name
+from namer.configuration import NamerConfig
+from namer.filenameparts import parse_file_name
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
-from namer.types import LookedUpFileInfo, NamerConfig
+from namer.types import LookedUpFileInfo
 from test.utils import validate_mp4_tags
 from test.namer_metadataapi_test import environment
 

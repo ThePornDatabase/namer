@@ -131,6 +131,7 @@ def get_resolution(file: Path) -> int:
     return 0
 
 
+@logger.catch
 def ffprobe(file: Path) -> Optional[FFProbeResults]:
     """
     Get the typed results of probing a video stream with ffprobe.

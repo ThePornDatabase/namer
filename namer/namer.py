@@ -14,14 +14,16 @@ from typing import List, Optional
 
 from loguru import logger
 
+from namer.command import Command
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, from_config, verify_configuration
-from namer.fileutils import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
+from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
+from namer.ffmpeg import ffprobe
 from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
-from namer.types import Command, ComparisonResult, LookedUpFileInfo
+from namer.types import ComparisonResult, LookedUpFileInfo
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,

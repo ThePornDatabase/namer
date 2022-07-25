@@ -21,10 +21,9 @@ from watchdog.observers.polling import PollingObserver
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
-from namer.fileutils import is_interesting_movie, make_command_relative_to, move_command_files
+from namer.command import is_interesting_movie, make_command_relative_to, move_command_files, Command
 from namer.name_formatter import PartialFormatter
 from namer.namer import process_file
-from namer.types import Command
 from namer.web.server import NamerWebServer
 
 
