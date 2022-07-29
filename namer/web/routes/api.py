@@ -8,8 +8,8 @@ from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
 from loguru import logger
 
-from namer.fileutils import make_command_relative_to, move_command_files
-from namer.types import NamerConfig
+from namer.command import make_command_relative_to, move_command_files
+from namer.configuration import NamerConfig
 from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results, read_failed_log_file
 
 

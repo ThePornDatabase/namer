@@ -6,7 +6,7 @@ from queue import Queue
 from flask import Blueprint, redirect, render_template
 from flask.wrappers import Response
 
-from namer.types import NamerConfig
+from namer.configuration import NamerConfig
 from namer.web.actions import get_failed_files, get_queued_files
 
 

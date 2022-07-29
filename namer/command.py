@@ -3,18 +3,59 @@ Tools for working with files and directories in namer.
 """
 
 import argparse
+from dataclasses import dataclass
 import os
 import shutil
 import sys
 from pathlib import Path
 from platform import system
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple
 
 from loguru import logger
 
-from namer.ffmpeg import ffprobe
-from namer.filenameparser import parse_file_name
-from namer.types import Command, ComparisonResult, default_config, LookedUpFileInfo, NamerConfig
+from namer.configuration import NamerConfig
+from namer.configuration_utils import default_config
+from namer.ffmpeg import ffprobe, FFProbeResults
+from namer.filenameparts import parse_file_name
+from namer.types import FileNameParts, ComparisonResult, LookedUpFileInfo
+
+
+# noinspection PyDataclass
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class Command:
+    input_file: Path
+    """
+    This is the original user/machine input of a target path.
+    If this path is a directory a movie is found within it (recursively).
+    If this file is a the movie file itself, the parent directory is calculated.
+    """
+    target_movie_file: Path
+    """
+    The movie file this name is targeting.
+    """
+    target_directory: Optional[Path] = None
+    """
+    The containing directory of a File.  This may be the immediate parent directory, or higher up, depending
+    on whether a directory was selected as the input to a naming process.
+    """
+    parsed_dir_name: bool
+    """
+    Was the input file a directory and is parsing directory names configured?
+    """
+    parsed_file: Optional[FileNameParts] = None
+    """
+    The parsed file name.
+    """
+
+    inplace: bool = False
+
+    write_from_nfos: bool = False
+
+    tpdb_id: Optional[str] = None
+
+    ff_probe_results: Optional[FFProbeResults]
+
+    config: NamerConfig
 
 
 def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
@@ -98,12 +139,43 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
                 _set_perms(target, config)
 
 
+def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[int, int]:
+    if not ffprobe_results:
+        return (0, 0)
+    stream = ffprobe_results.get_default_video_stream()
+    if not stream:
+        return (0, 0)
+    return (stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config))
+
+
+def get_codec_value(codec: str, config: NamerConfig) -> int:
+    desired_codecs = list(config.desired_codec)
+    desired_codecs.reverse()
+    if codec in desired_codecs:
+        return desired_codecs.index(codec) + 1
+    return 0
+
+
+def selected_best_movie(movies: List[Path], config: NamerConfig) -> Optional[Path]:
+    # This could use a lot of work.
+    if movies and len(movies) > 0:
+        selected = movies[0]
+        selected_values = extract_relevant_attributes(ffprobe(selected), config)
+        for current_movie in movies:
+            current_values = extract_relevant_attributes(ffprobe(current_movie), config)
+            if current_values[0] <= config.max_desired_resolutions:
+                if current_values[0] > selected_values[0] or (current_values[0] == selected_values[0] and current_values[1] > selected_values[1]):
+                    selected_values = current_values
+                    selected = current_movie
+        return selected
+    return None
+
+
 def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
     """
     Moves a file or directory to its final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
     """
-    infix = 0
 
     # determine where we will move the movie, and how we will name it.
     # if in_place is False we will move it to the config defined destination dir.
@@ -118,19 +190,37 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         name_template = command.config.new_relative_path_name
         target_dir = command.config.dest_dir
 
+    infix = 0
     relative_path: Optional[Path] = None
     # Find non-conflicting movie name.
+    movies: List[Path] = []
     while True:
         relative_path = Path(new_metadata.new_file_name(name_template, f"({infix})"))
         movie_name = target_dir / relative_path
         movie_name = movie_name.resolve()
         infix += 1
-        if not movie_name.exists() or command.target_movie_file.samefile(movie_name):
+        if not movie_name.exists():
+            break
+        movies.append(movie_name)
+        if command.target_movie_file.samefile(movie_name):
             break
 
     # Create the new dir if needed and move the movie file to it.
     movie_name.parent.mkdir(exist_ok=True, parents=True)
     command.target_movie_file.rename(movie_name)
+
+    # Now that all files are in place we'll see if we intend to minimize duplicates
+    if not command.config.presever_duplicates:
+        # Now set to the final name location since -- will grab the metadata requested
+        # incase it has been updated.
+        relative_path = Path(new_metadata.new_file_name(name_template, "(0)"))
+
+        # no move best match to primary movie location.
+        final_location = target_dir / relative_path
+        selected_movie = selected_best_movie(movies, command.config)
+        if selected_movie and selected_movie.absolute().as_uri() == final_location.absolute().as_uri():
+            final_location.unlink()
+            selected_movie.rename(final_location)
 
     containing_dir: Optional[Path] = None
     if len(relative_path.parts) > 1:

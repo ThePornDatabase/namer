@@ -1,14 +1,63 @@
 """
 Parse string in to FileNamePart define in namer_types.
 """
+from dataclasses import dataclass
 import re
 from pathlib import PurePath
+from typing import Optional
 
 from loguru import logger
 
-from namer.types import FileNameParts
 
 DEFAULT_REGEX_TOKENS = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class FileNameParts:
+    """
+    Represents info parsed from a file name, usually of a nzb, named something like:
+    'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.2160p.MP4-GAYME-xpost'
+    or
+    'DorcelClub.20.12..Aya.Benetti.Megane.Lopez.And.Bella.Tina.2160p.MP4-GAYME-xpost'
+    """
+
+    # pylint: disable=too-many-instance-attributes
+
+    site: Optional[str] = None
+    """
+    Site the file originated from, "DorcelClub", "EvilAngel", etc.
+    """
+    date: Optional[str] = None
+    """
+    formatted: YYYY-mm-dd
+    """
+    trans: bool = False
+    """
+    If the name originally started with an "TS" or "ts"
+    it will be stripped out and placed in a separate location, aids in matching, usable to genre mark content.
+    """
+    name: Optional[str] = None
+    """
+    The remained of a file, usually between the date and video markers such as XXX, 4k, etc.   Heavy lifting
+    occurs to match this to a scene name, perform names, or a combo of both.
+    """
+    extension: Optional[str] = None
+    """
+    The file's extension .mp4 or .mkv
+    """
+    source_file_name: Optional[str] = None
+    """
+    What was originally parsed.
+    """
+
+    def __str__(self) -> str:
+        return f"""site: {self.site}
+        date: {self.date}
+        trans: {self.trans}
+        name: {self.name}
+        extension: {self.extension}
+        original full name: {self.source_file_name}
+        """
 
 
 def name_cleaner(name: str) -> str:

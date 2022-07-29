@@ -19,9 +19,11 @@ from loguru import logger
 from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
-from namer.fileutils import is_interesting_movie, make_command_relative_to, move_command_files
+from namer.configuration import NamerConfig
+from namer.configuration_utils import default_config, verify_configuration
+from namer.command import is_interesting_movie, make_command_relative_to, move_command_files, Command
+from namer.name_formatter import PartialFormatter
 from namer.namer import process_file
-from namer.types import Command, default_config, NamerConfig
 from namer.web.server import NamerWebServer
 
 
@@ -238,7 +240,7 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level="INFO", diagnose=False)
     logger.info(str(namer_watchdog_config))
-    if not namer_watchdog_config.verify_watchdog_config():
+    if not verify_configuration(namer_watchdog_config, PartialFormatter()):
         sys.exit(-1)
     if namer_watchdog_config.retry_time is not None:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))

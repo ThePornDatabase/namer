@@ -10,8 +10,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 from mutagen.mp4 import MP4
 
+from namer.configuration import NamerConfig
 from namer.namer import check_arguments, main, set_permissions
-from namer.types import NamerConfig
 from test.utils import new_ea, prepare, sample_config, validate_mp4_tags
 
 

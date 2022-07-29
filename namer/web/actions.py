@@ -12,9 +12,9 @@ from typing import Dict, List
 
 from werkzeug.routing import Rule
 
-from namer.fileutils import gather_target_files_from_dir, is_interesting_movie, subpath_or_equal
+from namer.configuration import NamerConfig
+from namer.command import gather_target_files_from_dir, is_interesting_movie, subpath_or_equal, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
-from namer.types import Command, NamerConfig
 
 
 def has_no_empty_params(rule: Rule) -> bool:
