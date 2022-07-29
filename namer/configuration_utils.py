@@ -110,8 +110,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
 
     namer_config.presever_duplicates = config.getboolean("duplicates", "presever_duplicates", fallback=False)
     namer_config.max_desired_resolutions = config.getint("duplicates", "max_desired_resolutions", fallback=4360)
-    namer_config.desired_codec = config.get("duplicates", "desired_codec", fallback="HVEC H264").split(" ")
-               
+    namer_config.desired_codec = [x.strip().upper() for x in config.get("duplicates", "desired_codec", fallback="hvec, h264").split(",")]
 
     namer_config.write_nfo = config.getboolean("metadata", "write_nfo", fallback=False)
     namer_config.enabled_tagging = config.getboolean("metadata", "enabled_tagging", fallback=True)
