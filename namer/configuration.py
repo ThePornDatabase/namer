@@ -99,18 +99,18 @@ class NamerConfig:
     * First any movie under two minutes is ignored and presumed to be a sample,
     * then the highest resolution video is selected
     * then the best encoding mechanism h.245, or hvec.
-    You can set minfile size to 0 if you have set 
+    You can set minfile size to 0 if you have set
     """
 
     max_desired_resolutions: int = -1
     """
-    Example: 4320, 2160, 1080, 720, -1 means no upper restriction.
-    List your desired resolution in order, 
+    Videos above this resolution will not be retained if the exact match to your resolution (or less) is available.
+    List your desired resolution: 4380 2160 1080 or 720, -1 indicates that no max is desired.
     """
 
     desired_codec: List[str]
     """
-    Listed in order, desired codecs defaults to "hvec, h246", most videos are still in h246 encoding.
+    Listed in order, desired codecs defaults to "hvec h246", most videos are still in h246 encoding.
     """
 
     prefer_dir_name_if_available: bool = True

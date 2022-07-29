@@ -138,14 +138,15 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
             for target in file.rglob("**/*"):
                 _set_perms(target, config)
 
+
 def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[int, int]:
     if not ffprobe_results:
         return (0, 0)
     stream = ffprobe_results.get_default_video_stream()
     if not stream:
         return (0, 0)
-    codec = stream.codec_name.upper()
     return (stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config))
+
 
 def get_codec_value(codec: str, config: NamerConfig) -> int:
     desired_codecs = list(config.desired_codec)
@@ -153,6 +154,7 @@ def get_codec_value(codec: str, config: NamerConfig) -> int:
     if codec in desired_codecs:
         return desired_codecs.index(codec) + 1
     return 0
+
 
 def selected_best_movie(movies: List[Path], config: NamerConfig) -> Optional[Path]:
     # This could use a lot of work.
