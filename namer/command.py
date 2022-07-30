@@ -17,7 +17,7 @@ from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import ffprobe, FFProbeResults
 from namer.filenameparts import parse_file_name, FileNameParts
-from namer.comparison_resutls import LookedUpFileInfo, ComparisonResult
+from namer.comparison_results import LookedUpFileInfo, ComparisonResult
 
 
 # noinspection PyDataclass

@@ -16,7 +16,7 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_resutls import ComparisonResult, LookedUpFileInfo
+from namer.comparison_results import ComparisonResult, LookedUpFileInfo
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, from_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file

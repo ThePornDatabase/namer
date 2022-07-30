@@ -20,7 +20,7 @@ from loguru import logger
 from PIL import Image
 from unidecode import unidecode
 
-from namer.comparison_resutls import ComparisonResult, LookedUpFileInfo, Performer
+from namer.comparison_results import ComparisonResult, LookedUpFileInfo, Performer
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions
