@@ -14,14 +14,16 @@ from typing import List, Optional
 
 from loguru import logger
 
+from namer.command import Command
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, from_config, verify_configuration
-from namer.fileutils import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
+from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
+from namer.ffmpeg import FFProbeResults, ffprobe
 from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
-from namer.types import Command, ComparisonResult, LookedUpFileInfo
+from namer.types import ComparisonResult, LookedUpFileInfo
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -56,7 +58,7 @@ def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: 
                     process_file(command)
 
 
-def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: LookedUpFileInfo):
+def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: LookedUpFileInfo, ffprobe_results: Optional[FFProbeResults]):
     """
     Uses ComparisonResults to update a mp4 file's metadata based on a match in
     ComparisonResults.   Expects the first item of list to be the match if there is one.
@@ -68,7 +70,7 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
             random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
             poster = get_image(new_metadata.poster_url, random, video, config)
             logger.info("Updating file metadata (atoms): {}", video)
-            update_mp4_file(video, new_metadata, poster, config)
+            update_mp4_file(video, new_metadata, poster, ffprobe_results, config)
         logger.info("Done tagging file: {}", video)
         if poster is not None and new_metadata.poster_url is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
@@ -107,6 +109,7 @@ def process_file(command: Command) -> Optional[Command]:
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: List[ComparisonResult] = []
         # Match to nfo files, if enabled and found.
+        ffprobe_results = ffprobe(command.target_movie_file)
         if command.write_from_nfos is True:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
             if new_metadata is not None:
@@ -137,7 +140,7 @@ def process_file(command: Command) -> Optional[Command]:
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
             target = move_to_final_location(command, new_metadata)
-            tag_in_place(target.target_movie_file, command.config, new_metadata)
+            tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, command.config)
             logger.info("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
             return target

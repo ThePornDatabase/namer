@@ -3,6 +3,7 @@ Tools for working with files and directories in namer.
 """
 
 import argparse
+from dataclasses import dataclass
 import os
 import shutil
 import sys
@@ -14,8 +15,47 @@ from loguru import logger
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
-from namer.filenameparser import parse_file_name
-from namer.types import Command, ComparisonResult, LookedUpFileInfo
+from namer.ffmpeg import ffprobe, FFProbeResults
+from namer.filenameparts import parse_file_name
+from namer.types import FileNameParts, ComparisonResult, LookedUpFileInfo
+
+
+# noinspection PyDataclass
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class Command:
+    input_file: Path
+    """
+    This is the original user/machine input of a target path.
+    If this path is a directory a movie is found within it (recursively).
+    If this file is a the movie file itself, the parent directory is calculated.
+    """
+    target_movie_file: Path
+    """
+    The movie file this name is targeting.
+    """
+    target_directory: Optional[Path] = None
+    """
+    The containing directory of a File.  This may be the immediate parent directory, or higher up, depending
+    on whether a directory was selected as the input to a naming process.
+    """
+    parsed_dir_name: bool
+    """
+    Was the input file a directory and is parsing directory names configured?
+    """
+    parsed_file: Optional[FileNameParts] = None
+    """
+    The parsed file name.
+    """
+
+    inplace: bool = False
+
+    write_from_nfos: bool = False
+
+    tpdb_id: Optional[str] = None
+
+    ff_probe_results: Optional[FFProbeResults]
+
+    config: NamerConfig
 
 
 def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
@@ -244,8 +284,7 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.tpdb_id = uuid
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
-    # throws errors
-    # target_file.ff_probe_results = ffprobe(target_movie)
+    target_file.ff_probe_results = ffprobe(target_movie)
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) else None
     return output
 

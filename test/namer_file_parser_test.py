@@ -7,8 +7,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from namer.filenameparser import parse_file_name
-from namer.fileutils import make_command
+from namer.filenameparts import parse_file_name
+from namer.command import make_command
 from test.utils import environment
 
 REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"

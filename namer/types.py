@@ -2,57 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path, PurePath
 from typing import List, Optional
 
-from namer.configuration import NamerConfig
+from namer.filenameparts import FileNameParts
 from namer.name_formatter import PartialFormatter
 from pathvalidate import Platform, sanitize_filename
-
-
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class FileNameParts:
-    """
-    Represents info parsed from a file name, usually of a nzb, named something like:
-    'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.2160p.MP4-GAYME-xpost'
-    or
-    'DorcelClub.20.12..Aya.Benetti.Megane.Lopez.And.Bella.Tina.2160p.MP4-GAYME-xpost'
-    """
-
-    # pylint: disable=too-many-instance-attributes
-
-    site: Optional[str] = None
-    """
-    Site the file originated from, "DorcelClub", "EvilAngel", etc.
-    """
-    date: Optional[str] = None
-    """
-    formatted: YYYY-mm-dd
-    """
-    trans: bool = False
-    """
-    If the name originally started with an "TS" or "ts"
-    it will be stripped out and placed in a separate location, aids in matching, usable to genre mark content.
-    """
-    name: Optional[str] = None
-    """
-    The remained of a file, usually between the date and video markers such as XXX, 4k, etc.   Heavy lifting
-    occurs to match this to a scene name, perform names, or a combo of both.
-    """
-    extension: Optional[str] = None
-    """
-    The file's extension .mp4 or .mkv
-    """
-    source_file_name: Optional[str] = None
-    """
-    What was originally parsed.
-    """
-
-    def __str__(self) -> str:
-        return f"""site: {self.site}
-        date: {self.date}
-        trans: {self.trans}
-        name: {self.name}
-        extension: {self.extension}
-        original full name: {self.source_file_name}
-        """
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -263,42 +215,6 @@ class ComparisonResult:
         actors and scene name).
         """
         return self.site_match and self.date_match and self.name_match is not None and self.name_match >= 89.9
-
-
-# noinspection PyDataclass
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class Command:
-    input_file: Path
-    """
-    This is the original user/machine input of a target path.
-    If this path is a directory a movie is found within it (recursively).
-    If this file is a the movie file itself, the parent directory is calculated.
-    """
-    target_movie_file: Path
-    """
-    The movie file this name is targeting.
-    """
-    target_directory: Optional[Path] = None
-    """
-    The containing directory of a File.  This may be the immediate parent directory, or higher up, depending
-    on whether a directory was selected as the input to a naming process.
-    """
-    parsed_dir_name: bool
-    """
-    Was the input file a directory and is parsing directory names configured?
-    """
-    parsed_file: Optional[FileNameParts] = None
-    """
-    The parsed file name.
-    """
-
-    inplace: bool = False
-
-    write_from_nfos: bool = False
-
-    tpdb_id: Optional[str] = None
-
-    config: NamerConfig
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
