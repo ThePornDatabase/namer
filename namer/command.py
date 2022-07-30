@@ -9,7 +9,7 @@ import shutil
 import sys
 from pathlib import Path
 from platform import system
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple
 
 from loguru import logger
 
@@ -139,12 +139,43 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
                 _set_perms(target, config)
 
 
+def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[int, int]:
+    if not ffprobe_results:
+        return (0, 0)
+    stream = ffprobe_results.get_default_video_stream()
+    if not stream:
+        return (0, 0)
+    return (stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config))
+
+
+def get_codec_value(codec: str, config: NamerConfig) -> int:
+    desired_codecs = list(config.desired_codec)
+    desired_codecs.reverse()
+    if codec in desired_codecs:
+        return desired_codecs.index(codec) + 1
+    return 0
+
+
+def selected_best_movie(movies: List[Path], config: NamerConfig) -> Optional[Path]:
+    # This could use a lot of work.
+    if movies and len(movies) > 0:
+        selected = movies[0]
+        selected_values = extract_relevant_attributes(ffprobe(selected), config)
+        for current_movie in movies:
+            current_values = extract_relevant_attributes(ffprobe(current_movie), config)
+            if current_values[0] <= config.max_desired_resolutions:
+                if current_values[0] > selected_values[0] or (current_values[0] == selected_values[0] and current_values[1] > selected_values[1]):
+                    selected_values = current_values
+                    selected = current_movie
+        return selected
+    return None
+
+
 def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
     """
     Moves a file or directory to its final location after verifying there is no collision.
     Should a collision occur, the file is appropriately renamed to avoid collision.
     """
-    infix = 0
 
     # determine where we will move the movie, and how we will name it.
     # if in_place is False we will move it to the config defined destination dir.
@@ -159,19 +190,37 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         name_template = command.config.new_relative_path_name
         target_dir = command.config.dest_dir
 
+    infix = 0
     relative_path: Optional[Path] = None
     # Find non-conflicting movie name.
+    movies: List[Path] = []
     while True:
         relative_path = Path(new_metadata.new_file_name(name_template, f"({infix})"))
         movie_name = target_dir / relative_path
         movie_name = movie_name.resolve()
         infix += 1
-        if not movie_name.exists() or command.target_movie_file.samefile(movie_name):
+        if not movie_name.exists():
+            break
+        movies.append(movie_name)
+        if command.target_movie_file.samefile(movie_name):
             break
 
     # Create the new dir if needed and move the movie file to it.
     movie_name.parent.mkdir(exist_ok=True, parents=True)
     command.target_movie_file.rename(movie_name)
+
+    # Now that all files are in place we'll see if we intend to minimize duplicates
+    if not command.config.presever_duplicates:
+        # Now set to the final name location since -- will grab the metadata requested
+        # incase it has been updated.
+        relative_path = Path(new_metadata.new_file_name(name_template, "(0)"))
+
+        # no move best match to primary movie location.
+        final_location = target_dir / relative_path
+        selected_movie = selected_best_movie(movies, command.config)
+        if selected_movie and selected_movie.absolute().as_uri() != final_location.absolute().as_uri():
+            final_location.unlink()
+            selected_movie.rename(final_location)
 
     containing_dir: Optional[Path] = None
     if len(relative_path.parts) > 1:

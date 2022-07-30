@@ -92,6 +92,27 @@ class NamerConfig:
     minimum file size to process in MB, ignored if a file is to be processed
     """
 
+    presever_duplicates: bool = True
+    """
+    should duplicate videos be preserved.
+    If false, duplicates will be verified with a perceptual hash, then compared via ffprobe.
+    * First any movie under two minutes is ignored and presumed to be a sample,
+    * then the highest resolution video is selected
+    * then the best encoding mechanism h.245, or hvec.
+    You can set minfile size to 0 if you have set
+    """
+
+    max_desired_resolutions: int = -1
+    """
+    Videos above this resolution will not be retained if the exact match to your resolution (or less) is available.
+    List your desired resolution: 4380 2160 1080 or 720, -1 indicates that no max is desired.
+    """
+
+    desired_codec: List[str]
+    """
+    Listed in order, desired codecs defaults to "hvec h246", most videos are still in h246 encoding.
+    """
+
     prefer_dir_name_if_available: bool = True
     """
     If a directory name is to be preferred over a file name.
@@ -339,6 +360,11 @@ class NamerConfig:
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address
+            },
+            "Duplicate Config": {
+                "presever_duplicates": self.presever_duplicates,
+                "max_desired_resolutions": self.max_desired_resolutions,
+                "desired_codec": self.desired_codec,
             },
             "Tagging Config": {
                 "write_nfo": self.write_nfo,

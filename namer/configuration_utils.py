@@ -107,6 +107,11 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.max_performer_names = config.getint("namer", "max_performer_names", fallback=6)
     namer_config.enabled_requests_cache = config.getboolean("namer", "use_requests_cache", fallback=True)
     namer_config.requests_cache_expire_minutes = config.getint("namer", "requests_cache_expire_minutes", fallback=10)
+
+    namer_config.presever_duplicates = config.getboolean("duplicates", "presever_duplicates", fallback=True)
+    namer_config.max_desired_resolutions = config.getint("duplicates", "max_desired_resolutions", fallback=4360)
+    namer_config.desired_codec = [x.strip().upper() for x in config.get("duplicates", "desired_codec", fallback="hvec, h264").split(",")]
+
     namer_config.write_nfo = config.getboolean("metadata", "write_nfo", fallback=False)
     namer_config.enabled_tagging = config.getboolean("metadata", "enabled_tagging", fallback=True)
     namer_config.enabled_poster = config.getboolean("metadata", "enabled_poster", fallback=True)
