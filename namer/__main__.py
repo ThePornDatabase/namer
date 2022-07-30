@@ -19,7 +19,7 @@ import namer.metadataapi
 import namer.namer
 import namer.watchdog
 import namer.web
-from namer.types import default_config
+from namer.configuration_utils import default_config
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """

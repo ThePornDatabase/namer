@@ -1,7 +1,6 @@
 """
 Test namer_metadataapi_test.py
 """
-import contextlib
 import io
 import tempfile
 import unittest
@@ -11,70 +10,7 @@ from unittest import mock
 from namer.filenameparser import parse_file_name
 from namer.fileutils import make_command
 from namer.metadataapi import main, match
-from namer.types import NamerConfig
-from test.utils import sample_config
-from test.web.parrot_webserver import ParrotWebServer
-
-
-class FakeTPDB(ParrotWebServer):
-
-    def __init__(self):
-        super().__init__()
-        self.default_additions()
-
-    def __enter__(self):
-        super().__enter__()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        return super().__exit__(exc_type, exc_value, traceback)
-
-    def get_url(self) -> str:
-        return super().get_url()
-
-    def add_example_evil_angel(self, target_url: str):
-        test_dir = Path(__file__).resolve().parent
-        return_value = (test_dir / "ea.full.json").read_text()
-        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
-        super().set_response(target_url, modified_value)
-
-    def add_example_dorcel_club(self, target_url: str):
-        test_dir = Path(__file__).resolve().parent
-        return_value = (test_dir / "dc.json").read_text()
-        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
-        super().set_response(target_url, modified_value)
-
-    def add_poster(self, target_url: str) -> None:
-        test_dir = Path(__file__).resolve().parent
-        return_value = (test_dir / "poster.png").read_bytes()
-        super().set_response(target_url, bytearray(return_value))
-
-    def default_additions(self):
-        # Evil Angel:
-        # Search Results
-        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela.Clutch.Fabulous.Anal.3-Way&limit=25")
-        # Extra Metadata Lookup
-        self.add_example_evil_angel("/scenes/1678283?")
-        # UI Tests
-        self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
-        # Image for UI Test:
-        self.add_poster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
-        # DorcelClub
-        # Search Results
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya.Benetti.Megane.Lopez.And.Bella.Tina&limit=25")
-        # Extra Metadata Lookup
-        self.add_example_dorcel_club("/scenes/1674059?")
-        # with utf8 characters
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya.B%D0%B5n%D0%B5tti.M%D0%B5gane.Lop%D0%B5z.And.B%D0%B5lla.Tina&limit=25")
-
-
-@contextlib.contextmanager
-def environment(config: NamerConfig = sample_config()):
-    with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-        with FakeTPDB() as fakeTpdb:
-            tempdir = Path(tmpdir)
-            config.override_tpdb_address = fakeTpdb.get_url()
-            yield tempdir, fakeTpdb, config
+from test.utils import environment, sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

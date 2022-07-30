@@ -4,11 +4,10 @@ from pathlib import Path
 
 from typing import Optional
 
-import ffmpeg
 import imagehash
-from PIL.Image import Image, new
+from PIL import Image
 
-from namer.ffmpeg import extract_screenshot
+from namer.ffmpeg import FFProbeResults, extract_screenshot, ffprobe
 
 
 class VideoPerceptualHash:
@@ -19,23 +18,20 @@ class VideoPerceptualHash:
     def get_phash(self, video: Path) -> Optional[imagehash.ImageHash]:
         phash = None
 
-        thumbnail_list = self.__generate_thumbnails(video)
+        probe = ffprobe(video)
+        if not probe or not probe.get_default_video_stream():
+            return None
+
+        thumbnail_list = self.__generate_thumbnails(video, probe)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
             phash = imagehash.phash(thumbnail_image, hash_size=8, highfreq_factor=8)
 
         return phash
 
-    def __generate_thumbnails(self, file: Path) -> list:
-        probe = ffmpeg.probe(file)
-        if not probe:
-            return []
+    def __generate_thumbnails(self, file: Path, probe: FFProbeResults) -> list:
 
-        video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
-        if video_stream is None:
-            return []
-
-        duration = float(probe['format']['duration'])
+        duration = float(probe.format.duration)
         duration = math.ceil(duration * 100.0) / 100.0
         chunk_count = self.__columns * self.__rows
         offset = 0.05 * duration
@@ -56,11 +52,11 @@ class VideoPerceptualHash:
 
         return images
 
-    def __concat_images(self, images: list) -> Image:
+    def __concat_images(self, images: list) -> Image.Image:
         width, height = images[0].size
 
         image_size = (width * self.__columns, height * self.__rows)
-        image = new('RGB', image_size)
+        image = Image.new('RGB', image_size)
 
         for row in range(self.__rows):
             for col in range(self.__columns):
