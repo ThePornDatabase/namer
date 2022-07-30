@@ -121,7 +121,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
             self.assertFalse(output_file2.exists())
 
-
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
     def test_event_listener_success(self, mock_poster, mock_response):
