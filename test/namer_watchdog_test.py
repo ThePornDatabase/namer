@@ -90,6 +90,40 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
+    def test_handler_collisions_success_choose_best(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = True
+            config.write_namer_log = True
+            config.min_file_size = 0
+            config.presever_duplicates = False
+            config.max_desired_resolutions = -1
+            config.desired_codec = ["HVEC", "H264"]
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir),
+                new_ea(config.watch_dir, use_dir=False)
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            output = MP4(output_file)
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
+
+            output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
+            self.assertFalse(output_file2.exists())
+
+
+    @patch("namer.metadataapi.__get_response_json_object")
+    @patch("namer.namer.get_image")
     def test_event_listener_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
