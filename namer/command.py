@@ -218,7 +218,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         # no move best match to primary movie location.
         final_location = target_dir / relative_path
         selected_movie = selected_best_movie(movies, command.config)
-        if selected_movie and selected_movie.absolute().as_uri() == final_location.absolute().as_uri():
+        if selected_movie and selected_movie.absolute().as_uri() != final_location.absolute().as_uri():
             final_location.unlink()
             selected_movie.rename(final_location)
 
