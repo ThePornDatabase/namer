@@ -16,8 +16,8 @@ from loguru import logger
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import ffprobe, FFProbeResults
-from namer.filenameparts import parse_file_name
-from namer.types import FileNameParts, ComparisonResult, LookedUpFileInfo
+from namer.filenameparts import parse_file_name, FileNameParts
+from namer.comparison_resutls import LookedUpFileInfo, ComparisonResult
 
 
 # noinspection PyDataclass
