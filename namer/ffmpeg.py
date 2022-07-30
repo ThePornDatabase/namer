@@ -15,7 +15,7 @@ from io import BytesIO
 from pathlib import Path
 from random import choices
 from types import SimpleNamespace
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import ffmpeg
 from loguru import logger
@@ -137,7 +137,11 @@ def ffprobe(file: Path) -> Optional[FFProbeResults]:
     Get the typed results of probing a video stream with ffprobe.
     """
     logger.info("ffprobe file {}", file)
-    ffprobe_out = ffmpeg.probe(file)
+    ffprobe_out: Optional[Any] = None
+    try:
+        ffprobe_out = ffmpeg.probe(file)
+    except:
+        pass
     if not ffprobe_out:
         return
 
@@ -148,7 +152,7 @@ def ffprobe(file: Path) -> Optional[FFProbeResults]:
     output: List[FFProbeStream] = []
     for stream in streams:
         ff_stream = FFProbeStream()
-        ff_stream.bit_rate = int(stream['bit_rate'])
+        ff_stream.bit_rate = int(stream['bit_rate']) if 'bit_rate' in stream else -1
         ff_stream.codec_name = stream['codec_name']
         ff_stream.codec_type = stream['codec_type']
         ff_stream.index = int(stream['index'])
