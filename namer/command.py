@@ -20,7 +20,6 @@ from namer.filenameparts import parse_file_name
 from namer.types import FileNameParts, ComparisonResult, LookedUpFileInfo
 
 
-
 # noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class Command:
@@ -57,7 +56,6 @@ class Command:
     ff_probe_results: Optional[FFProbeResults]
 
     config: NamerConfig
-
 
 
 def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:

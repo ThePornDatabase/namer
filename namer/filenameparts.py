@@ -60,7 +60,6 @@ class FileNameParts:
         """
 
 
-
 def name_cleaner(name: str) -> str:
     """
     Given the name parts, following a date, but preceding the file extension, attempt to glean
