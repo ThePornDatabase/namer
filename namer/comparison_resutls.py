@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from typing import List, Optional
 
 from namer.filenameparts import FileNameParts
@@ -215,47 +215,3 @@ class ComparisonResult:
         actors and scene name).
         """
         return self.site_match and self.date_match and self.name_match is not None and self.name_match >= 89.9
-
-
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class ProcessingResults:
-    """
-    Returned from the namer.py process() function.   It contains information about if a match
-    was found, and of so, where files were placed.  It also tracks if a directory was inputted
-    to namer (rather than the exact movie file.)  That knowledge can be used to move directories
-    and preserve relative files, or to delete left over artifacts.
-    """
-
-    search_results: Optional[List[ComparisonResult]] = None
-    """
-    True if a match was found in the porndb.
-    """
-
-    new_metadata: Optional[LookedUpFileInfo] = None
-    """
-    New metadata found for the file being processed.
-    Sourced including queries against the porndb, which would be stored in search_results,
-    or reading a .nfo xml file next to the video, with the file name identical except for
-    the extension, which would be .nfo instead of .mp4,.mkv,.avi,.mov,.flv.
-    """
-
-    dir_file: Optional[Path] = None
-    """
-    Set if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
-    or all files can be moved to a destination specified in the field final_name_relative.
-    """
-
-    video_file: Optional[Path] = None
-    """
-    The location of the found video file.
-    """
-
-    parsed_file: Optional[FileNameParts] = None
-    """
-    The parsed file name.
-    """
-
-    final_name_relative: Optional[Path] = None
-    """
-    This is the full NamerConfig.new_relative_path_name string with all substitutions made.
-    """
