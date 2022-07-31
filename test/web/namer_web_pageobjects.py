@@ -86,7 +86,7 @@ class SearchSelectionItem:
 
     def select(self) -> 'FailedPage':
         self.__select.click()
-        wait_until_invisible(self.__select)
+        wait_until_invisible(self.__parent)
         return FailedPage(self.__parent.parent).refresh_items()
 
 
