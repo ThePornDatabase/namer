@@ -31,10 +31,9 @@ def chrome_factory(debug: bool) -> WebDriver:
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
 
+    webdriver_name = 'chromedriver'
     if system() == 'Windows':
-        webdriver_name = 'chromedriver'
-    else:
-        webdriver_name = 'chromedriver.exe'
+        webdriver_name = webdriver_name + '.exe'
 
     webdriver_path = os.getenv('CHROMEWEBDRIVER', default=None)
     if webdriver_path:
