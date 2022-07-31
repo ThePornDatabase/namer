@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Generic, List, Optional, TypeVar
 
 from assertpy import assert_that, fail
@@ -222,7 +223,13 @@ def wait_for_and_find_all(driver, by: str, value: str) -> List[WebElement]:
 
 
 def find_if_present(driver, by: str, value: str) -> Optional[WebElement]:
-    return next(iter(driver.find_elements(by, value)), None)
+    element = next(iter(driver.find_elements(by, value)), None)
+    count = 0
+    while element is None and count < 5:
+        element = next(iter(driver.find_elements(by, value)), None)
+        sleep(0.2)
+        count = count + 1
+    return element
 
 
 def wait_until_present(driver, by: str, value: str):
