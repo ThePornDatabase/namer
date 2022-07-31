@@ -8,6 +8,7 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from sys import gettrace as sys_gettrace
 from time import sleep, time
 from typing import Callable, List, Optional
 
@@ -16,6 +17,10 @@ from mutagen.mp4 import MP4
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from test.web.parrot_webserver import ParrotWebServer
+
+
+def is_debugging():
+    return sys_gettrace() is not None
 
 
 class Wait:
@@ -40,7 +45,7 @@ class Wait:
 
     def __wait(self, state: bool):
         max_time: float = time() + float(self._duration)
-        while time() < max_time:
+        while time() < max_time or is_debugging():
             if not self._predicate:
                 raise RuntimeError("you must set a predicate to wait on before calling attempting to wait.")
             if self._predicate and self._predicate() == state:

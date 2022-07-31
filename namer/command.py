@@ -9,7 +9,7 @@ import shutil
 import sys
 from pathlib import Path
 from platform import system
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, List, Optional, Sequence, Tuple
 
 from loguru import logger
 
@@ -139,13 +139,13 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
                 _set_perms(target, config)
 
 
-def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[int, int]:
+def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[float, int, int]:
     if not ffprobe_results:
-        return (0, 0)
+        return (0, 0, 0)
     stream = ffprobe_results.get_default_video_stream()
     if not stream:
-        return (0, 0)
-    return (stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config))
+        return (0, 0, 0)
+    return (stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config))
 
 
 def get_codec_value(codec: str, config: NamerConfig) -> int:
@@ -156,6 +156,17 @@ def get_codec_value(codec: str, config: NamerConfig) -> int:
     return 0
 
 
+def greater_than(seq1: Sequence, seq2: Sequence) -> bool:
+    for val in zip(seq1, seq2):
+        if val[0] > val[1]:
+            return True
+        if val[0] == val[1]:
+            continue
+        else:
+            return False
+    return False  # equal
+
+
 def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path]:
     # This could use a lot of work.
     if movies and len(movies) > 0:
@@ -164,8 +175,8 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
         for current_movie_str in movies:
             current_movie = Path(current_movie_str)
             current_values = extract_relevant_attributes(ffprobe(current_movie), config)
-            if current_values[0] <= config.max_desired_resolutions or config.max_desired_resolutions < 0:
-                if current_values[0] > selected_values[0] or (current_values[0] == selected_values[0] and current_values[1] > selected_values[1]):
+            if current_values[1] <= config.max_desired_resolutions or config.max_desired_resolutions == -1:
+                if greater_than(current_values, selected_values):
                     selected_values = current_values
                     selected = current_movie
         return selected

@@ -3,7 +3,6 @@ import os
 import unittest
 import warnings
 from platform import system
-from sys import gettrace as sys_gettrace
 
 import requests
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
@@ -19,12 +18,9 @@ from namer.configuration_utils import default_config
 from namer.watchdog import create_watcher
 from test.namer_metadataapi_test import environment
 from test.namer_watchdog_test import make_locations, new_ea
+from test.utils import is_debugging
 from test.web.namer_web_pageobjects import FailedPage
 from test.web.parrot_webserver import ParrotWebServer
-
-
-def is_debugging():
-    return sys_gettrace() is not None
 
 
 def chrome_factory(debug: bool) -> WebDriver:
