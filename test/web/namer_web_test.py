@@ -2,6 +2,7 @@ import contextlib
 import os
 import unittest
 import warnings
+from pathlib import Path
 from platform import system
 
 import requests
@@ -30,13 +31,18 @@ def chrome_factory(debug: bool) -> WebDriver:
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
 
+    if system() == 'Windows':
+        webdriver_name = 'chromedriver'
+    else:
+        webdriver_name = 'chromedriver.exe'
+
     webdriver_path = os.getenv('CHROMEWEBDRIVER', default=None)
     if webdriver_path:
-        webdriver_path = fr'{webdriver_path}\chromedriver.exe'
+        webdriver_path = Path(webdriver_path) / webdriver_name
     else:
         webdriver_path = ChromeDriverManager().install()
 
-    service = ChromeService(executable_path=webdriver_path, log_path=os.devnull)  # type: ignore
+    service = ChromeService(executable_path=str(webdriver_path), log_path=os.devnull)  # type: ignore
     return Chrome(service=service, options=options)
 
 
@@ -49,11 +55,11 @@ def edge_factory(debug: bool) -> WebDriver:
 
     webdriver_path = os.getenv('EDGEWEBDRIVER', default=None)
     if webdriver_path:
-        webdriver_path = fr'{webdriver_path}\msedgedriver.exe'
+        webdriver_path = Path(webdriver_path) / 'msedgedriver.exe'
     else:
         webdriver_path = EdgeChromiumDriverManager().install()
 
-    service = EdgeService(executable_path=webdriver_path, log_path=os.devnull)  # type: ignore
+    service = EdgeService(executable_path=str(webdriver_path), log_path=os.devnull)  # type: ignore
     webdriver = Edge(service=service, options=options)
     return webdriver
 
