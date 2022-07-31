@@ -71,31 +71,15 @@ def safari_factory(debug: bool) -> WebDriver:
 
 
 def default_os_browser(debug: bool) -> WebDriver:
-    browser = None
-
-    try:
-        browser = chrome_factory(debug)
-    except:
-        pass
-
-    if not browser:
-        try:
-            browser = edge_factory(debug)
-        except:
-            pass
-
-    return browser
-
-
-'''
-name = system()
-if name == 'Windows':
-    return edge_factory(debug)
-# until github actions
-# if name in ['Darwin', 'macOS']:
-#    return safari_factory(debug)
-return chrome_factory(debug)
-'''
+    name = system()
+    # ci_str = os.getenv('CI')
+    # ci = ci_str.lower() == "true" if ci_str else False
+    if name == 'Windows':  # and not ci:
+        return edge_factory(debug)
+    # until github actions
+    # if name in ['Darwin', 'macOS']:
+    #    return safari_factory(debug)
+    return chrome_factory(debug)
 
 
 @contextlib.contextmanager  # type: ignore

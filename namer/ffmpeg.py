@@ -100,9 +100,11 @@ def get_resolution(file: Path) -> int:
     """
     logger.info("resolution stream of file {}", file)
     probe = ffprobe(file)
-    height = probe.get_default_video_stream().height
-
-    return height
+    if probe:
+        stream = probe.get_default_video_stream()
+        if stream:
+            return stream.height if stream.height else 0
+    return 0
 
 
 @logger.catch
@@ -174,13 +176,12 @@ def get_audio_stream_for_lang(file: Path, language: str) -> int:
     Returns -1 if stream can not be determined
     """
 
-    probe = ffprobe(file)
-    stream = probe.get_audio_stream(language)
-
     stream_index = -1
-    if stream:
-        stream_index = stream.index - 1 if not stream.disposition_default else -1
-
+    probe = ffprobe(file)
+    if probe:
+        stream = probe.get_audio_stream(language)
+        if stream:
+            stream_index = stream.index - 1 if not stream.disposition_default else -1
     return stream_index
 
 
