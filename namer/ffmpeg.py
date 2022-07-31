@@ -160,7 +160,7 @@ def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbe
         probe_format.bit_rate = int(ffprobe_out['format']['bit_rate'])
         probe_format.duration = float(ffprobe_out['format']['duration'])
         probe_format.size = int(ffprobe_out['format']['size'])
-        probe_format.tags = ffprobe_out['format']['tags'] if 'tags' in ffprobe_out['format'] else []
+        probe_format.tags = ffprobe_out['format']['tags'] if 'tags' in ffprobe_out['format'] else {}
 
     return FFProbeResults(output, probe_format)
 
