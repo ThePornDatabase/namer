@@ -11,7 +11,7 @@ from pathlib import Path
 from namer.configuration import NamerConfig
 from namer.configuration_utils import from_config, verify_configuration
 from namer.name_formatter import PartialFormatter
-from namer.types import Performer
+from namer.comparison_results import Performer
 from test.utils import sample_config
 
 

@@ -11,7 +11,7 @@ from unittest import mock
 from namer.filenameparts import parse_file_name
 from namer.metadataapi import match
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
-from namer.types import Performer
+from namer.comparison_results import Performer
 from test.utils import sample_config
 
 

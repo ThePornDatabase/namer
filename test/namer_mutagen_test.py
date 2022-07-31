@@ -14,7 +14,7 @@ from namer.filenameparts import parse_file_name
 from namer.ffmpeg import ffprobe
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
-from namer.types import LookedUpFileInfo
+from namer.comparison_results import LookedUpFileInfo
 from test.utils import validate_mp4_tags
 from test.namer_metadataapi_test import environment
 

@@ -5,6 +5,7 @@ the porndb, and used for renaming (in place), and updating a mp4
 file's metadata (poster, artists, etc.)
 """
 import argparse
+from dataclasses import dataclass
 import pathlib
 import string
 import sys
@@ -15,15 +16,16 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
+from namer.comparison_results import ComparisonResult, LookedUpFileInfo
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, from_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults, ffprobe
+from namer.filenameparts import FileNameParts
 from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
-from namer.types import ComparisonResult, LookedUpFileInfo
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -38,6 +40,50 @@ DESCRIPTION = """
     file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
     match the file's name segment after the 'SITE.[YY]YY.MM.DD'.
   """
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class ProcessingResults:
+    """
+    Returned from the namer.py process() function.   It contains information about if a match
+    was found, and of so, where files were placed.  It also tracks if a directory was inputted
+    to namer (rather than the exact movie file.)  That knowledge can be used to move directories
+    and preserve relative files, or to delete left over artifacts.
+    """
+
+    search_results: Optional[List[ComparisonResult]] = None
+    """
+    True if a match was found in the porndb.
+    """
+
+    new_metadata: Optional[LookedUpFileInfo] = None
+    """
+    New metadata found for the file being processed.
+    Sourced including queries against the porndb, which would be stored in search_results,
+    or reading a .nfo xml file next to the video, with the file name identical except for
+    the extension, which would be .nfo instead of .mp4,.mkv,.avi,.mov,.flv.
+    """
+
+    dir_file: Optional[Path] = None
+    """
+    Set if the input file for naming was a directory.   This has advantages, as clean up of other files is now possible,
+    or all files can be moved to a destination specified in the field final_name_relative.
+    """
+
+    video_file: Optional[Path] = None
+    """
+    The location of the found video file.
+    """
+
+    parsed_file: Optional[FileNameParts] = None
+    """
+    The parsed file name.
+    """
+
+    final_name_relative: Optional[Path] = None
+    """
+    This is the full NamerConfig.new_relative_path_name string with all substitutions made.
+    """
 
 
 def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: bool = False):

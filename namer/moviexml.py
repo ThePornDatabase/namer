@@ -10,7 +10,7 @@ from lxml import etree, objectify
 
 from namer.configuration import NamerConfig
 from namer.command import set_permissions
-from namer.types import LookedUpFileInfo, Performer
+from namer.comparison_results import LookedUpFileInfo, Performer
 
 
 def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:

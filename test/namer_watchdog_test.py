@@ -11,9 +11,10 @@ from unittest.mock import MagicMock, patch
 
 from mutagen.mp4 import MP4
 
+from namer.ffmpeg import ffprobe
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed
-from test.utils import new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
+from test.utils import Wait, new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
 
 
 def make_locations(tempdir: Path) -> NamerConfig:
@@ -38,8 +39,7 @@ def wait_until_processed(config: NamerConfig):
     """
     Waits until all files have been moved out of watch/working dirs.
     """
-    while len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0:
-        time.sleep(0.2)
+    Wait().until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -87,6 +87,51 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+
+    @patch("namer.metadataapi.__get_response_json_object")
+    @patch("namer.namer.get_image")
+    def test_handler_collisions_success_choose_best(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+
+        okay = "Big_Buck_Bunny_360_10s_2MB_h264.mp4"
+        better = "Big_Buck_Bunny_720_10s_2MB_h264.mp4"
+        best = "Big_Buck_Bunny_720_10s_2MB_h265.mp4"
+
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = True
+            config.write_namer_log = True
+            config.min_file_size = 0
+            config.presever_duplicates = False
+            config.max_desired_resolutions = -1
+            config.desired_codec = ["HEVC", "H264"]
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir, mp4_file_name=okay),
+                new_ea(config.watch_dir, use_dir=False, post_stem="2", mp4_file_name=better),
+                new_ea(config.watch_dir, use_dir=False, post_stem="1", mp4_file_name=best)
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            self.assertEqual(MP4(output_file).get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
+            results = ffprobe(output_file)
+            self.assertIsNotNone(results)
+            if results:
+                stream = results.get_default_video_stream()
+                self.assertIsNotNone(stream)
+                if stream:
+                    self.assertEquals(stream.height, 720)
+                    self.assertEquals(stream.codec_name, "hevc")
+            output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
+            self.assertFalse(output_file2.exists())
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")

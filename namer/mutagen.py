@@ -10,7 +10,7 @@ from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
 from namer.configuration import NamerConfig
 from namer.ffmpeg import FFProbeResults, attempt_fix_corrupt, update_audio_stream_if_needed
-from namer.types import LookedUpFileInfo
+from namer.comparison_results import LookedUpFileInfo
 
 
 def resolution_to_hdv_setting(resolution: Optional[int]) -> int:
