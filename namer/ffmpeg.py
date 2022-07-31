@@ -5,21 +5,19 @@ only one default audio stream, and this script lets you set it with the correct 
 code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
-
 from dataclasses import dataclass
-import json
 import shutil
 import string
 import subprocess
+from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
 from random import choices
-from types import SimpleNamespace
 from typing import Any, Dict, List, Optional
 
 import ffmpeg
 from loguru import logger
-from PIL.Image import Image, open
+from PIL import Image
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -32,12 +30,12 @@ class FFProbeStream:
     disposition_attached_pic: bool  # is the "video" stream an attached picture.
     duration: float                 # seconds
     bit_rate: int                   # bitrate of the track
+    # audio
+    tags_language: Optional[str]            # 3 letters representing language of track (only matters for audio)
     # video only
     width: Optional[int] = None
     height: Optional[int] = None            # 720 1080 2160
     avg_frame_rate: Optional[float] = None  # average frames per second
-    # audio
-    tags_language: Optional[str]            # 3 letters representing language of track (only matters for audio)
 
     def __str__(self) -> str:
         return f"""codec_name: {self.codec_name}
@@ -66,30 +64,33 @@ class FFProbeFormat:
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FFProbeResults:
-    results: List[FFProbeStream]
-    format: FFProbeFormat
+    __results: List[FFProbeStream]
+    __format: FFProbeFormat
 
-    def __init__(self, data: List[FFProbeStream], format: FFProbeFormat):
-        self.results = data
-        self.format = format
+    def __init__(self, data: List[FFProbeStream], probe_format: FFProbeFormat):
+        self.__results = data
+        self.__format = probe_format
 
     def get_default_video_stream(self) -> Optional[FFProbeStream]:
-        for result in self.results:
+        for result in self.__results:
             if result.is_video() and result.disposition_default:
                 return result
 
     def get_default_audio_stream(self) -> Optional[FFProbeStream]:
-        for result in self.results:
+        for result in self.__results:
             if result.is_audio() and result.disposition_default:
                 return result
 
     def get_audio_stream(self, language_code: str) -> Optional[FFProbeStream]:
-        for result in self.results:
+        for result in self.__results:
             if result.is_audio() and result.tags_language == language_code:
                 return result
 
-    def all_streams(self) -> List[FFProbeStream]:
-        return self.results
+    def get_all_streams(self) -> List[FFProbeStream]:
+        return self.__results
+
+    def get_format(self) -> FFProbeFormat:
+        return self.__format
 
 
 def get_resolution(file: Path) -> int:
@@ -98,50 +99,32 @@ def get_resolution(file: Path) -> int:
     Returns zero if resolution can not be determined.
     """
     logger.info("resolution stream of file {}", file)
-
-    with subprocess.Popen(
-        [
-            "ffprobe",
-            "-v",
-            "error",
-            "-select_streams",
-            "v:0",
-            "-show_entries",
-            "stream=height",
-            "-of",
-            "csv=p=0",
-            file,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    ) as process:
-        stdout, stderr = process.communicate()
-        success = process.returncode == 0
-        output = 0
-        if stdout is not None:
-            output = stdout
-        if not success:
-            logger.warning("Error getting resolution of file {}", file)
-            if stderr is not None:
-                logger.warning(stderr)
-        if output is not None:
-            logger.info("output {}", output)
-            return int(output)
+    probe = ffprobe(file)
+    if probe:
+        stream = probe.get_default_video_stream()
+        if stream:
+            return stream.height if stream.height else 0
     return 0
 
 
 @logger.catch
 def ffprobe(file: Path) -> Optional[FFProbeResults]:
+    return _ffprobe(file, file.stat().st_size, file.stat().st_mtime)
+
+
+@lru_cache
+def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbeResults]:
     """
     Get the typed results of probing a video stream with ffprobe.
     """
+
     logger.info("ffprobe file {}", file)
     ffprobe_out: Optional[Any] = None
     try:
         ffprobe_out = ffmpeg.probe(file)
     except:
         pass
+
     if not ffprobe_out:
         return
 
@@ -174,17 +157,17 @@ def ffprobe(file: Path) -> Optional[FFProbeResults]:
 
         output.append(ff_stream)
 
-    format = FFProbeFormat()
+    probe_format = FFProbeFormat()
     if 'format' in ffprobe_out:
-        format.bit_rate = int(ffprobe_out['format']['bit_rate'])
-        format.duration = float(ffprobe_out['format']['duration'])
-        format.size = int(ffprobe_out['format']['size'])
-        format.tags = ffprobe_out['format']['tags']
+        probe_format.bit_rate = int(ffprobe_out['format']['bit_rate'])
+        probe_format.duration = float(ffprobe_out['format']['duration'])
+        probe_format.size = int(ffprobe_out['format']['size'])
+        probe_format.tags = ffprobe_out['format']['tags'] if 'tags' in ffprobe_out['format'] else {}
 
-    return FFProbeResults(output, format)
+    return FFProbeResults(output, probe_format)
 
 
-def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
+def get_audio_stream_for_lang(file: Path, language: str) -> int:
     """
     given a mp4 input file and a desired language will return the stream position of that language in the mp4.
     if the language is None, or the stream is not found, or the desired stream is the only default stream, None is returned.
@@ -193,51 +176,13 @@ def get_audio_stream_for_lang(mp4_file: Path, language: str) -> int:
     Returns -1 if stream can not be determined
     """
 
-    with subprocess.Popen(
-        [
-            "ffprobe",
-            "-show_streams",
-            "-select_streams",
-            "a",
-            "-of",
-            "json",
-            "-i",
-            mp4_file,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    ) as process:
-        stdout, stderr = process.communicate()
-        success = process.returncode == 0
-        audio_streams_str = None
-        if stdout is not None:
-            audio_streams_str = stdout
-        if not success:
-            logger.warning("Error getting audio streams of file {}", mp4_file)
-            if stderr is not None:
-                logger.warning(stderr)
-        logger.info("Target for audio: {}", mp4_file)
-        audio_streams = None
-        if audio_streams_str is not None:
-            audio_streams = json.loads(audio_streams_str, object_hook=lambda d: SimpleNamespace(**d))
-        lang_stream = None
-        needs_updated = False
-        if language:
-            test_lang = language.lower()[0:3]
-            if audio_streams is not None and hasattr(audio_streams, "streams"):
-                for audio_stream in audio_streams.streams:
-                    default = audio_stream.disposition.default == 1
-                    lang = audio_stream.tags.language
-                    if lang == test_lang:
-                        lang_stream = audio_stream.index - 1
-                        if default is False:
-                            needs_updated = True
-                    elif default is True:
-                        needs_updated = True
-                if needs_updated and lang_stream:
-                    return lang_stream
-    return -1
+    stream_index = -1
+    probe = ffprobe(file)
+    if probe:
+        stream = probe.get_audio_stream(language)
+        if stream:
+            stream_index = stream.index - 1 if not stream.disposition_default else -1
+    return stream_index
 
 
 def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bool:
@@ -318,7 +263,7 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
         return success
 
 
-def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> Image:
+def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> Image.Image:
     out, _ = (
         ffmpeg
         .input(file, ss=time)
@@ -327,6 +272,6 @@ def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> I
         .run(quiet=True, capture_stdout=True)
     )
     out = BytesIO(out)
-    image = open(out)
+    image = Image.open(out)
 
     return image

@@ -105,7 +105,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.prefer_dir_name_if_available = True
             config.write_namer_log = True
             config.min_file_size = 0
-            config.presever_duplicates = False
+            config.preserve_duplicates = False
             config.max_desired_resolutions = -1
             config.desired_codec = ["HEVC", "H264"]
             watcher = create_watcher(config)
@@ -128,8 +128,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 stream = results.get_default_video_stream()
                 self.assertIsNotNone(stream)
                 if stream:
-                    self.assertEquals(stream.height, 720)
-                    self.assertEquals(stream.codec_name, "hevc")
+                    self.assertEqual(stream.height, 720)
+                    self.assertEqual(stream.codec_name, "hevc")
             output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
             self.assertFalse(output_file2.exists())
 

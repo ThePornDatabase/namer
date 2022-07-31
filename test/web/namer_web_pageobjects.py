@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Generic, List, Optional, TypeVar
 
 from assertpy import assert_that, fail
@@ -86,7 +87,7 @@ class SearchSelectionItem:
 
     def select(self) -> 'FailedPage':
         self.__select.click()
-        wait_until_invisible(self.__select)
+        wait_until_invisible(self.__parent)
         return FailedPage(self.__parent.parent).refresh_items()
 
 
@@ -210,28 +211,34 @@ class FailedItem:
 
 
 def wait_for_and_find(driver, by: str, value: str) -> WebElement:
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     wait.until(expected_conditions.visibility_of_any_elements_located((by, value)))
     return driver.find_element(by, value)
 
 
 def wait_for_and_find_all(driver, by: str, value: str) -> List[WebElement]:
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     wait.until(expected_conditions.presence_of_element_located((by, value)))
     return driver.find_elements(by, value)
 
 
 def find_if_present(driver, by: str, value: str) -> Optional[WebElement]:
-    return next(iter(driver.find_elements(by, value)), None)
+    element = next(iter(driver.find_elements(by, value)), None)
+    count = 0
+    while element is None and count < 5:
+        element = next(iter(driver.find_elements(by, value)), None)
+        sleep(0.2)
+        count = count + 1
+    return element
 
 
 def wait_until_present(driver, by: str, value: str):
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     wait.until(expected_conditions.visibility_of_any_elements_located((by, value)))
 
 
 def find_and_wait_until_stale(driver, by: str, value: str):
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     element = find_if_present(driver, by, value)
     if element:
         wait.until(expected_conditions.any_of(
@@ -241,7 +248,7 @@ def find_and_wait_until_stale(driver, by: str, value: str):
 
 def wait_until_invisible(element: WebElement):
     if element:
-        wait = WebDriverWait(element.parent, 20)
+        wait = WebDriverWait(element.parent, 30)
         wait.until(expected_conditions.any_of(
             expected_conditions.invisibility_of_element(element),
             expected_conditions.staleness_of(element)))
@@ -270,7 +277,7 @@ class FailedPage:
         return NavElements(self.__driver)
 
     def refresh_items(self) -> 'FailedPage':
-        self.__refresh.click()
+        wait_for_and_find(self.__driver, By.ID, 'refreshFiles').click()
         return FailedPage(self.__driver)
 
     def items(self) -> List[FailedItem]:

@@ -141,11 +141,11 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
 
 def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[float, int, int]:
     if not ffprobe_results:
-        return (0, 0, 0)
+        return 0, 0, 0
     stream = ffprobe_results.get_default_video_stream()
     if not stream:
-        return (0, 0, 0)
-    return (stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config))
+        return 0, 0, 0
+    return stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config)
 
 
 def get_codec_value(codec: str, config: NamerConfig) -> int:
@@ -223,7 +223,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     movies.append(str(movie_name))
 
     # Now that all files are in place we'll see if we intend to minimize duplicates
-    if not command.config.presever_duplicates and len(movies) > 1:
+    if not command.config.preserve_duplicates and len(movies) > 1:
         # Now set to the final name location since -- will grab the metadata requested
         # incase it has been updated.
         relative_path = Path(new_metadata.new_file_name(name_template, "(0)"))
