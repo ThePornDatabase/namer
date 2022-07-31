@@ -53,7 +53,8 @@ def safari_factory(debug: bool) -> WebDriver:
 
 def default_os_browser(debug: bool) -> WebDriver:
     name = system()
-    if name == 'Windows':
+    ci = os.environ['CI'].lower() == "true" if os.environ['CI'] else False
+    if name == 'Windows' and not ci:
         return edge_factory(debug)
     # until github actions
     # if name in ['Darwin', 'macOS']:
