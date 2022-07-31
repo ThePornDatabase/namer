@@ -92,7 +92,7 @@ class NamerConfig:
     minimum file size to process in MB, ignored if a file is to be processed
     """
 
-    presever_duplicates: bool = True
+    preserve_duplicates: bool = True
     """
     should duplicate videos be preserved.
     If false, duplicates will be verified with a perceptual hash, then compared via ffprobe.
@@ -362,7 +362,7 @@ class NamerConfig:
                 "override_tpdb_address": self.override_tpdb_address
             },
             "Duplicate Config": {
-                "presever_duplicates": self.presever_duplicates,
+                "preserve_duplicates": self.preserve_duplicates,
                 "max_desired_resolutions": self.max_desired_resolutions,
                 "desired_codec": self.desired_codec,
             },

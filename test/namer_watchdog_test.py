@@ -105,7 +105,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.prefer_dir_name_if_available = True
             config.write_namer_log = True
             config.min_file_size = 0
-            config.presever_duplicates = False
+            config.preserve_duplicates = False
             config.max_desired_resolutions = -1
             config.desired_codec = ["HEVC", "H264"]
             watcher = create_watcher(config)
