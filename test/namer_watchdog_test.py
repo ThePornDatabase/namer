@@ -5,56 +5,16 @@ import logging
 import os
 import tempfile
 import time
-from types import FunctionType, LambdaType
-from typing import Callable, Optional
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from xml.etree.ElementPath import prepare_predicate
 
 from mutagen.mp4 import MP4
 
 from namer.ffmpeg import ffprobe
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed
-from test.utils import new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
-
-
-class Wait:
-    _predicate: Optional[Callable[[], bool]] = None
-    _duration: int = 10
-    _checking: float = 0.1
-
-    def __init__(self):
-        pass
-        
-    def seconds(self, seconds: int) -> 'Wait':
-        self._duration = seconds
-        return self
-
-    def checking(self, seconds: float) -> 'Wait':
-        self._checking = seconds
-        return self
-
-    def until(self, func: Callable[[], bool]) -> 'Wait':
-        self._predicate = func
-        return self
-
-    def __wait(self, state: bool):
-        max_time: float = time.time() + float(self._duration)
-        while time.time() < max_time:
-            if not self._predicate:
-                raise RuntimeError("you must set a predicate to wait on before calling attempting to wait.")
-            if self._predicate() == state:
-                return
-            time.sleep(self._checking)
-        raise RuntimeError(f"Timed out waiting for predicate {self._predicate} to return {state}")
-
-    def isTrue(self):
-        self.__wait(True)
-
-    def isFalse(self):
-        self.__wait(False)
+from test.utils import Wait, new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
 
 
 def make_locations(tempdir: Path) -> NamerConfig:
@@ -79,8 +39,7 @@ def wait_until_processed(config: NamerConfig):
     """
     Waits until all files have been moved out of watch/working dirs.
     """
-    while len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0:
-        time.sleep(0.2)
+    Wait().until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -129,7 +88,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
-
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
     def test_handler_collisions_success_choose_best(self, mock_poster, mock_response):
@@ -163,9 +121,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            (Wait()
-                .until(lambda:  MP4(output_file).get("\xa9nam") == ["Carmela Clutch: Fabulous Anal 3-Way!"])
-                .isTrue())
+            self.assertEqual(MP4(output_file).get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             results = ffprobe(output_file)
             self.assertIsNotNone(results)
             if results:

@@ -8,13 +8,51 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from time import sleep, time
+from typing import Callable, List, Optional
 
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from test.web.parrot_webserver import ParrotWebServer
+
+
+class Wait:
+    _predicate: Optional[Callable[[], bool]] = None
+    _duration: int = 10
+    _checking: float = 0.1
+
+    def __init__(self):
+        pass
+
+    def seconds(self, seconds: int) -> 'Wait':
+        self._duration = seconds
+        return self
+
+    def checking(self, seconds: float) -> 'Wait':
+        self._checking = seconds
+        return self
+
+    def until(self, func: Callable[[], bool]) -> 'Wait':
+        self._predicate = func
+        return self
+
+    def __wait(self, state: bool):
+        max_time: float = time() + float(self._duration)
+        while time() < max_time:
+            if not self._predicate:
+                raise RuntimeError("you must set a predicate to wait on before calling attempting to wait.")
+            if self._predicate and self._predicate() == state:
+                return
+            sleep(self._checking)
+        raise RuntimeError(f"Timed out waiting for predicate {self._predicate} to return {state}")
+
+    def isTrue(self):
+        self.__wait(True)
+
+    def isFalse(self):
+        self.__wait(False)
 
 
 def sample_config() -> NamerConfig:
