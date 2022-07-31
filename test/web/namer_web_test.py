@@ -71,10 +71,18 @@ def safari_factory(debug: bool) -> WebDriver:
 
 
 def default_os_browser(debug: bool) -> WebDriver:
+    browser = None
+
     try:
-        browser = edge_factory(debug)
-    except:
         browser = chrome_factory(debug)
+    except:
+        pass
+
+    if not browser:
+        try:
+            browser = edge_factory(debug)
+        except:
+            pass
 
     return browser
 
