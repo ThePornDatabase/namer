@@ -270,7 +270,7 @@ class FailedPage:
         return NavElements(self.__driver)
 
     def refresh_items(self) -> 'FailedPage':
-        self.__refresh.click()
+        wait_for_and_find(self.__driver, By.ID, 'refreshFiles').click()
         return FailedPage(self.__driver)
 
     def items(self) -> List[FailedItem]:
