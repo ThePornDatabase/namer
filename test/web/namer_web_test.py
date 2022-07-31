@@ -42,7 +42,7 @@ def edge_factory(debug: bool) -> WebDriver:
 
     webdriver_path = os.getenv('EDGEWEBDRIVER', default=None)
     if webdriver_path:
-        webdriver_path = '{webdriver_path}\msedgedriver.exe'
+        webdriver_path = r'{webdriver_path}\msedgedriver.exe'
     else:
         webdriver_path = EdgeChromiumDriverManager().install()
 
