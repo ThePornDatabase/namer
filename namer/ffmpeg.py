@@ -89,6 +89,9 @@ class FFProbeResults:
     def all_streams(self) -> List[FFProbeStream]:
         return self.__results
 
+    def get_format(self) -> FFProbeFormat:
+        return self.__format
+
 
 def get_resolution(file: Path) -> int:
     """
