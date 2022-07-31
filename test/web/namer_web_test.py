@@ -124,8 +124,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 "Accept": "application/json",
                 "User-Agent": "namer-1",
             }
-            # while True:
-            #    time.sleep(.2)
             with requests.request("GET", f"{url}test", headers=headers) as response:
                 response.raise_for_status()
                 self.assertEqual(response.text, "response")
