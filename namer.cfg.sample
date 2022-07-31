@@ -126,6 +126,22 @@ default_genre = Adult
 # taken, no streams (audio/video) are re-encoded.  See: https://iso639-3.sil.org/code_tables/639/data/
 language = eng
 
+[duplicates]
+
+# If this is set to false duplicates will be discarded, and a rough selection criteria can be configured below
+# to select the retained video
+presever_duplicates = True
+
+# If set to -1, no max resolution is set.   Others selecting 720, 1080, 2160, 4380, etc will limit retained videos
+# to the desired resolution.   If a too large video is the only one available it will be retained.  Defautls to 4380
+max_desired_resolutions = -1
+
+# The codecs in order that you want to retain.   
+# by default hevc is preferred to h264, which is preferred vs everything else.
+desired_codec = hevc, h264
+
+
+
 [watchdog]
 
 # If the file path found by watcher matches this regex, it will not trigger processing.
