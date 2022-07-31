@@ -210,13 +210,13 @@ class FailedItem:
 
 
 def wait_for_and_find(driver, by: str, value: str) -> WebElement:
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     wait.until(expected_conditions.visibility_of_any_elements_located((by, value)))
     return driver.find_element(by, value)
 
 
 def wait_for_and_find_all(driver, by: str, value: str) -> List[WebElement]:
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     wait.until(expected_conditions.presence_of_element_located((by, value)))
     return driver.find_elements(by, value)
 
@@ -226,12 +226,12 @@ def find_if_present(driver, by: str, value: str) -> Optional[WebElement]:
 
 
 def wait_until_present(driver, by: str, value: str):
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     wait.until(expected_conditions.visibility_of_any_elements_located((by, value)))
 
 
 def find_and_wait_until_stale(driver, by: str, value: str):
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
     element = find_if_present(driver, by, value)
     if element:
         wait.until(expected_conditions.any_of(
@@ -241,7 +241,7 @@ def find_and_wait_until_stale(driver, by: str, value: str):
 
 def wait_until_invisible(element: WebElement):
     if element:
-        wait = WebDriverWait(element.parent, 20)
+        wait = WebDriverWait(element.parent, 30)
         wait.until(expected_conditions.any_of(
             expected_conditions.invisibility_of_element(element),
             expected_conditions.staleness_of(element)))
