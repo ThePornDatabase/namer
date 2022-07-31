@@ -48,7 +48,8 @@ class Wait:
         while time() < max_time or is_debugging():
             if not self._predicate:
                 raise RuntimeError("you must set a predicate to wait on before calling attempting to wait.")
-            if self._predicate and self._predicate() == state:
+            predicate = self._predicate
+            if predicate and predicate() == state:
                 return
             sleep(self._checking)
         raise RuntimeError(f"Timed out waiting for predicate {self._predicate} to return {state}")
