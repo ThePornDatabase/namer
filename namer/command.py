@@ -164,7 +164,7 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
         for current_movie_str in movies:
             current_movie = Path(current_movie_str)
             current_values = extract_relevant_attributes(ffprobe(current_movie), config)
-            if current_values[0] <= config.max_desired_resolutions:
+            if current_values[0] <= config.max_desired_resolutions or config.max_desired_resolutions < 0:
                 if current_values[0] > selected_values[0] or (current_values[0] == selected_values[0] and current_values[1] > selected_values[1]):
                     selected_values = current_values
                     selected = current_movie
@@ -226,6 +226,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
                 movies.remove(str(final_location))
                 final_location.unlink()
                 selected_movie.rename(final_location)
+                movie_name = final_location
             for movie in movies:
                 Path(movie).unlink()
 

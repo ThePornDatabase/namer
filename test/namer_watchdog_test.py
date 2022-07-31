@@ -5,15 +5,56 @@ import logging
 import os
 import tempfile
 import time
+from types import FunctionType, LambdaType
+from typing import Callable, Optional
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from xml.etree.ElementPath import prepare_predicate
 
 from mutagen.mp4 import MP4
 
+from namer.ffmpeg import ffprobe
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed
 from test.utils import new_ea, prepare, sample_config, validate_mp4_tags, validate_permissions
+
+
+class Wait:
+    _predicate: Optional[Callable[[], bool]] = None
+    _duration: int = 10
+    _checking: float = 0.1
+
+    def __init__(self):
+        pass
+        
+    def seconds(self, seconds: int) -> 'Wait':
+        self._duration = seconds
+        return self
+
+    def checking(self, seconds: float) -> 'Wait':
+        self._checking = seconds
+        return self
+
+    def until(self, func: Callable[[], bool]) -> 'Wait':
+        self._predicate = func
+        return self
+
+    def __wait(self, state: bool):
+        max_time: float = time.time() + float(self._duration)
+        while time.time() < max_time:
+            if not self._predicate:
+                raise RuntimeError("you must set a predicate to wait on before calling attempting to wait.")
+            if self._predicate() == state:
+                return
+            time.sleep(self._checking)
+        raise RuntimeError(f"Timed out waiting for predicate {self._predicate} to return {state}")
+
+    def isTrue(self):
+        self.__wait(True)
+
+    def isFalse(self):
+        self.__wait(False)
 
 
 def make_locations(tempdir: Path) -> NamerConfig:
@@ -88,12 +129,18 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
+
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
     def test_handler_collisions_success_choose_best(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
         """
+
+        okay = "Big_Buck_Bunny_360_10s_2MB_h264.mp4"
+        better = "Big_Buck_Bunny_720_10s_2MB_h264.mp4"
+        best = "Big_Buck_Bunny_720_10s_2MB_h265.mp4"
+
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             config = make_locations(tempdir)
@@ -102,12 +149,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.min_file_size = 0
             config.presever_duplicates = False
             config.max_desired_resolutions = -1
-            config.desired_codec = ["HVEC", "H264"]
+            config.desired_codec = ["HEVC", "H264"]
             watcher = create_watcher(config)
             watcher.start()
             targets = [
-                new_ea(config.watch_dir),
-                new_ea(config.watch_dir, use_dir=False)
+                new_ea(config.watch_dir, mp4_file_name=okay),
+                new_ea(config.watch_dir, use_dir=False, post_stem="2", mp4_file_name=better),
+                new_ea(config.watch_dir, use_dir=False, post_stem="1", mp4_file_name=best)
             ]
             prepare(targets, mock_poster, mock_response)
             wait_until_processed(config)
@@ -115,9 +163,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
-            output = MP4(output_file)
-            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
-
+            (Wait()
+                .until(lambda:  MP4(output_file).get("\xa9nam") == ["Carmela Clutch: Fabulous Anal 3-Way!"])
+                .isTrue())
+            results = ffprobe(output_file)
+            self.assertIsNotNone(results)
+            if results:
+                stream = results.get_default_video_stream()
+                self.assertIsNotNone(stream)
+                if stream:
+                    self.assertEquals(stream.height, 720)
+                    self.assertEquals(stream.codec_name, "hevc")
             output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
             self.assertFalse(output_file2.exists())
 
