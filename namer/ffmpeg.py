@@ -86,8 +86,11 @@ class FFProbeResults:
             if result.is_audio() and result.tags_language == language_code:
                 return result
 
-    def all_streams(self) -> List[FFProbeStream]:
+    def get_all_streams(self) -> List[FFProbeStream]:
         return self.__results
+
+    def get_format(self) -> FFProbeFormat:
+        return self.__format
 
 
 def get_resolution(file: Path) -> int:

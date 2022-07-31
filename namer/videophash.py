@@ -31,7 +31,7 @@ class VideoPerceptualHash:
 
     def __generate_thumbnails(self, file: Path, probe: FFProbeResults) -> list:
 
-        duration = float(probe.format.duration)
+        duration = float(probe.get_format().duration)
         duration = math.ceil(duration * 100.0) / 100.0
         chunk_count = self.__columns * self.__rows
         offset = 0.05 * duration
