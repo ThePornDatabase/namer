@@ -39,7 +39,8 @@ def edge_factory(debug: bool) -> WebDriver:
         options.headless = True
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
-    service = EdgeService(executable_path=EdgeChromiumDriverManager().install(), log_path=os.devnull)  # type: ignore
+    webdriver_path = os.getenv('EDGEWEBDRIVER', default=EdgeChromiumDriverManager().install())
+    service = EdgeService(executable_path=webdriver_path, log_path=os.devnull)  # type: ignore
     webdriver = Edge(service=service, options=options)
     return webdriver
 
