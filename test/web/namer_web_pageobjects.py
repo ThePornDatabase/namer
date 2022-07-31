@@ -262,9 +262,9 @@ class FailedPage:
         self.__noFailedFiles = find_if_present(driver, By.CSS_SELECTOR, 'div[class="col m-1 text-center"] span')
         if self.__noFailedFiles is None:
             self.__page_links = wait_for_and_find_all(driver, by=By.CSS_SELECTOR, value='a[class="page-link"]')
+            # wait_for_and_find(driver, by=By.CSS_SELECTOR, value='table[id*="failed"].dataTable tbody')
+            self.__items = wait_for_and_find_all(driver, by=By.CSS_SELECTOR, value='table[id*="failed"].dataTable tbody tr')
             self.__search = wait_for_and_find(driver, by=By.CSS_SELECTOR, value='input[type="search"]')
-            wait_for_and_find(driver, by=By.CSS_SELECTOR, value='table[id*="failed"].dataTable tbody')
-            self.__items = wait_for_and_find_all(driver, by=By.CSS_SELECTOR, value='table[id*="failed"] tbody tr')
 
     def navigate_to(self) -> NavElements:
         return NavElements(self.__driver)
