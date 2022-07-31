@@ -29,7 +29,14 @@ def chrome_factory(debug: bool) -> WebDriver:
         options.headless = True
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
-    service = ChromeService(executable_path=ChromeDriverManager().install(), log_path=os.devnull)  # type: ignore
+
+    webdriver_path = os.getenv('CHROMEWEBDRIVER', default=None)
+    if webdriver_path:
+        webdriver_path = fr'{webdriver_path}\chromedriver.exe'
+    else:
+        webdriver_path = ChromeDriverManager().install()
+
+    service = ChromeService(executable_path=webdriver_path, log_path=os.devnull)  # type: ignore
     return Chrome(service=service, options=options)
 
 
@@ -59,13 +66,23 @@ def safari_factory(debug: bool) -> WebDriver:
 
 
 def default_os_browser(debug: bool) -> WebDriver:
-    name = system()
-    if name == 'Windows':
-        return edge_factory(debug)
-    # until github actions
-    # if name in ['Darwin', 'macOS']:
-    #    return safari_factory(debug)
-    return chrome_factory(debug)
+    try:
+        browser = edge_factory(debug)
+    except:
+        browser = chrome_factory(debug)
+
+    return browser
+
+
+'''
+name = system()
+if name == 'Windows':
+    return edge_factory(debug)
+# until github actions
+# if name in ['Darwin', 'macOS']:
+#    return safari_factory(debug)
+return chrome_factory(debug)
+'''
 
 
 @contextlib.contextmanager  # type: ignore
