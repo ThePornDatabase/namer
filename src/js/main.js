@@ -3,6 +3,8 @@ const $ = require('jquery')
 import 'datatables.net-bs5'
 
 const filesResult = $('#filesResult')
+const searchForm = $('#searchForm')
+const searchButton = searchForm.find('button.search')
 const resultBody = $('#searchResults .modal-body')
 const logBody = $('#logFile .modal-body')
 const queryInput = $('#queryInput')
@@ -14,7 +16,7 @@ const deleteButton = $('#deleteButton')
 
 const Helpers = require('./helpers')
 
-$('.search').on('click', function () {
+searchButton.on('click', function () {
     resultBody.html(Helpers.getProgressBar())
 
     const data = {
@@ -25,6 +27,12 @@ $('.search').on('click', function () {
     Helpers.request('./api/v1/get_search', data, function (data) {
         Helpers.render('searchResults', data, resultBody)
     })
+})
+
+queryInput.on('keyup', function (e) {
+    if (e.which === 13) {
+        searchButton.click()
+    }
 })
 
 $('.log').on('click', function () {
@@ -50,6 +58,10 @@ filesResult.on('click', '.match', function () {
     queryInput.val(file)
     queryInput.data('file', file)
 })
+
+searchForm.on('transitionend webkitTransitionEnd oTransitionEnd', function () {
+    queryInput.focus()
+});
 
 searchResults.on('click', '.rename', function () {
     const data = {

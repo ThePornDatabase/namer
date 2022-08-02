@@ -2,6 +2,7 @@ import contextlib
 import os
 import unittest
 import warnings
+from pathlib import Path
 from platform import system
 
 import requests
@@ -29,7 +30,14 @@ def chrome_factory(debug: bool) -> WebDriver:
         options.headless = True
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
-    service = ChromeService(executable_path=ChromeDriverManager().install(), log_path=os.devnull)  # type: ignore
+
+    webdriver_path = os.getenv('CHROMEWEBDRIVER', default=None)
+    if webdriver_path:
+        webdriver_path = Path(webdriver_path) / 'chromedriver'
+    else:
+        webdriver_path = ChromeDriverManager().install()
+
+    service = ChromeService(executable_path=str(webdriver_path), log_path=os.devnull)  # type: ignore
     return Chrome(service=service, options=options)
 
 
@@ -39,7 +47,14 @@ def edge_factory(debug: bool) -> WebDriver:
         options.headless = True
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
-    service = EdgeService(executable_path=EdgeChromiumDriverManager().install(), log_path=os.devnull)  # type: ignore
+
+    webdriver_path = os.getenv('EDGEWEBDRIVER', default=None)
+    if webdriver_path:
+        webdriver_path = Path(webdriver_path) / 'msedgedriver'
+    else:
+        webdriver_path = EdgeChromiumDriverManager().install()
+
+    service = EdgeService(executable_path=str(webdriver_path), log_path=os.devnull)  # type: ignore
     webdriver = Edge(service=service, options=options)
     return webdriver
 

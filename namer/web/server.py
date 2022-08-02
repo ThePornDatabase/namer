@@ -36,11 +36,11 @@ class GenericWebServer:
         'font/woff2': '.woff2',
     }
 
-    def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_url: Optional[str] = 'public'):
+    def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_path: Optional[str] = 'public'):
         self.__host = host
         self.__port = port
         self.__path = '/' if not webroot else webroot
-        self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_url, template_folder='templates')
+        self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_path, template_folder='templates')
         self.__blueprints = blueprints
 
         self.__add_mime_types()
@@ -58,7 +58,7 @@ class GenericWebServer:
             self.__app.register_blueprint(blueprint, url_prefix=blueprint_path)
 
     def __add_mime_types(self):
-        self.__app.config['JSONIFY_MIMETYPE'] = 'application/json; charset=utf-8'
+        self.__app.json.mimetype = 'application/json; charset=utf-8'
 
         for mime, ext in self.__mime_types.items():
             test_mime, test_ext = mimetypes.guess_type(f'0{ext}')

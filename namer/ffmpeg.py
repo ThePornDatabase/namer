@@ -109,10 +109,14 @@ def get_resolution(file: Path) -> int:
 
 @logger.catch
 def ffprobe(file: Path) -> Optional[FFProbeResults]:
+    """
+    Get the typed results of probing a video stream with ffprobe.
+    """
+
     return _ffprobe(file, file.stat().st_size, file.stat().st_mtime)
 
 
-@lru_cache
+@lru_cache(maxsize=1024)
 def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbeResults]:
     """
     Get the typed results of probing a video stream with ffprobe.
@@ -139,11 +143,11 @@ def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbe
         ff_stream.codec_name = stream['codec_name']
         ff_stream.codec_type = stream['codec_type']
         ff_stream.index = int(stream['index'])
-        ff_stream.duration = float(stream['duration'])
+        ff_stream.duration = float(stream['duration']) if 'duration' in stream else -1
 
         ff_stream.height = int(stream['height']) if 'height' in stream else -1
         ff_stream.width = int(stream['width']) if 'width' in stream else -1
-        ff_stream.tags_language = stream['tags']['language'] if 'tags' in stream else None
+        ff_stream.tags_language = stream['tags']['language'] if 'tags' in stream and 'language' in stream['tags'] else None
 
         if 'disposition' in stream:
             ff_stream.disposition_attached_pic = stream['disposition']['attached_pic'] == 1
