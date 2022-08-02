@@ -30,7 +30,7 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     """
     Get failed files to rename.
     """
-    return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config)))
+    return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config, skip_ffprobe=True)))
 
 
 def get_queued_files(queue: Queue) -> List[Dict]:
