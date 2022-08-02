@@ -6,7 +6,6 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 import argparse
 import itertools
 import json
-import pathlib
 import re
 import sys
 from datetime import date, timedelta
@@ -339,16 +338,16 @@ def main(args_list: List[str]):
     that is parsable by namer_file_parser.py
     """
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-c", "--configfile", help="override location for a configuration file.", type=pathlib.Path)
-    parser.add_argument("-f", "--file", help="File we want to provide a match name for.", required=True, type=pathlib.Path)
-    parser.add_argument("-j", "--jsonfile", help="write returned json to this file.", type=pathlib.Path)
+    parser.add_argument("-c", "--configfile", help="override location for a configuration file.", type=Path)
+    parser.add_argument("-f", "--file", help="File we want to provide a match name for.", required=True, type=Path)
+    parser.add_argument("-j", "--jsonfile", help="write returned json to this file.", type=Path)
     parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
     args = parser.parse_args(args=args_list)
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     config = default_config()
-    file_name = make_command(Path(args.file), config)
+    file_name = make_command(Path(args.file), config, ignore_file=True)
     match_results = []
     if file_name is not None and file_name.parsed_file is not None:
         match_results = match(file_name.parsed_file, config)

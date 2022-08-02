@@ -289,7 +289,7 @@ def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
         return False
     exists = path.exists()
     suffix = path.suffix.lower()[1:] in config.target_extensions
-    size = path.stat().st_size / (1024 * 1024) >= config.min_file_size
+    size = path.stat().st_size / (1024 * 1024) >= config.min_file_size if path.is_file() else 0
     return exists and size and suffix
 
 
@@ -339,7 +339,7 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     return file
 
 
-def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, use_ffprobe: bool = False) -> Optional[Command]:
+def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, use_ffprobe: bool = False, ignore_file: bool = False) -> Optional[Command]:
     """
     after finding target directory and target movie from input, returns file name descriptors.
     """
@@ -354,7 +354,7 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.inplace = inplace
     if use_ffprobe:
         target_file.ff_probe_results = ffprobe(target_movie)
-    output = target_file if is_interesting_movie(target_file.target_movie_file, config) else None
+    output = target_file if is_interesting_movie(target_file.target_movie_file, config) or ignore_file else None
     return output
 
 
