@@ -26,18 +26,13 @@ from test.web.parrot_webserver import ParrotWebServer
 
 def chrome_factory(debug: bool) -> WebDriver:
     options = ChromeOptions()
-    if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not debug:
+    if not debug:
         options.headless = True
-    if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
-
-    webdriver_name = 'chromedriver'
-    if system() == 'Windows':
-        webdriver_name = webdriver_name + '.exe'
 
     webdriver_path = os.getenv('CHROMEWEBDRIVER', default=None)
     if webdriver_path:
-        webdriver_path = Path(webdriver_path) / webdriver_name
+        webdriver_path = Path(webdriver_path) / 'chromedriver'
     else:
         webdriver_path = ChromeDriverManager().install()
 
@@ -47,14 +42,13 @@ def chrome_factory(debug: bool) -> WebDriver:
 
 def edge_factory(debug: bool) -> WebDriver:
     options = EdgeOptions()
-    if (system() == 'Linux' and os.environ.get("DISPLAY") is None) or not debug:
+    if not debug:
         options.headless = True
-    if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument("--no-sandbox")
 
     webdriver_path = os.getenv('EDGEWEBDRIVER', default=None)
     if webdriver_path:
-        webdriver_path = Path(webdriver_path) / 'msedgedriver.exe'
+        webdriver_path = Path(webdriver_path) / 'msedgedriver'
     else:
         webdriver_path = EdgeChromiumDriverManager().install()
 

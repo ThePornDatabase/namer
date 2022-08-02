@@ -33,7 +33,7 @@ class ParrotWebServer(GenericWebServer):
 
     def __init__(self):
         self.__responses = {}
-        super().__init__("127.0.0.1", port=0, webroot="/", blueprints=[get_routes(self.__responses)], static_url=None)
+        super().__init__("127.0.0.1", port=0, webroot="/", blueprints=[get_routes(self.__responses)], static_path=None)
 
     def __enter__(self):
         self.__background_thread = Thread(target=self.start)
