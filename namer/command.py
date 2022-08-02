@@ -299,7 +299,7 @@ def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iter
     """
     if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
-        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config), dir_to_scan.iterdir())
+        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config, use_ffprobe=False), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
     return []
@@ -339,7 +339,7 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     return file
 
 
-def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None) -> Optional[Command]:
+def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, use_ffprobe: bool = False) -> Optional[Command]:
     """
     after finding target directory and target movie from input, returns file name descriptors.
     """
@@ -352,7 +352,8 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.tpdb_id = uuid
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
-    target_file.ff_probe_results = ffprobe(target_movie)
+    if use_ffprobe:
+        target_file.ff_probe_results = ffprobe(target_movie)
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) else None
     return output
 

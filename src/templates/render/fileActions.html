@@ -1,0 +1,13 @@
+{% if file['file'] %}
+    <button type="button" class="btn btn-secondary log" data-bs-toggle="modal" data-bs-target="#logFile" data-file="{{ file['file'] }}" title="Show Log">
+        <i class="bi bi-info-circle"></i>
+    </button>
+    <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}" title="Search">
+        <i class="bi bi-search"></i>
+    </button>
+    {% if config.allow_delete_files %}
+        <button type="button" class="btn btn-danger delete" data-bs-toggle="modal" data-bs-target="#deleteConfirm" data-file="{{ file['file'] }}" title="Delete">
+            <i class="bi bi-trash"></i>
+        </button>
+    {% endif %}
+{% endif %}
