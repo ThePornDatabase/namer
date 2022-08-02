@@ -17,7 +17,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-    __tools_path: Path = Path().resolve() / '..' / 'tools'
+    __tools_path: Path = Path(__file__).resolve().parent.parent / 'tools'
     __stash_path: Path = __tools_path / 'stash_phash'
     __generator = VideoPerceptualHash(__stash_path)
 
@@ -39,7 +39,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test phash calculation.
         """
-        print(self.__stash_path)
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
