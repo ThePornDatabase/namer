@@ -44,16 +44,16 @@ class VideoPerceptualHash:
 
     def __execute_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
-
-        if self.__phash_path:
+        if not self.__phash_path:
             return phash
 
         args = [
             str(self.__phash_path),
-            '-f', str(file.resolve()),
+            '-f', str(file),
         ]
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
             stdout, stderr = process.communicate()
+            stdout, stderr = stdout.strip(), stderr.strip()
             success = process.returncode == 0
             if success:
                 phash = imagehash.hex_to_hash(stdout)
