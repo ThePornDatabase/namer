@@ -35,7 +35,7 @@ class VideoPerceptualHash:
         thumbnail_list = self.__generate_thumbnails(file, duration)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
-            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.BILINEAR)
+            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)
 
         return phash
 
@@ -99,7 +99,7 @@ class VideoPerceptualHash:
         return image
 
     @staticmethod
-    def __phash(image: Image.Image, hash_size=8, high_freq_factor=4, resample: Literal[0, 1, 2, 3, 4, 5] = Image.LANCZOS) -> Optional[imagehash.ImageHash]:
+    def __phash(image: Image.Image, hash_size=8, high_freq_factor=4, resample: Literal[0, 1, 2, 3, 4, 5] = Image.Resampling.LANCZOS) -> Optional[imagehash.ImageHash]:
         if hash_size < 2:
             raise ValueError("Hash size must be greater than or equal to 2")
 
