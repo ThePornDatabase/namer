@@ -293,13 +293,13 @@ def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
     return exists and size and suffix
 
 
-def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig, use_ffprobe: bool = False) -> Iterable[Command]:
+def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iterable[Command]:
     """
     Find files to process in a target directory.
     """
     if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
-        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config, use_ffprobe=use_ffprobe), dir_to_scan.iterdir())
+        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config, use_ffprobe=False), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
     return []
