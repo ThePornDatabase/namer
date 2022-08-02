@@ -112,7 +112,7 @@ def ffprobe(file: Path) -> Optional[FFProbeResults]:
     return _ffprobe(file, file.stat().st_size, file.stat().st_mtime)
 
 
-@lru_cache
+@lru_cache(maxsize=1024)
 def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbeResults]:
     """
     Get the typed results of probing a video stream with ffprobe.
