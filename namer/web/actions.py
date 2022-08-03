@@ -73,6 +73,8 @@ def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
             'title': scene_data.name,
             'date': scene_data.date,
             'poster': scene_data.poster_url,
+            'site': scene_data.site,
+            'tags_count': len(scene_data.tags),
         }
         files.append(scene)
 

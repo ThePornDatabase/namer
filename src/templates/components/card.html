@@ -1,8 +1,14 @@
 <div class="card h-100" style="width:12rem">
+    {% if file['tags_count'] > 0 %}
+        <span class="position-absolute start-100 translate-middle badge rounded-pill bg-secondary">{{ file['tags_count'] }}</span>
+    {% endif %}
     <img class="card-img-top" src="{{ file['poster'] }}" alt="{{ file['title'] }}">
     <div class="card-body">
         <h5 class="card-title">{{ file['title'] }}</h5>
-        <p class="card-text">{{ file['date'] }}</p>
+        <p class="card-text">{{ file['site'] }}</p>
+        <p class="card-text">
+            <small class="text-muted">{{ file['date'] }}</small>
+        </p>
     </div>
     <div class="card-footer">
         <a href="https://metadataapi.net/scenes/{{ file['id'] }}" class="btn btn-secondary" target="_blank">Show</a>
