@@ -1,0 +1,24 @@
+{% set background_colours = {
+    'Male': 'bg-blue-400',
+    'Female': 'bg-pink-400',
+    'Trans': 'bg-purple-400',
+    'default': 'bg-gray-400',
+} %}
+
+{% if file['performers'] %}
+    {% for performer in file['performers'] %}
+        {% if performer['gender'] in background_colours %}
+            {% set background_colour = background_colours[performer['gender']] %}
+            {% set gender_icon = 'bi-gender-' + performer['gender'].lower() %}
+        {% else %}
+            {% set background_colour = background_colours['default'] %}
+            {% set gender_icon = None %}
+        {% endif %}
+        <span class="badge {{ background_colour }}"{% if performer['tooltip'] %} title="{{ performer['tooltip'] }}"{% endif %}>
+            {{ performer['name'] }}
+            {% if gender_icon %}
+                <i class="bi {{ gender_icon }}"></i>
+            {% endif %}
+        </span>
+    {% endfor %}
+{% endif %}
