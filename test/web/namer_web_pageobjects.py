@@ -61,6 +61,7 @@ class SearchSelectionItem:
     __parent: WebElement
     __show: WebElement
     __select: WebElement
+    __site: WebElement
     __date: WebElement
     __title: WebElement
 
@@ -71,12 +72,16 @@ class SearchSelectionItem:
         if self.__title.text is None or self.__title.text == "":
             wait_until_present(self.__parent.parent, By.CSS_SELECTOR, 'button[class="btn btn-primary float-end rename"]')
             self.__title = self.__parent.find_element(By.CLASS_NAME, 'card-title')
-        self.__date = self.__parent.find_element(By.CLASS_NAME, 'card-text')
+        self.__site = self.__parent.find_element(By.CLASS_NAME, 'card-text')
+        self.__date = self.__parent.find_element(By.CLASS_NAME, 'text-muted')
         self.__show = self.__parent.find_element(By.CSS_SELECTOR, 'a[class="btn btn-secondary"]')
         self.__select = self.__parent.find_element(By.CSS_SELECTOR, 'button[class="btn btn-primary float-end rename"]')
 
     def title_text(self) -> Assertion['SearchSelectionItem']:
         return Assertion(self, self.__title.text)
+
+    def site_text(self) -> Assertion['SearchSelectionItem']:
+        return Assertion(self, self.__site.text)
 
     def date_text(self) -> Assertion['SearchSelectionItem']:
         return Assertion(self, self.__date.text)
