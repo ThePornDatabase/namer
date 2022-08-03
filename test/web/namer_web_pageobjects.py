@@ -88,7 +88,7 @@ class SearchSelectionItem:
     def date_text(self) -> Assertion['SearchSelectionItem']:
         return Assertion(self, self.__date.text)
 
-    def performers(self) -> list[Assertion['SearchSelectionItem']]:
+    def performers(self) -> List[Assertion['SearchSelectionItem']]:
         return [Assertion(self, performer.text) for performer in self.__performers]
 
     def show(self) -> 'SearchSelectionItem':
