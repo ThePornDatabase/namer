@@ -231,6 +231,9 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     file_info.site = data.site.name
     file_info.look_up_site_id = data._id  # pylint: disable=protected-access
     for json_performer in data.performers:
+        if not json_performer.name:
+            continue
+
         performer = Performer()
         if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
             performer.role = json_performer.parent.extras.gender
