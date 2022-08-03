@@ -243,7 +243,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
 
     containing_dir: Optional[Path] = None
     if len(relative_path.parts) > 1:
-        containing_dir = target_dir / relative_path.parts[0]
+        containing_dir = target_dir / relative_path.parent
 
     # we want to retain files if asked and if a directory will exist.
     if command.target_directory and not command.config.del_other_files and containing_dir is not None:
