@@ -124,7 +124,7 @@ def convert_size(size_bytes: int) -> str:
     Convert int to size string.
     """
     if size_bytes == 0:
-        return '0B'
+        return '0 B'
 
     size = 1024
     size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')

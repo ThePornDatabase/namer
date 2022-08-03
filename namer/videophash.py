@@ -27,18 +27,26 @@ class VideoPerceptualHash:
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
 
+        thumbnail_image = self.__generate_image_thumbnail(file)
+        if thumbnail_image:
+            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)
+
+        return phash
+
+    def __generate_image_thumbnail(self, file: Path) -> Optional[Image.Image]:
+        thumbnail_image = None
+
         probe = ffprobe(file)
         if not probe:
-            return
+            return thumbnail_image
 
         duration = probe.get_format().duration
 
         thumbnail_list = self.__generate_thumbnails(file, duration)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
-            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)
 
-        return phash
+        return thumbnail_image
 
     def get_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         return self.__execute_stash_phash(file)
