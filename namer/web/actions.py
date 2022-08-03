@@ -68,11 +68,21 @@ def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
 
     files = []
     for scene_data in file_infos:
+        performers = []
+        for performer in scene_data.performers:
+            performers.append({
+                'name': performer.name,
+                'gender': performer.role,
+            })
+
         scene = {
             'id': scene_data.uuid,
             'title': scene_data.name,
             'date': scene_data.date,
             'poster': scene_data.poster_url,
+            'site': scene_data.site,
+            'tags_count': len(scene_data.tags),
+            'performers': performers,
         }
         files.append(scene)
 
@@ -122,7 +132,7 @@ def convert_size(size_bytes: int) -> str:
     Convert int to size string.
     """
     if size_bytes == 0:
-        return '0B'
+        return '0 B'
 
     size = 1024
     size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')

@@ -17,7 +17,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-    __tools_path: Path = Path(__file__).resolve().parent.parent / 'tools'
+    __tools_path: Path = Path(__file__).parent.parent / 'tools'
     __stash_path: Path = __tools_path / 'stash_phash'
     __generator = VideoPerceptualHash(__stash_path)
 

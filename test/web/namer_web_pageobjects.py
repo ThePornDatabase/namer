@@ -61,25 +61,35 @@ class SearchSelectionItem:
     __parent: WebElement
     __show: WebElement
     __select: WebElement
+    __site: WebElement
     __date: WebElement
+    __performers: List[WebElement]
     __title: WebElement
 
     def __init__(self, parent: WebElement):
         self.__parent = parent
 
         self.__title = wait_for_and_find(self.__parent, By.CLASS_NAME, 'card-title')
-        if self.__title.text is None or self.__title.text == "":
-            wait_until_present(self.__parent.parent, By.CSS_SELECTOR, 'button[class="btn btn-primary float-end rename"]')
+        if not self.__title.text:
+            wait_until_present(self.__parent.parent, By.CSS_SELECTOR, 'button.rename')
             self.__title = self.__parent.find_element(By.CLASS_NAME, 'card-title')
-        self.__date = self.__parent.find_element(By.CLASS_NAME, 'card-text')
-        self.__show = self.__parent.find_element(By.CSS_SELECTOR, 'a[class="btn btn-secondary"]')
-        self.__select = self.__parent.find_element(By.CSS_SELECTOR, 'button[class="btn btn-primary float-end rename"]')
+        self.__site = self.__parent.find_element(By.CLASS_NAME, 'card-text')
+        self.__date = self.__parent.find_element(By.CLASS_NAME, 'text-muted')
+        self.__performers = self.__parent.find_elements(By.CSS_SELECTOR, '.card-body .badge')
+        self.__show = self.__parent.find_element(By.CSS_SELECTOR, 'a.btn-secondary')
+        self.__select = self.__parent.find_element(By.CSS_SELECTOR, 'button.rename')
 
     def title_text(self) -> Assertion['SearchSelectionItem']:
         return Assertion(self, self.__title.text)
 
+    def site_text(self) -> Assertion['SearchSelectionItem']:
+        return Assertion(self, self.__site.text)
+
     def date_text(self) -> Assertion['SearchSelectionItem']:
         return Assertion(self, self.__date.text)
+
+    def performers(self) -> List[Assertion['SearchSelectionItem']]:
+        return [Assertion(self, performer.text) for performer in self.__performers]
 
     def show(self) -> 'SearchSelectionItem':
         self.__show.click()

@@ -1,8 +1,38 @@
+{% set background_colours = {
+    'Male': 'bg-blue-400',
+    'Female': 'bg-pink-400',
+    'Trans': 'bg-purple-400',
+    'default': 'bg-gray-400',
+} %}
+
 <div class="card h-100" style="width:12rem">
+    {% if file['tags_count'] > 0 %}
+        <span class="position-absolute start-100 translate-middle badge rounded-pill bg-secondary">{{ file['tags_count'] }}</span>
+    {% endif %}
     <img class="card-img-top" src="{{ file['poster'] }}" alt="{{ file['title'] }}">
     <div class="card-body">
         <h5 class="card-title">{{ file['title'] }}</h5>
-        <p class="card-text">{{ file['date'] }}</p>
+        <p class="card-text">{{ file['site'] }}</p>
+        <p class="card-text">
+            <small class="text-muted">{{ file['date'] }}</small>
+        </p>
+        {% if file['performers'] %}
+            {% for performer in file['performers'] %}
+                {% if performer['gender'] in background_colours %}
+                    {% set background_colour = background_colours[performer['gender']] %}
+                    {% set gender_icon = 'bi-gender-' + performer['gender'].lower() %}
+                {% else %}
+                    {% set background_colour = background_colours['default'] %}
+                    {% set gender_icon = None %}
+                {% endif %}
+                <span class="badge {{ background_colour }}">
+                    {{ performer['name'] }}
+                    {% if gender_icon %}
+                        <i class="bi {{ gender_icon }}"></i>
+                    {% endif %}
+                </span>
+            {% endfor %}
+        {% endif %}
     </div>
     <div class="card-footer">
         <a href="https://metadataapi.net/scenes/{{ file['id'] }}" class="btn btn-secondary" target="_blank">Show</a>
