@@ -6,6 +6,7 @@ from typing import List, Literal, Optional
 
 import imagehash
 import numpy
+import scipy.fft
 import scipy.fftpack
 from loguru import logger
 from PIL import Image
@@ -20,7 +21,7 @@ class VideoPerceptualHash:
 
     __phash_path: Optional[Path]
 
-    def __init__(self, phash_path: Path = None):
+    def __init__(self, phash_path: Optional[Path] = None):
         self.__phash_path = phash_path
 
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
@@ -108,7 +109,7 @@ class VideoPerceptualHash:
         pixels = numpy.asarray(image)
 
         dct = scipy.fft.dct(scipy.fft.dct(pixels, axis=0), axis=1)
-        dct_low_freq = dct[:hash_size, :hash_size]
+        dct_low_freq = dct[:hash_size, :hash_size]  # type: ignore
         med = numpy.median(dct_low_freq)
         diff = dct_low_freq > med
 

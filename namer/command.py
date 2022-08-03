@@ -255,11 +255,10 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
             possible_log.unlink()
         # move directory contents
         for file in command.target_directory.iterdir():
-            full_file = command.target_directory / file
-            if full_file != command.target_movie_file:
-                dest_file = containing_dir / file
+            if file != command.target_movie_file:
+                dest_file = containing_dir / file.name
                 dest_file.parent.mkdir(parents=True, exist_ok=True)
-                full_file.rename(dest_file)
+                file.rename(dest_file)
     if command.target_directory and containing_dir:
         set_permissions(containing_dir, command.config)
     else:
@@ -289,7 +288,7 @@ def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
         return False
     exists = path.exists()
     suffix = path.suffix.lower()[1:] in config.target_extensions
-    size = path.stat().st_size / (1024 * 1024) >= config.min_file_size if path.is_file() else 0
+    size = path.stat().st_size / (1024 * 1024) >= config.min_file_size if path.is_file() else False
     return exists and size and suffix
 
 

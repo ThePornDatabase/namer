@@ -196,6 +196,43 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
+    def test_handler_deeply_nested_success_no_dirname_extra_files(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = False
+            config.write_namer_log = True
+            config.min_file_size = 0
+            config.del_other_files = False
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir / "deeper" / "and_deeper", use_dir=False),
+            ]
+            prepare(targets, mock_poster, mock_response)
+            testfile = config.watch_dir / "deeper" / "testfile.txt"
+            contents = "Create a new text file!"
+            with open(testfile, "w", encoding="utf-8") as file:
+                file.write(contents)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            validate_mp4_tags(self, output_file)
+            validate_permissions(self, output_file, 664)
+            outputtestfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "testfile.txt"
+            self.assertEqual(outputtestfile.read_text(), contents)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+
+    @patch("namer.metadataapi.__get_response_json_object")
+    @patch("namer.namer.get_image")
     def test_handler_deeply_nested_success(self, mock_poster, mock_response):
         """
         Test the handle function works for a directory.
