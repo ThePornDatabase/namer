@@ -1,5 +1,6 @@
 FROM ubuntu:jammy as base
 
+ENV TZ=Europe/London
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies.
@@ -8,6 +9,7 @@ RUN apt-get update \
        python3-pip \
        python3 \
        ffmpeg \
+       tzdata \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
