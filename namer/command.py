@@ -72,7 +72,7 @@ def move_command_files(target: Optional[Command], new_target: Path) -> Optional[
         output = make_command(working_dir, target.config)
     else:
         working_file = Path(new_target) / target.target_movie_file.name
-        target.target_movie_file.rename(working_file)
+        shutil.move(target.target_movie_file, working_file)
         logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
         output = make_command(working_file, target.config)
     if output is not None:
@@ -219,7 +219,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
 
     # Create the new dir if needed and move the movie file to it.
     movie_name.parent.mkdir(exist_ok=True, parents=True)
-    command.target_movie_file.rename(movie_name)
+    shutil.move(command.target_movie_file, movie_name)
     movies.append(str(movie_name))
 
     # Now that all files are in place we'll see if we intend to minimize duplicates
@@ -236,7 +236,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
             if str(selected_movie.absolute()) != str(final_location.absolute()):
                 movies.remove(str(final_location))
                 final_location.unlink()
-                selected_movie.rename(final_location)
+                shutil.move(selected_movie, final_location)
                 movie_name = final_location
             for movie in movies:
                 Path(movie).unlink()
@@ -258,7 +258,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
             if file != command.target_movie_file:
                 dest_file = containing_dir / file.name
                 dest_file.parent.mkdir(parents=True, exist_ok=True)
-                file.rename(dest_file)
+                shutil.move(file, dest_file)
     if command.target_directory and containing_dir:
         set_permissions(containing_dir, command.config)
     else:
