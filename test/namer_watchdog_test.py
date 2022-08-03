@@ -209,6 +209,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.write_namer_log = True
             config.min_file_size = 0
             config.del_other_files = False
+            config.new_relative_path_name = "{site}/{site} - {date} - {name}/{site} - {date} - {name}.{ext}"
             watcher = create_watcher(config)
             watcher.start()
             targets = [
@@ -223,10 +224,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            output_file = config.dest_dir / "EvilAngel" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
             validate_permissions(self, output_file, 664)
-            outputtestfile = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "testfile.txt"
+            outputtestfile = config.dest_dir / "EvilAngel" /  "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "testfile.txt"
             self.assertEqual(outputtestfile.read_text(), contents)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
