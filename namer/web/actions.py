@@ -68,6 +68,13 @@ def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
 
     files = []
     for scene_data in file_infos:
+        performers = []
+        for performer in scene_data.performers:
+            performers.append({
+                'name': performer.name,
+                'gender': performer.role,
+            })
+
         scene = {
             'id': scene_data.uuid,
             'title': scene_data.name,
@@ -75,6 +82,7 @@ def get_search_results(query: str, file: str, config: NamerConfig) -> Dict:
             'poster': scene_data.poster_url,
             'site': scene_data.site,
             'tags_count': len(scene_data.tags),
+            'performers': performers,
         }
         files.append(scene)
 

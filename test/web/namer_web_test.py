@@ -125,6 +125,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 .results()[0].title_text().is_equal_to('Carmela Clutch: Fabulous Anal 3-Way!').on_success()
                 .site_text().is_equal_to('Evil Angel').on_success()
                 .date_text().is_equal_to('2022-01-03').on_success()
+                .performers()[0].is_equal_to('Carmela Clutch').on_success()
                 .select()  # returns to failed page
                 .assert_has_no_files())
         print("done")
