@@ -353,7 +353,7 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.inplace = inplace
     if use_ffprobe:
         target_file.ff_probe_results = ffprobe(target_movie)
-    output = target_file if is_interesting_movie(target_file.target_movie_file, config) or ignore_file_restrictions  else None
+    output = target_file if is_interesting_movie(target_file.target_movie_file, config) or ignore_file_restrictions else None
     return output
 
 
