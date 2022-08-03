@@ -227,8 +227,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             output_file = config.dest_dir / "EvilAngel" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
             validate_permissions(self, output_file, 664)
-            outputtestfile = config.dest_dir / "EvilAngel" /  "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "testfile.txt"
-            self.assertEqual(outputtestfile.read_text(), contents)
+            output_test_file = config.dest_dir / "EvilAngel" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "testfile.txt"
+            self.assertEqual(output_test_file.read_text(), contents)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
