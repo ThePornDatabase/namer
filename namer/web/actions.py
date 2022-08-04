@@ -33,11 +33,12 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config)))
 
 
-def get_queued_files(queue: Queue) -> List[Dict]:
+def get_queued_files(queue: Queue, queue_limit: int = 100) -> List[Dict]:
     """
     Get queued files.
     """
-    return list(map(command_to_file_info, filter(lambda i: i is not None, queue.queue)))
+    queue_items = list(queue.queue)[:queue_limit]
+    return list(map(command_to_file_info, filter(lambda i: i is not None, queue_items)))
 
 
 def get_queue_size(queue: Queue) -> int:
