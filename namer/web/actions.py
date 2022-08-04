@@ -33,11 +33,12 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config)))
 
 
-def get_queued_files(queue: Queue) -> List[Dict]:
+def get_queued_files(queue: Queue, queue_limit: int = 100) -> List[Dict]:
     """
     Get queued files.
     """
-    return list(map(command_to_file_info, filter(lambda i: i is not None, queue.queue)))
+    queue_items = list(queue.queue)[:queue_limit]
+    return list(map(command_to_file_info, filter(lambda i: i is not None, queue_items)))
 
 
 def get_queue_size(queue: Queue) -> int:
@@ -153,3 +154,17 @@ def convert_size(size_bytes: int) -> str:
     s = round(size_bytes / p, 2)
 
     return f'{s:.2f} {size_name[i]}'
+
+
+def human_format(num):
+    if num == 0:
+        return '0'
+
+    size = 1000
+    size_name = ('', 'K', 'M', 'B', 'T')
+    i = int(math.floor(math.log(num, size)))
+    p = math.pow(size, i)
+    s = str(round(num / p, 2))
+    s = s.rstrip('0').rstrip('.')
+
+    return f'{s}{size_name[i]}'
