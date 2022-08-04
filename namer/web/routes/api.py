@@ -10,7 +10,7 @@ from loguru import logger
 
 from namer.command import make_command_relative_to, move_command_files
 from namer.configuration import NamerConfig
-from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results, read_failed_log_file
+from namer.web.actions import delete_file, get_failed_files, get_queue_size, get_queued_files, get_search_results, human_format, read_failed_log_file
 
 
 def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
@@ -64,6 +64,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
     @blueprint.route('/v1/get_queue', methods=['POST'])
     def get_queue() -> Response:
         res = get_queue_size(command_queue)
+        res = human_format(res)
 
         return jsonify(res)
 

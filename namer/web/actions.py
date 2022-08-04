@@ -154,3 +154,17 @@ def convert_size(size_bytes: int) -> str:
     s = round(size_bytes / p, 2)
 
     return f'{s:.2f} {size_name[i]}'
+
+
+def human_format(num):
+    if num == 0:
+        return '0'
+
+    size = 1000
+    size_name = ('', 'K', 'M', 'B', 'T')
+    i = int(math.floor(math.log(num, size)))
+    p = math.pow(size, i)
+    s = str(round(num / p, 2))
+    s = s.rstrip('0').rstrip('.')
+
+    return f'{s}{size_name[i]}'
