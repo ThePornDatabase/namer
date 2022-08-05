@@ -128,6 +128,11 @@ class NamerConfig:
     Should a log of comparisons be written next to processed video files.
     """
 
+    write_namer_failed_log: bool = True
+    """
+    Should a log of comparisons be written next to processed video files.
+    """
+
     update_permissions_ownership: bool = False
     """
     Should file permissions/ownership be updated.
@@ -349,6 +354,7 @@ class NamerConfig:
                 "prefer_dir_name_if_available": self.prefer_dir_name_if_available,
                 "target_extensions": self.target_extensions,
                 "write_namer_log": self.write_namer_log,
+                "write_namer_failed_log": self.write_namer_failed_log,
                 "trailer_location": self.trailer_location,
                 "sites_with_no_date_info": self.sites_with_no_date_info,
                 "update_permissions_ownership": self.update_permissions_ownership,

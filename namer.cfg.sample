@@ -46,8 +46,11 @@ prefer_dir_name_if_available = True
 # minimum file size to process in MB, ignored if a file is to be processed
 min_file_size = 300
 
-# Should namer's comparison log be written next to successfully moved videos (it will always be added to the failed dir).
+# Should namer's comparison log be written next to successfully moved videos.
 write_namer_log = False
+
+# Should namer's comparison log be written next to failed videos.
+write_namer_failed_log = True
 
 # Comma separated list of extensions for namer to process (in order of preference in case multiple types exist in a target directory)
 # Case insensitive, Only mp4 supports tagging.  

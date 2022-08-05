@@ -15,22 +15,24 @@
     </div>
 {% endblock %}
 {% block external %}
-    <div id="logFile" class="modal fade" tabindex="-1" aria-labelledby="modalLogsLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalLogsLabel">Failed Log</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="progress"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    {% if config.write_namer_failed_log %}
+        <div id="logFile" class="modal fade" tabindex="-1" aria-labelledby="modalLogsLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLogsLabel">Failed Log</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
     <div id="searchForm" class="modal fade" tabindex="-1" aria-labelledby="searchFormLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

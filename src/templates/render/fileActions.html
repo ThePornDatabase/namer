@@ -1,7 +1,9 @@
 {% if file['file'] %}
-    <button type="button" class="btn btn-secondary log" data-bs-toggle="modal" data-bs-target="#logFile" data-file="{{ file['file'] }}" title="Show Log">
-        <i class="bi bi-info-circle"></i>
-    </button>
+    {% if config.write_namer_failed_log %}
+        <button type="button" class="btn btn-secondary log" data-bs-toggle="modal" data-bs-target="#logFile" data-file="{{ file['file'] }}" title="Show Log">
+            <i class="bi bi-info-circle"></i>
+        </button>
+    {% endif %}
     <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}" title="Search">
         <i class="bi bi-search"></i>
     </button>

@@ -101,6 +101,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.override_tpdb_address = config.get("namer", "override_tpdb_address", fallback="https://api.metadataapi.net/")
 
     namer_config.write_namer_log = config.getboolean("namer", "write_namer_log", fallback=False)
+    namer_config.write_namer_failed_log = config.getboolean("namer", "write_namer_failed_log", fallback=True)
     namer_config.update_permissions_ownership = config.getboolean("namer", "update_permissions_ownership", fallback=False)
     namer_config.set_dir_permissions = config.getint("namer", "set_dir_permissions", fallback=775)
     namer_config.set_file_permissions = config.getint("namer", "set_file_permissions", fallback=664)
@@ -110,7 +111,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
 
     namer_config.preserve_duplicates = config.getboolean("duplicates", "preserve_duplicates", fallback=True)
     namer_config.max_desired_resolutions = config.getint("duplicates", "max_desired_resolutions", fallback=-1)
-    namer_config.desired_codec = [x.strip().upper() for x in config.get("duplicates", "desired_codec", fallback="hevc, h264").split(",")]
+    namer_config.desired_codec = [x.strip().upper() for x in config.get("duplicates", "desired_codec", fallback="hevc,h264").split(",")]
 
     namer_config.write_nfo = config.getboolean("metadata", "write_nfo", fallback=False)
     namer_config.enabled_tagging = config.getboolean("metadata", "enabled_tagging", fallback=True)

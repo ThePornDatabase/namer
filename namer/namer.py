@@ -192,7 +192,7 @@ def process_file(command: Command) -> Optional[Command]:
             return target
         elif command.inplace is False:
             failed = move_command_files(command, command.config.failed_dir)
-            if failed is not None and search_results is not None:
+            if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
                 write_log_file(failed.target_movie_file, search_results, failed.config)
     return None
 
