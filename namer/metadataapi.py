@@ -164,8 +164,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
 
     http_file = Http.download_file(url, headers=headers)
     if http_file:
-        with open(file, 'wb') as f:
-            f.write(http_file.read())
+        file.write_bytes(http_file.getbuffer().tobytes())
 
     return bool(http_file)
 
