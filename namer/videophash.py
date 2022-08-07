@@ -68,7 +68,7 @@ class VideoPerceptualHash:
             zipfile.ZipFile(http_file).extractall(self.__phash_path)
             if os != 'windows':
                 file = self.__phash_path / self.__phash_name
-                file.chmod(777)
+                file.chmod(int('777', base=8))
 
         return bool(http_file)
 
