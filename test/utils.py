@@ -214,9 +214,9 @@ def new_ea(target_dir: Path, use_dir: bool = True, post_stem: str = "", match: b
     if use_dir is True:
         target_file = target_dir / name / "qwerty.mp4"
     os.makedirs(target_file.parent, exist_ok=True)
-    target_file.parent.chmod(int("700", base=8))
+    target_file.parent.chmod(0o700)
     shutil.copy(test_mp4, target_file)
-    test_mp4.chmod(int("600", base=8))
+    test_mp4.chmod(0o600)
     poster = Path(tempfile.mktemp(suffix=".png"))
     shutil.copy(test_poster, poster)
     return ProcessingTarget(target_file, search_json_file.read_text(), exact_json_file.read_text(), poster, match)
