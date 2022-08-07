@@ -162,13 +162,12 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = Http.get(url, cache_session=config.cache_session, headers=headers, stream=True)
-    if http.ok:
-        with open(file, 'wb') as io_wrapper:
-            for data in http.iter_content(1024):
-                io_wrapper.write(data)
+    http_file = Http.download_file(url, headers=headers)
+    if http_file:
+        with open(file, 'wb') as f:
+            f.write(http_file.read())
 
-    return http.ok
+    return bool(http_file)
 
 
 @logger.catch
