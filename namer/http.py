@@ -2,12 +2,14 @@ from io import BytesIO
 from typing import Optional
 
 import requests
+from loguru import logger
 from requests_cache import CachedSession
 
 
 class Http:
     @staticmethod
     def request(method, url, **kwargs):
+        logger.info(f'Requesting {method} "{url}"')
         cache_session: Optional[CachedSession] = kwargs.get('cache_session')
         if 'cache_session' in kwargs:
             del kwargs['cache_session']
