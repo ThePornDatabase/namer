@@ -5,6 +5,7 @@ only one default audio stream, and this script lets you set it with the correct 
 code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
+import json
 from dataclasses import dataclass
 import shutil
 import string
@@ -37,14 +38,22 @@ class FFProbeStream:
     avg_frame_rate: Optional[float] = None  # average frames per second
 
     def __str__(self) -> str:
-        return f"""codec_name: {self.codec_name}
-        width: {self.width}
-        height: {self.height}
-        codec_type: {self.codec_type}
-        framerate: {self.avg_frame_rate}
-        duration: {self.duration}
-        disposition_default: {self.disposition_default}
-        """
+        data = self.to_dict()
+
+        return json.dumps(data, indent=2)
+
+    def to_dict(self) -> dict:
+        data = {
+            'codec_name': self.codec_name,
+            'width': self.width,
+            'height': self.height,
+            'codec_type': self.codec_type,
+            'framerate': self.avg_frame_rate,
+            'duration': self.duration,
+            'disposition_default': self.disposition_default,
+        }
+
+        return data
 
     def is_audio(self) -> bool:
         return self.codec_type == "audio"
