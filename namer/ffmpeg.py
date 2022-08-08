@@ -25,7 +25,6 @@ class FFProbeStream:
     index: int                      # stream numer
     codec_name: str                 # "mp3", "h264", "hvec", "png"
     codec_type: str                 # "audio" or "video"
-    codec_name: str                 # hevc
     disposition_default: bool       # default stream of this type
     disposition_attached_pic: bool  # is the "video" stream an attached picture.
     duration: float                 # seconds
@@ -112,6 +111,7 @@ def get_resolution(file: Path) -> int:
         stream = probe.get_default_video_stream()
         if stream:
             return stream.height if stream.height else 0
+
     return 0
 
 
