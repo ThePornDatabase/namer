@@ -5,10 +5,10 @@ only one default audio stream, and this script lets you set it with the correct 
 code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
+import json
 from dataclasses import dataclass
 import shutil
 import string
-import subprocess
 from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
@@ -25,7 +25,6 @@ class FFProbeStream:
     index: int                      # stream numer
     codec_name: str                 # "mp3", "h264", "hvec", "png"
     codec_type: str                 # "audio" or "video"
-    codec_name: str                 # hevc
     disposition_default: bool       # default stream of this type
     disposition_attached_pic: bool  # is the "video" stream an attached picture.
     duration: float                 # seconds
@@ -38,14 +37,22 @@ class FFProbeStream:
     avg_frame_rate: Optional[float] = None  # average frames per second
 
     def __str__(self) -> str:
-        return f"""codec_name: {self.codec_name}
-        width: {self.width}
-        height: {self.height}
-        codec_type: {self.codec_type}
-        framerate: {self.avg_frame_rate}
-        duration: {self.duration}
-        disposition_default: {self.disposition_default}
-        """
+        data = self.to_dict()
+
+        return json.dumps(data, indent=2)
+
+    def to_dict(self) -> dict:
+        data = {
+            'codec_name': self.codec_name,
+            'width': self.width,
+            'height': self.height,
+            'codec_type': self.codec_type,
+            'framerate': self.avg_frame_rate,
+            'duration': self.duration,
+            'disposition_default': self.disposition_default,
+        }
+
+        return data
 
     def is_audio(self) -> bool:
         return self.codec_type == "audio"
@@ -104,6 +111,7 @@ def get_resolution(file: Path) -> int:
         stream = probe.get_default_video_stream()
         if stream:
             return stream.height if stream.height else 0
+
     return 0
 
 
@@ -186,6 +194,7 @@ def get_audio_stream_for_lang(file: Path, language: str) -> int:
         stream = probe.get_audio_stream(language)
         if stream:
             stream_index = stream.index - 1 if not stream.disposition_default else -1
+
     return stream_index
 
 
@@ -195,42 +204,38 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
     mostly a concern for apple players (Quicktime/Apple TV/etc.)
     Copies, and potentially updates the default audio stream of a video file.
     """
+
     random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    work_file = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
-    stream = None if language is None else get_audio_stream_for_lang(mp4_file, language)
-    if stream is not None and stream >= 0:
-        logger.info("Attempt to alter default audio stream of {}", mp4_file)
-        with subprocess.Popen(
-            [
-                "ffmpeg",
-                "-i",
-                mp4_file,  # input file
-                "-map",
-                "0",  # copy all stream
-                "-disposition:a",
-                "none",  # mark all audio streams as not default
-                # mark this audio stream as default
-                f"-disposition:a:{stream}",
-                "default",
-                "-c",
-                "copy",  # don't re-encode anything.
-                work_file,
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-        ) as process:
-            stdout, stderr = process.communicate()
-            success = process.returncode == 0
-            if not success:
-                logger.info("Could not update audio stream for {}", mp4_file)
-                if stderr is not None:
-                    logger.info(stderr)
-            else:
-                logger.warning("Return code: {}", process.returncode)
-                mp4_file.unlink()
-                shutil.move(work_file, mp4_file)
-            return success
+    temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
+    work_file = mp4_file.parent / temp_filename
+
+    stream = get_audio_stream_for_lang(mp4_file, language) if language else None
+    if stream and stream >= 0:
+        process = (
+            ffmpeg
+            .input(mp4_file)
+            .output(str(work_file), **{
+                'map': 0,  # copy all stream
+                'disposition:a': 'none',  # mark all audio streams as not default
+                f'disposition:a:{stream}': 'default',  # mark this audio stream as default
+                'c': 'copy'  # don't re-encode anything.
+            })
+            .run_async(quiet=True)
+        )
+
+        stdout, stderr = process.communicate()
+        success = process.returncode == 0
+        if not success:
+            logger.info("Could not update audio stream for {}", mp4_file)
+            if stderr:
+                logger.info(stderr)
+        else:
+            logger.warning("Return code: {}", process.returncode)
+            mp4_file.unlink()
+            shutil.move(work_file, mp4_file)
+
+        return success
+
     return True
 
 
@@ -239,32 +244,29 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
     Attempt to fix corrupt mp4 files.
     """
     random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    work_file = mp4_file.parent / (mp4_file.stem + random + mp4_file.suffix)
+    temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
+    work_file = mp4_file.parent / temp_filename
+
     logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
-    with subprocess.Popen(
-        [
-            "ffmpeg",
-            "-i",
-            mp4_file,  # input file
-            "-c",
-            "copy",  # don't re-encode anything.
-            work_file,
-        ],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    ) as process:
-        stdout, stderr = process.communicate()
-        success = process.returncode == 0
-        if not success:
-            logger.info("Could not fix mp4 files {}", mp4_file)
-            if stderr is not None:
-                logger.info(stderr)
-        else:
-            logger.warning("Return code: {}", process.returncode)
-            mp4_file.unlink()
-            shutil.move(work_file, mp4_file)
-        return success
+    process = (
+        ffmpeg
+        .input(mp4_file)
+        .output(str(work_file), c='copy')
+        .run_async(quiet=True)
+    )
+
+    stdout, stderr = process.communicate()
+    success = process.returncode == 0
+    if not success:
+        logger.info("Could not fix mp4 files {}", mp4_file)
+        if stderr:
+            logger.info(stderr)
+    else:
+        logger.warning("Return code: {}", process.returncode)
+        mp4_file.unlink()
+        shutil.move(work_file, mp4_file)
+
+    return success
 
 
 def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> Image.Image:

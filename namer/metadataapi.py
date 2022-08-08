@@ -162,13 +162,11 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     if "metadataapi.net" in url:
         headers["Authorization"] = f"Bearer {config.porndb_token}"
 
-    http = Http.get(url, cache_session=config.cache_session, headers=headers, stream=True)
-    if http.ok:
-        with open(file, 'wb') as io_wrapper:
-            for data in http.iter_content(1024):
-                io_wrapper.write(data)
+    http_file = Http.download_file(url, headers=headers)
+    if http_file:
+        file.write_bytes(http_file.getbuffer().tobytes())
 
-    return http.ok
+    return bool(http_file)
 
 
 @logger.catch
@@ -198,7 +196,7 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
     returns json object with info
     """
     if namer_config.trailer_location is not None and not len(namer_config.trailer_location) == 0 and url is not None and len(url) > 0 and video_file is not None:
-        logger.info("Attempting to download trailer: {}", url)
+        logger.info("Attempting to download trailer")
         location = namer_config.trailer_location[:max([idx for idx, x in enumerate(namer_config.trailer_location) if x == "."])]
         url_parts = url.split("?")[0].split(".")
         ext = "mp4"
@@ -284,7 +282,6 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
 
 
 def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config: NamerConfig):
-    logger.info("Querying: {}", url)
     json_response = __get_response_json_object(url, namer_config)
     file_infos = []
     if json_response is not None and json_response.strip() != "":

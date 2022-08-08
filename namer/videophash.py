@@ -1,5 +1,7 @@
 import concurrent.futures
 import subprocess
+import platform
+import zipfile
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import List, Literal, Optional
@@ -12,6 +14,7 @@ from loguru import logger
 from PIL import Image
 
 from namer.ffmpeg import extract_screenshot, ffprobe
+from namer.http import Http
 
 
 class VideoPerceptualHash:
@@ -20,9 +23,15 @@ class VideoPerceptualHash:
     __rows: int = 5
 
     __phash_path: Optional[Path]
+    __phash_name: str = 'stash_phash'
 
-    def __init__(self, phash_path: Optional[Path] = None):
-        self.__phash_path = phash_path
+    def __init__(self):
+        self.__phash_path = Path(__file__).parent.parent / 'tools'
+        if not self.__phash_path.is_dir():
+            self.__phash_path.mkdir(exist_ok=True, parents=True)
+
+        if not [file for file in self.__phash_path.glob('*') if self.__phash_name == file.stem]:
+            self.__download_stash_phash()
 
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
@@ -51,13 +60,25 @@ class VideoPerceptualHash:
     def get_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         return self.__execute_stash_phash(file)
 
+    def __download_stash_phash(self):
+        os = platform.system().lower()
+        url = f'https://github.com/DirtyRacer1337/stash_phash/releases/download/nightly/stash_phash-{os}.zip'
+        http_file = Http.download_file(url)
+        if http_file:
+            zipfile.ZipFile(http_file).extractall(self.__phash_path)
+            if os != 'windows':
+                file = self.__phash_path / self.__phash_name
+                file.chmod(0o777)
+
+        return bool(http_file)
+
     def __execute_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
         if not self.__phash_path:
             return phash
 
         args = [
-            str(self.__phash_path),
+            str(self.__phash_path / self.__phash_name),
             '-f', str(file),
         ]
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
