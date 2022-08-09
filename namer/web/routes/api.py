@@ -24,7 +24,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = request.json
 
         res = False
-        if data is not None:
+        if data:
             template: str = data.get('template')
             client_data = data.get('data')
             active_page: str = data.get('url')
@@ -56,7 +56,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = request.json
 
         res = False
-        if data is not None:
+        if data:
             res = get_search_results(data['query'], data['file'], config)
 
         return jsonify(res)
@@ -73,13 +73,13 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = request.json
 
         res = False
-        if data is not None:
+        if data:
             res = False
             movie = config.failed_dir / Path(data['file'])
             logger.error(f"moving movie {movie}")
             command = make_command_relative_to(movie, config.failed_dir, config=config)
             moved_command = move_command_files(command, config.work_dir)
-            if moved_command is not None:
+            if moved_command:
                 moved_command.tpdb_id = data['scene_id']
                 command_queue.put(moved_command)  # Todo pass selection
 
@@ -90,7 +90,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = request.json
 
         res = False
-        if data is not None:
+        if data:
             res = delete_file(data['file'], config)
 
         return jsonify(res)
@@ -100,7 +100,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         data = request.json
 
         res = False
-        if data is not None:
+        if data:
             res = read_failed_log_file(data['file'], config)
 
         return jsonify(res)

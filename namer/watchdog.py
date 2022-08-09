@@ -99,7 +99,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
             if re.search(self.namer_config.ignored_dir_regex, relative_path) is None and done_copying(path) and is_interesting_movie(path, self.namer_config):
                 logger.info("watchdog process called for {}", relative_path)
                 # Extra wait time in case other files are copies in as well.
-                if self.namer_config.del_other_files is True:
+                if self.namer_config.del_other_files:
                     time.sleep(self.namer_config.extra_sleep_time)
                 self.prepare_file_for_processing(path)
 
@@ -149,7 +149,7 @@ class MovieWatcher:
         """
         if not self.__started:
             self.start()
-            if self.__namer_config.web is True:
+            if self.__namer_config.web:
                 self.__webserver = NamerWebServer(self.__namer_config, self.__command_queue)
                 self.__webserver.start()
             try:

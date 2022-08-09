@@ -163,7 +163,7 @@ class LookedUpFileInfo:
             # will apply the infix before the file extension if just a file name, if a path, with apply
             # the infix after the fist part (first directory name) of the (sub)path
             path = PurePath(name)
-            if len(path.parts) > 1:
+            if path.parts:
                 name = str(path.parent / (path.stem + infix + path.suffix))
             else:
                 name = path.stem + infix + path.suffix
