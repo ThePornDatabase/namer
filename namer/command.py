@@ -59,13 +59,10 @@ class Command:
 
 
 def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
-    working_dir = None
-    working_file = None
-    output: Optional[Command] = None
-    if target is None:
+    if not target:
         return None
 
-    if target.input_file == target.target_directory and target.target_directory is not None:
+    if target.target_directory and target.input_file == target.target_directory:
         working_dir = Path(new_target) / target.target_directory.name
         logger.info("Moving {} to {} for processing", target.target_directory, working_dir)
         shutil.move(target.target_directory, working_dir)
@@ -75,10 +72,12 @@ def move_command_files(target: Optional[Command], new_target: Path) -> Optional[
         shutil.move(target.target_movie_file, working_file)
         logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
         output = make_command(working_file, target.config)
-    if output is not None:
+
+    if output:
         output.tpdb_id = target.tpdb_id
         output.inplace = target.inplace
         output.write_from_nfos = target.write_from_nfos
+
     return output
 
 
@@ -88,11 +87,11 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
     of the result matches to a log file.
     """
     log_name = None
-    if movie_file is not None:
+    if movie_file:
         log_name = movie_file.with_name(movie_file.stem + "_namer.log")
         logger.info("Writing log to {}", log_name)
         with open(log_name, "wt", encoding="UTF-8") as log_file:
-            if match_attempts is None or len(match_attempts) == 0:
+            if not match_attempts:
                 log_file.write("No search results returned.\n")
             else:
                 for attempt in match_attempts:
@@ -101,11 +100,11 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
                     log_file.write(f"Scene Name           : {attempt.looked_up.name}\n")
                     log_file.write(f"Match                : {attempt.is_match()}\n")
                     log_file.write(f"Query URL            : {attempt.looked_up.original_query}\n")
-                    if attempt.name_parts.site is None:
+                    if not attempt.name_parts.site:
                         attempt.name_parts.site = "None"
-                    if attempt.name_parts.date is None:
+                    if not attempt.name_parts.date:
                         attempt.name_parts.date = "None"
-                    if attempt.name_parts.date is None:
+                    if not attempt.name_parts.date:
                         attempt.name_parts.name = "None"
                     log_file.write(f"{str(attempt.site_match):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
                     log_file.write(f"{str(attempt.date_match):5} Found Date     : {attempt.looked_up.date:50.50} Parsed Date     : {attempt.name_parts.date:50.50}\n")
@@ -115,15 +114,18 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
 
 
 def _set_perms(target: Path, config: NamerConfig):
-    file_perm: Optional[int] = (None if config.set_file_permissions is None else int(str(config.set_file_permissions), 8))
-    dir_perm: Optional[int] = (None if config.set_dir_permissions is None else int(str(config.set_dir_permissions), 8))
-    if config.set_gid is not None:
+    file_perm: Optional[int] = (int(str(config.set_file_permissions), 8) if config.set_file_permissions else None)
+    dir_perm: Optional[int] = (int(str(config.set_dir_permissions), 8) if config.set_dir_permissions else None)
+
+    if config.set_gid:
         os.lchown(target, uid=-1, gid=config.set_gid)
-    if config.set_uid is not None:
+
+    if config.set_uid:
         os.lchown(target, uid=config.set_uid, gid=-1)
-    if target.is_dir() and dir_perm is not None:
+
+    if target.is_dir() and dir_perm:
         target.chmod(dir_perm)
-    elif target.is_file() and file_perm is not None:
+    elif target.is_file() and file_perm:
         target.chmod(file_perm)
 
 
@@ -132,7 +134,7 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
-    if system() != "Windows" and file is not None and file.exists() and config.update_permissions_ownership is True:
+    if system() != "Windows" and file and file.exists() and config.update_permissions_ownership:
         _set_perms(file, config)
         if file.is_dir():
             for target in file.rglob("**/*"):
@@ -169,7 +171,7 @@ def greater_than(seq1: Sequence, seq2: Sequence) -> bool:
 
 def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path]:
     # This could use a lot of work.
-    if movies and len(movies) > 0:
+    if movies:
         selected = Path(movies[0])
         selected_values = extract_relevant_attributes(ffprobe(selected), config)
         for current_movie_str in movies:
@@ -195,15 +197,15 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     # else we will just rename the movie in its current location (as all that was defined in the command was the movie file.)
     name_template = command.config.inplace_name
     target_dir = command.target_movie_file.parent
-    if command.target_directory is not None:
+    if command.target_directory:
         name_template = command.config.new_relative_path_name
         target_dir = command.target_directory.parent
-    if command.inplace is not True:
+
+    if not command.inplace:
         name_template = command.config.new_relative_path_name
         target_dir = command.config.dest_dir
 
     infix = 0
-    relative_path: Optional[Path] = None
     # Find non-conflicting movie name.
     movies: List[str] = []
     while True:
@@ -213,6 +215,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         infix += 1
         if not movie_name.exists():
             break
+
         movies.append(str(movie_name))
         if command.target_movie_file.samefile(movie_name):
             break
@@ -223,7 +226,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     movies.append(str(movie_name))
 
     # Now that all files are in place we'll see if we intend to minimize duplicates
-    if not command.config.preserve_duplicates and len(movies) > 1:
+    if not command.config.preserve_duplicates and movies:
         # Now set to the final name location since -- will grab the metadata requested
         # incase it has been updated.
         relative_path = Path(new_metadata.new_file_name(name_template, "(0)"))
@@ -242,53 +245,60 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
                 Path(movie).unlink()
 
     containing_dir: Optional[Path] = None
-    if len(relative_path.parts) > 1:
+    if relative_path.parts:
         containing_dir = target_dir / relative_path.parent
 
     # we want to retain files if asked and if a directory will exist.
-    if command.target_directory and not command.config.del_other_files and containing_dir is not None:
+    if command.target_directory and not command.config.del_other_files and containing_dir:
         containing_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"moving other files to new dir: {containing_dir} from {command.target_directory}")
         # first remove namer log if exists
         possible_log = command.target_movie_file.parent / (command.target_movie_file.stem + "_namer.log")
         if possible_log.exists():
             possible_log.unlink()
+
         # move directory contents
         for file in command.target_directory.iterdir():
             if file != command.target_movie_file:
                 dest_file = containing_dir / file.name
                 dest_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(file, dest_file)
+
     if command.target_directory and containing_dir:
         set_permissions(containing_dir, command.config)
     else:
         set_permissions(movie_name, command.config)
 
     output = Command()
-    if movie_name is not None:
+    if movie_name:
         output.target_movie_file = movie_name
         output.input_file = movie_name
-    if containing_dir is not None:
+
+    if containing_dir:
         output.target_directory = containing_dir
         output.input_file = containing_dir
 
-    if command.target_directory is not None and not subpath_or_equal(output.target_directory, command.target_directory):
+    if command.target_directory and not subpath_or_equal(output.target_directory, command.target_directory):
         shutil.rmtree(command.target_directory)
+
     return output
 
 
 def subpath_or_equal(potential_sub: Optional[Path], potential_parent: Optional[Path]) -> bool:
-    if potential_parent is None or potential_sub is None:
+    if not potential_parent or not potential_sub:
         return False
+
     return len(potential_parent.parts) <= len(potential_sub.parts) and all(i == j for i, j in zip(potential_parent.parts, potential_sub.parts))
 
 
 def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
-    if path is None:
+    if not path:
         return False
+
     exists = path.exists()
     suffix = path.suffix.lower()[1:] in config.target_extensions
     size = path.stat().st_size / (1024 * 1024) >= config.min_file_size if path.is_file() else False
+
     return exists and size and suffix
 
 
@@ -296,11 +306,12 @@ def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iter
     """
     Find files to process in a target directory.
     """
-    if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
+    if dir_to_scan and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
         mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config, use_ffprobe=False), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
+
     return []
 
 
@@ -312,15 +323,18 @@ def __exact_command(target_movie_file: Path, target_dir: Optional[Path], config:
     command = Command()
     command.target_directory = target_dir
     command.target_movie_file = target_movie_file
-    command.parsed_dir_name = target_dir is not None and config.prefer_dir_name_if_available
+    command.parsed_dir_name = target_dir and config.prefer_dir_name_if_available
     command.config = config
     name = target_movie_file.name
+
     parsed_dir_name = False
-    if target_dir is not None and config.prefer_dir_name_if_available:
+    if target_dir and config.prefer_dir_name_if_available:
         name = target_dir.name + target_movie_file.suffix
         parsed_dir_name = True
+
     command.parsed_file = parse_file_name(name, config.name_parser)
     command.parsed_dir_name = parsed_dir_name
+
     return command
 
 
@@ -330,11 +344,12 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     """
     list_of_files = list(root_dir.rglob("**/*.*"))
     file = None
-    if len(list_of_files) > 0:
+    if list_of_files:
         for target_ext in config.target_extensions:
-            filtered = list(filter(lambda o, ext=target_ext: o.suffix is not None and o.suffix.lower()[1:] == ext, list_of_files))
-            if file is None and filtered is not None and len(filtered) > 0:
+            filtered = list(filter(lambda o, ext=target_ext: o.suffix and o.suffix.lower()[1:] == ext, list_of_files))
+            if not file and filtered:
                 file = max(filtered, key=lambda x: x.stat().st_size)
+
     return file
 
 
@@ -344,16 +359,20 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     """
     target_dir = input_file if input_file.is_dir() else None
     target_movie = input_file if not input_file.is_dir() else find_target_file(input_file, config)
-    if target_movie is None:
-        return None
+    if not target_movie:
+        return
+
     target_file = __exact_command(target_movie, target_dir, config)
     target_file.input_file = input_file
     target_file.tpdb_id = uuid
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
+
     if use_ffprobe:
         target_file.ff_probe_results = ffprobe(target_movie)
+
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) or ignore_file_restrictions else None
+
     return output
 
 
@@ -364,10 +383,11 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
     """
     if subpath_or_equal(input_dir, relative_to):
         relative_path = input_dir.absolute().relative_to(relative_to.absolute())
-        if relative_path is not None:
+        if relative_path:
             target_file = relative_to / relative_path.parts[0]
             return make_command(target_file, config, nfo, inplace, uuid)
-    return None
+
+    return
 
 
 def main(arg_list: List[str]):
@@ -380,7 +400,7 @@ def main(arg_list: List[str]):
     args = parser.parse_args(arg_list)
     target = Path(args.file).absolute()
     target_file = make_command(target, default_config())
-    if target_file is not None:
+    if target_file:
         print(target_file.parsed_file)
 
 

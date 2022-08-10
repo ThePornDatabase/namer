@@ -110,13 +110,14 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
     ComparisonResults.   Expects the first item of list to be the match if there is one.
     Will download a poster as well depending on NamerConfig config setting.
     """
-    if new_metadata is not None and video is not None:
+    if new_metadata and video:
         poster = None
-        if config.enabled_tagging is True and video.suffix.lower() == ".mp4":
+        if config.enabled_tagging and video.suffix.lower() == ".mp4":
             random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
             poster = get_image(new_metadata.poster_url, random, video, config)
             logger.info("Updating file metadata (atoms): {}", video)
             update_mp4_file(video, new_metadata, poster, ffprobe_results, config)
+
         logger.info("Done tagging file: {}", video)
         if poster is not None and new_metadata.poster_url is not None and new_metadata.poster_url.startswith("http"):
             poster.unlink()
@@ -156,7 +157,7 @@ def process_file(command: Command) -> Optional[Command]:
         search_results: List[ComparisonResult] = []
         # Match to nfo files, if enabled and found.
         ffprobe_results = ffprobe(command.target_movie_file)
-        if command.write_from_nfos is True:
+        if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
             if new_metadata is not None:
                 new_metadata.original_parsed_filename = command.parsed_file
@@ -174,7 +175,7 @@ def process_file(command: Command) -> Optional[Command]:
                 new_metadata = file_infos
         elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:
             search_results = match(command.parsed_file, command.config)
-            if len(search_results) > 0 and search_results[0].is_match() is True:
+            if search_results and search_results[0].is_match():
                 new_metadata = search_results[0].looked_up
             if not command.target_movie_file:
                 logger.error("""
@@ -202,10 +203,12 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     Once the file is in its final location we will grab other relevant output if requested.
     """
     trailer = None
-    if config.write_namer_log is True:
+    if config.write_namer_log:
         write_log_file(video_file, search_results, config)
-    if config.trailer_location is not None and not len(config.trailer_location) == 0 and new_metadata is not None:
+
+    if config.trailer_location and new_metadata is not None:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
+
     if config.write_nfo and new_metadata is not None:
         poster = get_image(new_metadata.poster_url, "-poster", video_file, config)
         background = get_image(new_metadata.background_url, "-background", video_file, config)
@@ -213,6 +216,7 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
             poster = get_image(performer.image, performer.name.replace(" ", "-") + "-image", video_file, config)
             if poster is not None:
                 performer.image = str(poster)
+
         write_nfo(video_file, new_metadata, config, trailer, poster, background)
 
 
@@ -268,7 +272,7 @@ def main(arg_list: List[str]):
     target = args.file
     if args.dir is not None:
         target = args.dir
-    if args.many is True:
+    if args.many:
         dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
     else:
         command = make_command(target.absolute(), config, inplace=True, nfo=args.infos)

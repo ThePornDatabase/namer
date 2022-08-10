@@ -14,7 +14,7 @@ class Http:
         if 'cache_session' in kwargs:
             del kwargs['cache_session']
 
-        if kwargs.get("stream", False) or cache_session is None:
+        if kwargs.get("stream", False) or not isinstance(cache_session, CachedSession):
             return requests.request(method, url, **kwargs)
         else:
             return cache_session.request(method, url, **kwargs)

@@ -30,8 +30,9 @@ class Performer:
 
     def __str__(self):
         name = "Unknown" if self.name is None else self.name
-        if self.role is not None:
+        if self.role:
             return name + " (" + self.role + ")"
+
         return name
 
     def __repr__(self):
@@ -123,32 +124,20 @@ class LookedUpFileInfo:
         Converts the info in to a dict that can be used
         by PartialFormatter to return a new path for a file.
         """
-        if self.original_parsed_filename is None:
+        if not self.original_parsed_filename:
             self.original_parsed_filename = FileNameParts()
+
         return {
             "uuid": self.uuid,
             "date": self.date,
             "description": self.description,
             "name": self.name,
-            "site": self.site.replace(" ", "") if self.site is not None else None,
+            "site": self.site.replace(" ", "") if self.site else None,
             "full_site": self.site,
-            "performers": " ".join(
-                map(
-                    lambda p: p.name,
-                    filter(lambda p: p.role == "Female", self.performers),
-                )
-            )
-            if self.performers is not None
-            else None,
-            "all_performers": " ".join(map(lambda p: p.name, self.performers))
-            if self.performers is not None
-            else None,
-            "ext": self.original_parsed_filename.extension
-            if self.original_parsed_filename is not None
-            else None,
-            "trans": self.original_parsed_filename.trans
-            if self.original_parsed_filename is not None
-            else None,
+            "performers": " ".join(map(lambda p: p.name, filter(lambda p: p.role == "Female", self.performers))) if self.performers else None,
+            "all_performers": " ".join(map(lambda p: p.name, self.performers)) if self.performers else None,
+            "ext": self.original_parsed_filename.extension if self.original_parsed_filename else None,
+            "trans": self.original_parsed_filename.trans if self.original_parsed_filename else None,
         }
 
     def new_file_name(self, template: str, infix: str = "(0)") -> str:
@@ -163,7 +152,7 @@ class LookedUpFileInfo:
             # will apply the infix before the file extension if just a file name, if a path, with apply
             # the infix after the fist part (first directory name) of the (sub)path
             path = PurePath(name)
-            if len(path.parts) > 1:
+            if path.parts:
                 name = str(path.parent / (path.stem + infix + path.suffix))
             else:
                 name = path.stem + infix + path.suffix
@@ -214,4 +203,4 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name).
         """
-        return self.site_match and self.date_match and self.name_match is not None and self.name_match >= 89.9
+        return self.site_match and self.date_match and self.name_match and self.name_match >= 89.9

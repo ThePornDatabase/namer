@@ -48,7 +48,7 @@ def get_queue_size(queue: Queue) -> int:
 def command_to_file_info(command: Command) -> Dict:
     return {
         'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if subpath_or_equal(command.target_movie_file, command.config.failed_dir) else None,
-        'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory is not None else command.target_movie_file.stem,
+        'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
         'size_byte': command.target_movie_file.stat().st_size,
         'size': convert_size(command.target_movie_file.stat().st_size),
@@ -62,7 +62,7 @@ def get_search_results(query: str, file: str, config: NamerConfig, performers_li
     url = __build_url(config, name=query)
     json_response = __get_response_json_object(url, config)
     file_infos = []
-    if json_response is not None and json_response.strip() != '':
+    if json_response and json_response.strip() != '':
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, None)

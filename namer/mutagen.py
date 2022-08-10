@@ -17,7 +17,7 @@ def resolution_to_hdv_setting(resolution: Optional[int]) -> int:
     """
     Using the resolution (height) of a video stream return the atom value for hd video
     """
-    if resolution is None:
+    if not resolution:
         return 0
     if resolution >= 2160:
         return 3
@@ -80,11 +80,11 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Pat
     if not success:
         logger.info("Could not process audio or copy {}", mp4)
     logger.info("Updating atom tags on: {}", mp4)
-    if mp4 is not None and mp4.exists():
+    if mp4 and mp4.exists():
         video: MP4 = get_mp4_if_possible(mp4)
         video.clear()
         set_single_if_not_none(video, "\xa9nam", looked_up.name)
-        video["\xa9day"] = [looked_up.date + "T09:00:00Z"] if looked_up.date is not None else []
+        video["\xa9day"] = [looked_up.date + "T09:00:00Z"] if looked_up.date else []
         if config.enable_metadataapi_genres:
             set_array_if_not_none(video, "\xa9gen", looked_up.tags)
         else:
@@ -129,7 +129,7 @@ def add_poster(poster, video):
     """
     Adds a poster to the mp4 metadata if available and correct format.
     """
-    if poster is not None:
+    if poster:
         with open(poster, "rb") as file:
             ext = poster.suffix.upper()
             image_format = None
