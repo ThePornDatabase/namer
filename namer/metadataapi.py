@@ -66,7 +66,7 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
-        release_date = name_parts.date and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
+        release_date = bool(name_parts.date and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date))
 
     result: Tuple[str, float] = ('', 0.0)
 
@@ -237,11 +237,9 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     for json_performer in data.performers:
         if not json_performer.name:
             continue
-
-        performer = Performer()
+        performer = Performer(json_performer.name)
         if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
             performer.role = json_performer.parent.extras.gender
-        performer.name = json_performer.name
         performer.image = json_performer.image
         file_info.performers.append(performer)
 

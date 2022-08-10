@@ -58,7 +58,7 @@ class GenericWebServer:
             self.__app.register_blueprint(blueprint, url_prefix=blueprint_path)
 
     def __add_mime_types(self):
-        self.__app.json.mimetype = 'application/json; charset=utf-8'
+        self.__app.json.mimetype = 'application/json; charset=utf-8'  # type: ignore
 
         for mime, ext in self.__mime_types.items():
             test_mime, test_ext = mimetypes.guess_type(f'0{ext}')

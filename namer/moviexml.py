@@ -29,11 +29,10 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
 
     info.performers = []
     for actor in movie.actor:
-        performer = Performer()
-        performer.name = str(actor.name)
-        performer.role = str(actor.role)
-        info.performers.append(performer)
-
+        if actor is not None and actor.name:
+            performer = Performer(str(actor.name))
+            performer.role = str(actor.role)
+            info.performers.append(performer)
     if hasattr(movie, "phoenixadulturlid"):
         info.look_up_site_id = str(movie.phoenixadulturlid)
 

@@ -323,7 +323,7 @@ def __exact_command(target_movie_file: Path, target_dir: Optional[Path], config:
     command = Command()
     command.target_directory = target_dir
     command.target_movie_file = target_movie_file
-    command.parsed_dir_name = target_dir and config.prefer_dir_name_if_available
+    command.parsed_dir_name = bool(target_dir and config.prefer_dir_name_if_available)
     command.config = config
     name = target_movie_file.name
 

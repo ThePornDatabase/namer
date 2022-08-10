@@ -38,7 +38,7 @@ class VideoPerceptualHash:
 
         thumbnail_image = self.__generate_image_thumbnail(file)
         if thumbnail_image:
-            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)
+            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
 
         return phash
 
@@ -66,7 +66,7 @@ class VideoPerceptualHash:
         http_file = Http.download_file(url)
         if http_file:
             zipfile.ZipFile(http_file).extractall(self.__phash_path)
-            if os != 'windows':
+            if os != 'windows' and self.__phash_path:
                 file = self.__phash_path / self.__phash_name
                 file.chmod(0o777)
 
@@ -129,7 +129,7 @@ class VideoPerceptualHash:
         return image
 
     @staticmethod
-    def __phash(image: Image.Image, hash_size=8, high_freq_factor=4, resample: Literal[0, 1, 2, 3, 4, 5] = Image.Resampling.LANCZOS) -> Optional[imagehash.ImageHash]:
+    def __phash(image: Image.Image, hash_size=8, high_freq_factor=4, resample: Literal[0, 1, 2, 3, 4, 5] = Image.Resampling.LANCZOS) -> Optional[imagehash.ImageHash]:  # type: ignore
         if hash_size < 2:
             raise ValueError("Hash size must be greater than or equal to 2")
 

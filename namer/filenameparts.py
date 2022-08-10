@@ -137,7 +137,7 @@ def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> 
 
         if match.groupdict().get("trans"):
             trans = match.group("trans")
-            file_name_parts.trans = trans and trans.strip().upper() == "TS"
+            file_name_parts.trans = bool(trans and trans.strip().upper() == "TS")
 
         file_name_parts.extension = match.group("ext")
         file_name_parts.source_file_name = filename

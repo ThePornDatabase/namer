@@ -101,7 +101,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(fmt.format_field(format_spec="adsfadsf", value="fmt"), bad_fmt)
 
         with self.assertRaises(Exception) as error2:
-            fmt1 = PartialFormatter(missing="", bad_fmt=None)
+            fmt1 = PartialFormatter(missing="", bad_fmt=None)   # type: ignore
             fmt1.format_field(format_spec="adsfadsf", value="fmt")
         self.assertTrue("Invalid format specifier" in str(error2.exception))
 

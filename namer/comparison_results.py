@@ -14,7 +14,7 @@ class Performer:
     """
 
     name: str
-    role: str
+    role: Optional[str]
     image: Optional[str]
     """
     if available the performers gender, stored as a role.  example: "Female", "Male"
@@ -23,7 +23,7 @@ class Performer:
     Other performers are also used in name matching, if females are attempted first.
     """
 
-    def __init__(self, name=None, role=None, image=None):
+    def __init__(self, name, role=None, image=None):
         self.name = name
         self.role = role
         self.image = image
@@ -203,4 +203,4 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name).
         """
-        return self.site_match and self.date_match and self.name_match and self.name_match >= 89.9
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 89.9)
