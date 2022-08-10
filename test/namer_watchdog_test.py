@@ -263,6 +263,40 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
+
+    @patch("namer.metadataapi.__get_response_json_object")
+    @patch("namer.namer.get_image")
+    def test_handler_deeply_nested_success_custom_location(self, mock_poster, mock_response):
+        """
+        Test the handle function works for a directory.
+        """
+        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+            tempdir = Path(tmpdir)
+            config = make_locations(tempdir)
+            config.prefer_dir_name_if_available = True
+            config.write_namer_log = True
+            config.del_other_files = False
+            config.min_file_size = 0
+            config.set_dir_permissions = None
+            config.set_file_permissions = None
+            config.new_relative_path_name = "{site} - {date} - {name}/{site} - {date} - {name} - {uuid}.{ext}"
+            watcher = create_watcher(config)
+            watcher.start()
+            targets = [
+                new_ea(config.watch_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
+            ]
+            prepare(targets, mock_poster, mock_response)
+            wait_until_processed(config)
+            watcher.stop()
+            self.assertFalse(targets[0].file.exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! - 1678283.mp4"
+            validate_mp4_tags(self, output_file)
+            validate_permissions(self, output_file, 600)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+
+
     def test_handler_ignore(self):
         """
         Test the handle function works for a directory.

@@ -18,6 +18,7 @@ class PartialFormatter(string.Formatter):
         "act",
         "ext",
         "trans",
+        "uuid",
     ]
 
     def __init__(self, missing="~~", bad_fmt="!!"):
