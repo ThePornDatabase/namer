@@ -263,7 +263,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
-
     @patch("namer.metadataapi.__get_response_json_object")
     @patch("namer.namer.get_image")
     def test_handler_deeply_nested_success_custom_location(self, mock_poster, mock_response):
@@ -295,7 +294,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-
 
     def test_handler_ignore(self):
         """
