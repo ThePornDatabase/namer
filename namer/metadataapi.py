@@ -36,18 +36,18 @@ def __find_best_match(query: Optional[str], match_terms: List[str], config: Name
         powerset_iter = itertools.chain(powerset_iter, data)
 
     ratio = rapidfuzz.process.extractOne(query, choices=powerset_iter)
-    return (ratio[0], ratio[1]) if ratio is not None else ratio
+    return (ratio[0], ratio[1]) if ratio else ratio
 
 
 def __attempt_better_match(existing: Tuple[str, float], query: Optional[str], match_terms: List[str], namer_config: NamerConfig) -> Tuple[str, float]:
-    if existing is not None and existing[1] >= 89.9:  # magic numer
+    if existing and existing[1] >= 89.9:  # magic numer
         return existing
 
     found = __find_best_match(query, match_terms, namer_config)
-    if existing is None:
+    if not existing:
         return found
 
-    if found is None:
+    if not found:
         return "", 0.0
 
     return existing if existing[1] >= found[1] else found
@@ -56,9 +56,9 @@ def __attempt_better_match(existing: Tuple[str, float], query: Optional[str], ma
 def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
     site = False
     found_site = None
-    if looked_up.site is not None:
+    if looked_up.site:
         found_site = re.sub(r"[^a-z0-9]", "", looked_up.site.lower())
-        if name_parts.site is None:
+        if not name_parts.site:
             site = True
         else:
             site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode(name_parts.site.lower())) in found_site
@@ -66,26 +66,26 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
     if found_site in namer_config.sites_with_no_date_info:
         release_date = True
     else:
-        release_date = name_parts.date is not None and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
+        release_date = name_parts.date and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date)
 
     result: Tuple[str, float] = ('', 0.0)
 
     # Full Name
     all_performers = list(map(lambda p: p.name, looked_up.performers))
-    if looked_up.name is not None:
+    if looked_up.name:
         all_performers.insert(0, looked_up.name)
 
     result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
-    if name_parts.name is not None:
+    if name_parts.name:
         result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     # First Name Powerset.
-    if result is not None and result[1] < 89.9:
+    if result and result[1] < 89.9:
         all_performers = list(map(lambda p: p.name.split(" ")[0], looked_up.performers))
-        if looked_up.name is not None:
+        if looked_up.name:
             all_performers.insert(0, looked_up.name)
         result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
-        if name_parts.name is not None:
+        if name_parts.name:
             result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     return ComparisonResult(
@@ -115,13 +115,13 @@ def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) 
     results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True)
     results = __update_results(results, name_parts, namer_config, skip_name=True)
 
-    if name_parts.date is not None and (not results or not results[-1].is_match()):
+    if name_parts.date and (not results or not results[-1].is_match()):
         name_parts.date = (date.fromisoformat(name_parts.date) + timedelta(days=-1)).isoformat()
         logger.info("Not found, trying 1 day before: {}", name_parts)
         results = __update_results(results, name_parts, namer_config)
         results = __update_results(results, name_parts, namer_config, skip_date=False, skip_name=True)
 
-    if name_parts.date is not None and (not results or not results[-1].is_match()):
+    if name_parts.date and (not results or not results[-1].is_match()):
         name_parts.date = (date.fromisoformat(name_parts.date) + timedelta(days=2)).isoformat()
         logger.info("Not found, trying 1 day after: {}", name_parts)
         results = __update_results(results, name_parts, namer_config)
@@ -135,7 +135,7 @@ def __match_percent(result: ComparisonResult) -> float:
     if result.is_match():
         add_value = 1000.00
 
-    value = (result.name_match + add_value) if result is not None and result.name_match is not None else add_value
+    value = (result.name_match + add_value) if result and result.name_match else add_value
     logger.debug("Name match was {:.2f} for {}", value, result.name)
 
     return value
@@ -177,7 +177,7 @@ def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config
     """
     returns json object with info
     """
-    if url is not None and video_file is not None:
+    if url and video_file:
         file = video_file.parent / (video_file.stem + infix + '.png')
         if config.enabled_poster and url.startswith("http") and not file.exists():
             file.parent.mkdir(parents=True, exist_ok=True)
@@ -229,7 +229,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     file_info.source_url = data.url
     file_info.poster_url = data.poster
     file_info.trailer_url = data.trailer
-    if data.background is not None:
+    if data.background:
         file_info.background_url = data.background.large
     file_info.site = data.site.name
     file_info.look_up_site_id = data._id  # pylint: disable=protected-access
@@ -273,19 +273,19 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
 
 
 def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None) -> str:
-    if uuid is not None:
+    if uuid:
         query = "/" + str(uuid)
     else:
         query = "?parse="
-        if site is not None:
+        if site:
             # There is a known issue in tpdb, where site names are not matched due to casing.
             # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
             # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
             # Hense, the hack of lower casing the site.
             query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
-        if release_date is not None:
+        if release_date:
             query += release_date + "."
-        if name is not None:
+        if name:
             query += quote(re.sub(r" ", ".", name))
         query += "&limit=25"
 
@@ -295,7 +295,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
 def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config: NamerConfig):
     json_response = __get_response_json_object(url, namer_config)
     file_infos = []
-    if json_response is not None and json_response.strip() != "":
+    if json_response and json_response.strip() != "":
         logger.debug("json_response: \n{}", json_response)
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
@@ -327,7 +327,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
     Matches will appear first.
     """
-    if file_name_parts is None:
+    if not file_name_parts:
         return []
 
     comparison_results = __metadata_api_lookup(file_name_parts, namer_config)
@@ -336,9 +336,9 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     # with the uuid of the best match.
     if comparison_results and comparison_results[0].is_match():
         uuid = comparison_results[0].looked_up.uuid
-        if uuid is not None:
+        if uuid:
             file_infos = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
-            if file_infos is not None:
+            if file_infos:
                 comparison_results[0].looked_up = file_infos
 
     return comparison_results
@@ -371,7 +371,7 @@ def main(args_list: List[str]):
 
     if match_results and match_results[0].is_match():
         print(match_results[0].looked_up.new_file_name(config.inplace_name))
-        if args.jsonfile is not None and match_results[0].looked_up is not None and match_results[0].looked_up.original_response is not None:
+        if args.jsonfile and match_results[0].looked_up and match_results[0].looked_up.original_response:
             Path(args.jsonfile).write_text(match_results[0].looked_up.original_response, encoding="UTF-8")
 
 

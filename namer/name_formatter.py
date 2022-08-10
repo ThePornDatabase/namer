@@ -34,7 +34,7 @@ class PartialFormatter(string.Formatter):
         return val
 
     def format_field(self, value, format_spec: str):
-        if value is None:
+        if not value:
             return self.missing
         try:
             if re.match(r".\d+s", format_spec):
@@ -48,6 +48,6 @@ class PartialFormatter(string.Formatter):
                 format_spec = ""
             return super().format_field(value, format_spec)
         except ValueError:
-            if self.bad_fmt is not None:
+            if self.bad_fmt:
                 return self.bad_fmt
             raise

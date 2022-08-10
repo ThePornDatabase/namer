@@ -4,7 +4,7 @@ Parse string in to FileNamePart define in namer_types.
 from dataclasses import dataclass
 import re
 from pathlib import PurePath
-from typing import Optional
+from typing import Optional, Pattern
 
 from loguru import logger
 
@@ -74,7 +74,7 @@ def name_cleaner(name: str) -> str:
     return name
 
 
-def parser_config_to_regex(tokens: str) -> str:
+def parser_config_to_regex(tokens: str) -> Pattern[str]:
     """
     ``{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}``
 
@@ -112,7 +112,7 @@ def parser_config_to_regex(tokens: str) -> str:
             "_dot": _dot,
         }
     )
-    return regex
+    return re.compile(regex)
 
 
 def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> FileNameParts:
@@ -123,20 +123,25 @@ def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> 
     regex = parser_config_to_regex(regex_config)
     file_name_parts = FileNameParts()
     file_name_parts.extension = PurePath(filename).suffix[1:]
-    match = re.search(regex, filename)
+    match = regex.search(filename)
     if match:
-        if match.groupdict().get("year") is not None:
+        if match.groupdict().get("year"):
             prefix = "20" if len(match.group("year")) == 2 else ""
             file_name_parts.date = prefix + match.group("year") + "-" + match.group("month") + "-" + match.group("day")
-        if match.groupdict().get("name") is not None:
+
+        if match.groupdict().get("name"):
             file_name_parts.name = name_cleaner(match.group("name"))
-        if match.groupdict().get("site") is not None:
+
+        if match.groupdict().get("site"):
             file_name_parts.site = match.group("site")
-        if match.groupdict().get("trans") is not None:
+
+        if match.groupdict().get("trans"):
             trans = match.group("trans")
-            file_name_parts.trans = trans is not None and trans.strip().upper() == "TS"
+            file_name_parts.trans = trans and trans.strip().upper() == "TS"
+
         file_name_parts.extension = match.group("ext")
         file_name_parts.source_file_name = filename
     else:
         logger.warning("Could not parse target name which may be a file (or directory) name depending on settings and input: {}", filename)
+
     return file_name_parts

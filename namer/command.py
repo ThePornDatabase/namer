@@ -114,7 +114,7 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
 
 
 def _set_perms(target: Path, config: NamerConfig):
-    file_perm: Optional[int] = (int(str(config.set_file_permissions), 8) if config.set_file_permissions else None )
+    file_perm: Optional[int] = (int(str(config.set_file_permissions), 8) if config.set_file_permissions else None)
     dir_perm: Optional[int] = (int(str(config.set_dir_permissions), 8) if config.set_dir_permissions else None)
 
     if config.set_gid:

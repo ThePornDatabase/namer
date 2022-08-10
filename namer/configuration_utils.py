@@ -23,7 +23,7 @@ def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> 
     Verifies the contents of your config file. Returns False if configuration failed.
     """
     success = True
-    if config.enable_metadataapi_genres is not True and config.default_genre is None:
+    if not config.enable_metadataapi_genres and not config.default_genre:
         logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
         success = False
     success = __verify_name_string(formatter, "inplace_name", config.inplace_name) and success
@@ -35,7 +35,7 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
     Verifies the contents of your config file. Returns False if configuration failed.
     """
     success = True
-    if config.enable_metadataapi_genres is not True and config.default_genre is None:
+    if not config.enable_metadataapi_genres and not config.default_genre:
         logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
         success = False
     success = __verify_dir(config, "watch_dir") and success
@@ -51,9 +51,10 @@ def __verify_dir(config: NamerConfig, name: str) -> bool:
     verify a config directory exist. return false if verification fails
     """
     file_name = getattr(config, name) if hasattr(config, name) else None
-    if file_name is not None and not file_name.is_dir():
+    if file_name and not file_name.is_dir():
         logger.error("Configured directory {}: {} is not a directory or not accessible", name, file_name)
         return False
+
     return True
 
 
@@ -123,18 +124,23 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.new_relative_path_name = config.get("watchdog", "new_relative_path_name", fallback="{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
     namer_config.del_other_files = config.getboolean("watchdog", "del_other_files", fallback=False)
     namer_config.extra_sleep_time = config.getint("watchdog", "extra_sleep_time", fallback=30)
+
     watch_dir = config.get("watchdog", "watch_dir", fallback=None)
-    if watch_dir is not None:
+    if watch_dir:
         namer_config.watch_dir = Path(watch_dir).resolve()
+
     work_dir = config.get("watchdog", "work_dir", fallback=None)
-    if work_dir is not None:
+    if work_dir:
         namer_config.work_dir = Path(work_dir).resolve()
+
     failed_dir = config.get("watchdog", "failed_dir", fallback=None)
-    if failed_dir is not None:
+    if failed_dir:
         namer_config.failed_dir = Path(failed_dir).resolve()
+
     dest_dir = config.get("watchdog", "dest_dir", fallback=None)
-    if dest_dir is not None:
+    if dest_dir:
         namer_config.dest_dir = Path(dest_dir).resolve()
+
     namer_config.retry_time = config.get("watchdog", "retry_time", fallback=f"03:{random.randint(0, 59):0>2}")
     namer_config.web = config.getboolean("watchdog", "web", fallback=False)
     namer_config.port = config.getint("watchdog", "port", fallback=6980)
@@ -150,6 +156,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
         backend = 'sqlite' if sqlite_supported else 'filesystem'
         expire_time = timedelta(minutes=namer_config.requests_cache_expire_minutes)
         namer_config.cache_session = CachedSession(str(cache_file), backend=backend, expire_after=expire_time, ignored_parameters=["Authorization"])
+
     return namer_config
 
 
@@ -160,7 +167,7 @@ def default_config() -> NamerConfig:
     config = configparser.ConfigParser()
     default_locations = []
     config_loc = os.environ.get("NAMER_CONFIG")
-    if config_loc is not None and Path(config_loc).exists():
+    if config_loc and Path(config_loc).exists():
         default_locations = [Path(config_loc)]
     elif (Path.home() / ".namer.cfg").exists():
         default_locations = [Path.home() / ".namer.cfg"]
