@@ -156,7 +156,6 @@ def process_file(command: Command) -> Optional[Command]:
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: List[ComparisonResult] = []
         # Match to nfo files, if enabled and found.
-        ffprobe_results = ffprobe(command.target_movie_file)
         if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
             if new_metadata is not None:
@@ -186,6 +185,7 @@ def process_file(command: Command) -> Optional[Command]:
         target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
+            ffprobe_results = ffprobe(command.target_movie_file)
             target = move_to_final_location(command, new_metadata)
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, command.config)
