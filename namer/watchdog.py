@@ -21,7 +21,7 @@ from watchdog.observers.polling import PollingObserver
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
-from namer.command import is_interesting_movie, make_command_relative_to, move_command_files, Command
+from namer.command import gather_target_files_from_dir, is_interesting_movie, make_command_relative_to, move_command_files, Command
 from namer.name_formatter import PartialFormatter
 from namer.namer import process_file
 from namer.web.server import NamerWebServer
@@ -58,12 +58,14 @@ def retry_failed(namer_config: NamerConfig):
     Moves the contents from the failed dir to the watch dir to attempt reprocessing.
     """
     logger.info("Retry failed items:")
+
     # remove all old namer log files
     for log_file in namer_config.failed_dir.rglob("**/*_namer.log"):
         log_file.unlink()
+
     # move all files back to watch dir.
-    for file in list(namer_config.failed_dir.iterdir()):
-        shutil.move(namer_config.failed_dir / file.name, namer_config.watch_dir / file.name)
+    for file in gather_target_files_from_dir(namer_config.failed_dir, namer_config):
+        shutil.move(file.target_movie_file, namer_config.watch_dir / file.target_movie_file.name)
 
 
 def is_fs_case_sensitive():
