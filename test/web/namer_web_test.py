@@ -110,6 +110,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.allow_delete_files = True
         config.write_nfo = False
         config.min_file_size = 0
+        config.write_namer_failed_log = True
         with make_test_context(config) as (_tempdir, _watcher, browser, _mock_tpdb):
             new_ea(config.failed_dir, use_dir=False)
             (FailedPage(browser).refresh_items()
