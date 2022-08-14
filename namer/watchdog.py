@@ -32,8 +32,9 @@ def done_copying(file: Optional[Path]) -> bool:
     Determines if a file is being copied by checking its size in 2 second
     increments and seeing if the size has stayed the same.
     """
-    if file is None or file.exists() is False:
+    if not file or not file.exists():
         return False
+
     while True:
         try:
             # pylint: disable=consider-using-with
@@ -42,6 +43,7 @@ def done_copying(file: Optional[Path]) -> bool:
             break
         except PermissionError:
             time.sleep(0.2)
+
     return True
 
 
@@ -82,12 +84,13 @@ class MovieEventHandler(PatternMatchingEventHandler):
     and passes off the processing to the handler() function above.
     """
 
-    namer_config: NamerConfig
+    __namer_config: NamerConfig
 
     def __init__(self, namer_config: NamerConfig, queue: Queue):
         super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
-        self.namer_config = namer_config
-        self.command_queue = queue
+        self.__namer_config = namer_config
+        self.__command_queue = queue
+        self.__re_ignored_dir = re.compile(namer_config.ignored_dir_regex)
 
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
@@ -95,22 +98,25 @@ class MovieEventHandler(PatternMatchingEventHandler):
             file_path = event.dest_path  # type: ignore
         elif event.event_type != EVENT_TYPE_DELETED:
             file_path = event.src_path
-        if file_path is not None:
+
+        if file_path:
             path = Path(file_path)
-            relative_path = str(path.relative_to(self.namer_config.watch_dir))
-            if re.search(self.namer_config.ignored_dir_regex, relative_path) is None and done_copying(path) and is_interesting_movie(path, self.namer_config):
+            relative_path = str(path.relative_to(self.__namer_config.watch_dir))
+            if not self.__re_ignored_dir.search(relative_path) and done_copying(path) and is_interesting_movie(path, self.__namer_config):
                 logger.info("watchdog process called for {}", relative_path)
+
                 # Extra wait time in case other files are copies in as well.
-                if self.namer_config.del_other_files:
-                    time.sleep(self.namer_config.extra_sleep_time)
+                if self.__namer_config.del_other_files:
+                    time.sleep(self.__namer_config.extra_sleep_time)
+
                 self.prepare_file_for_processing(path)
 
     @logger.catch
     def prepare_file_for_processing(self, path: Path):
-        command = make_command_relative_to(input_dir=path, relative_to=self.namer_config.watch_dir, config=self.namer_config)
-        working_command = move_command_files(command, self.namer_config.work_dir)
+        command = make_command_relative_to(input_dir=path, relative_to=self.__namer_config.watch_dir, config=self.__namer_config)
+        working_command = move_command_files(command, self.__namer_config.work_dir)
         if working_command is not None:
-            self.command_queue.put(working_command)
+            self.__command_queue.put(working_command)
 
 
 class MovieWatcher:
@@ -128,6 +134,7 @@ class MovieWatcher:
             command = self.__command_queue.get()
             if command is None:
                 break
+
             handle(command)
             self.__command_queue.task_done()
         self.__command_queue.task_done()
@@ -154,30 +161,35 @@ class MovieWatcher:
             if self.__namer_config.web:
                 self.__webserver = NamerWebServer(self.__namer_config, self.__command_queue)
                 self.__webserver.start()
+
             try:
-                while True and not self.__stopped:
+                while not self.__stopped:
                     schedule.run_pending()
                     time.sleep(3)
                 self.stop()
             except KeyboardInterrupt:
                 self.stop()
+
             self.__started = False
             self.__stopped = False
 
     def __enter__(self):
         self.__background_thread = Thread(target=self.run)
         self.__background_thread.start()
+
         tries = 0
-        while self.get_web_port() is None and tries < 20:
+        while not self.get_web_port() and tries < 20:
             time.sleep(0.2)
             tries += 1
-        if self.get_web_port is None:
+
+        if not self.get_web_port:
             raise RuntimeError("application did not get assigned a port within 4 seconds.")
+
         return self
 
     def __simple_exit__(self):
         self.stop()
-        if self.__background_thread is not None:
+        if self.__background_thread:
             self.__background_thread.join()
             self.__background_thread = None
 
@@ -190,23 +202,29 @@ class MovieWatcher:
         """
         config = self.__namer_config
         logger.info("Start porndb scene watcher.... watching: {}", config.watch_dir)
+
         if os.environ.get("PROJECT_VERSION"):
             project_version = os.environ.get("PROJECT_VERSION")
             print(f"Namer version: {project_version}")
+
         if os.environ.get("BUILD_DATE"):
             build_date = os.environ.get("BUILD_DATE")
             print(f"Built on: {build_date}")
+
         if os.environ.get("GIT_HASH"):
             git_hash = os.environ.get("GIT_HASH")
             print(f"Git Hash: {git_hash}")
+
         self.__schedule()
         self.__event_observer.start()
         self.__worker_thread.start()
+
         # touch all existing movie files.
         files: List[Path] = []
         for file in self.__namer_config.watch_dir.rglob("**/*.*"):
             if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
                 files.append(file)
+
         for file in files:
             if file.exists() and file.is_file():
                 self.__event_handler.prepare_file_for_processing(file)
@@ -221,7 +239,7 @@ class MovieWatcher:
             logger.info("exiting")
             self.__event_observer.stop()
             self.__event_observer.join()
-            if self.__webserver is not None:
+            if self.__webserver:
                 self.__webserver.stop()
             self.__command_queue.put(None)
             self.__command_queue.join()
@@ -241,12 +259,16 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     """
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level="INFO", diagnose=False)
-    logger.info(str(namer_watchdog_config))
+    logger.info(namer_watchdog_config)
+
     if not verify_configuration(namer_watchdog_config, PartialFormatter()):
         sys.exit(-1)
-    if namer_watchdog_config.retry_time is not None:
+
+    if namer_watchdog_config.retry_time:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))
+
     movie_watcher = MovieWatcher(namer_watchdog_config)
+
     return movie_watcher
 
 

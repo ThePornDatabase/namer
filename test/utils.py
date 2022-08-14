@@ -109,7 +109,7 @@ class FakeTPDB(ParrotWebServer):
         # Extra Metadata Lookup
         self.add_example_evil_angel("/scenes/1678283?")
         # UI Tests
-        self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
+        self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21&limit=25")
         # Image for UI Test:
         self.add_poster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
         # DorcelClub
