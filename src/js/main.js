@@ -54,8 +54,9 @@ refreshFiles.on('click', function () {
 })
 
 filesResult.on('click', '.match', function () {
+    const query = $(this).data('query')
     const file = $(this).data('file')
-    queryInput.val(file)
+    queryInput.val(query)
     queryInput.data('file', file)
 })
 

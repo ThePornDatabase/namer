@@ -4,7 +4,7 @@
             <i class="bi bi-info-circle"></i>
         </button>
     {% endif %}
-    <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}" title="Search">
+    <button type="button" class="btn btn-primary match" data-bs-toggle="modal" data-bs-target="#searchForm" data-file="{{ file['file'] }}" data-query="{{ file['name'] }}" title="Search">
         <i class="bi bi-search"></i>
     </button>
     {% if config.allow_delete_files %}
