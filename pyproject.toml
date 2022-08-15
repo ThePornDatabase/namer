@@ -25,6 +25,7 @@ Pillow = "^9.1.1"
 requests-cache = "^0.9.4"
 ffmpeg-python = "^0.2.0"
 ImageHash = "^4.2.1"
+jsonpickle = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"

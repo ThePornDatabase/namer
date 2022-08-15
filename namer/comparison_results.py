@@ -204,3 +204,8 @@ class ComparisonResult:
         actors and scene name).
         """
         return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 89.9)
+
+
+@dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class ComparisonResults:
+    results: List[ComparisonResult]

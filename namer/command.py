@@ -11,13 +11,14 @@ from pathlib import Path
 from platform import system
 from typing import Iterable, List, Optional, Sequence, Tuple
 
+from jsonpickle import encode
 from loguru import logger
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import ffprobe, FFProbeResults
 from namer.filenameparts import parse_file_name, FileNameParts
-from namer.comparison_results import LookedUpFileInfo, ComparisonResult
+from namer.comparison_results import ComparisonResults, LookedUpFileInfo, ComparisonResult
 
 
 # noinspection PyDataclass
@@ -84,7 +85,7 @@ def move_command_files(target: Optional[Command], new_target: Path) -> Optional[
 def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[ComparisonResult]], namer_config: NamerConfig) -> Optional[Path]:
     """
     Given porndb scene results sorted by how closely they match a file,  write the contents
-    of the result matches to a log file.
+    of the result matches to a log file with json pickle, the ui could reconsitute the results
     """
     log_name = None
     if movie_file:
@@ -94,21 +95,9 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
             if not match_attempts:
                 log_file.write("No search results returned.\n")
             else:
-                for attempt in match_attempts:
-                    log_file.write("\n")
-                    log_file.write(f"File                 : {attempt.name_parts.source_file_name}\n")
-                    log_file.write(f"Scene Name           : {attempt.looked_up.name}\n")
-                    log_file.write(f"Match                : {attempt.is_match()}\n")
-                    log_file.write(f"Query URL            : {attempt.looked_up.original_query}\n")
-                    if not attempt.name_parts.site:
-                        attempt.name_parts.site = "None"
-                    if not attempt.name_parts.date:
-                        attempt.name_parts.date = "None"
-                    if not attempt.name_parts.date:
-                        attempt.name_parts.name = "None"
-                    log_file.write(f"{str(attempt.site_match):5} Found Site Name: {attempt.looked_up.site:50.50} Parsed Site Name: {attempt.name_parts.site:50.50}\n")
-                    log_file.write(f"{str(attempt.date_match):5} Found Date     : {attempt.looked_up.date:50.50} Parsed Date     : {attempt.name_parts.date:50.50}\n")
-                    log_file.write(f"{attempt.name_match:5.1f} Found Name     : {attempt.name:50.50} Parsed Name     : {attempt.name_parts.name:50.50}\n")
+                json_out = encode(ComparisonResults(match_attempts), indent=2)
+                log_file.write(json_out)
+                #  how to decode: value = decode(json_out)
         set_permissions(log_name, namer_config)
     return log_name
 
