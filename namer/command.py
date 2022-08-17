@@ -95,7 +95,10 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
             if not match_attempts:
                 log_file.write("No search results returned.\n")
             else:
-                json_out = encode(match_attempts, indent=2)
+                for result in match_attempts.results:
+                    del result.looked_up.original_query
+                    del result.looked_up.original_response
+                json_out = encode(match_attempts, indent=2, make_refs=False)
                 log_file.write(json_out)
                 #  how to decode: value = decode(json_out)
         set_permissions(log_name, namer_config)

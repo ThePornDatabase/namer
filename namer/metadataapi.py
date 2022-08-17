@@ -334,7 +334,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     if comparison_results and comparison_results[0].is_match():
         uuid = comparison_results[0].looked_up.uuid
         if uuid:
-            file_infos = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
+            file_infos: LookedUpFileInfo | None = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
             if file_infos:
                 comparison_results[0].looked_up = file_infos
     return ComparisonResults(comparison_results)
