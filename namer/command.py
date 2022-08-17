@@ -18,7 +18,7 @@ from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import ffprobe, FFProbeResults
 from namer.filenameparts import parse_file_name, FileNameParts
-from namer.comparison_results import ComparisonResults, LookedUpFileInfo, ComparisonResult
+from namer.comparison_results import ComparisonResults, LookedUpFileInfo
 
 
 # noinspection PyDataclass
@@ -82,7 +82,7 @@ def move_command_files(target: Optional[Command], new_target: Path) -> Optional[
     return output
 
 
-def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[ComparisonResult]], namer_config: NamerConfig) -> Optional[Path]:
+def write_log_file(movie_file: Optional[Path], match_attempts: Optional[ComparisonResults], namer_config: NamerConfig) -> Optional[Path]:
     """
     Given porndb scene results sorted by how closely they match a file,  write the contents
     of the result matches to a log file with json pickle, the ui could reconsitute the results
@@ -95,7 +95,7 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[List[Com
             if not match_attempts:
                 log_file.write("No search results returned.\n")
             else:
-                json_out = encode(ComparisonResults(match_attempts), indent=2)
+                json_out = encode(match_attempts, indent=2)
                 log_file.write(json_out)
                 #  how to decode: value = decode(json_out)
         set_permissions(log_name, namer_config)

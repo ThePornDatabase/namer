@@ -48,7 +48,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(target_file.name)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
-            update_mp4_file(target_file, info[0].looked_up, poster, ffprobe_results, NamerConfig())
+            update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             output = MP4(target_file)
             self.assertEqual(output.get("\xa9nam"), ["Peeping Tom"])
 
@@ -66,7 +66,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(target_file.name)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
-            update_mp4_file(target_file, info[0].looked_up, poster, ffprobe_results, NamerConfig())
+            update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
 
     def test_sha_sum_two_identical_transformations(self):
@@ -86,7 +86,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(target_file.name)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
-            update_mp4_file(target_file, info[0].looked_up, poster, ffprobe_results, NamerConfig())
+            update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
             sha_1 = hashlib.sha256(target_file.read_bytes()).digest().hex()
         with environment() as (tempdir, _parrot, config):
@@ -98,7 +98,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(target_file.name)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
-            update_mp4_file(target_file, info[0].looked_up, poster, ffprobe_results, NamerConfig())
+            update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
             sha_2 = hashlib.sha256(target_file.read_bytes()).digest().hex()
         self.assertEqual(str(sha_1), str(sha_2))
@@ -117,7 +117,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(target_file.name)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
-            update_mp4_file(target_file, info[0].looked_up, poster, ffprobe_results, NamerConfig())
+            update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
 
     def test_non_existent_file(self):
@@ -131,7 +131,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             name_parts = parse_file_name(targetfile.name)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(targetfile)
-            update_mp4_file(targetfile, info[0].looked_up, poster, ffprobe_results, config)
+            update_mp4_file(targetfile, info.results[0].looked_up, poster, ffprobe_results, config)
             self.assertFalse(targetfile.exists())
 
     def test_empty_infos(self):

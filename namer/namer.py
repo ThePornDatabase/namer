@@ -16,7 +16,7 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_results import ComparisonResult, LookedUpFileInfo
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, from_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
@@ -154,7 +154,7 @@ def process_file(command: Command) -> Optional[Command]:
     logger.info("Processing: {}", command.input_file)
     if command.target_movie_file is not None:
         new_metadata: Optional[LookedUpFileInfo] = None
-        search_results: List[ComparisonResult] = []
+        search_results: ComparisonResults = ComparisonResults([])
         # Match to nfo files, if enabled and found.
         if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
@@ -168,14 +168,15 @@ def process_file(command: Command) -> Optional[Command]:
         #    phash = VideoPerceptualHash().get_phash(command.target_movie_file)
         #    todo use phash
         elif new_metadata is None and command.tpdb_id is not None and command.parsed_file is not None:
-            search_results = []
             file_infos = get_complete_metadatapi_net_fileinfo(command.parsed_file, command.tpdb_id, command.config)
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:
             search_results = match(command.parsed_file, command.config)
-            if search_results and search_results[0].is_match():
-                new_metadata = search_results[0].looked_up
+            if search_results:
+                matched = search_results.get_match()
+                if matched:
+                    new_metadata = matched.looked_up
             if not command.target_movie_file:
                 logger.error("""
                     Could not process file or directory: {}
@@ -198,7 +199,7 @@ def process_file(command: Command) -> Optional[Command]:
     return None
 
 
-def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: List[ComparisonResult], config: NamerConfig):
+def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: ComparisonResults, config: NamerConfig):
     """
     Once the file is in its final location we will grab other relevant output if requested.
     """

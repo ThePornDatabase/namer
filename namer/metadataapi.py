@@ -19,7 +19,7 @@ from loguru import logger
 from PIL import Image
 from unidecode import unidecode
 
-from namer.comparison_results import ComparisonResult, LookedUpFileInfo, Performer
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions
@@ -320,14 +320,13 @@ def get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, n
     return None
 
 
-def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -> List[ComparisonResult]:
+def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -> ComparisonResults:
     """
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
     Matches will appear first.
     """
     if not file_name_parts:
-        return []
-
+        return ComparisonResults([])
     comparison_results = __metadata_api_lookup(file_name_parts, namer_config)
     comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
     # Works around the porndb not returning all info on search queries by looking up the full data
@@ -338,8 +337,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
             file_infos = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
             if file_infos:
                 comparison_results[0].looked_up = file_infos
-
-    return comparison_results
+    return ComparisonResults(comparison_results)
 
 
 def main(args_list: List[str]):
@@ -363,14 +361,16 @@ def main(args_list: List[str]):
     config = default_config()
     file_name = make_command(Path(args.file), config, ignore_file_restrictions=True)
 
-    match_results = []
+    results: Optional[ComparisonResults] = None
     if file_name and file_name.parsed_file:
-        match_results = match(file_name.parsed_file, config)
+        results = match(file_name.parsed_file, config)
 
-    if match_results and match_results[0].is_match():
-        print(match_results[0].looked_up.new_file_name(config.inplace_name))
-        if args.jsonfile and match_results[0].looked_up and match_results[0].looked_up.original_response:
-            Path(args.jsonfile).write_text(match_results[0].looked_up.original_response, encoding="UTF-8")
+    if results:
+        matched = results.get_match()
+        if matched:
+            print(matched.looked_up.new_file_name(config.inplace_name))
+            if args.jsonfile and matched.looked_up and matched.looked_up.original_response:
+                Path(args.jsonfile).write_text(matched.looked_up.original_response, encoding="UTF-8")
 
 
 if __name__ == "__main__":

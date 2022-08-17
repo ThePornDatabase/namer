@@ -56,8 +56,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config = sample_config()
         config.enable_metadataapi_genres = True
         results = match(name, config)
-        self.assertEqual(len(results), 1)
-        result = results[0]
+        self.assertEqual(len(results.results), 1)
+        result = results.results[0]
         output = write_movie_xml_file(result.looked_up, config)
         expected = """<?xml version='1.0' encoding='UTF-8'?>
 <movie>
@@ -140,8 +140,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
         config = sample_config()
         results = match(name, config)
-        self.assertEqual(len(results), 1)
-        result = results[0]
+        self.assertEqual(len(results.results), 1)
+        result = results.results[0]
         output = write_movie_xml_file(result.looked_up, config)
         expected = """<?xml version='1.0' encoding='UTF-8'?>
 <movie>

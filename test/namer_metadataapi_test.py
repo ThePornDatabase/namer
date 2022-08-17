@@ -25,8 +25,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (_path, _parrot, config):
             name = parse_file_name("DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4")
             results = match(name, config)
-            self.assertEqual(len(results), 1)
-            result = results[0]
+            self.assertEqual(len(results.results), 1)
+            result = results.results[0]
             info = result.looked_up
             self.assertEqual(info.name, "Peeping Tom")
             self.assertEqual(info.date, "2021-12-23")
@@ -54,8 +54,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             # the "e"s in the string below are unicode е (0x435), not asci e (0x65).
             name = parse_file_name("DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4")
             results = match(name, config)
-            self.assertEqual(len(results), 1)
-            result = results[0]
+            self.assertEqual(len(results.results), 1)
+            result = results.results[0]
             self.assertTrue(result.is_match())
             info = result.looked_up
             self.assertEqual(info.name, "Peeping Tom")
@@ -83,12 +83,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (_path, _parrot, config):
             name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             results = match(name, config)
-            self.assertEqual(len(results), 1)
-            result = results[0]
+            self.assertEqual(len(results.results), 1)
+            result = results.results[0]
             self.assertTrue(result.date_match)
             self.assertTrue(result.site_match)
             self.assertGreaterEqual(result.name_match, 90.0)
-            info = results[0].looked_up
+            info = results.results[0].looked_up
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
             self.assertEqual(info.date, "2022-01-03")
             self.assertEqual(info.site, "Evil Angel")
@@ -122,12 +122,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         mock_response.return_value = response.read_text()
         name = parse_file_name("BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4")
         results = match(name, sample_config())
-        self.assertEqual(len(results), 1)
-        result = results[0]
+        self.assertEqual(len(results.results), 1)
+        result = results.results[0]
         self.assertTrue(result.date_match)
         self.assertTrue(result.site_match)
         self.assertGreaterEqual(result.name_match, 90.0)
-        info = results[0].looked_up
+        info = results.results[0].looked_up
         self.assertEqual(info.name, "Suck, Suck, Blow")
         self.assertEqual(info.date, "2022-02-28")
         self.assertEqual(info.site, "Brazzers Exxtra")
@@ -139,12 +139,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (_path, _parrot, config):
             name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             results = match(name, config)
-            self.assertEqual(len(results), 1)
-            result = results[0]
+            self.assertEqual(len(results.results), 1)
+            result = results.results[0]
             self.assertTrue(result.date_match)
             self.assertTrue(result.site_match)
             self.assertGreaterEqual(result.name_match, 90.0)
-            info = results[0].looked_up
+            info = results.results[0].looked_up
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
             self.assertEqual(info.date, "2022-01-03")
             self.assertEqual(info.site, "Evil Angel")
@@ -179,7 +179,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertIsNotNone(command)
             if command is not None:
                 results = match(command.parsed_file, config)
-                self.assertEqual(len(results), 0)
+                self.assertEqual(len(results.results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_no_message(self, mock_response):
@@ -198,7 +198,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertIsNotNone(command)
             if command is not None:
                 results = match(command.parsed_file, config)
-                self.assertEqual(len(results), 0)
+                self.assertEqual(len(results.results), 0)
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net_none_message(self, mock_response):
@@ -217,7 +217,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertIsNotNone(command)
             if command is not None:
                 results = match(command.parsed_file, config)
-                self.assertEqual(len(results), 0)
+                self.assertEqual(len(results.results), 0)
 
     @mock.patch("sys.stdout", new_callable=io.StringIO)
     @mock.patch("namer.metadataapi.default_config")
