@@ -203,7 +203,7 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name).
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 89.9)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 94.9)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
