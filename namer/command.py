@@ -11,7 +11,7 @@ from pathlib import Path
 from platform import system
 from typing import Iterable, List, Optional, Sequence, Tuple
 
-from jsonpickle import encode
+import jsonpickle
 from loguru import logger
 
 from namer.configuration import NamerConfig
@@ -85,7 +85,7 @@ def move_command_files(target: Optional[Command], new_target: Path) -> Optional[
 def write_log_file(movie_file: Optional[Path], match_attempts: Optional[ComparisonResults], namer_config: NamerConfig) -> Optional[Path]:
     """
     Given porndb scene results sorted by how closely they match a file,  write the contents
-    of the result matches to a log file with json pickle, the ui could reconsitute the results
+    of the result matches to a log file with json pickle, the ui could reconstitute the results
     """
     log_name = None
     if movie_file:
@@ -98,9 +98,10 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
                 for result in match_attempts.results:
                     del result.looked_up.original_query
                     del result.looked_up.original_response
-                json_out = encode(match_attempts, indent=2, make_refs=False)
+
+                json_out = jsonpickle.encode(match_attempts, indent=2, make_refs=False)
                 log_file.write(json_out)
-                #  how to decode: value = decode(json_out)
+                #  how to decode: value = jsonpickle.decode(json_out)
         set_permissions(log_name, namer_config)
     return log_name
 
