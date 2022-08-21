@@ -67,7 +67,8 @@ def retry_failed(namer_config: NamerConfig):
 
     # move all files back to watch dir.
     for file in gather_target_files_from_dir(namer_config.failed_dir, namer_config):
-        shutil.move(file.target_movie_file, namer_config.watch_dir / file.target_movie_file.name)
+        target = file.target_directory.name if file.parsed_dir_name and file.target_directory else file.target_movie_file.name
+        shutil.move(namer_config.failed_dir / target, namer_config.watch_dir / target)
 
 
 def is_fs_case_sensitive():
