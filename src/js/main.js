@@ -1,4 +1,5 @@
 require('bootstrap/js/dist/modal')
+const hljs = require('highlight.js/lib/common')
 const $ = require('jquery')
 import 'datatables.net-bs5'
 
@@ -43,7 +44,8 @@ $('.log').on('click', function () {
     }
 
     Helpers.request('./api/v1/read_failed_log', data, function (data) {
-        Helpers.render('logFile', data, logBody)
+        const log = hljs.highlight(data, {language: 'json'}).value
+        logBody.html(`<pre><code class="hljs">${log}</pre></code>`)
     })
 })
 
