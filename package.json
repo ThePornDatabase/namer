@@ -17,7 +17,6 @@
     "datatables.net": "^1.12.1",
     "datatables.net-bs5": "^1.12.1",
     "highlight.js": "^11.6.0",
-    "html-entities": "^2.3.3",
     "jquery": "^3.6.0"
   },
   "devDependencies": {
