@@ -1,4 +1,5 @@
 const $ = require('jquery')
+const htmlEntities = require('html-entities')
 
 class Helpers {
     static getProgressBar() {
@@ -42,7 +43,8 @@ class Helpers {
         }
 
         Helpers.request('./api/v1/render', data, function (data) {
-            selector.html(data.response)
+            const html = htmlEntities.decode(data.response)
+            selector.html(html)
             afterRender?.(selector)
         })
     }
