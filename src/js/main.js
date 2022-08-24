@@ -44,8 +44,8 @@ $('.log').on('click', function () {
     }
 
     Helpers.request('./api/v1/read_failed_log', data, function (data) {
-        const log = hljs.highlight(data, {language: 'json'}).value
-        logBody.html(`<pre><code class="hljs">${log}</pre></code>`)
+        data = hljs.highlight(data, {language: 'json'}).value
+        Helpers.render('logFile', data, logBody)
     })
 })
 
