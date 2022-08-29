@@ -26,6 +26,7 @@ requests-cache = "^0.9.4"
 ffmpeg-python = "^0.2.0"
 ImageHash = "^4.2.1"
 jsonpickle = "^2.2.0"
+exceptiongroup = "^1.0.0-rc.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"

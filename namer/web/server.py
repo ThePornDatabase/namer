@@ -46,6 +46,7 @@ class GenericWebServer:
         self.__add_mime_types()
         self.__register_blueprints()
         self.__make_server()
+        self.__register_custom_processors()
 
     def __make_server(self):
         self.__compress.init_app(self.__app)
@@ -64,6 +65,14 @@ class GenericWebServer:
             test_mime, test_ext = mimetypes.guess_type(f'0{ext}')
             if test_mime is None:
                 mimetypes.add_type(mime, ext)
+
+    def __register_custom_processors(self):
+        functions = {
+            'bool_to_icon': self.bool_to_icon,
+        }
+        self.__app.jinja_env.globals.update(**functions)
+
+        self.__app.jinja_env.add_extension('jinja2.ext.do')
 
     def start(self):
         self.__thread.start()
@@ -95,6 +104,14 @@ class GenericWebServer:
         Returns the full url to access this server, usually http://127.0.0.1:<os assigned port>/
         """
         return f"http://{self.__host}:{self.get_effective_port()}{self.__path}"
+
+    @staticmethod
+    def bool_to_icon(item: bool):
+        icon = 'x'
+        if item:
+            icon = 'check'
+
+        return f'<i class="bi bi-{icon}"></i>'
 
 
 class NamerWebServer(GenericWebServer):

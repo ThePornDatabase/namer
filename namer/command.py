@@ -99,7 +99,7 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
                     del result.looked_up.original_query
                     del result.looked_up.original_response
 
-                json_out = jsonpickle.encode(match_attempts, indent=2, make_refs=False)
+                json_out = jsonpickle.encode(match_attempts)
                 log_file.write(json_out)
                 #  how to decode: value = jsonpickle.decode(json_out)
         set_permissions(log_name, namer_config)

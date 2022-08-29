@@ -8,10 +8,12 @@ import shutil
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Dict, List
+from typing import Dict, List, Optional
 
+import jsonpickle
 from werkzeug.routing import Rule
 
+from namer.comparison_results import ComparisonResults
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, subpath_or_equal, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
@@ -55,11 +57,11 @@ def command_to_file_info(command: Command) -> Dict:
     }
 
 
-def get_search_results(query: str, file: str, config: NamerConfig, performers_limit: int = 5) -> Dict:
+def get_search_results(query: str, file: str, config: NamerConfig, performers_limit: int = 5, page: int = 1) -> Dict:
     """
     Search results for user selection.
     """
-    url = __build_url(config, name=query)
+    url = __build_url(config, name=query, page=page)
     json_response = __get_response_json_object(url, config)
     file_infos = []
     if json_response and json_response.strip() != '':
@@ -124,13 +126,16 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     return not file_name.is_file()
 
 
-def read_failed_log_file(name: str, config: NamerConfig) -> str:
+def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonResults]:
     file_name = config.failed_dir / name
     file_name = file_name.parent / (file_name.stem + '_namer.log')
-    data = ''
+
+    res: Optional[ComparisonResults] = None
     if file_name.is_file():
         data = file_name.read_text('UTF-8')
-    return data
+        res = jsonpickle.decode(data)
+
+    return res
 
 
 def is_acceptable_file(file: Path, config: NamerConfig) -> bool:

@@ -119,7 +119,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 .items()[0]
                 .file_name().is_equal_to("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!").on_success()
                 .file_extension().is_equal_to("MP4").on_success()
-                .show_log_modal().log_text().is_empty().on_success().close()
+                .show_log_modal().log_text().is_equal_to("No results found").on_success().close()
                 .items()[0]
                 .show_search_modal()
                 .search()

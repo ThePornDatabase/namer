@@ -9,7 +9,9 @@
         <p class="card-text">
             <small class="text-muted">{{ file['date'] }}</small>
         </p>
-        {% include 'components/performers_badges.html' %}
+        {% with key = 'gender' %}
+            {% include 'components/performersBadges.html' %}
+        {% endwith %}
     </div>
     <div class="card-footer">
         <a href="https://metadataapi.net/scenes/{{ file['id'] }}" class="btn btn-secondary" target="_blank">Show</a>

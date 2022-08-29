@@ -270,7 +270,7 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
     return file_infos
 
 
-def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None) -> str:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None) -> str:
     if uuid:
         query = "/" + str(uuid)
     else:
@@ -285,6 +285,8 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query += release_date + "."
         if name:
             query += quote(re.sub(r" ", ".", name))
+        if page and page > 1:
+            query += f"&page={page}"
         query += "&limit=25"
 
     return f"{namer_config.override_tpdb_address}scenes{query}"
@@ -294,7 +296,7 @@ def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config
     json_response = __get_response_json_object(url, namer_config)
     file_infos = []
     if json_response and json_response.strip() != "":
-        logger.debug("json_response: \n{}", json_response)
+        # logger.debug("json_response: \n{}", json_response)
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
@@ -334,7 +336,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     if comparison_results and comparison_results[0].is_match():
         uuid = comparison_results[0].looked_up.uuid
         if uuid:
-            file_infos: LookedUpFileInfo | None = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
+            file_infos: Optional[LookedUpFileInfo] = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
             if file_infos:
                 comparison_results[0].looked_up = file_infos
     return ComparisonResults(comparison_results)

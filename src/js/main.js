@@ -1,24 +1,23 @@
-require('bootstrap/js/dist/modal')
-const hljs = require('highlight.js/lib/common')
+import {Popover, Tooltip, Modal} from 'bootstrap'
+
 const $ = require('jquery')
 import 'datatables.net-bs5'
 
 const filesResult = $('#filesResult')
+const resultForm = $('#searchResults .modal-body')
+const logForm = $('#logFile .modal-body')
 const searchForm = $('#searchForm')
-const searchButton = searchForm.find('button.search')
-const resultBody = $('#searchResults .modal-body')
-const logBody = $('#logFile .modal-body')
+const searchButton = $('#searchForm .modal-footer .search')
 const queryInput = $('#queryInput')
 const deleteFile = $('#deleteFile')
 const queueSize = $('#queueSize')
 const refreshFiles = $('#refreshFiles')
-const searchResults = $('#searchResults')
 const deleteButton = $('#deleteButton')
 
 const Helpers = require('./helpers')
 
 searchButton.on('click', function () {
-    resultBody.html(Helpers.getProgressBar())
+    resultForm.html(Helpers.getProgressBar())
 
     const data = {
         'query': queryInput.val(),
@@ -26,7 +25,7 @@ searchButton.on('click', function () {
     }
 
     Helpers.request('./api/v1/get_search', data, function (data) {
-        Helpers.render('searchResults', data, resultBody)
+        Helpers.render('searchResults', data, resultForm)
     })
 })
 
@@ -36,25 +35,6 @@ queryInput.on('keyup', function (e) {
     }
 })
 
-$('.log').on('click', function () {
-    logBody.html(Helpers.getProgressBar())
-
-    const data = {
-        'file': $(this).data('file'),
-    }
-
-    Helpers.request('./api/v1/read_failed_log', data, function (data) {
-        data = hljs.highlight(data, {language: 'json'}).value
-        Helpers.render('logFile', data, logBody)
-    })
-})
-
-refreshFiles.on('click', function () {
-    filesResult.html(Helpers.getProgressBar())
-    Helpers.refreshFiles(filesResult, $(this).data('target'))
-    updateQueueSize()
-})
-
 filesResult.on('click', '.match', function () {
     const query = $(this).data('query')
     const file = $(this).data('file')
@@ -62,18 +42,22 @@ filesResult.on('click', '.match', function () {
     queryInput.data('file', file)
 })
 
-searchForm.on('transitionend webkitTransitionEnd oTransitionEnd', function () {
-    queryInput.focus()
-});
+filesResult.on('click', '.log', function () {
+    logForm.html(Helpers.getProgressBar())
 
-searchResults.on('click', '.rename', function () {
     const data = {
         'file': $(this).data('file'),
-        'scene_id': $(this).data('scene-id'),
     }
 
-    Helpers.request('./api/v1/rename', data, function () {
-        Helpers.refreshFiles(filesResult)
+    Helpers.request('./api/v1/read_failed_log', data, function (data) {
+        Helpers.render('logFile', data, logForm, function (selector) {
+            const tooltips = selector.find('[data-bs-toggle="tooltip"]')
+            tooltips.each(function (index, element) {
+                new Tooltip(element, {
+                    boundary: selector,
+                })
+            })
+        })
     })
 })
 
@@ -82,6 +66,19 @@ filesResult.on('click', '.delete', function () {
     deleteFile.val(file)
     deleteFile.data('file', file)
 })
+
+refreshFiles.on('click', function () {
+    filesResult.html(Helpers.getProgressBar())
+    Helpers.refreshFiles(filesResult, $(this).data('target'))
+    updateQueueSize()
+})
+
+searchForm.on('transitionend webkitTransitionEnd oTransitionEnd', function () {
+    queryInput.focus()
+})
+
+resultForm.on('click', '.rename', rename)
+logForm.on('click', '.rename', rename)
 
 deleteButton.on('click', function () {
     const data = {
@@ -92,6 +89,17 @@ deleteButton.on('click', function () {
         Helpers.refreshFiles(filesResult)
     })
 })
+
+function rename() {
+    const data = {
+        'file': $(this).data('file'),
+        'scene_id': $(this).data('scene-id'),
+    }
+
+    Helpers.request('./api/v1/rename', data, function () {
+        Helpers.refreshFiles(filesResult)
+    })
+}
 
 function updateQueueSize() {
     Helpers.request('./api/v1/get_queue', null, function (data) {
