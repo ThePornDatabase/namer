@@ -270,7 +270,7 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
     return file_infos
 
 
-def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None) -> str:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None) -> str:
     if uuid:
         query = "/" + str(uuid)
     else:
@@ -285,6 +285,8 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query += release_date + "."
         if name:
             query += quote(re.sub(r" ", ".", name))
+        if page:
+            query += f"&page={page}"
         query += "&limit=25"
 
     return f"{namer_config.override_tpdb_address}scenes{query}"
