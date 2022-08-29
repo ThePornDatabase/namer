@@ -285,7 +285,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query += release_date + "."
         if name:
             query += quote(re.sub(r" ", ".", name))
-        if page:
+        if page and page > 1:
             query += f"&page={page}"
         query += "&limit=25"
 

@@ -276,7 +276,7 @@ class FailedPage:
         self.__driver = driver
         find_and_wait_until_stale(driver, By.ID, "progressBar")
         self.__refresh = wait_for_and_find(driver, By.ID, 'refreshFiles')
-        self.__noFailedFiles = find_if_present(driver, By.CSS_SELECTOR, 'div[class="col m-1 text-center"] span')
+        self.__noFailedFiles = find_if_present(driver, By.CSS_SELECTOR, '#filesResult div[class="col m-1 text-center"] span')
         if self.__noFailedFiles is None:
             self.__page_links = wait_for_and_find_all(driver, by=By.CSS_SELECTOR, value='a[class="page-link"]')
             self.__search = wait_for_and_find(driver, by=By.CSS_SELECTOR, value='input[type="search"]')
