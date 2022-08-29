@@ -101,7 +101,10 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         res = False
         if data:
-            res = read_failed_log_file(data['file'], config)
+            res = {
+                'file': data['file'],
+                'data': read_failed_log_file(data['file'], config)
+            }
 
         return jsonify(res)
 

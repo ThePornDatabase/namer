@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import PurePath
 from typing import List, Optional
 
@@ -77,11 +77,11 @@ class LookedUpFileInfo:
     """
     Url to download a poster for this video
     """
-    performers: List[Performer]
+    performers: List[Performer] = field(default_factory=list)
     """
     List of performers, containing names, and "roles" aka genders, for each performer.
     """
-    genres: List[str]
+    # genres: List[str] = field(default_factory=list)
     """
     List of genres, per porndb.  Tends to be noisy.
     """
@@ -109,7 +109,7 @@ class LookedUpFileInfo:
     """
     The url to download a background image, should it exist.
     """
-    tags: List[str]
+    tags: List[str] = field(default_factory=list)
     """
     Tags associated with the video.   Noisy and long list.
     """

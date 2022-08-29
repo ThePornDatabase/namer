@@ -1,1 +1,13 @@
-<pre><code class="hljs">{{ data|safe }}</code></pre>
+<div class="row row-cols-auto justify-content-center">
+    {% if data['data']['results'] %}
+        {% for file in data['data']['results'] %}
+            <div class="col m-1">
+                {% include 'components/cardLog.html' %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col m-1 text-center">
+            <span>No results found</span>
+        </div>
+    {% endif %}
+</div>

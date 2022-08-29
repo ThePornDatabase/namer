@@ -1,0 +1,31 @@
+{% set name_match = True if file['name_match'] > 94.9 else False %}
+
+{% set performers = [] %}
+{% for performer in file['looked_up']['performers'] %}
+    {% do performers.append(performer['name']) %}
+{% endfor %}
+
+<p>
+    <span><b>Site Match:</b> {{ bool_to_icon(file['site_match']) }}</span>
+    <br>
+    <span><b>Found:</b> {{ file['name_parts']['site']|default('', True) }}</span>
+    <br>
+    <span><b>Parsed:</b> {{ file['looked_up']['site']|default('', True) }}</span>
+    <br>
+</p>
+<p>
+    <span><b>Date Match:</b> {{ bool_to_icon(file['date_match']) }}</span>
+    <br>
+    <span><b>Found:</b> {{ file['name_parts']['date']|default('', True) }}</span>
+    <br>
+    <span><b>Parsed:</b> {{ file['looked_up']['date']|default('', True) }}</span>
+</p>
+<p>
+    <span><b>Name Match:</b> {{ bool_to_icon(name_match) }}</span>
+    <br>
+    <span><b>Found:</b> {{ file['name_parts']['name']|default('', True) }}</span>
+    <br>
+    <span><b>Parsed:</b> {{ file['looked_up']['name']|default('', True) }}</span>
+    <br>
+    <span><b>Matched With:</b> {{ performers|join(', ') }}</span>
+</p>

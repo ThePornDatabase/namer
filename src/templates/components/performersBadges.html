@@ -7,9 +7,9 @@
 
 {% if file['performers'] %}
     {% for performer in file['performers'] %}
-        {% if performer['gender'] in background_colours %}
-            {% set background_colour = background_colours[performer['gender']] %}
-            {% set gender_icon = 'bi-gender-' + performer['gender'].lower() %}
+        {% if performer[key] in background_colours %}
+            {% set background_colour = background_colours[performer[key]] %}
+            {% set gender_icon = 'bi-gender-' + performer[key].lower() %}
         {% else %}
             {% set background_colour = background_colours['default'] %}
             {% set gender_icon = None %}
