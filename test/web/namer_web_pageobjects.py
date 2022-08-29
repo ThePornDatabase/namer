@@ -169,7 +169,7 @@ class LogModal:
         wait.until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, 'button[class="btn btn-secondary"]')))
         self.__close = self.__driver.find_element(By.CSS_SELECTOR, 'button[data-bs-dismiss="modal"]')
         self.__cancel = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Close"]')
-        self.__log_item = self.__driver.find_element(By.CSS_SELECTOR, value='pre code')
+        self.__log_item = self.__driver.find_element(By.CSS_SELECTOR, value='.modal-body')
 
     def close(self) -> 'FailedPage':
         self.__close.click()
