@@ -1,24 +1,30 @@
 {% set background_colours = {
-    'Male': 'bg-blue-400',
-    'Female': 'bg-pink-400',
-    'Trans': 'bg-purple-400',
-    'default': 'bg-gray-400',
+    'Male': ('bg-blue-400', 'gender-male'),
+    'Female': ('bg-pink-400', 'gender-female'),
+    'Trans': ('bg-purple-400', 'gender-trans'),
+    'default': ('bg-gray-400', None),
 } %}
+{% set performers_limit = 5 %}
 
 {% if file['performers'] %}
-    {% for performer in file['performers'] %}
-        {% if performer[key] in background_colours %}
-            {% set background_colour = background_colours[performer[key]] %}
-            {% set gender_icon = 'bi-gender-' + performer[key].lower() %}
-        {% else %}
-            {% set background_colour = background_colours['default'] %}
-            {% set gender_icon = None %}
-        {% endif %}
-        <span class="badge {{ background_colour }}"{% if performer['tooltip'] %} title="{{ performer['tooltip'] }}"{% endif %}>
-            {{ performer['name'] }}
-            {% if gender_icon %}
-                <i class="bi {{ gender_icon }}"></i>
-            {% endif %}
-        </span>
+    {% set scene_performers = file['performers'][:performers_limit] %}
+    {% set other_performer = file['performers'][performers_limit:] %}
+
+    {% for performer in scene_performers %}
+        {% set gender = performer['role'] if performer['role'] in background_colours else 'default' %}
+        {% set background_colour, gender_icon = background_colours[gender] %}
+
+        {% with name = performer['name'] %}
+            {% set background_colour, gender_icon = background_colours[gender] %}
+            {% include 'render/performerBadge.html' %}
+        {% endwith %}
     {% endfor %}
+
+    {% if other_performer %}
+        {% with name = 'and ' ~ other_performer|count ~ ' more' %}
+            {% set tooltip = other_performer|map(attribute='name')|join(', ') %}
+            {% set background_colour, gender_icon = background_colours['default'] %}
+            {% include 'render/performerBadge.html' %}
+        {% endwith %}
+    {% endif %}
 {% endif %}

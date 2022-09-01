@@ -39,7 +39,6 @@ class Performer:
         return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
 
 
-# noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo:
     """
@@ -93,7 +92,7 @@ class LookedUpFileInfo:
     """
     url query used to get the above json response
     """
-    original_parsed_filename: Optional[FileNameParts]
+    original_parsed_filename: Optional[FileNameParts] = None
     """
     The FileNameParts used to build the original_query
     """

@@ -1,7 +1,8 @@
-import {Popover, Tooltip, Modal} from 'bootstrap'
-
-const $ = require('jquery')
+import {Popover, Modal} from 'bootstrap'
+import $ from 'jquery'
 import 'datatables.net-bs5'
+
+import {Helpers} from './helpers'
 
 const filesResult = $('#filesResult')
 const resultForm = $('#searchResults .modal-body')
@@ -14,8 +15,6 @@ const queueSize = $('#queueSize')
 const refreshFiles = $('#refreshFiles')
 const deleteButton = $('#deleteButton')
 
-const Helpers = require('./helpers')
-
 searchButton.on('click', function () {
     resultForm.html(Helpers.getProgressBar())
 
@@ -25,7 +24,9 @@ searchButton.on('click', function () {
     }
 
     Helpers.request('./api/v1/get_search', data, function (data) {
-        Helpers.render('searchResults', data, resultForm)
+        Helpers.render('searchResults', data, resultForm, function (selector) {
+            Helpers.initTooltips(selector)
+        })
     })
 })
 
@@ -51,12 +52,7 @@ filesResult.on('click', '.log', function () {
 
     Helpers.request('./api/v1/read_failed_log', data, function (data) {
         Helpers.render('logFile', data, logForm, function (selector) {
-            const tooltips = selector.find('[data-bs-toggle="tooltip"]')
-            tooltips.each(function (index, element) {
-                new Tooltip(element, {
-                    boundary: selector,
-                })
-            })
+            Helpers.initTooltips(selector)
         })
     })
 })
@@ -68,7 +64,6 @@ filesResult.on('click', '.delete', function () {
 })
 
 refreshFiles.on('click', function () {
-    filesResult.html(Helpers.getProgressBar())
     Helpers.refreshFiles(filesResult, $(this).data('target'))
     updateQueueSize()
 })

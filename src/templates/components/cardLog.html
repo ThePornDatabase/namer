@@ -8,7 +8,6 @@
             <small class="text-muted">{{ file['looked_up']['date'] }}</small>
         </p>
         {% with file=file['looked_up'] %}
-            {% set key = 'role' %}
             {% include 'components/performersBadges.html' %}
         {% endwith %}
     </div>
