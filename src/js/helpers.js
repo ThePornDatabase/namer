@@ -1,11 +1,14 @@
-const $ = require('jquery')
+import $ from 'jquery'
+import {Tooltip} from 'bootstrap'
 
-class Helpers {
+export class Helpers {
     static getProgressBar() {
         return '<div class="progress"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
     }
 
     static refreshFiles(selector, target = 'files') {
+        selector.html(Helpers.getProgressBar())
+
         let url
         switch (target) {
             case 'queue':
@@ -72,6 +75,13 @@ class Helpers {
             success: success,
         })
     }
-}
 
-module.exports = Helpers
+    static initTooltips(selector) {
+        const tooltips = selector.find('[data-bs-toggle="tooltip"]')
+        tooltips.each(function (index, element) {
+            new Tooltip(element, {
+                boundary: selector[0],
+            })
+        })
+    }
+}

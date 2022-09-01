@@ -57,7 +57,7 @@ def command_to_file_info(command: Command) -> Dict:
     }
 
 
-def get_search_results(query: str, file: str, config: NamerConfig, performers_limit: int = 5, page: int = 1) -> Dict:
+def get_search_results(query: str, file: str, config: NamerConfig, page: int = 1) -> Dict:
     """
     Search results for user selection.
     """
@@ -71,25 +71,6 @@ def get_search_results(query: str, file: str, config: NamerConfig, performers_li
 
     files = []
     for scene_data in file_infos:
-        scene_performers = scene_data.performers
-        other_performers = []
-        if performers_limit:
-            scene_performers = scene_data.performers[:performers_limit]
-            other_performers = scene_data.performers[performers_limit:]
-
-        performers = []
-        for performer in scene_performers:
-            performers.append({
-                'name': performer.name,
-                'gender': performer.role,
-            })
-
-        if other_performers:
-            performers.append({
-                'name': f'and {len(scene_data.performers) - performers_limit} more',
-                'tooltip': ', '.join([performer.name for performer in other_performers])
-            })
-
         scene = {
             'id': scene_data.uuid,
             'title': scene_data.name,
@@ -97,7 +78,7 @@ def get_search_results(query: str, file: str, config: NamerConfig, performers_li
             'poster': scene_data.poster_url,
             'site': scene_data.site,
             'tags_count': len(scene_data.tags),
-            'performers': performers,
+            'performers': scene_data.performers,
         }
         files.append(scene)
 
