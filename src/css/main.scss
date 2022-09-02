@@ -1,16 +1,16 @@
-@import '~bootstrap/dist/css/bootstrap.css';
+@import '~bootstrap/scss/bootstrap';
 @import '~bootstrap-icons/font/bootstrap-icons.css';
 @import '~datatables.net-bs5/css/dataTables.bootstrap5.css';
 
-$colours-400: (
-  "gray": rgb(156 163 175),
-  "blue": rgb(96 165 250),
-  "pink": rgb(244 114 182),
-  "purple": rgb(192 132 252),
+$gender-colours: (
+  'default': $gray-600,
+  'male': $blue-400,
+  'female': $pink-400,
+  'trans': $purple-400,
 );
 
-@each $name, $value in $colours-400 {
-  .bg-#{$name}-400 {
+@each $name, $value in $gender-colours {
+  .bg-#{$name} {
     background-color: $value;
   }
 }
