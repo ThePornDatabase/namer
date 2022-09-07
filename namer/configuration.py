@@ -6,7 +6,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Pattern, Sequence
 
 from requests_cache import CachedSession
 
@@ -186,7 +186,7 @@ class NamerConfig:
     scrapers/storage mechanisms.
     """
 
-    site_abbreviations: Dict[str, str]
+    site_abbreviations: Dict[Pattern, str]
     """
     Configuration provided list of abbreviations, should the site of a parsed file name match the abbreviation (key),
     it will be replaced with the value matching the key, like ["aa","Amature Allure"].   It is up to the user to provide
