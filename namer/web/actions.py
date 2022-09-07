@@ -115,8 +115,9 @@ def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonR
     res: Optional[ComparisonResults] = None
     if file_name.is_file():
         data = file_name.read_text('UTF-8')
-        res = jsonpickle.decode(data)
-
+        decoded = jsonpickle.decode(data)
+        if decoded and isinstance(decoded, ComparisonResults):
+            res = decoded
     return res
 
 
