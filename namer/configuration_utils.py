@@ -3,6 +3,7 @@ Namer Configuration readers/verifier
 """
 
 import configparser
+import json
 import os
 import random
 import re
@@ -15,6 +16,7 @@ from loguru import logger
 from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 from namer.configuration import NamerConfig
+from namer.database import abbreviations
 from namer.name_formatter import PartialFormatter
 
 
@@ -99,6 +101,12 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.sites_with_no_date_info = [re.sub(r"[^a-z0-9]", "", x.strip().lower()) for x in config.get("namer", "sites_with_no_date_info", fallback="").split(",")]
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")
+
+    namer_config.site_abbreviations = abbreviations
+    site_abbreviations = config.get("namer", "site_abbreviations", fallback=None)
+    if site_abbreviations:
+        namer_config.site_abbreviations.update(json.loads(site_abbreviations))
+
     namer_config.override_tpdb_address = config.get("namer", "override_tpdb_address", fallback="https://api.metadataapi.net/")
 
     namer_config.write_namer_log = config.getboolean("namer", "write_namer_log", fallback=False)

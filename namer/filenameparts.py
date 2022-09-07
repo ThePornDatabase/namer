@@ -8,8 +8,7 @@ from typing import Optional, Pattern
 
 from loguru import logger
 
-from namer.database import abbreviations
-
+from namer.configuration import NamerConfig
 
 DEFAULT_REGEX_TOKENS = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
 
@@ -117,13 +116,13 @@ def parser_config_to_regex(tokens: str) -> Pattern[str]:
     return re.compile(regex)
 
 
-def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> FileNameParts:
+def parse_file_name(filename: str, namer_config: NamerConfig) -> FileNameParts:
     """
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.
     """
-    filename = replace_abbreviations(filename)
-    regex = parser_config_to_regex(regex_config)
+    filename = replace_abbreviations(filename, namer_config)
+    regex = parser_config_to_regex(namer_config.name_parser)
     file_name_parts = FileNameParts()
     file_name_parts.extension = PurePath(filename).suffix[1:]
     match = regex.search(filename)
@@ -150,8 +149,8 @@ def parse_file_name(filename: str, regex_config: str = DEFAULT_REGEX_TOKENS) -> 
     return file_name_parts
 
 
-def replace_abbreviations(text: str):
-    for abbreviation, full in abbreviations.items():
+def replace_abbreviations(text: str, namer_config: NamerConfig):
+    for abbreviation, full in namer_config.site_abbreviations.items():
         r = re.compile(fr'^{abbreviation} ', re.IGNORECASE)
         if r.match(text):
             text = r.sub(f'{full} ', text, 1)
