@@ -1,14 +1,14 @@
 <ul class="nav nav-tabs card-header-tabs">
-    <li class="nav-item">
+    <li class="nav-item me-2">
         <a class="nav-link{% if active_page == 'failed' %} active{% endif %}" href="./failed">Files</a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item me-2">
         <a class="nav-link{% if active_page == 'queue' %} active{% endif %}" href="./queue">
             Queue
-            <span id="queueSize" class="badge text-bg-secondary"></span>
+            <span id="queueSize" class="badge text-bg-secondary">0</span>
         </a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item me-2">
         <a class="nav-link{% if active_page == 'settings' %} active{% endif %}" href="./settings">Settings</a>
     </li>
 </ul>
