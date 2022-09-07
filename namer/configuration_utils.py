@@ -105,7 +105,15 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.site_abbreviations = abbreviations
     site_abbreviations = config.get("namer", "site_abbreviations", fallback=None)
     if site_abbreviations:
-        namer_config.site_abbreviations.update(json.loads(site_abbreviations))
+        data = json.loads(site_abbreviations)
+        namer_config.site_abbreviations.update(data)
+
+    new_abbreviation = {}
+    for abbreviation, full in namer_config.site_abbreviations.items():
+        key = re.compile(fr'^{abbreviation} ', re.IGNORECASE)
+        new_abbreviation[key] = f'{full} '
+
+    namer_config.site_abbreviations = new_abbreviation
 
     namer_config.override_tpdb_address = config.get("namer", "override_tpdb_address", fallback="https://api.metadataapi.net/")
 

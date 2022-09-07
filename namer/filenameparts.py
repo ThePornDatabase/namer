@@ -151,9 +151,8 @@ def parse_file_name(filename: str, namer_config: NamerConfig) -> FileNameParts:
 
 def replace_abbreviations(text: str, namer_config: NamerConfig):
     for abbreviation, full in namer_config.site_abbreviations.items():
-        r = re.compile(fr'^{abbreviation} ', re.IGNORECASE)
-        if r.match(text):
-            text = r.sub(f'{full} ', text, 1)
+        if abbreviation.match(text):
+            text = abbreviation.sub(full, text, 1)
             break
 
     return text
