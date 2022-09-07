@@ -364,7 +364,7 @@ class NamerConfig:
                 "write_namer_failed_log": self.write_namer_failed_log,
                 "trailer_location": self.trailer_location,
                 "sites_with_no_date_info": self.sites_with_no_date_info,
-                "site_abbreviations": self.site_abbreviations,
+                "site_abbreviations": {key.pattern: value for key, value in self.site_abbreviations.items()},
                 "update_permissions_ownership": self.update_permissions_ownership,
                 "set_dir_permissions": self.set_dir_permissions,
                 "set_file_permissions": self.set_file_permissions,
