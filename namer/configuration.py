@@ -6,7 +6,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
 
 from requests_cache import CachedSession
 
@@ -186,6 +186,13 @@ class NamerConfig:
     scrapers/storage mechanisms.
     """
 
+    site_abbreviations: Dict[str, str]
+    """
+    Configuration provided list of abbreviations, should the site of a parsed file name match the abbreviation (key),
+    it will be replaced with the value matching the key, like ["aa","Amature Allure"].   It is up to the user to provide
+    a list of abbreviations.
+    """
+
     enabled_requests_cache: bool = True
     """
     Cache http requests
@@ -357,6 +364,7 @@ class NamerConfig:
                 "write_namer_failed_log": self.write_namer_failed_log,
                 "trailer_location": self.trailer_location,
                 "sites_with_no_date_info": self.sites_with_no_date_info,
+                "site_abbreviations": self.site_abbreviations,
                 "update_permissions_ownership": self.update_permissions_ownership,
                 "set_dir_permissions": self.set_dir_permissions,
                 "set_file_permissions": self.set_file_permissions,

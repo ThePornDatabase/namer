@@ -23,7 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test parsing a stored response as a LookedUpFileInfo
         """
         with environment() as (_path, _parrot, config):
-            name = parse_file_name("DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4")
+            name = parse_file_name("DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.mp4", sample_config())
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
             result = results.results[0]
@@ -52,7 +52,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with environment() as (_path, _parrot, config):
             # the "e"s in the string below are unicode е (0x435), not asci e (0x65).
-            name = parse_file_name("DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4")
+            name = parse_file_name("DorcеlClub - 2021-12-23 - Aya.Bеnеtti.Mеgane.Lopеz.And.Bеlla.Tina.mp4", sample_config())
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
             result = results.results[0]
@@ -81,7 +81,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test parsing a stored response as a LookedUpFileInfo
         """
         with environment() as (_path, _parrot, config):
-            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
             result = results.results[0]
@@ -120,7 +120,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ssb2.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name("BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4")
+        name = parse_file_name("BrazzersExxtra.22.02.28.Marykate.Moss.Suck.Suck.Blow.XXX.1080p.MP4-WRB-xpost.mp4", sample_config())
         results = match(name, sample_config())
         self.assertEqual(len(results.results), 1)
         result = results.results[0]
@@ -137,7 +137,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
         with environment() as (_path, _parrot, config):
-            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
             result = results.results[0]

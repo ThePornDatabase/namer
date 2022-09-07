@@ -52,7 +52,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.full.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
         config = sample_config()
         config.enable_metadataapi_genres = True
         results = match(name, config)
@@ -137,7 +137,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         response = Path(__file__).resolve().parent / "ea.full.json"
         mock_response.return_value = response.read_text()
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
         config = sample_config()
         results = match(name, config)
         self.assertEqual(len(results.results), 1)

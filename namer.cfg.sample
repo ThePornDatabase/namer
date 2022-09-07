@@ -82,6 +82,10 @@ trailer_location =
 # values are set to the scrape time, not the video release date.
 sites_with_no_date_info =
 
+# Site abbreviations are short strings converted to longer strings in the site section of a parse file name.
+# Useful to match files whose names include the abbreviations rather than full site names.
+# A one line json string that should be a map.
+site_abbreviations = {"bex" : "BrazzersExxtra", "ps": "PropertySex"}
 
 # When guessing at matches namer can use performer names to attempt to match.   This can be costly in terms of cpu time.
 # Plus who lists all the performers if over 6 on a scene's name?   You can increase this, but the cpu/runtime cost increases

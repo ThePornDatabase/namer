@@ -325,7 +325,7 @@ def __exact_command(target_movie_file: Path, target_dir: Optional[Path], config:
         name = target_dir.name + target_movie_file.suffix
         parsed_dir_name = True
 
-    command.parsed_file = parse_file_name(name, config.name_parser)
+    command.parsed_file = parse_file_name(name, config)
     command.parsed_dir_name = parsed_dir_name
 
     return command

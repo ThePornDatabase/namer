@@ -45,7 +45,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "poster.png", poster)
             target_file = (tempdir / "DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4")
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
-            name_parts = parse_file_name(target_file.name)
+            name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
@@ -63,7 +63,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = tempdir / "poster.png"
             shutil.copy(test_dir / "poster.png", poster)
-            name_parts = parse_file_name(target_file.name)
+            name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
@@ -83,7 +83,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = tempdir / "poster.png"
             shutil.copy(test_dir / "poster.png", poster)
-            name_parts = parse_file_name(target_file.name)
+            name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
@@ -95,7 +95,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = tempdir / "poster.png"
             shutil.copy(test_dir / "poster.png", poster)
-            name_parts = parse_file_name(target_file.name)
+            name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
@@ -114,7 +114,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             poster = None
-            name_parts = parse_file_name(target_file.name)
+            name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
@@ -128,7 +128,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (tempdir, _parrot, config):
             targetfile = (tempdir / "test" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             poster = None
-            name_parts = parse_file_name(targetfile.name)
+            name_parts = parse_file_name(targetfile.name, config)
             info = match(name_parts, config)
             ffprobe_results = ffprobe(targetfile)
             update_mp4_file(targetfile, info.results[0].looked_up, poster, ffprobe_results, config)
