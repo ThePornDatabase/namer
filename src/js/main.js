@@ -1,12 +1,15 @@
 import {Popover, Modal} from 'bootstrap'
 import $ from 'jquery'
 import 'datatables.net-bs5'
+import {escape} from 'lodash'
 
 import {Helpers} from './helpers'
 
 const filesResult = $('#filesResult')
 const resultForm = $('#searchResults .modal-body')
+const resultFormTitle = $('#modalSearchResultsLabel span')
 const logForm = $('#logFile .modal-body')
+const logFormTitle = $('#modalLogsLabel span')
 const searchForm = $('#searchForm')
 const searchButton = $('#searchForm .modal-footer .search')
 const queryInput = $('#queryInput')
@@ -22,6 +25,10 @@ searchButton.on('click', function () {
         'query': queryInput.val(),
         'file': queryInput.data('file'),
     }
+
+    const title = escape(`(${data['file']}) [${data['query']}]`)
+    resultFormTitle.html(title)
+    resultFormTitle.attr('title', title)
 
     Helpers.request('./api/v1/get_search', data, function (data) {
         Helpers.render('searchResults', data, resultForm, function (selector) {
@@ -49,6 +56,11 @@ filesResult.on('click', '.log', function () {
     const data = {
         'file': $(this).data('file'),
     }
+
+    const title = escape(`[${data['file']}]`)
+
+    logFormTitle.html(title)
+    logFormTitle.attr('title', title)
 
     Helpers.request('./api/v1/read_failed_log', data, function (data) {
         Helpers.render('logFile', data, logForm, function (selector) {
