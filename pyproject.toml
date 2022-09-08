@@ -47,7 +47,7 @@ max_line_length = 150
 mccabe = ["+*"]
 pycodestyle = ["+*", "-E501", "-E722"]
 pyflakes = ["+*"]
-pylint = ["+*", "-C0301", "-I1101" ]
+pylint = ["+*", "-C0301", "-I1101"]
 
 [tool.pylint.'MASTER']
 extension-pkg-allow-list = ["lxml"]

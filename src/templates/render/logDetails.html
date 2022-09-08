@@ -1,10 +1,5 @@
 {% set name_match = True if file['name_match'] > 94.9 else False %}
 
-{% set performers = [] %}
-{% for performer in file['looked_up']['performers'] %}
-    {% do performers.append(performer['name']) %}
-{% endfor %}
-
 <p>
     <span><b>Site Match:</b> {{ bool_to_icon(file['site_match']) }}</span>
     <br>
