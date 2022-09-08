@@ -16,7 +16,8 @@
     "bootstrap-icons": "^1.9.1",
     "datatables.net": "^1.12.1",
     "datatables.net-bs5": "^1.12.1",
-    "jquery": "^3.6.1"
+    "jquery": "^3.6.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
