@@ -110,7 +110,7 @@ function rename() {
 
 function updateQueueSize() {
     Helpers.request('./api/v1/get_queue', null, function (data) {
-        Helpers.render('queueSize', data, queueSize)
+        queueSize.html(data)
     })
 }
 
