@@ -1,6 +1,7 @@
 <div class="row row-cols-auto justify-content-center">
-    {% if data['data']['results'] %}
-        {% for file in data['data']['results'] %}
+    {% set results = data['data']['results']|selectattr('name_match', '>=', 80)|list %}
+    {% if results %}
+        {% for file in results %}
             <div class="col m-1 mb-2">
                 {% include 'components/cardLog.html' %}
             </div>
