@@ -110,7 +110,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
 
     new_abbreviation = {}
     for abbreviation, full in namer_config.site_abbreviations.items():
-        key = re.compile(fr'^{abbreviation} ', re.IGNORECASE)
+        key = re.compile(fr'^{abbreviation}[ .-]+', re.IGNORECASE)
         new_abbreviation[key] = f'{full} '
 
     namer_config.site_abbreviations = new_abbreviation
