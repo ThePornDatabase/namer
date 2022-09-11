@@ -7,7 +7,7 @@ periods, ".", as any number of spaces " ", dashes "-", or periods ".".
 Provided you have an access token to the porndb (free sign up) https://www.metadataapi.net/, this program will
 attempt to match your file's name to search results from the porndb.   Please note that the site must at least be
 a substring of the actual site name on the porndb, and the date must be within one day or the release date on the
-porndb for a match to be considered.  If the log file flag is enabled then a <original file name minus ext>_namer.log
+porndb for a match to be considered.  If the log file flag is enabled then a <original file name minus ext>_namer.json.gz
 file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
 match the file.
 """

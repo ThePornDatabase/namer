@@ -3,6 +3,7 @@ Tools for working with files and directories in namer.
 """
 
 import argparse
+import gzip
 from dataclasses import dataclass
 import os
 import shutil
@@ -89,19 +90,21 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
     """
     log_name = None
     if movie_file:
-        log_name = movie_file.with_name(movie_file.stem + "_namer.log")
+        log_name = movie_file.with_name(movie_file.stem + "_namer.json.gz")
         logger.info("Writing log to {}", log_name)
-        with open(log_name, "wt", encoding="UTF-8") as log_file:
-            if not match_attempts:
-                log_file.write("No search results returned.\n")
-            else:
-                for result in match_attempts.results:
-                    del result.looked_up.original_query
-                    del result.looked_up.original_response
-                json_out = jsonpickle.encode(match_attempts)
-                if json_out:
-                    log_file.write(json_out)
+        with open(log_name, "wb") as log_file:
+            for result in match_attempts.results:
+                del result.looked_up.original_query
+                del result.looked_up.original_response
+
+            json_out = jsonpickle.encode(match_attempts, separators=(',', ':'))
+            if json_out:
+                json_out = json_out.encode('UTF-8')
+                json_out = gzip.compress(json_out)
+                log_file.write(json_out)
+
         set_permissions(log_name, namer_config)
+
     return log_name
 
 
@@ -245,7 +248,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         containing_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"moving other files to new dir: {containing_dir} from {command.target_directory}")
         # first remove namer log if exists
-        possible_log = command.target_movie_file.parent / (command.target_movie_file.stem + "_namer.log")
+        possible_log = command.target_movie_file.parent / (command.target_movie_file.stem + "_namer.json.gz")
         if possible_log.exists():
             possible_log.unlink()
 

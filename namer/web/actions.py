@@ -1,7 +1,7 @@
 """
 Helper functions to tie in to namer's functionality.
 """
-
+import gzip
 import json
 import math
 import shutil
@@ -110,14 +110,15 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
 
 def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonResults]:
     file_name = config.failed_dir / name
-    file_name = file_name.parent / (file_name.stem + '_namer.log')
+    file_name = file_name.parent / (file_name.stem + '_namer.json.gz')
 
     res: Optional[ComparisonResults] = None
     if file_name.is_file():
-        data = file_name.read_text('UTF-8')
+        data = gzip.decompress(file_name.read_bytes())
         decoded = jsonpickle.decode(data)
         if decoded and isinstance(decoded, ComparisonResults):
             res = decoded
+
     return res
 
 
