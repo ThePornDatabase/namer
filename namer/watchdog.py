@@ -62,7 +62,7 @@ def retry_failed(namer_config: NamerConfig):
     logger.info("Retry failed items:")
 
     # remove all old namer log files
-    for log_file in namer_config.failed_dir.rglob("**/*_namer.log"):
+    for log_file in namer_config.failed_dir.rglob("**/*_namer.json.gz"):
         log_file.unlink()
 
     # move all files back to watch dir.

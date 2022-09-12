@@ -187,7 +187,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
-            self.assertTrue((output_file.parent / (output_file.stem + "_namer.log")).exists())
+            self.assertTrue((output_file.parent / (output_file.stem + "_namer.json.gz")).exists())
             output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
             validate_mp4_tags(self, output_file2)
             validate_permissions(self, output_file2, 664)
@@ -346,7 +346,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(work_file.exists())
             failed_file = config.failed_dir / relative
             self.assertTrue(failed_file.exists() and failed_file.is_file())
-            failed_log_file = failed_file.parent / (failed_file.stem + "_namer.log")
+            failed_log_file = failed_file.parent / (failed_file.stem + "_namer.json.gz")
             self.assertTrue(failed_log_file.exists() and failed_log_file.is_file())
             retry_failed(config)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
