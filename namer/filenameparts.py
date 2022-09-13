@@ -144,7 +144,7 @@ def parse_file_name(filename: str, namer_config: NamerConfig) -> FileNameParts:
         file_name_parts.extension = match.group("ext")
         file_name_parts.source_file_name = filename
     else:
-        logger.warning("Could not parse target name which may be a file (or directory) name depending on settings and input: {}", filename)
+        logger.debug("Could not parse target name which may be a file (or directory) name depending on settings and input: {}", filename)
 
     return file_name_parts
 

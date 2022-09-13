@@ -102,14 +102,14 @@ def from_config(config: ConfigParser) -> NamerConfig:
     if "" in namer_config.sites_with_no_date_info:
         namer_config.sites_with_no_date_info.remove("")
 
-    abbreviation = abbreviations.copy()
+    abbreviations_db = abbreviations.copy()
     site_abbreviations = config.get("namer", "site_abbreviations", fallback=None)
     if site_abbreviations:
         data = json.loads(site_abbreviations)
-        abbreviation.update(data)
+        abbreviations_db.update(data)
 
     new_abbreviation = {}
-    for abbreviation, full in abbreviation.items():
+    for abbreviation, full in abbreviations_db.items():
         key = re.compile(fr'^{abbreviation}[ .-]+', re.IGNORECASE)
         new_abbreviation[key] = f'{full} '
 
