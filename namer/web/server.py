@@ -1,6 +1,7 @@
 """
 A wrapper allowing shutdown of a Flask server.
 """
+import logging
 from asyncio.log import logger
 import mimetypes
 from queue import Queue
@@ -36,12 +37,16 @@ class GenericWebServer:
         'font/woff2': '.woff2',
     }
 
-    def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_path: Optional[str] = 'public'):
+    def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_path: Optional[str] = 'public', quiet=True):
         self.__host = host
         self.__port = port
         self.__path = '/' if not webroot else webroot
         self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_path, template_folder='templates')
         self.__blueprints = blueprints
+
+        if quiet:
+            logging.getLogger('waitress').disabled = True
+            logging.getLogger('waitress.queue').disabled = True
 
         self.__add_mime_types()
         self.__register_blueprints()
@@ -71,7 +76,6 @@ class GenericWebServer:
             'bool_to_icon': self.bool_to_icon,
         }
         self.__app.jinja_env.globals.update(**functions)
-
         self.__app.jinja_env.add_extension('jinja2.ext.do')
 
     def start(self):

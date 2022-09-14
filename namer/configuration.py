@@ -1,7 +1,7 @@
 """
 Namer Configuration readers/verifier
 """
-
+import json
 import os
 import sys
 from dataclasses import dataclass
@@ -346,8 +346,11 @@ class NamerConfig:
             for value in config[key]:
                 output.append(f"  {value}: {config[key][value]}")
 
-        # return json.dumps(config, indent=2)
         return '\n'.join(output)
+
+    def json(self):
+        config = self.to_dict()
+        return json.dumps(config, indent=2)
 
     def to_dict(self) -> dict:
         porndb_token = "None In Set, Go to https://metadatapi.net/ to get one!"
@@ -390,7 +393,7 @@ class NamerConfig:
             },
             "Watchdog Config": {
                 "ignored_dir_regex": self.ignored_dir_regex,
-                "min_file_size": f"{self.min_file_size} MB",
+                "min_file_size": self.min_file_size,
                 "del_other_files": self.del_other_files,
                 "new_relative_path_name": self.new_relative_path_name,
                 "watch_dir": str(self.watch_dir),
