@@ -111,9 +111,11 @@ def __update_results(results: List[ComparisonResult], name_parts: FileNameParts,
 def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
     results = []
     results = __update_results(results, name_parts, namer_config)
-    results = __update_results(results, name_parts, namer_config, skip_date=True)
-    results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True)
     results = __update_results(results, name_parts, namer_config, skip_name=True)
+
+    if name_parts.date:
+        results = __update_results(results, name_parts, namer_config, skip_date=True)
+        results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True)
 
     if name_parts.date and (not results or not results[-1].is_match()):
         name_parts.date = (date.fromisoformat(name_parts.date) + timedelta(days=-1)).isoformat()
