@@ -30,7 +30,10 @@ from namer.http import Http
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
     powerset_iter = []
 
-    max_size = min(len(match_terms), config.max_performer_names)
+    max_size = len(match_terms)
+    if config.max_performer_names > 0:
+        max_size = min(max_size, config.max_performer_names)
+
     for length in range(1, max_size + 1):
         data = map(" ".join, itertools.combinations(match_terms, length))
         powerset_iter = itertools.chain(powerset_iter, data)
