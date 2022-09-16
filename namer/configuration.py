@@ -348,7 +348,7 @@ class NamerConfig:
 
         return '\n'.join(output)
 
-    def json(self):
+    def to_json(self):
         config = self.to_dict()
         return json.dumps(config, indent=2)
 
@@ -373,7 +373,7 @@ class NamerConfig:
                 "set_file_permissions": self.set_file_permissions,
                 "set_uid": self.set_uid,
                 "set_gid": self.set_gid,
-                "max_performer_names": self.set_file_permissions,
+                "max_performer_names": self.max_performer_names,
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address
