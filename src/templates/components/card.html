@@ -12,7 +12,7 @@
         {% include 'components/performersBadges.html' %}
     </div>
     <div class="card-footer">
-        <a href="https://metadataapi.net/scenes/{{ file['id'] }}" class="btn btn-secondary" target="_blank">Show</a>
+        <a href="https://metadataapi.net/{{ file['id'] }}" class="btn btn-secondary" target="_blank">Show</a>
         <button class="btn btn-primary float-end rename" data-bs-dismiss="modal" data-scene-id="{{ file['id'] }}" data-file="{{ data['file'] }}">
             Select
         </button>

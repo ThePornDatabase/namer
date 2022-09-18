@@ -187,6 +187,8 @@ def process_file(command: Command) -> Optional[Command]:
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
             ffprobe_results = ffprobe(command.target_movie_file)
+            if ffprobe_results:
+                new_metadata.resolution = ffprobe_results.get_resolution()
             target = move_to_final_location(command, new_metadata)
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, command.config)

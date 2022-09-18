@@ -22,7 +22,7 @@ from PIL import Image
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FFProbeStream:
-    index: int                      # stream numer
+    index: int                      # stream number
     codec_name: str                 # "mp3", "h264", "hvec", "png"
     codec_type: str                 # "audio" or "video"
     disposition_default: bool       # default stream of this type
@@ -99,20 +99,10 @@ class FFProbeResults:
     def get_format(self) -> FFProbeFormat:
         return self.__format
 
-
-def get_resolution(file: Path) -> int:
-    """
-    Gets the vertical resolution of a mp4 file.  For example, 720, 1080, 2160...
-    Returns zero if resolution can not be determined.
-    """
-    logger.info("resolution stream of file {}", file)
-    probe = ffprobe(file)
-    if probe:
-        stream = probe.get_default_video_stream()
+    def get_resolution(self) -> Optional[int]:
+        stream = self.get_default_video_stream()
         if stream:
             return stream.height if stream.height else 0
-
-    return 0
 
 
 @logger.catch

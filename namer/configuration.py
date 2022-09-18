@@ -193,6 +193,21 @@ class NamerConfig:
     a list of abbreviations.
     """
 
+    movie_data_prefered: Sequence[str]
+    """
+    Sequence of sites where movie data should be prefered (movies will be marked scenes instead of movie)
+    """
+
+    vr_studios: Sequence[str]
+    """
+    Sequence of vr studios who's content is all vr content.
+    """
+
+    vr_tags: Sequence[str]
+    """
+    a set of tags that indicates an individual video is vr.
+    """
+
     enabled_requests_cache: bool = True
     """
     Cache http requests
@@ -367,6 +382,9 @@ class NamerConfig:
                 "write_namer_failed_log": self.write_namer_failed_log,
                 "trailer_location": self.trailer_location,
                 "sites_with_no_date_info": self.sites_with_no_date_info,
+                "movie_data_prefered": self.movie_data_prefered,
+                "vr_studios": self.vr_studios,
+                "vr_tags": self.vr_tags,
                 "site_abbreviations": {key.pattern: value for key, value in self.site_abbreviations.items()},
                 "update_permissions_ownership": self.update_permissions_ownership,
                 "set_dir_permissions": self.set_dir_permissions,

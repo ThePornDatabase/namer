@@ -74,7 +74,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test that adding metadata to two identical files on two different systems, at two different times
         produces the shame bytes (via sha256)
         """
+        # when the id = <id>
         expected_on_all_oses = '8f5d649c470a350154a69762b2de17d7ba25492abd93a83ed780ab41c1d5f208'
+
         sha_1 = None
         sha_2 = None
         with environment() as (tempdir, _parrot, config):

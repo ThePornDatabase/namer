@@ -105,21 +105,27 @@ class FakeTPDB(ParrotWebServer):
     def default_additions(self):
         # Evil Angel:
         # Search Results
-        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela.Clutch.Fabulous.Anal.3-Way&limit=25")
+        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_example_evil_angel("/scenes?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03&limit=25")
         # Extra Metadata Lookup
         self.add_example_evil_angel("/scenes/1678283?")
         # UI Tests
-        self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21&limit=25")
+        self.add_example_evil_angel("/scenes?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+        self.add_example_evil_angel("/movies?q=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
         # Image for UI Test:
         self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
         self.add_poster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
         # DorcelClub
         # Search Results
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya.Benetti.Megane.Lopez.And.Bella.Tina&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.&limit=25")
         # Extra Metadata Lookup
         self.add_example_dorcel_club("/scenes/1674059?")
         # with utf8 characters
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya.B%D0%B5n%D0%B5tti.M%D0%B5gane.Lop%D0%B5z.And.B%D0%B5lla.Tina&limit=25")
+        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20B%D0%B5n%D0%B5tti%20M%D0%B5gane%20Lop%D0%B5z%20And%20B%D0%B5lla%20Tina&limit=25")
 
 
 @contextlib.contextmanager

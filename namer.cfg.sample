@@ -25,15 +25,19 @@ porndb_token = ****************************************
 # Allowed replacements:
 #
 # * 'date' - in the format of YYYY-MM-DD.
+# * 'year' - just the year of the scene/movie.
 # * 'description' - too long, don't use in a name.
-# * 'name' - the scene name
-# * 'site' - the site name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
-# * 'full_site' - the site name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
+# * 'name' - the scene/movie name
+# * 'site' - the site or studio name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
+# * 'full_site' - the full site/studio name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
 # * 'performers' - space seperated list of female performers
 # * 'all_performers' - space seperated list of all performers
 # * 'act' - an act, parsed from original file name, don't use.
 # * 'ext' - original file's extension, you should keep this.
 # * 'trans' - 'TS', or 'ts' if detected in original file name.
+# * 'type' - "movie" or "scene" depending on tpdb api used to find the metadata (/scenes or /movies)
+# * 'resolution' - 480p, 720p, 1080p, 4k, or any other integer
+# * 'vr', is the studio is a known vr studio, 'vr', else '', can be used for folder names, like ../adult{vr}/.. 
 #
 # This should not contain paths, as files will be processed in place when called on the command line from namer.  
 inplace_name={site} - {date} - {name}.{ext}
@@ -81,6 +85,17 @@ trailer_location =
 # Comma seperated list of sites whose date information in tpdb is known to be sketchy at best as the
 # values are set to the scrape time, not the video release date.
 sites_with_no_date_info =
+
+# Comma seperated list of sites/studios whose Sites/Studios where namer will prefer matching movies 
+# instead of scenes as default behavior
+# will also switch the type flag from 'movie' to 'scene'.
+movie_data_prefered = missax
+
+# Comma seperated list of vr studios, this will be used to set the vr name flag.
+vr_studios = 18 VR,Babe VR,Badoink VR,Dorm Room,Kink VR,Real VR,RealJamVR,Sex Like Real,SexBabesVR,SinsVR,SLR Originals,Swallowbay,Virtual Taboo,VirtualRealPorn,VR Bangers,VR Cosplay X,VR Hush,VRConk,VRedging,Wankz VR
+
+# a set of tags that indicates an individual video is vr.
+vr_tags = virtual reality, vr porn
 
 # Site abbreviations are short strings converted to longer strings in the site section of a parse file name.
 # Useful to match files whose names include the abbreviations rather than full site names.

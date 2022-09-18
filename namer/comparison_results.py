@@ -2,9 +2,11 @@ from dataclasses import dataclass, field
 from pathlib import PurePath
 from typing import List, Optional
 
+from pathvalidate import Platform, sanitize_filename
+
+from namer.configuration import NamerConfig
 from namer.filenameparts import FileNameParts
 from namer.name_formatter import PartialFormatter
-from pathvalidate import Platform, sanitize_filename
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -112,19 +114,46 @@ class LookedUpFileInfo:
     """
     Tags associated with the video.   Noisy and long list.
     """
+    type: Optional[str] = None
+    """
+    movie or scene, a distinction without a difference.
+    """
+    duration: Optional[float] = None
+    """
+    Minute long run lenth of scene or movie.
+    """
+    resolution: Optional[int]
+    """
+    the width of video in pixels.
+    """
 
     def __init__(self):
         self.performers = []
         self.tags = []
+        self.resolution = None
         self.original_parsed_filename = FileNameParts()
 
-    def as_dict(self):
+    def as_dict(self, config: NamerConfig):
         """
         Converts the info in to a dict that can be used
         by PartialFormatter to return a new path for a file.
         """
         if not self.original_parsed_filename:
             self.original_parsed_filename = FileNameParts()
+
+        res = self.resolution
+        res_str: Optional[str] = None
+        if res:
+            res_str = "4k" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
+
+        vr = ""
+        if (self.site and self.site.upper() in config.vr_studios) or any(tag.strip().upper() in config.vr_tags for tag in self.tags):
+            vr = "vr"
+
+        if self.original_query and '/movies' in self.original_query and self.site not in config.movie_data_prefered:
+            self.type = 'movie'
+        else:
+            self.type = 'scene'
 
         return {
             "uuid": self.uuid,
@@ -137,13 +166,16 @@ class LookedUpFileInfo:
             "all_performers": " ".join(map(lambda p: p.name, self.performers)) if self.performers else None,
             "ext": self.original_parsed_filename.extension if self.original_parsed_filename else None,
             "trans": self.original_parsed_filename.trans if self.original_parsed_filename else None,
+            "vr": vr,
+            "resolution": res_str,
+            "type": self.type,
         }
 
-    def new_file_name(self, template: str, infix: str = "(0)") -> str:
+    def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
-        dictionary = self.as_dict()
+        dictionary = self.as_dict(config)
         clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) for k, v in dictionary.items()}
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)

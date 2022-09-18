@@ -100,7 +100,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <genre>Threesome</genre>
   <genre>Toys / Dildos</genre>
   <studio>Evil Angel</studio>
-  <theporndbid>1678283</theporndbid>
+  <theporndbid>scenes/1678283</theporndbid>
   <phoenixadultid/>
   <phoenixadulturlid/>
   <sourceid>https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543</sourceid>
@@ -185,7 +185,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <tag>Toys / Dildos</tag>
   <genre>Adult</genre>
   <studio>Evil Angel</studio>
-  <theporndbid>1678283</theporndbid>
+  <theporndbid>scenes/1678283</theporndbid>
   <phoenixadultid/>
   <phoenixadulturlid/>
   <sourceid>https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543</sourceid>

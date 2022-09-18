@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from namer.ffmpeg import get_audio_stream_for_lang, get_resolution, update_audio_stream_if_needed, ffprobe
+from namer.ffmpeg import get_audio_stream_for_lang, update_audio_stream_if_needed, ffprobe
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -22,8 +22,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            res = get_resolution(file)
-            self.assertEqual(res, 240)
+            results = ffprobe(file)
+            self.assertIsNotNone(results)
+            if results:
+                res = results.get_resolution()
+                self.assertEqual(res, 240)
 
     def test_get_audio_stream(self):
         """

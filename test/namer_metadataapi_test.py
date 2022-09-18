@@ -111,7 +111,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.performers[1].role, "Female")
             self.assertEqual(info.performers[2].name, "Mark Wood")
             self.assertEqual(info.performers[2].role, "Male")
-            self.assertEqual(info.new_file_name(template="{name}"), "Carmela Clutch Fabulous Anal 3-Way!")
+            self.assertEqual(info.new_file_name("{name}", config), "Carmela Clutch Fabulous Anal 3-Way!")
 
     @mock.patch("namer.metadataapi.__get_response_json_object")
     def test_call_metadataapi_net2(self, mock_response):
