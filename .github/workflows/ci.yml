@@ -29,7 +29,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: '1.1.14'
+          poetry-version: '1.2.1'
 
       - name: Install ffmpeg
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
-          poetry-version: '1.1.14'
+          poetry-version: '1.2.1'
       - run: poetry install
       - run: poetry run flakeheaven lint
 
@@ -106,7 +106,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
-          poetry-version: '1.1.14'
+          poetry-version: '1.2.1'
 
       - run: poetry install
       
@@ -163,7 +163,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: '1.1.14'
+          poetry-version: '1.2.1'
 
       - name: create tag from pyproject version on change.
         id: auto-tag
@@ -217,7 +217,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: '1.1.14'
+          poetry-version: '1.2.1'
       - run: poetry install
       - run: poetry build
 
