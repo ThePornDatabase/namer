@@ -22,7 +22,7 @@ from namer.configuration_utils import default_config, from_config, verify_config
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults, ffprobe
 from namer.filenameparts import FileNameParts
-from namer.metadataapi import get_complete_metadatapi_net_fileinfo, get_image, get_trailer, match
+from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
@@ -168,7 +168,7 @@ def process_file(command: Command) -> Optional[Command]:
         #    phash = VideoPerceptualHash().get_phash(command.target_movie_file)
         #    todo use phash
         elif new_metadata is None and command.tpdb_id is not None and command.parsed_file is not None:
-            file_infos = get_complete_metadatapi_net_fileinfo(command.parsed_file, command.tpdb_id, command.config)
+            file_infos = get_complete_metadataapi_net_fileinfo(command.parsed_file, command.tpdb_id, command.config)
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:
