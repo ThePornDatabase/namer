@@ -224,13 +224,13 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
 def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     movie = True if "/movie" in url else False
     file_info = LookedUpFileInfo()
-    id = None
+    data_id = None
     if hasattr(data, '_id') and not movie:
         file_info.uuid = f"scenes/{data._id}"  # pylint: disable=protected-access
-        id = data._id
+        data_id = data._id
     elif hasattr(data, 'uuid') and movie:
         file_info.uuid = f"movies/{data.uuid}"
-        id = data.uuid
+        data_id = data.uuid
     file_info.name = data.title
     file_info.description = data.description
     file_info.date = data.date
@@ -246,7 +246,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     else:
         file_info.trailer_url = None
 
-    if hasattr(data, 'backgroud') and data.background:
+    if hasattr(data, 'background') and data.background:
         file_info.background_url = data.background.large
     file_info.site = data.site.name
 
@@ -257,7 +257,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     # This is for backwards compatibility of sha hashes only.
     # remove before updating metadata with phash/oshash, replace with full tpdb url, or fully remove, or get a real uuid.
     # this gets written in to the metadata of a video and effects file hashes.
-    file_info.look_up_site_id = id
+    file_info.look_up_site_id = data_id
 
     for json_performer in data.performers:
         if not json_performer.name:
@@ -347,7 +347,7 @@ def __get_metadataapi_net_fileinfo(name_parts: FileNameParts, namer_config: Name
     return file_infos
 
 
-def get_complete_metadatapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
+def get_complete_metadataapi_net_fileinfo(name_parts: FileNameParts, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
     url = __build_url(namer_config, uuid=uuid)
     file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
     if file_infos:
@@ -370,7 +370,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     if comparison_results and comparison_results[0].is_match():
         uuid = comparison_results[0].looked_up.uuid
         if uuid:
-            file_infos: Optional[LookedUpFileInfo] = get_complete_metadatapi_net_fileinfo(file_name_parts, uuid, namer_config)
+            file_infos: Optional[LookedUpFileInfo] = get_complete_metadataapi_net_fileinfo(file_name_parts, uuid, namer_config)
             if file_infos:
                 comparison_results[0].looked_up = file_infos
     return ComparisonResults(comparison_results)

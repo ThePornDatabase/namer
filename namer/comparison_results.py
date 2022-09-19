@@ -122,7 +122,7 @@ class LookedUpFileInfo:
     """
     Minute long run lenth of scene or movie.
     """
-    resolution: Optional[int]
+    resolution: Optional[int] = None
     """
     the width of video in pixels.
     """

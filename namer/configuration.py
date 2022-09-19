@@ -99,7 +99,7 @@ class NamerConfig:
     * First any movie under two minutes is ignored and presumed to be a sample,
     * then the highest resolution video is selected
     * then the best encoding mechanism h.245, or hvec.
-    You can set minfile size to 0 if you have set
+    You can set min file size to 0 if you have set
     """
 
     max_desired_resolutions: int = -1
