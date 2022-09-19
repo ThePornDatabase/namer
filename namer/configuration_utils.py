@@ -126,6 +126,11 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.enabled_requests_cache = config.getboolean("namer", "use_requests_cache", fallback=True)
     namer_config.requests_cache_expire_minutes = config.getint("namer", "requests_cache_expire_minutes", fallback=10)
 
+    namer_config.movie_data_prefered = [x.strip().upper() for x in config.get("namer", "movie_data_prefered", fallback="").split(",")]
+    vr_studios = "18 VR,Babe VR,Badoink VR,Dorm Room,Kink VR,Real VR,RealJamVR,Sex Like Real,SexBabesVR,SinsVR,SLR Originals,Swallowbay,Virtual Taboo,VirtualRealPorn,VR Bangers,VR Cosplay X,VR Hush,VRConk,VRedging,Wankz VR"
+    namer_config.vr_studios = [x.strip().upper() for x in config.get("namer", "vr_studios", fallback=vr_studios).split(",")]
+    namer_config.vr_tags = [x.strip().upper() for x in config.get("namer", "vr_tags", fallback="virtual reality, vr porn").split(",")]
+
     namer_config.preserve_duplicates = config.getboolean("duplicates", "preserve_duplicates", fallback=True)
     namer_config.max_desired_resolutions = config.getint("duplicates", "max_desired_resolutions", fallback=-1)
     namer_config.desired_codec = [x.strip().upper() for x in config.get("duplicates", "desired_codec", fallback="hevc,h264").split(",")]

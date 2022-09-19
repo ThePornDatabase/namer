@@ -19,6 +19,9 @@ class PartialFormatter(string.Formatter):
         "ext",
         "trans",
         "uuid",
+        "vr",
+        "type",
+        "resolution",
     ]
 
     def __init__(self, missing="~~", bad_fmt="!!"):

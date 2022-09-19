@@ -93,9 +93,10 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
         log_name = movie_file.with_name(movie_file.stem + "_namer.json.gz")
         logger.info("Writing log to {}", log_name)
         with open(log_name, "wb") as log_file:
-            for result in match_attempts.results:
-                del result.looked_up.original_query
-                del result.looked_up.original_response
+            if match_attempts:
+                for result in match_attempts.results:
+                    del result.looked_up.original_query
+                    del result.looked_up.original_response
 
             json_out = jsonpickle.encode(match_attempts, separators=(',', ':'))
             if json_out:
@@ -204,7 +205,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     # Find non-conflicting movie name.
     movies: List[str] = []
     while True:
-        relative_path = Path(new_metadata.new_file_name(name_template, f"({infix})"))
+        relative_path = Path(new_metadata.new_file_name(name_template, command.config, f"({infix})"))
         movie_name = target_dir / relative_path
         movie_name = movie_name.resolve()
         infix += 1
@@ -224,7 +225,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     if not command.config.preserve_duplicates and movies:
         # Now set to the final name location since -- will grab the metadata requested
         # incase it has been updated.
-        relative_path = Path(new_metadata.new_file_name(name_template, "(0)"))
+        relative_path = Path(new_metadata.new_file_name(name_template, command.config, "(0)"))
 
         # no move best match to primary movie location.
         final_location = (target_dir / relative_path).resolve()
