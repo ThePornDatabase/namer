@@ -117,6 +117,7 @@ def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: File
     if name_parts.date:
         results = __update_results(results, name_parts, namer_config, skip_date=True, movie=movies)
         results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True, movie=movies)
+
     return results
 
 
@@ -125,10 +126,12 @@ def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) 
     if name_parts.site:
         if name_parts.site.strip().upper() in namer_config.movie_data_prefered:
             movies = True
+
     results = []
     results = __metadata_api_lookup_type(results, name_parts, namer_config, movies)
-    if len(results) < 1 or not results[0].is_match():
+    if not results or not results[0].is_match():
         results = __metadata_api_lookup_type(results, name_parts, namer_config, not movies)
+
     return results
 
 
@@ -139,6 +142,7 @@ def __match_percent(result: ComparisonResult) -> float:
 
     value = (result.name_match + add_value) if result and result.name_match else add_value
     logger.debug("Name match was {:.2f} for {}", value, result.name)
+
     return value
 
 
@@ -224,6 +228,7 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
 def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
     movie = True if "/movie" in url else False
     file_info = LookedUpFileInfo()
+
     data_id = None
     if hasattr(data, '_id') and not movie:
         file_info.uuid = f"scenes/{data._id}"  # pylint: disable=protected-access
@@ -231,23 +236,27 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     elif hasattr(data, 'uuid') and movie:
         file_info.uuid = f"movies/{data.uuid}"
         data_id = data.uuid
+
     file_info.name = data.title
     file_info.description = data.description
     file_info.date = data.date
     file_info.source_url = data.url
+
     if hasattr(data, 'poster'):
         file_info.poster_url = data.poster
     elif hasattr(data, 'front'):
         file_info.poster_url = data.front
     else:
         file_info.poster_url = None
+
+    if hasattr(data, 'background') and data.background:
+        file_info.background_url = data.background.large
+
     if hasattr(data, 'trailer'):
         file_info.trailer_url = data.trailer
     else:
         file_info.trailer_url = None
 
-    if hasattr(data, 'background') and data.background:
-        file_info.background_url = data.background.large
     file_info.site = data.site.name
 
     # clean up messy site metadata from adultdvdempire -> tpdb.
@@ -262,6 +271,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     for json_performer in data.performers:
         if not json_performer.name:
             continue
+
         performer = Performer(json_performer.name)
         if hasattr(json_performer, "parent") and hasattr(json_performer.parent, "extras"):
             performer.role = json_performer.parent.extras.gender
@@ -272,6 +282,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
             performer.image = json_performer.image
         else:
             performer.image = None
+
         file_info.performers.append(performer)
 
     file_info.original_query = url
@@ -285,6 +296,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     if hasattr(data, "tags"):
         for tag in data.tags:
             tags.append(tag.name)
+
         file_info.tags = tags
 
     return file_info
@@ -363,8 +375,10 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
     """
     if not file_name_parts:
         return ComparisonResults([])
+
     comparison_results = __metadata_api_lookup(file_name_parts, namer_config)
     comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
+
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.
     if comparison_results and comparison_results[0].is_match():
@@ -373,6 +387,7 @@ def match(file_name_parts: Optional[FileNameParts], namer_config: NamerConfig) -
             file_infos: Optional[LookedUpFileInfo] = get_complete_metadataapi_net_fileinfo(file_name_parts, uuid, namer_config)
             if file_infos:
                 comparison_results[0].looked_up = file_infos
+
     return ComparisonResults(comparison_results)
 
 
