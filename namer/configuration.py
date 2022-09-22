@@ -340,6 +340,11 @@ class NamerConfig:
     If enabled_requests_cache is true this http.session will be constructed and used for requests to tpdb.
     """
 
+    debug: bool = False
+    """
+    Set logger level to debug
+    """
+
     diagnose_errors: bool = False
     """
     Errors may be raised by the program, and when they are loguru may be used to help explain them, showing
@@ -425,6 +430,7 @@ class NamerConfig:
                 "host": self.host,
                 "web_root": self.web_root,
                 "allow_delete_files": self.allow_delete_files,
+                "debug": self.debug,
                 "diagnose_errors": self.diagnose_errors,
             }
         }
