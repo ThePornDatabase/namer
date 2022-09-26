@@ -102,7 +102,7 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
 
 def __update_results(results: List[ComparisonResult], name_parts: FileNameParts, namer_config: NamerConfig, skip_date: bool = False, skip_name: bool = False, movie: bool = False):
     if not results or not results[0].is_match():
-        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name):
+        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, movie):
             result = __evaluate_match(name_parts, match_attempt, namer_config)
             results.append(result)
         results = sorted(results, key=__match_percent, reverse=True)
@@ -230,7 +230,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     file_info = LookedUpFileInfo()
 
     object_type = data.type.lower()
-    file_info.uuid = f"{object_type}/{data._id}"  # pylint: disable=protected-access
+    file_info.uuid = f"{object_type}s/{data._id}"  # pylint: disable=protected-access
     data_id = data._id
 
     file_info.name = data.title
