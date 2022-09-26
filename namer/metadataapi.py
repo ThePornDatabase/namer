@@ -229,13 +229,9 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     movie = True if "/movie" in url else False
     file_info = LookedUpFileInfo()
 
-    data_id = None
-    if hasattr(data, '_id') and not movie:
-        file_info.uuid = f"scenes/{data._id}"  # pylint: disable=protected-access
-        data_id = data._id
-    elif hasattr(data, 'uuid') and movie:
-        file_info.uuid = f"movies/{data.uuid}"
-        data_id = data.uuid
+    object_type = data.type.lower()
+    file_info.uuid = f"{object_type}/{data._id}"  # pylint: disable=protected-access
+    data_id = data._id
 
     file_info.name = data.title
     file_info.description = data.description
