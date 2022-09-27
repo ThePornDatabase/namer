@@ -82,6 +82,7 @@ def get_search_results(query: str, file: str, config: NamerConfig, page: int = 1
     for scene_data in file_infos:
         scene = {
             'id': scene_data.uuid,
+            'type': scene_data.type,
             'title': scene_data.name,
             'date': scene_data.date,
             'poster': scene_data.poster_url,
