@@ -75,7 +75,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         produces the shame bytes (via sha256)
         """
         # when the id = <id>
-        expected_on_all_oses = '8f5d649c470a350154a69762b2de17d7ba25492abd93a83ed780ab41c1d5f208'
+        expected_on_all_oses = '20917bbeece758be9971549cbea53092ade17df9cccfa8c105e2cf5c169cb3da'
 
         sha_1 = None
         sha_2 = None
