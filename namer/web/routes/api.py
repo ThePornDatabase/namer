@@ -6,7 +6,6 @@ from queue import Queue
 
 from flask import Blueprint, jsonify, render_template, request
 from flask.wrappers import Response
-from loguru import logger
 
 from namer.command import make_command_relative_to, move_command_files
 from namer.configuration import NamerConfig
@@ -77,7 +76,6 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         if data:
             res = False
             movie = config.failed_dir / Path(data['file'])
-            logger.error(f"moving movie {movie}")
             command = make_command_relative_to(movie, config.failed_dir, config=config)
             moved_command = move_command_files(command, config.work_dir)
             if moved_command:

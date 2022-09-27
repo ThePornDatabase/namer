@@ -237,13 +237,13 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
     if dir_to_process is not None:
         logger.info("Directory to process: {}", dir_to_process)
         if not dir_to_process.is_dir() or not dir_to_process.exists():
-            logger.info("Error not a directory! {}", dir_to_process)
+            logger.error("Error not a directory! {}", dir_to_process)
             error = True
 
     if config_override is not None:
         logger.info("Config override specified: {}", config_override)
         if not config_override.is_file() or not config_override.exists():
-            logger.info("Config override specified, but file does not exit: {}", config_override)
+            logger.warning("Config override specified, but file does not exit: {}", config_override)
             error = True
     return error
 

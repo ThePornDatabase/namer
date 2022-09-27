@@ -216,9 +216,9 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
         stdout, stderr = process.communicate()
         success = process.returncode == 0
         if not success:
-            logger.info("Could not update audio stream for {}", mp4_file)
+            logger.warning("Could not update audio stream for {}", mp4_file)
             if stderr:
-                logger.info(stderr)
+                logger.error(stderr)
         else:
             logger.warning("Return code: {}", process.returncode)
             mp4_file.unlink()
@@ -248,9 +248,9 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
     stdout, stderr = process.communicate()
     success = process.returncode == 0
     if not success:
-        logger.info("Could not fix mp4 files {}", mp4_file)
+        logger.warning("Could not fix mp4 files {}", mp4_file)
         if stderr:
-            logger.info(stderr)
+            logger.error(stderr)
     else:
         logger.warning("Return code: {}", process.returncode)
         mp4_file.unlink()

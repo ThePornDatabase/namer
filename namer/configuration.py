@@ -373,7 +373,7 @@ class NamerConfig:
         return json.dumps(config, indent=2)
 
     def to_dict(self) -> dict:
-        porndb_token = "None In Set, Go to https://metadatapi.net/ to get one!"
+        porndb_token = "None is Set, Go to https://metadatapi.net/ to get one!"
         if self.porndb_token:
             porndb_token = "*" * len(self.porndb_token)
 
