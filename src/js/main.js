@@ -83,8 +83,8 @@ refreshFiles.on('click', function () {
     updateQueueSize()
 })
 
-searchForm.on('transitionend webkitTransitionEnd oTransitionEnd', function () {
-    queryInput.focus()
+searchForm[0].addEventListener('shown.bs.modal', () => {
+  queryInput.focus()
 })
 
 resultForm.on('click', '.rename', rename)
