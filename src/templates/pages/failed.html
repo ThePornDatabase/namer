@@ -41,8 +41,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <label for="queryInput" class="form-label">Search query</label>
-                    <input id="queryInput" type="text" class="form-control">
+                    <div class="mb-3">
+                        <label for="queryInput" class="form-label">Search query</label>
+                        <input id="queryInput" type="text" class="form-control">
+                    </div>
+                    <div>
+                        <label for="queryType" class="form-label">Search type</label>
+                        <select id="queryType" class="form-select" aria-label="Search type">
+                            <option selected>Any</option>
+                            <option>Scenes</option>
+                            <option>Movies</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

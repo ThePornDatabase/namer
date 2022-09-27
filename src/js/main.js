@@ -14,6 +14,7 @@ const logFormTitle = $('#modalLogsLabel span')
 const searchForm = $('#searchForm')
 const searchButton = $('#searchForm .modal-footer .search')
 const queryInput = $('#queryInput')
+const queryType = $('#queryType')
 const deleteFile = $('#deleteFile')
 const queueSize = $('#queueSize')
 const refreshFiles = $('#refreshFiles')
@@ -25,6 +26,7 @@ searchButton.on('click', function () {
     const data = {
         'query': queryInput.val(),
         'file': queryInput.data('file'),
+        'type':  queryType.val(),
     }
 
     const title = escape(`(${data['file']}) [${data['query']}]`)

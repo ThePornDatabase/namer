@@ -59,25 +59,29 @@ def command_to_file_info(command: Command) -> Dict:
     }
 
 
-def get_search_results(query: str, file: str, config: NamerConfig, page: int = 1) -> Dict:
+def get_search_results(query: str, search_type: str, file: str, config: NamerConfig, page: int = 1) -> Dict:
     """
     Search results for user selection.
     """
-    # scenes
-    url = __build_url(config, name=query, page=page, movie=False)
-    json_response = __get_response_json_object(url, config)
+
     file_infos = []
-    if json_response and json_response.strip() != '':
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, None)
-    # movies
-    url = __build_url(config, name=query, page=page, movie=True)
-    json_response = __get_response_json_object(url, config)
-    if json_response and json_response.strip() != '':
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
+    if search_type == 'Any' or search_type == 'Scenes':
+        # scenes
+        url = __build_url(config, name=query, page=page, movie=False)
+        json_response = __get_response_json_object(url, config)
+        if json_response and json_response.strip() != '':
+            json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
+            formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
+            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
+
+    if search_type == 'Any' or search_type == 'Movies':
+        # movies
+        url = __build_url(config, name=query, page=page, movie=True)
+        json_response = __get_response_json_object(url, config)
+        if json_response and json_response.strip() != '':
+            json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
+            formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
+            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
 
     files = []
     for scene_data in file_infos:
