@@ -6,6 +6,8 @@ import hljs from 'highlight.js'
 
 import {Helpers} from './helpers'
 
+window.jQuery = $
+
 const filesResult = $('#filesResult')
 const resultForm = $('#searchResults .modal-body')
 const resultFormTitle = $('#modalSearchResultsLabel span')
@@ -83,7 +85,7 @@ refreshFiles.on('click', function () {
     updateQueueSize()
 })
 
-searchForm[0].addEventListener('shown.bs.modal', () => {
+searchForm.on('shown.bs.modal', function () {
   queryInput.focus()
 })
 
