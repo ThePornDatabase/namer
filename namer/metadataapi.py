@@ -42,7 +42,7 @@ def __find_best_match(query: Optional[str], match_terms: List[str], config: Name
 
 
 def __attempt_better_match(existing: Tuple[str, float], query: Optional[str], match_terms: List[str], namer_config: NamerConfig) -> Tuple[str, float]:
-    if existing and existing[1] >= 89.9:  # magic numer
+    if existing and existing[1] >= 94.9:  # magic numer
         return existing
 
     found = __find_best_match(query, match_terms, namer_config)
