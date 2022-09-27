@@ -5,6 +5,7 @@ import gzip
 import json
 import math
 import shutil
+from functools import lru_cache
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -118,12 +119,17 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
 
 
 def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonResults]:
-    file_name = config.failed_dir / name
-    file_name = file_name.parent / (file_name.stem + '_namer.json.gz')
+    file = config.failed_dir / name
+    file = file.parent / (file.stem + '_namer.json.gz')
 
+    return _read_failed_log_file(file, file.stat().st_size, file.stat().st_mtime)
+
+
+@lru_cache(maxsize=1024)
+def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Optional[ComparisonResults]:
     res: Optional[ComparisonResults] = None
-    if file_name.is_file():
-        data = gzip.decompress(file_name.read_bytes())
+    if file.is_file():
+        data = gzip.decompress(file.read_bytes())
         decoded = jsonpickle.decode(data)
         if decoded and isinstance(decoded, ComparisonResults):
             res = decoded
