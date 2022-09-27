@@ -148,6 +148,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
             self.assertEqual(info.date, "2022-01-03")
             self.assertEqual(info.site, "Evil Angel")
+            self.assertEqual(info.external_id, "198543")
+            self.assertEqual(info.type, "scene")
             self.assertIsNotNone(info.description)
             if info.description is not None:
                 self.assertRegex(info.description, r"brunette Carmela Clutch positions her big, juicy")

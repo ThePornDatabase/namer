@@ -22,6 +22,7 @@ class PartialFormatter(string.Formatter):
         "vr",
         "type",
         "resolution",
+        "external_id",
     ]
 
     def __init__(self, missing="~~", bad_fmt="!!"):

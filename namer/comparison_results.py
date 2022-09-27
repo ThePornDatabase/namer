@@ -126,6 +126,10 @@ class LookedUpFileInfo:
     """
     the width of video in pixels.
     """
+    external_id: Optional[str] = None
+    """
+    Should the source site provide it, the id for the site.
+    """
 
     def __init__(self):
         self.performers = []
@@ -169,6 +173,7 @@ class LookedUpFileInfo:
             "vr": vr,
             "resolution": res_str,
             "type": self.type,
+            "external_id": self.external_id,
         }
 
     def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:

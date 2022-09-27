@@ -278,7 +278,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.min_file_size = 0
             config.set_dir_permissions = None
             config.set_file_permissions = None
-            config.new_relative_path_name = "{site} - {date} - {name}/{site} - {date} - {name} - {uuid}.{ext}"
+            config.new_relative_path_name = "{site} - {date} - {name}/{site} - {date} - {name} - {uuid} - {external_id} - ({resolution}).{ext}"
             watcher = create_watcher(config)
             watcher.start()
             targets = [
@@ -289,7 +289,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertFalse(targets[0].file.exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! - scenes1678283.mp4"
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! - scenes1678283 - 198543 - (240).mp4"
             validate_mp4_tags(self, output_file)
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)

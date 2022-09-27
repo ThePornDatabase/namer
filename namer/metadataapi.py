@@ -229,14 +229,17 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     movie = True if "/movie" in url else False
     file_info = LookedUpFileInfo()
 
-    object_type = data.type.lower()
-    file_info.uuid = f"{object_type}s/{data._id}"  # pylint: disable=protected-access
+    file_info.type = data.type.lower()
+    file_info.uuid = f"{file_info.type}s/{data._id}"  # pylint: disable=protected-access
     data_id = data._id
 
     file_info.name = data.title
     file_info.description = data.description
     file_info.date = data.date
     file_info.source_url = data.url
+
+    if hasattr(data, 'external_id'):
+        file_info.external_id = data.external_id
 
     if hasattr(data, 'poster'):
         file_info.poster_url = data.poster
