@@ -38,7 +38,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
             )
             self.assertIn(
-                "/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
+                "bg-dorcel-club-peeping-tom",
                 info.poster_url if info.poster_url else "",
             )
             self.assertEqual(info.performers[0].name, "Ryan Benetti")
@@ -68,7 +68,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 info.source_url, "https://dorcelclub.com/en/scene/85289/peeping-tom"
             )
             self.assertIn(
-                "/unsafe/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F15%2Fe1%2Fac%2Fe028ae39fdc24d6d0fed4ecf14e53ae%2Flogo%2Fdorcelclub-logo.png,-10,-10,25)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F6e%2Fca%2F89%2F05343d45d85ef2d480ed63f6311d229%2Fbackground%2Fbg-dorcel-club-peeping-tom.jpg",
+                "bg-dorcel-club-peeping-tom.",
                 info.poster_url if info.poster_url else "",
             )
             self.assertEqual(info.performers[0].name, "Ryan Benetti")
@@ -102,7 +102,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543",
             )
             self.assertIn(
-                "/unsafe/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2F01%2F92%2F04%2F76e780fd19c4306bc744f79b5cb4bce%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg",
+                "bg-evil-angel-carmela-clutch-fabulous-anal-3-way",
                 info.poster_url if info.poster_url else ""
             )
             self.assertEqual(info.performers[0].name, "Carmela Clutch")
@@ -154,7 +154,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.source_url, "https://evilangel.com/en/video/Carmela-Clutch-Fabulous-Anal-3-Way/198543")
             self.assertIsNotNone(info.poster_url)
             if info.poster_url is not None:
-                self.assertRegex(info.poster_url, "http.*/unsafe/1000x1500/smart/.*%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg")
+                self.assertRegex(info.poster_url, "bg-evil-angel-carmela-clutch-fabulous-anal-3-way")
             self.assertEqual(info.performers[0].name, "Carmela Clutch")
             self.assertEqual(info.performers[0].role, "Female")
             self.assertEqual(info.performers[1].name, "Francesca Le")
