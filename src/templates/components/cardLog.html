@@ -1,6 +1,7 @@
 <div class="card h-100" style="width:11.5rem">
     <span class="position-absolute start-100 translate-middle badge rounded-pill bg-secondary">{{ file['name_match']|round(2) }}%</span>
     <img class="card-img-top" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
+    <div class="card-header text-center p-0">{{ file['looked_up']['type'] }}</div>
     <div class="card-body">
         <h5 class="card-title">{{ file['looked_up']['name'] }}</h5>
         <p class="card-text">{{ file['looked_up']['site'] }}</p>

@@ -5,6 +5,7 @@ import gzip
 import json
 import math
 import shutil
+from functools import lru_cache
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -58,30 +59,34 @@ def command_to_file_info(command: Command) -> Dict:
     }
 
 
-def get_search_results(query: str, file: str, config: NamerConfig, page: int = 1) -> Dict:
+def get_search_results(query: str, search_type: str, file: str, config: NamerConfig, page: int = 1) -> Dict:
     """
     Search results for user selection.
     """
-    # scenes
-    url = __build_url(config, name=query, page=page, movie=False)
-    json_response = __get_response_json_object(url, config)
+
+    responses = {}
+    if search_type == 'Any' or search_type == 'Scenes':
+        # scenes
+        url = __build_url(config, name=query, page=page, movie=False)
+        responses[url] = __get_response_json_object(url, config)
+
+    if search_type == 'Any' or search_type == 'Movies':
+        # movies
+        url = __build_url(config, name=query, page=page, movie=True)
+        responses[url] = __get_response_json_object(url, config)
+
     file_infos = []
-    if json_response and json_response.strip() != '':
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, None)
-    # movies
-    url = __build_url(config, name=query, page=page, movie=True)
-    json_response = __get_response_json_object(url, config)
-    if json_response and json_response.strip() != '':
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
+    for url, response in responses.items():
+        if response and response.strip() != '':
+            json_obj = json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
+            formatted = json.dumps(json.loads(response), indent=4, sort_keys=True)
+            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
 
     files = []
     for scene_data in file_infos:
         scene = {
             'id': scene_data.uuid,
+            'type': scene_data.type,
             'title': scene_data.name,
             'date': scene_data.date,
             'poster': scene_data.poster_url,
@@ -117,12 +122,21 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
 
 
 def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonResults]:
-    file_name = config.failed_dir / name
-    file_name = file_name.parent / (file_name.stem + '_namer.json.gz')
+    file = config.failed_dir / name
+    file = file.parent / (file.stem + '_namer.json.gz')
 
     res: Optional[ComparisonResults] = None
-    if file_name.is_file():
-        data = gzip.decompress(file_name.read_bytes())
+    if file.is_file():
+        res = _read_failed_log_file(file, file.stat().st_size, file.stat().st_mtime)
+
+    return res
+
+
+@lru_cache(maxsize=1024)
+def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Optional[ComparisonResults]:
+    res: Optional[ComparisonResults] = None
+    if file.is_file():
+        data = gzip.decompress(file.read_bytes())
         decoded = jsonpickle.decode(data)
         if decoded and isinstance(decoded, ComparisonResults):
             res = decoded

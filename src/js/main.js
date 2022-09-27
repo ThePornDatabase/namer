@@ -6,6 +6,8 @@ import hljs from 'highlight.js'
 
 import {Helpers} from './helpers'
 
+window.jQuery = $
+
 const filesResult = $('#filesResult')
 const resultForm = $('#searchResults .modal-body')
 const resultFormTitle = $('#modalSearchResultsLabel span')
@@ -14,6 +16,7 @@ const logFormTitle = $('#modalLogsLabel span')
 const searchForm = $('#searchForm')
 const searchButton = $('#searchForm .modal-footer .search')
 const queryInput = $('#queryInput')
+const queryType = $('#queryType')
 const deleteFile = $('#deleteFile')
 const queueSize = $('#queueSize')
 const refreshFiles = $('#refreshFiles')
@@ -25,6 +28,7 @@ searchButton.on('click', function () {
     const data = {
         'query': queryInput.val(),
         'file': queryInput.data('file'),
+        'type':  queryType.val(),
     }
 
     const title = escape(`(${data['file']}) [${data['query']}]`)
@@ -81,8 +85,8 @@ refreshFiles.on('click', function () {
     updateQueueSize()
 })
 
-searchForm.on('transitionend webkitTransitionEnd oTransitionEnd', function () {
-    queryInput.focus()
+searchForm.on('shown.bs.modal', function () {
+  queryInput.focus()
 })
 
 resultForm.on('click', '.rename', rename)

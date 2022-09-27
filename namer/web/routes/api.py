@@ -57,7 +57,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         res = False
         if data:
             page = data['page'] if 'page' in data else 1
-            res = get_search_results(data['query'], data['file'], config, page=page)
+            res = get_search_results(data['query'], data['type'], data['file'], config, page=page)
 
         return jsonify(res)
 
