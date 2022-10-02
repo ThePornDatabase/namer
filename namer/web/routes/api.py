@@ -47,7 +47,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
     @blueprint.route('/v1/get_queued', methods=['POST'])
     def get_queued() -> Response:
-        data = get_queued_files(command_queue)
+        data = get_queued_files(command_queue, config)
         return jsonify(data)
 
     @blueprint.route('/v1/get_search', methods=['POST'])

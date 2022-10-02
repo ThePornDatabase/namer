@@ -36,19 +36,19 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     return list(map(lambda o: command_to_file_info(o, config), gather_target_files_from_dir(config.failed_dir, config)))
 
 
-def get_queued_files(queue: Queue, queue_limit: int = 100) -> List[Dict]:
+def get_queued_files(queue: Queue, config: NamerConfig, queue_limit: int = 100) -> List[Dict]:
     """
     Get queued files.
     """
     queue_items = list(queue.queue)[:queue_limit]
-    return list(map(command_to_file_info, filter(lambda i: i is not None, queue_items)))
+    return list(map(lambda x: command_to_file_info(x, config), filter(lambda i: i is not None, queue_items)))
 
 
 def get_queue_size(queue: Queue) -> int:
     return queue.qsize()
 
 
-def command_to_file_info(command: Command, config: NamerConfig = None) -> Dict:
+def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     stat = command.target_movie_file.stat()
 
     res = {
@@ -60,8 +60,8 @@ def command_to_file_info(command: Command, config: NamerConfig = None) -> Dict:
     }
 
     if config and config.add_max_percent_column:
-        log_data = read_failed_log_file(command.target_movie_file.stem, config)
-        percentage = log_data.results[0].name_match if log_data else 0.0
+        log_data = read_failed_log_file(res['file'], config)
+        percentage = log_data.results[0].name_match if log_data and log_data.results and log_data.results[0] else 0.0
         res['percentage'] = percentage
 
     return res
@@ -133,9 +133,13 @@ def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonR
     file = config.failed_dir / name
     file = file.parent / (file.stem + '_namer.json.gz')
 
+    print("Log file name: {}", file)
+
     res: Optional[ComparisonResults] = None
     if file.is_file():
         res = _read_failed_log_file(file, file.stat().st_size, file.stat().st_mtime)
+    
+    print("Res file {}", res)
 
     return res
 

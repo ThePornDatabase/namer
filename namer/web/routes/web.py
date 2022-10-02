@@ -45,7 +45,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         """
         Displays all queued files.
         """
-        data = get_queued_files(command_queue)
+        data = get_queued_files(command_queue, config)
         return render_template('pages/queue.html', data=data, config=config)
 
     @blueprint.route('/settings')
