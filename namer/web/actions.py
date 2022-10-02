@@ -61,9 +61,8 @@ def command_to_file_info(command: Command, config: NamerConfig = None) -> Dict:
 
     if config and config.add_max_percent_column:
         log_data = read_failed_log_file(command.target_movie_file.stem, config)
-        if log_data:
-            percentage = log_data.results[0].name_match
-            res['percentage'] = percentage
+        percentage = log_data.results[0].name_match if log_data else 0.0
+        res['percentage'] = percentage
 
     return res
 
