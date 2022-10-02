@@ -138,7 +138,7 @@ def read_failed_log_file(name: str, config: NamerConfig) -> Optional[ComparisonR
     res: Optional[ComparisonResults] = None
     if file.is_file():
         res = _read_failed_log_file(file, file.stat().st_size, file.stat().st_mtime)
-    
+
     print("Res file {}", res)
 
     return res
