@@ -33,7 +33,7 @@ def get_failed_files(config: NamerConfig) -> List[Dict]:
     """
     Get failed files to rename.
     """
-    return list(map(command_to_file_info, gather_target_files_from_dir(config.failed_dir, config)))
+    return list(map(lambda o: command_to_file_info(o, config), gather_target_files_from_dir(config.failed_dir, config)))
 
 
 def get_queued_files(queue: Queue, queue_limit: int = 100) -> List[Dict]:
@@ -48,15 +48,24 @@ def get_queue_size(queue: Queue) -> int:
     return queue.qsize()
 
 
-def command_to_file_info(command: Command) -> Dict:
+def command_to_file_info(command: Command, config: NamerConfig = None) -> Dict:
     stat = command.target_movie_file.stat()
-    return {
+
+    res = {
         'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if subpath_or_equal(command.target_movie_file, command.config.failed_dir) else None,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
         'size_byte': stat.st_size,
         'size': convert_size(stat.st_size),
     }
+
+    if config and config.add_max_percent_column:
+        log_data = read_failed_log_file(command.target_movie_file.stem, config)
+        if log_data:
+            percentage = log_data.results[0].name_match
+            res['percentage'] = percentage
+
+    return res
 
 
 def get_search_results(query: str, search_type: str, file: str, config: NamerConfig, page: int = 1) -> Dict:

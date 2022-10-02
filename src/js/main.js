@@ -1,4 +1,6 @@
+// noinspection ES6UnusedImports
 import {Popover, Modal} from 'bootstrap'
+
 import $ from 'jquery'
 import 'datatables.net-bs5'
 import {escape} from 'lodash'
@@ -28,7 +30,7 @@ searchButton.on('click', function () {
     const data = {
         'query': queryInput.val(),
         'file': queryInput.data('file'),
-        'type':  queryType.val(),
+        'type': queryType.val(),
     }
 
     const title = escape(`(${data['file']}) [${data['query']}]`)
@@ -86,7 +88,7 @@ refreshFiles.on('click', function () {
 })
 
 searchForm.on('shown.bs.modal', function () {
-  queryInput.focus()
+    queryInput.focus()
 })
 
 resultForm.on('click', '.rename', rename)

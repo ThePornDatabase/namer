@@ -168,6 +168,7 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.host = config.get("watchdog", "host", fallback="0.0.0.0")
     namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
     namer_config.allow_delete_files = config.getboolean("watchdog", "allow_delete_files", fallback=False)
+    namer_config.add_max_percent_column = config.getboolean("watchdog", "add_max_percent_column", fallback=False)
     namer_config.debug = config.getboolean("watchdog", "debug", fallback=False)
     namer_config.diagnose_errors = config.getboolean("watchdog", "diagnose_errors", fallback=False)
 
