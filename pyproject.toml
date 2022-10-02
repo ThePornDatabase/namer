@@ -29,7 +29,7 @@ jsonpickle = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"
-pytest-cov = "^3.0.0"
+pytest-cov = "^4.0.0"
 coverage = "^6.3.2"
 flakeheaven = "^3.0.0"
 selenium = "^4.2.0"
