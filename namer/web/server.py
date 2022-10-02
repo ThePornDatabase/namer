@@ -2,14 +2,15 @@
 A wrapper allowing shutdown of a Flask server.
 """
 import logging
-from asyncio.log import logger
 import mimetypes
+from datetime import datetime
 from queue import Queue
 from threading import Thread
 from typing import List, Optional, Union
 
-from flask import Flask, Blueprint
+from flask import Blueprint, Flask
 from flask_compress import Compress
+from loguru import logger
 from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
@@ -76,6 +77,13 @@ class GenericWebServer:
             'bool_to_icon': self.bool_to_icon,
         }
         self.__app.jinja_env.globals.update(**functions)
+
+        filters = {
+            'timestamp_to_datetime': self.timestamp_to_datetime,
+            'strftime': self.strftime,
+        }
+        self.__app.jinja_env.filters.update(**filters)
+
         self.__app.jinja_env.add_extension('jinja2.ext.do')
 
     def start(self):
@@ -110,12 +118,20 @@ class GenericWebServer:
         return f"http://{self.__host}:{self.get_effective_port()}{self.__path}"
 
     @staticmethod
-    def bool_to_icon(item: bool):
+    def bool_to_icon(item: bool) -> str:
         icon = 'x'
         if item:
             icon = 'check'
 
         return f'<i class="bi bi-{icon}"></i>'
+
+    @staticmethod
+    def timestamp_to_datetime(item: int) -> datetime:
+        return datetime.utcfromtimestamp(item)
+
+    @staticmethod
+    def strftime(item: datetime, datetime_format: str) -> str:
+        return item.strftime(datetime_format)
 
 
 class NamerWebServer(GenericWebServer):

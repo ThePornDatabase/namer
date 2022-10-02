@@ -55,8 +55,8 @@ def command_to_file_info(command: Command, config: NamerConfig = None) -> Dict:
         'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if subpath_or_equal(command.target_movie_file, command.config.failed_dir) else None,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
-        'size_byte': stat.st_size,
-        'size': convert_size(stat.st_size),
+        'update_time': int(stat.st_mtime),
+        'size': stat.st_size,
     }
 
     if config and config.add_max_percent_column:
@@ -157,22 +157,6 @@ def is_acceptable_file(file: Path, config: NamerConfig) -> bool:
     Checks if a file belong to namer.
     """
     return str(config.failed_dir) in str(file.resolve()) and file.is_file() and is_interesting_movie(file, config)
-
-
-def convert_size(size_bytes: int) -> str:
-    """
-    Convert int to size string.
-    """
-    if size_bytes == 0:
-        return '0 B'
-
-    size = 1024
-    size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
-    i = int(math.floor(math.log(size_bytes, size)))
-    p = math.pow(size, i)
-    s = round(size_bytes / p, 2)
-
-    return f'{s:.2f} {size_name[i]}'
 
 
 def human_format(num):
