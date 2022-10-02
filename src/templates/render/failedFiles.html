@@ -5,6 +5,9 @@
             <th scope="col">File Name</th>
             <th scope="col">Extension</th>
             <th scope="col">Size</th>
+            {% if config.add_max_percent_column %}
+                <th scope="col">Percentage</th>
+            {% endif %}
             <th scope="col" data-orderable="false"></th>
         </tr>
         </thead>
@@ -14,6 +17,9 @@
                 <td class="col">{{ file['name'] }}</td>
                 <td class="col-1">{{ file['ext'] }}</td>
                 <td class="col-1" data-order="{{ file['size_byte'] }}">{{ file['size'] }}</td>
+                {% if config.add_max_percent_column %}
+                    <td class="col-1" data-order="{{ file['percentage'] }}">{{ file['percentage']|round(2) }}%</td>
+                {% endif %}
                 <td class="col-2 text-end">
                     {% include 'render/fileActions.html' %}
                 </td>

@@ -335,6 +335,11 @@ class NamerConfig:
     Allow to delete files in web interface
     """
 
+    add_max_percent_column: bool = False
+    """
+    Add maximal percent from failed log to table in web interface
+    """
+
     cache_session: Optional[CachedSession]
     """
     If enabled_requests_cache is true this http.session will be constructed and used for requests to tpdb.
@@ -430,6 +435,7 @@ class NamerConfig:
                 "host": self.host,
                 "web_root": self.web_root,
                 "allow_delete_files": self.allow_delete_files,
+                "add_max_percent_column": self.add_max_percent_column,
                 "debug": self.debug,
                 "diagnose_errors": self.diagnose_errors,
             }
