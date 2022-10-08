@@ -73,7 +73,12 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
     result: Tuple[str, float] = ('', 0.0)
 
     # Full Name
-    all_performers = list(map(lambda p: p.name, looked_up.performers))
+    # Deal with some movies having 50+ performers by throwing performer info away for essamble casts :D
+    performers = looked_up.performers
+    if len(looked_up.performers) > 6:
+        performers = []
+
+    all_performers = list(map(lambda p: p.name, performers))
     if looked_up.name:
         all_performers.insert(0, looked_up.name)
 
@@ -83,7 +88,7 @@ def __evaluate_match(name_parts: FileNameParts, looked_up: LookedUpFileInfo, nam
 
     # First Name Powerset.
     if result and result[1] < 89.9:
-        all_performers = list(map(lambda p: p.name.split(" ")[0], looked_up.performers))
+        all_performers = list(map(lambda p: p.name.split(" ")[0], performers))
         if looked_up.name:
             all_performers.insert(0, looked_up.name)
         result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)

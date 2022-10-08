@@ -50,18 +50,16 @@
             "birthplace": null,
             "cupsize": null,
             "ethnicity": null,
+            "eye_colour": null,
             "fakeboobs": false,
             "gender": "Female",
             "haircolor": null,
             "height": null,
-            "iafd": null,
             "measurements": null,
             "nationality": null,
             "piercings": null,
-            "status": null,
             "tattoos": null,
-            "weight": null,
-            "yearsactive": null
+            "weight": null
           },
           "image": "https://thumb.metadataapi.net/lvCP91wSXf6QiRHtK54_YUAe6V8=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F45%2F44%2F1a%2F91bbd2d3d0fbd9ec6e307232443bc74%2Fposter%2Fmedia-libraryggpiOf",
           "thumbnail": "https://thumb.metadataapi.net/a6lLyOkQS1eLo-wOhyJtRphoIS0=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F45%2F44%2F1a%2F91bbd2d3d0fbd9ec6e307232443bc74%2Fposter%2Fmedia-libraryggpiOf",
@@ -130,18 +128,16 @@
             "birthplace": "Las Vegas, Nevada",
             "cupsize": null,
             "ethnicity": null,
+            "eye_colour": null,
             "fakeboobs": false,
             "gender": "Female",
             "haircolor": null,
             "height": "69",
-            "iafd": null,
             "measurements": null,
             "nationality": null,
             "piercings": null,
-            "status": null,
             "tattoos": null,
-            "weight": "160",
-            "yearsactive": null
+            "weight": "160"
           },
           "image": "https://thumb.metadataapi.net/hFbhM0rjp6ObN1zaN-5Bpn-HDpc=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fc1%2F1d%2Fc1%2Fce65e2ec3ee82a00c0386fedf3ce55f%2Fposter%2F1c26e72e98169c23d61418c69eec019775f9fb64",
           "thumbnail": "https://thumb.metadataapi.net/vh3VOCIjPRlZvvqTwrihnJ6HUtU=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fc1%2F1d%2Fc1%2Fce65e2ec3ee82a00c0386fedf3ce55f%2Fposter%2F1c26e72e98169c23d61418c69eec019775f9fb64",
@@ -270,7 +266,7 @@
       }
     ],
     "path": "https://api.metadataapi.net/scenes",
-    "per_page": 25,
+    "per_page": 15,
     "to": 1,
     "total": 1
   }
