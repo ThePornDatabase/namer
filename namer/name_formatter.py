@@ -55,7 +55,7 @@ class PartialFormatter(string.Formatter):
                 value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
             elif '|' in format_spec:
-                template = Template(f'{{{{ val|{format_spec[:-1]} }}}}')
+                template = Template(f'{{{{ val{format_spec} }}}}')
                 value = template.render(val=value)
                 format_spec = ""
 
