@@ -1,6 +1,6 @@
 import re
 import string
-from typing import Tuple
+from jinja2 import Template
 
 
 class PartialFormatter(string.Formatter):
@@ -41,8 +41,10 @@ class PartialFormatter(string.Formatter):
         try:
             field_name, mods = field_name.split('|', 1) if '|' in field_name else (field_name, '')
             val = super().get_field(field_name, args, kwargs)
-            val = self.__apply_mods(val, mods)
 
+            if mods:
+                template = Template(f'{{{{ val|{mods} }}}}')
+                val = (template.render(val=val[0]), val[1])
         except (KeyError, AttributeError) as err:
             val = None, field_name
             if field_name not in self.__supported_keys:
@@ -68,19 +70,3 @@ class PartialFormatter(string.Formatter):
             if self.bad_fmt:
                 return self.bad_fmt
             raise
-
-    def __apply_mods(self, val: Tuple[str, str], mods: str) -> Tuple[str, str]:
-        res, key = val
-
-        for mod in mods.split('|'):
-            mod_args = []
-            if '(' in mod and ')' in mod:
-                mod, mod_args = mod.split('(', 1)
-                mod_args = mod_args.split(')', 1)[0]
-                mod_args = mod_args.split(',')
-
-            if mod in self.__functions:
-                func = self.__functions[mod]
-                res = func(res, *mod_args)
-
-        return res, key
