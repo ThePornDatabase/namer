@@ -92,6 +92,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = fmt.format("{name}{act: >10}", name="scene1", act="act1")
         self.assertEqual(name, "scene1      act1")
 
+        name = fmt.format("{name:|title}{act:|upper}", name="scene1", act="act1")
+        self.assertEqual(name, "Scene1ACT1")
+
         with self.assertRaises(Exception) as error1:
             name = fmt.format("{name1}{act: >10}", name="scene1", act="act1")
             self.assertEqual(name, "scene1      act1")

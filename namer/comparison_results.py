@@ -184,14 +184,15 @@ class LookedUpFileInfo:
         clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) for k, v in dictionary.items()}
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
-        if infix != str("(0)"):
+
+        if infix != "(0)":
             # will apply the infix before the file extension if just a file name, if a path, with apply
             # the infix after the fist part (first directory name) of the (sub)path
             path = PurePath(name)
+            name = path.stem + infix + path.suffix
             if path.parts:
-                name = str(path.parent / (path.stem + infix + path.suffix))
-            else:
-                name = path.stem + infix + path.suffix
+                name = str(path.parent / name)
+
         return name
 
 
