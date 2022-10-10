@@ -60,7 +60,7 @@ class PartialFormatter(string.Formatter):
             elif self.__regex['i'].match(format_spec):
                 value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
-            elif '|' in format_spec:
+            elif format_spec.startswith('|'):
                 template = Template(f'{{{{ val{format_spec} }}}}')
                 value = template.render(val=value)
                 format_spec = ""
