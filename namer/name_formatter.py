@@ -8,7 +8,7 @@ class PartialFormatter(string.Formatter):
     Used for formatting NamerConfig.inplace_name and NamerConfig.
     """
 
-    __supported_keys = [
+    supported_keys = [
         "date",
         "description",
         "name",
@@ -26,13 +26,6 @@ class PartialFormatter(string.Formatter):
         "external_id",
     ]
 
-    __functions = {
-        'lower': str.lower,
-        'upper': str.upper,
-        'title': str.title,
-        'replace': str.replace,
-    }
-
     def __init__(self, missing="~~", bad_fmt="!!"):
         self.missing, self.bad_fmt = missing, bad_fmt
 
@@ -47,8 +40,8 @@ class PartialFormatter(string.Formatter):
                 val = (template.render(val=val[0]), val[1])
         except (KeyError, AttributeError) as err:
             val = None, field_name
-            if field_name not in self.__supported_keys:
-                raise KeyError(f"Key {field_name} not in support keys: {self.__supported_keys}") from err
+            if field_name not in self.supported_keys:
+                raise KeyError(f"Key {field_name} not in support keys: {self.supported_keys}") from err
 
         return val
 
