@@ -27,6 +27,12 @@ class PartialFormatter(string.Formatter):
         "external_id",
     ]
 
+    __regex = {
+        's': re.compile(r'.\d+s'),
+        'p': re.compile(r'.\d+p'),
+        'i': re.compile(r'.\d+i'),
+    }
+
     def __init__(self, missing="~~", bad_fmt="!!"):
         self.missing, self.bad_fmt = missing, bad_fmt
 
@@ -45,13 +51,13 @@ class PartialFormatter(string.Formatter):
         if not value:
             return self.missing
         try:
-            if re.match(r".\d+s", format_spec):
+            if self.__regex['s'].match(format_spec):
                 value = value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
-            elif re.match(r".\d+p", format_spec):
+            elif self.__regex['p'].match(format_spec):
                 value = format_spec[0] * int(format_spec[1:-1]) + value
                 format_spec = ""
-            elif re.match(r".\d+i", format_spec):
+            elif self.__regex['i'].match(format_spec):
                 value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
             elif '|' in format_spec:
