@@ -1,5 +1,6 @@
 import re
 import string
+
 from jinja2 import Template
 
 
@@ -32,12 +33,7 @@ class PartialFormatter(string.Formatter):
     def get_field(self, field_name, args, kwargs):
         # Handle a key not found
         try:
-            field_name, mods = field_name.split('|', 1) if '|' in field_name else (field_name, '')
             val = super().get_field(field_name, args, kwargs)
-
-            if mods:
-                template = Template(f'{{{{ val|{mods} }}}}')
-                val = (template.render(val=val[0]), val[1])
         except (KeyError, AttributeError) as err:
             val = None, field_name
             if field_name not in self.supported_keys:
@@ -52,12 +48,17 @@ class PartialFormatter(string.Formatter):
             if re.match(r".\d+s", format_spec):
                 value = value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
-            if re.match(r".\d+p", format_spec):
+            elif re.match(r".\d+p", format_spec):
                 value = format_spec[0] * int(format_spec[1:-1]) + value
                 format_spec = ""
-            if re.match(r".\d+i", format_spec):
+            elif re.match(r".\d+i", format_spec):
                 value = format_spec[0] * int(format_spec[1:-1]) + value + format_spec[0] * int(format_spec[1:-1])
                 format_spec = ""
+            elif '|' in format_spec:
+                template = Template(f'{{{{ val|{format_spec[:-1]} }}}}')
+                value = template.render(val=value)
+                format_spec = ""
+
             return super().format_field(value, format_spec)
         except ValueError:
             if self.bad_fmt:
