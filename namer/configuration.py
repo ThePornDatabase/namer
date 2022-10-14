@@ -421,7 +421,7 @@ class NamerConfig:
                 "language": self.language,
             },
             "Watchdog Config": {
-                "ignored_dir_regex": self.ignored_dir_regex,
+                "ignored_dir_regex": self.ignored_dir_regex.pattern,
                 "min_file_size": self.min_file_size,
                 "del_other_files": self.del_other_files,
                 "new_relative_path_name": self.new_relative_path_name,
