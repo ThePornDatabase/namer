@@ -87,6 +87,7 @@ class GenericWebServer:
         self.__app.jinja_env.add_extension('jinja2.ext.do')
 
     def start(self):
+        logger.info(f'Starting server: {self.get_url()}')
         self.__thread.start()
 
     def __run(self):

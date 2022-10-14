@@ -236,14 +236,14 @@ class MovieWatcher:
         """
         if not self.__stopped:
             self.__stopped = True
-            logger.info("exiting")
+            logger.info("Exiting")
             self.__event_observer.stop()
             self.__event_observer.join()
             if self.__webserver:
                 self.__webserver.stop()
             self.__command_queue.put(None)
             self.__command_queue.join()
-            logger.info("exited")
+            logger.info("Exited")
 
     def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:
