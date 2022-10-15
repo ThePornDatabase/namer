@@ -39,7 +39,11 @@ porndb_token = ****************************************
 # * 'resolution' - 480p, 720p, 1080p, 4k, or any other integer
 # * 'vr', is the studio is a known vr studio, 'vr', else '', can be used for folder names, like ../adult{vr}/.. 
 #
-# This should not contain paths, as files will be processed in place when called on the command line from namer.  
+# This should not contain paths, as files will be processed in place when called on the command line from namer.
+#
+# Also note that jinja2 filters are support:
+# https://jinja.palletsprojects.com/en/3.1.x/templates/#list-of-builtin-filters
+# Like {site:|lower} or {name:|title|replace(' ', '.'))}
 inplace_name={site} - {date} - {name}.{ext}
 
 # If a directory name is to be preferred over a file name.
@@ -112,6 +116,16 @@ use_requests_cache = True
 
 # Amount of minutes that http request would be in cache
 requests_cache_expire_minutes = 10
+
+[Phash]
+# Calculate and use phashes in search for matches
+search_phash = True
+
+# If there is a phash match, require any name match be in the top N results
+require_match_phash_top = 3
+
+# If true will push phash match metadata back upstream.
+send_phash_of_matches_to_tpdb = True
 
 [metadata]
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
