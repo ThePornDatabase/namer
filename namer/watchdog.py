@@ -226,7 +226,7 @@ class MovieWatcher:
 
         for file in files:
             relative_path = str(file.relative_to(self.__namer_config.watch_dir))
-            if not config.ignored_dir_regex.search(relative_path) and file.exists() and file.is_file():
+            if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
                 self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
