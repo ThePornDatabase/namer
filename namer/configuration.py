@@ -3,6 +3,7 @@ Namer Configuration readers/verifier
 """
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -261,7 +262,7 @@ class NamerConfig:
     taken, no streams (audio/video) are re-encoded.  Available here: https://iso639-3.sil.org/code_tables/639/data/
     """
 
-    ignored_dir_regex: str = ".*_UNPACK_.*"
+    ignored_dir_regex: Pattern = re.compile(r".*_UNPACK_.*", re.IGNORECASE)
     """
     If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
     """
@@ -420,7 +421,7 @@ class NamerConfig:
                 "language": self.language,
             },
             "Watchdog Config": {
-                "ignored_dir_regex": self.ignored_dir_regex,
+                "ignored_dir_regex": self.ignored_dir_regex.pattern,
                 "min_file_size": self.min_file_size,
                 "del_other_files": self.del_other_files,
                 "new_relative_path_name": self.new_relative_path_name,

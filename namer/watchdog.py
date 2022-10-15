@@ -4,7 +4,6 @@ to relevant locations after match the file against the porndb.
 """
 
 import os
-import re
 import shutil
 import sys
 import tempfile
@@ -91,7 +90,6 @@ class MovieEventHandler(PatternMatchingEventHandler):
         super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.__namer_config = namer_config
         self.__command_queue = queue
-        self.__re_ignored_dir = re.compile(namer_config.ignored_dir_regex)
 
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
@@ -103,7 +101,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         if file_path:
             path = Path(file_path)
             relative_path = str(path.relative_to(self.__namer_config.watch_dir))
-            if not self.__re_ignored_dir.search(relative_path) and done_copying(path) and is_interesting_movie(path, self.__namer_config):
+            if not self.__namer_config.ignored_dir_regex.search(relative_path) and done_copying(path) and is_interesting_movie(path, self.__namer_config):
                 logger.info("watchdog process called for {}", relative_path)
 
                 # Extra wait time in case other files are copies in as well.
@@ -227,7 +225,8 @@ class MovieWatcher:
                 files.append(file)
 
         for file in files:
-            if file.exists() and file.is_file():
+            relative_path = str(file.relative_to(self.__namer_config.watch_dir))
+            if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
                 self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
@@ -237,14 +236,14 @@ class MovieWatcher:
         """
         if not self.__stopped:
             self.__stopped = True
-            logger.info("exiting")
+            logger.info("Exiting")
             self.__event_observer.stop()
             self.__event_observer.join()
             if self.__webserver:
                 self.__webserver.stop()
             self.__command_queue.put(None)
             self.__command_queue.join()
-            logger.info("exited")
+            logger.info("Exited")
 
     def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:

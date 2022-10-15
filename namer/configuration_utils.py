@@ -141,7 +141,11 @@ def from_config(config: ConfigParser) -> NamerConfig:
     namer_config.enable_metadataapi_genres = config.getboolean("metadata", "enable_metadataapi_genres", fallback=False)
     namer_config.default_genre = config.get("metadata", "default_genre", fallback="Adult")
     namer_config.language = config.get("metadata", "language", fallback=None)
-    namer_config.ignored_dir_regex = config.get("metadata", "ignored_dir_regex", fallback=".*_UNPACK_.*")
+
+    ignored_dir_regex = config.get("watchdog", "ignored_dir_regex", fallback=r".*_UNPACK_.*")
+    if ignored_dir_regex:
+        namer_config.ignored_dir_regex = re.compile(ignored_dir_regex, re.IGNORECASE)
+
     namer_config.new_relative_path_name = config.get("watchdog", "new_relative_path_name", fallback="{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
     namer_config.del_other_files = config.getboolean("watchdog", "del_other_files", fallback=False)
     namer_config.extra_sleep_time = config.getint("watchdog", "extra_sleep_time", fallback=30)
