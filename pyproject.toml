@@ -7,7 +7,7 @@ authors = ["4c0d3r <4c0d3r@protonmail.com>"]
 include = ["**/web/public/assets/**/*", "**/web/templates/**/*"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<=3.11"
 rapidfuzz = "^2.0.5"
 watchdog = "^2.1.6"
 pathvalidate = "^2.5.0"

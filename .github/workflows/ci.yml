@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:  
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [ '3.8', '3.9', '3.10' ]
+        python-version: [ '3.8', '3.9', '3.10', '3.11' ]
     steps:
       - uses: actions/checkout@v2
 
@@ -29,7 +29,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: '1.2.1'
+          poetry-version: '1.2.2'
 
       - name: Install ffmpeg
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
-          poetry-version: '1.2.1'
+          poetry-version: '1.2.2'
       - run: poetry install
       - run: poetry run flakeheaven lint
 
@@ -106,7 +106,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0        
         with:
-          poetry-version: '1.2.1'
+          poetry-version: '1.2.2'
 
       - run: poetry install
       
@@ -163,7 +163,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: '1.2.1'
+          poetry-version: '1.2.2'
 
       - name: create tag from pyproject version on change.
         id: auto-tag
@@ -217,7 +217,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
-          poetry-version: '1.2.1'
+          poetry-version: '1.2.2'
       - run: poetry install
       - run: poetry build
 
