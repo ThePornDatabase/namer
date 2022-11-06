@@ -4,13 +4,28 @@ allowing the metadata to be written in to video files (currently only mp4's),
 or used in renaming the video file.
 """
 from pathlib import Path
-from typing import Any, Optional
-
-from lxml import etree, objectify
+from typing import Any, Optional, List
+from xml.dom.minidom import parseString, Document, Element
 
 from namer.configuration import NamerConfig
 from namer.command import set_permissions
 from namer.comparison_results import LookedUpFileInfo, Performer
+
+
+def get_childnode(node: Element, name: str) -> Element:
+    return node.getElementsByTagName(name)[0]
+
+
+def get_all_childnode(node: Element, name: str) -> List[Element]:
+    return node.getElementsByTagName(name)
+
+
+def get_childnode_text(node: Element, name: str) -> str:
+    return node.getElementsByTagName(name)[0].childNodes[0].data
+
+
+def get_all_childnode_text(node: Element, name: str) -> List[str]:
+    return [x.childNodes[0].data for x in node.getElementsByTagName(name)]
 
 
 def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
@@ -19,28 +34,32 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
     """
     content = xml_file.read_text(encoding="UTF-8")
 
-    movie: Any = objectify.fromstring(bytes(content, encoding="UTF-8"), parser=None)
+    movie: Any = parseString(bytes(content, encoding="UTF-8"))
     info = LookedUpFileInfo()
-    info.name = str(movie.title)
-    info.site = str(movie.studio[0])
-    info.date = str(movie.releasedate)
-    info.description = str(movie.plot)
-    info.poster_url = str(movie.art.poster)
+    info.name = get_childnode_text(movie, 'title')
+    info.site = get_all_childnode_text(movie, 'studio')[0]
+    info.date = get_childnode_text(movie, 'releasedate')
+    info.description = get_childnode_text(movie, 'plot')
+    art = get_childnode(movie, 'art')
+    info.poster_url = get_childnode_text(art, 'poster')
 
     info.performers = []
-    for actor in movie.actor:
-        if actor is not None and actor.name:
-            performer = Performer(str(actor.name))
-            performer.role = str(actor.role)
+    for actor in get_all_childnode(movie, "actor"):
+        name = get_childnode_text(actor, 'name')
+        if actor and name:
+            performer = Performer(name)
+            performer.role = get_childnode_text(actor, 'role')
             info.performers.append(performer)
-    if hasattr(movie, "phoenixadulturlid"):
-        info.look_up_site_id = str(movie.phoenixadulturlid)
+    phoenixadulturlid = get_childnode_text(movie, 'phoenixadulturlid')
+    if phoenixadulturlid:
+        info.look_up_site_id = phoenixadulturlid
 
-    if hasattr(movie, "theporndbid"):
-        info.uuid = str(movie.theporndbid)
+    theporndbid = get_childnode_text(movie, 'theporndbid')
+    if phoenixadulturlid:
+        info.uuid = theporndbid
 
     info.tags = []
-    for genre in movie.genre:
+    for genre in get_all_childnode_text(movie, "genre"):
         info.tags.append(str(genre))
 
     info.original_parsed_filename = None
@@ -50,63 +69,62 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
     return info
 
 
+def add_sub_element(doc: Document, parent: Element, name: str, text: Optional[str] = None) -> Element:
+    sub_element = doc.createElement(name)
+    parent.appendChild(sub_element)
+    if text:
+        txt_node = doc.createTextNode(text)
+        sub_element.appendChild(txt_node)
+    return sub_element
+
+
+def add_all_sub_element(doc: Document, parent: Element, name: str, text_list: List[str]) -> None:
+    if text_list:
+        for text in text_list:
+            sub_element = doc.createElement(name)
+            parent.appendChild(sub_element)
+            txt_node = doc.createTextNode(text)
+            sub_element.appendChild(txt_node)
+
+
 def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: Optional[Path] = None, poster: Optional[Path] = None, background: Optional[Path] = None) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
-    root: Any = etree.Element("movie", attrib=None, nsmap=None)
-    etree.SubElement(root, "plot", attrib=None, nsmap=None).text = info.description
-    etree.SubElement(root, "outline", attrib=None, nsmap=None)
-    etree.SubElement(root, "title", attrib=None, nsmap=None).text = info.name
-    etree.SubElement(root, "dateadded", attrib=None, nsmap=None)
-
-    trailer_tag = etree.SubElement(root, "trailer", attrib=None, nsmap=None)
-    if trailer:
-        trailer_tag.text = str(trailer)
-
-    if info.date:
-        etree.SubElement(root, "year", attrib=None, nsmap=None).text = info.date[:4]
-
-    etree.SubElement(root, "premiered", attrib=None, nsmap=None).text = info.date
-    etree.SubElement(root, "releasedate", attrib=None, nsmap=None).text = info.date
-    etree.SubElement(root, "mpaa", attrib=None, nsmap=None).text = "XXX"
-    art = etree.SubElement(root, "art", attrib=None, nsmap=None)
-
-    poster_tag = etree.SubElement(art, "poster", attrib=None, nsmap=None)
-    if poster:
-        poster_tag.text = str(poster)
-
-    background_tag = etree.SubElement(art, "background", attrib=None, nsmap=None)
-    if background:
-        background_tag.text = str(background)
-
+    doc = Document()
+    root: Element = doc.createElement('movie')
+    doc.appendChild(root)
+    add_sub_element(doc, root, "plot", info.description)
+    add_sub_element(doc, root, "outline")
+    add_sub_element(doc, root, "title", info.name)
+    add_sub_element(doc, root, "dateadded")
+    add_sub_element(doc, root, "trailer", str(trailer) if trailer else None)
+    add_sub_element(doc, root, "year", info.date[:4] if info.date else None)
+    add_sub_element(doc, root, "premiered", info.date)
+    add_sub_element(doc, root, "releasedate", info.date)
+    add_sub_element(doc, root, "mpaa", "XXX")
+    art = add_sub_element(doc, root, "art")
+    add_sub_element(doc, art, 'poster', str(poster) if poster else None)
+    add_sub_element(doc, art, 'background', str(background) if background else None)
     if config.enable_metadataapi_genres:
-        for tag in info.tags:
-            etree.SubElement(root, "genre", attrib=None, nsmap=None).text = tag
+        add_all_sub_element(doc, root, 'genre', info.tags)
     else:
-        for tag in info.tags:
-            etree.SubElement(root, "tag", attrib=None, nsmap=None).text = tag
-        etree.SubElement(root, "genre", attrib=None, nsmap=None).text = config.default_genre
-
-    etree.SubElement(root, "studio", attrib=None, nsmap=None).text = info.site
-    etree.SubElement(root, "theporndbid", attrib=None, nsmap=None).text = str(info.uuid)
-    etree.SubElement(root, "phoenixadultid", attrib=None, nsmap=None)
-    etree.SubElement(root, "phoenixadulturlid", attrib=None, nsmap=None)
-    etree.SubElement(root, "sourceid", attrib=None, nsmap=None).text = info.source_url
-
+        add_all_sub_element(doc, root, 'tag', info.tags)
+        add_sub_element(doc, root, 'genre', config.default_genre)
+    add_sub_element(doc, root, 'studio', info.site)
+    add_sub_element(doc, root, 'theporndbid', str(info.uuid))
+    add_sub_element(doc, root, 'phoenixadultid')
+    add_sub_element(doc, root, 'phoenixadulturlid')
+    add_sub_element(doc, root, 'sourceid', info.source_url)
     for performer in info.performers:
-        actor = objectify.SubElement(root, "actor", attrib=None, nsmap=None)
-        etree.SubElement(actor, "name", attrib=None, nsmap=None).text = performer.name
-        etree.SubElement(actor, "role", attrib=None, nsmap=None).text = performer.role
-        etree.SubElement(actor, "image", attrib=None, nsmap=None).text = str(performer.image)
-        etree.SubElement(actor, "type", attrib=None, nsmap=None).text = "Actor"
-        etree.SubElement(actor, "thumb", attrib=None, nsmap=None)
-
-    objectify.SubElement(root, "fileinfo", attrib=None, nsmap=None)
-    objectify.deannotate(root)
-    etree.cleanup_namespaces(root, top_nsmap=None, keep_ns_prefixes=None)
-
-    return etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="UTF-8").decode(encoding="UTF-8")  # type: ignore
+        actor = add_sub_element(doc, root, 'actor')
+        add_sub_element(doc, actor, 'name', performer.name)
+        add_sub_element(doc, actor, 'role', performer.role)
+        add_sub_element(doc, actor, 'image', str(performer.image) if performer.image else None)
+        add_sub_element(doc, actor, 'type', "Actor")
+        add_sub_element(doc, actor, 'thumb')
+    add_sub_element(doc, root, 'fileinfo')
+    return str(doc.toprettyxml(indent="  ", newl='\n', encoding="UTF-8"), encoding="utf8")
 
 
 def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: NamerConfig, trailer: Optional[Path], poster: Optional[Path], background: Optional[Path]):
