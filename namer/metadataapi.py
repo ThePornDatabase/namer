@@ -129,7 +129,7 @@ def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: File
 def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
     movies = False
     if name_parts.site:
-        if name_parts.site.strip().upper() in namer_config.movie_data_prefered:
+        if name_parts.site.strip().lower() in namer_config.movie_data_prefered:
             movies = True
 
     results = []

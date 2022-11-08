@@ -143,7 +143,7 @@ def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], confi
     stream = ffprobe_results.get_default_video_stream()
     if not stream:
         return 0, 0, 0
-    return stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.upper(), config)
+    return stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.lower(), config)
 
 
 def get_codec_value(codec: str, config: NamerConfig) -> int:

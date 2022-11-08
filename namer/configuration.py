@@ -8,6 +8,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Pattern, Sequence
+from configupdater import ConfigUpdater
 
 from requests_cache import CachedSession
 
@@ -15,6 +16,8 @@ from requests_cache import CachedSession
 # noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class NamerConfig:
+
+    config_updater: ConfigUpdater
     """
     Configuration for namer and namer_watchdog
     """

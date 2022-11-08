@@ -5,11 +5,10 @@ import logging
 import os
 import sys
 import unittest
-from configparser import ConfigParser
 from pathlib import Path
 
 from namer.configuration import NamerConfig
-from namer.configuration_utils import from_config, verify_configuration
+from namer.configuration_utils import verify_configuration
 from namer.name_formatter import PartialFormatter
 from namer.comparison_results import Performer
 from test.utils import sample_config
@@ -141,65 +140,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config1.new_relative_path_name = "{whahha}/{site} - {date}"
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
-
-    def test_from_config(self):
-        """
-        Verify config reader does it's job.
-        """
-        config = ConfigParser()
-        non_default_all_config = """
-        [namer]
-            porndb_token = mytoken
-            inplace_name={site} - {name}.{ext}
-            prefer_dir_name_if_available = False
-            min_file_size = 69
-            write_namer_log = True
-            set_dir_permissions = 700
-            set_file_permissions = 700
-            trailer_location = trailer/default.{ext}
-            sites_with_no_date_info = Milf, TeamWhatever
-
-        [metadata]
-            write_nfo = True
-            enabled_tagging = False
-            enabled_poster = False
-            enable_metadataapi_genres = True
-            default_genre = Pron
-            language = rus
-
-        [watchdog]
-            del_other_files = True
-            new_relative_path_name={site} - {name}/{site} - {name}.{ext}
-            watch_dir = /notarealplace/watch
-            work_dir = /notarealplace/work
-            failed_dir = /notarealplace/failed
-            dest_dir = /notarealplace/dest
-            retry_time = 02:16
-        """
-        config.read_string(non_default_all_config)
-        namer_config = from_config(config)
-        self.assertEqual(namer_config.porndb_token, "mytoken")
-        self.assertEqual(namer_config.inplace_name, "{site} - {name}.{ext}")
-        self.assertEqual(namer_config.prefer_dir_name_if_available, False)
-        self.assertEqual(namer_config.min_file_size, 69)
-        self.assertEqual(namer_config.write_namer_log, True)
-        self.assertEqual(namer_config.set_dir_permissions, 700)
-        self.assertEqual(namer_config.set_file_permissions, 700)
-        self.assertEqual(namer_config.trailer_location, "trailer/default.{ext}")
-        self.assertEqual(namer_config.write_nfo, True)
-        self.assertEqual(namer_config.sites_with_no_date_info, ["milf", "teamwhatever"])
-        self.assertEqual(namer_config.enabled_tagging, False)
-        self.assertEqual(namer_config.enabled_poster, False)
-        self.assertEqual(namer_config.enable_metadataapi_genres, True)
-        self.assertEqual(namer_config.default_genre, "Pron")
-        self.assertEqual(namer_config.language, "rus")
-        self.assertEqual(namer_config.del_other_files, True)
-        self.assertEqual(namer_config.new_relative_path_name, "{site} - {name}/{site} - {name}.{ext}")
-        self.assertEqual(namer_config.watch_dir, Path().resolve() / "/notarealplace/watch")
-        self.assertEqual(namer_config.work_dir, Path().resolve() / "/notarealplace/work")
-        self.assertEqual(namer_config.dest_dir, Path().resolve() / "/notarealplace/dest")
-        self.assertEqual(namer_config.failed_dir, Path().resolve() / "/notarealplace/failed")
-        self.assertEqual(namer_config.retry_time, "02:16")
 
     def test_main_method(self):
         """

@@ -65,7 +65,7 @@ def sample_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    os.environ["NAMER_CONFIG"] = "./namer.cfg.sample"
+    os.environ["NAMER_CONFIG"] = "namer.cfg.default"
     return default_config()
 
 
