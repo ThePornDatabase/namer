@@ -107,7 +107,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config.min_file_size = 0
             config.preserve_duplicates = False
             config.max_desired_resolutions = -1
-            config.desired_codec = ["HEVC", "H264"]
+            config.desired_codec = ["hevc", "h264"]
             watcher = create_watcher(config)
             watcher.start()
             targets = [

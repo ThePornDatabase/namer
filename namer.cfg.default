@@ -4,6 +4,10 @@
 # sign up here: https://metadataapi.net/register
 porndb_token = ****************************************
 
+# You should likely never edit this, unless you know regex really well and wont ask for help when you mess up.
+# Seriously don't edit it.
+name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
+
 # How to write output file name.  When namer.py is run this is applied in place 
 # (next to the file to be processed).
 # If you are running watchdog see new_relative_path_name in the watchdog section.
@@ -74,8 +78,8 @@ set_file_permissions = 664
 # Setting uid and groupid for new and moved files.
 # Use the id numbers, not names.  Defaults to process uid/gid in non windows systems.
 
-#set_uid = None
-#set_gid = None
+set_uid =
+set_gid =
 
 # If you want the trailers downloaded set the value relative to the final location of the movie file here.
 # Currently assumes directory per video, and doesn't work in vast majority of cases (cdns with caches busted,
@@ -116,6 +120,9 @@ use_requests_cache = True
 
 # Amount of minutes that http request would be in cache
 requests_cache_expire_minutes = 10
+
+# Leave this unset unless you are testing a new tpdb endpoint.
+override_tpdb_address = 
 
 [Phash]
 # Calculate and use phashes in search for matches
@@ -212,7 +219,7 @@ failed_dir = ./test/failed
 dest_dir = ./test/dest
 
 # When to retry failed items, default is a random minute during the 3 am hour in your timezone.
-#retry_time = 03:16
+retry_time =
 
 # Run webserver while running watchdog.
 web = False

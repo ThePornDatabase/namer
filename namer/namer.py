@@ -98,7 +98,7 @@ def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: 
         files.sort()
         for file in files:
             fullpath_file = dir_to_scan / file
-            if fullpath_file.is_dir() or fullpath_file.suffix.upper() in [".MP4", ".MKV"]:
+            if fullpath_file.is_dir() or fullpath_file.suffix.lower()[1:] in config.target_extensions:
                 command = make_command(fullpath_file, config, nfo=infos, inplace=True)
                 if command is not None:
                     process_file(command)

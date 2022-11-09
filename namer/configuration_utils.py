@@ -2,13 +2,14 @@
 Namer Configuration readers/verifier
 """
 
-import configparser
 import json
 import os
+import io
 import random
 import re
 import tempfile
-from configparser import ConfigParser
+from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
+from configupdater import ConfigUpdater
 from datetime import timedelta
 from pathlib import Path
 
@@ -83,98 +84,192 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     return success
 
 
-def from_config(config: ConfigParser) -> NamerConfig:
-    """
-    Given a config parser pointed at a namer.cfg file, return a NamerConfig with the file's parameters.
-    """
-    namer_config = NamerConfig()
-    namer_config.porndb_token = config.get("namer", "porndb_token", fallback="")
-    namer_config.inplace_name = config.get("namer", "inplace_name", fallback="{site} - {date} - {name}.{ext}")
-    namer_config.name_parser = config.get("namer", "name_parser", fallback="{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}")
-    namer_config.prefer_dir_name_if_available = config.getboolean("namer", "prefer_dir_name_if_available", fallback=False)
-    namer_config.target_extensions = [x.strip().lower() for x in config.get("namer", "target_extensions", fallback="mp4,mkv,avi,mov,flv").split(",")]
+def get_str(updater: ConfigUpdater, section: str, key: str) -> Optional[str]:
+    if updater.has_option(section, key):
+        output = updater.get(section, key)
+        return str(output.value)
+    else:
+        return None
+        # raise RuntimeError(f"Not a configuration section: {section} key: {key}")
 
-    namer_config.min_file_size = config.getint("namer", "min_file_size", fallback=100)
-    namer_config.set_uid = config.getint("namer", "set_uid", fallback=None)
-    namer_config.set_gid = config.getint("namer", "set_gid", fallback=None)
-    namer_config.trailer_location = config.get("namer", "trailer_location", fallback=None)
-    namer_config.sites_with_no_date_info = [re.sub(r"[^a-z0-9]", "", x.strip().lower()) for x in config.get("namer", "sites_with_no_date_info", fallback="").split(",")]
-    if "" in namer_config.sites_with_no_date_info:
-        namer_config.sites_with_no_date_info.remove("")
 
+def to_bool(value: Optional[str]) -> Optional[bool]:
+    return value.lower() == "true" if value else None
+
+
+def from_bool(value: Optional[bool]) -> str:
+    return str(value) if value is not None else ""
+
+
+def to_str_list_lower(value: Optional[str]) -> List[str]:
+    return [x.strip().lower() for x in value.lower().split(',')] if value else []
+
+
+def from_str_list_lower(value: Optional[List[str]]) -> str:
+    return ", ".join(value) if value else ""
+
+
+def to_int(value: Optional[str]) -> Optional[int]:
+    return int(value) if value else None
+
+
+def from_int(value: Optional[int]) -> str:
+    return str(value) if value else ""
+
+
+def to_path(value: Optional[str]) -> Optional[Path]:
+    return Path(value).resolve() if value else None
+
+
+def from_path(value: Optional[Path]) -> str:
+    return str(value) if value else ""
+
+
+def to_regex_list(value: Optional[str]) -> List[Pattern]:
+    return [re.compile(x.strip()) for x in value.split(',')] if value else []
+
+
+def from_regex_list(value: Optional[List[Pattern]]) -> str:
+    return ", ".join([x.pattern for x in value]) if value else ""
+
+
+def to_site_abreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
     abbreviations_db = abbreviations.copy()
-    site_abbreviations = config.get("namer", "site_abbreviations", fallback=None)
     if site_abbreviations:
         data = json.loads(site_abbreviations)
         abbreviations_db.update(data)
-
-    new_abbreviation = {}
+    new_abbreviation: Dict[Pattern, str] = {}
     for abbreviation, full in abbreviations_db.items():
         key = re.compile(fr'^{abbreviation}[ .-]+', re.IGNORECASE)
         new_abbreviation[key] = f'{full} '
+    return new_abbreviation
 
-    namer_config.site_abbreviations = new_abbreviation
 
-    namer_config.override_tpdb_address = config.get("namer", "override_tpdb_address", fallback="https://api.metadataapi.net/")
+def from_site_abreviation(site_abbreviations: Optional[Dict[Pattern, str]]) -> str:
+    out: Dict[str, str] = {x.pattern[1:-6]: y[0:-1] for (x, y) in site_abbreviations.items()} if site_abbreviations else {}
+    wrapper = io.StringIO("")
+    json.dump(out, wrapper)
+    return wrapper.getvalue()
 
-    namer_config.write_namer_log = config.getboolean("namer", "write_namer_log", fallback=False)
-    namer_config.write_namer_failed_log = config.getboolean("namer", "write_namer_failed_log", fallback=True)
-    namer_config.update_permissions_ownership = config.getboolean("namer", "update_permissions_ownership", fallback=False)
-    namer_config.set_dir_permissions = config.getint("namer", "set_dir_permissions", fallback=775)
-    namer_config.set_file_permissions = config.getint("namer", "set_file_permissions", fallback=664)
-    namer_config.max_performer_names = config.getint("namer", "max_performer_names", fallback=6)
-    namer_config.enabled_requests_cache = config.getboolean("namer", "use_requests_cache", fallback=True)
-    namer_config.requests_cache_expire_minutes = config.getint("namer", "requests_cache_expire_minutes", fallback=10)
 
-    namer_config.movie_data_prefered = [x.strip().upper() for x in config.get("namer", "movie_data_prefered", fallback="").split(",")]
-    vr_studios = "18 VR,Babe VR,Badoink VR,Dorm Room,Kink VR,Real VR,RealJamVR,Sex Like Real,SexBabesVR,SinsVR,SLR Originals,Swallowbay,Virtual Taboo,VirtualRealPorn,VR Bangers,VR Cosplay X,VR Hush,VRConk,VRedging,Wankz VR"
-    namer_config.vr_studios = [x.strip().upper() for x in config.get("namer", "vr_studios", fallback=vr_studios).split(",")]
-    namer_config.vr_tags = [x.strip().upper() for x in config.get("namer", "vr_tags", fallback="virtual reality, vr porn").split(",")]
+def to_pattern(value: Optional[str]) -> Optional[Pattern]:
+    return re.compile(value, re.IGNORECASE) if value else None
 
-    namer_config.preserve_duplicates = config.getboolean("duplicates", "preserve_duplicates", fallback=True)
-    namer_config.max_desired_resolutions = config.getint("duplicates", "max_desired_resolutions", fallback=-1)
-    namer_config.desired_codec = [x.strip().upper() for x in config.get("duplicates", "desired_codec", fallback="hevc,h264").split(",")]
 
-    namer_config.write_nfo = config.getboolean("metadata", "write_nfo", fallback=False)
-    namer_config.enabled_tagging = config.getboolean("metadata", "enabled_tagging", fallback=True)
-    namer_config.enabled_poster = config.getboolean("metadata", "enabled_poster", fallback=True)
-    namer_config.enable_metadataapi_genres = config.getboolean("metadata", "enable_metadataapi_genres", fallback=False)
-    namer_config.default_genre = config.get("metadata", "default_genre", fallback="Adult")
-    namer_config.language = config.get("metadata", "language", fallback=None)
+def from_pattern(value: Optional[Pattern]) -> str:
+    return value.pattern if value else ""
 
-    ignored_dir_regex = config.get("watchdog", "ignored_dir_regex", fallback=r".*_UNPACK_.*")
-    if ignored_dir_regex:
-        namer_config.ignored_dir_regex = re.compile(ignored_dir_regex, re.IGNORECASE)
 
-    namer_config.new_relative_path_name = config.get("watchdog", "new_relative_path_name", fallback="{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
-    namer_config.del_other_files = config.getboolean("watchdog", "del_other_files", fallback=False)
-    namer_config.extra_sleep_time = config.getint("watchdog", "extra_sleep_time", fallback=30)
+def to_site_list(value: Optional[str]) -> List[str]:
+    return [re.sub(r"[^a-z0-9]", "", x.strip().lower()) for x in value.split(",")] if value else []
 
-    watch_dir = config.get("watchdog", "watch_dir", fallback=None)
-    if watch_dir:
-        namer_config.watch_dir = Path(watch_dir).resolve()
 
-    work_dir = config.get("watchdog", "work_dir", fallback=None)
-    if work_dir:
-        namer_config.work_dir = Path(work_dir).resolve()
+def set_str(updater: ConfigUpdater, section: str, key: str, value: str) -> None:
+    updater[section][key].value = value
 
-    failed_dir = config.get("watchdog", "failed_dir", fallback=None)
-    if failed_dir:
-        namer_config.failed_dir = Path(failed_dir).resolve()
 
-    dest_dir = config.get("watchdog", "dest_dir", fallback=None)
-    if dest_dir:
-        namer_config.dest_dir = Path(dest_dir).resolve()
+def set_comma_list(updater: ConfigUpdater, section: str, key: str, value: List[str]) -> None:
+    updater[section][key].value = ", ".join(value)
 
-    namer_config.retry_time = config.get("watchdog", "retry_time", fallback=f"03:{random.randint(0, 59):0>2}")
-    namer_config.web = config.getboolean("watchdog", "web", fallback=False)
-    namer_config.port = config.getint("watchdog", "port", fallback=6980)
-    namer_config.host = config.get("watchdog", "host", fallback="0.0.0.0")
-    namer_config.web_root = config.get("watchdog", "web_root", fallback=None)
-    namer_config.allow_delete_files = config.getboolean("watchdog", "allow_delete_files", fallback=False)
-    namer_config.add_max_percent_column = config.getboolean("watchdog", "add_max_percent_column", fallback=False)
-    namer_config.debug = config.getboolean("watchdog", "debug", fallback=False)
-    namer_config.diagnose_errors = config.getboolean("watchdog", "diagnose_errors", fallback=False)
+
+def set_int(updater: ConfigUpdater, section: str, key: str, value: int) -> None:
+    updater[section][key].value = str(value)
+
+
+def set_boolean(updater: ConfigUpdater, section: str, key: str, value: bool) -> None:
+    updater[section][key] = str(value)
+
+
+field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optional[Callable[[Any], str]]]] = {
+    "porndb_token": ("namer", None, None),
+    "name_parser": ("namer", None, None),
+    "inplace_name": ("namer", None, None),
+    "prefer_dir_name_if_available": ("namer", to_bool, from_bool),
+    "min_file_size": ("namer", to_int, from_int),
+    "write_namer_log": ("namer", to_bool, from_bool),
+    "write_namer_failed_log": ("namer", to_bool, from_bool),
+    "target_extensions": ("namer", to_str_list_lower, from_str_list_lower),
+    "update_permissions_ownership": ("namer", to_bool, from_bool),
+    "set_dir_permissions": ("namer", to_int, from_int),
+    "set_file_permissions": ("namer", to_int, from_int),
+    "set_uid": ("namer", to_int, from_int),
+    "set_gid": ("namer", to_int, from_int),
+    "trailer_location": ("namer", None, None),
+    "sites_with_no_date_info": ("namer", to_str_list_lower, from_str_list_lower),
+    "movie_data_prefered": ("namer", to_str_list_lower, from_str_list_lower),
+    "vr_studios": ("namer", to_str_list_lower, from_str_list_lower),
+    "vr_tags": ("namer", to_str_list_lower, from_str_list_lower),
+    "site_abbreviations": ("namer", to_site_abreviation, from_site_abreviation),
+    "max_performer_names": ("namer", to_int, from_int),
+    "use_requests_cache": ("namer", to_bool, from_bool),
+    "requests_cache_expire_minutes": ("namer", to_int, from_int),
+    "override_tpdb_address": ("namer", to_bool, from_bool),
+    "search_phash": ("Phash", to_bool, from_bool),
+    "require_match_phash_top": ("Phash", to_bool, from_bool),
+    "send_phash_of_matches_to_tpdb": ("Phash", to_bool, from_bool),
+    "write_nfo": ("metadata", to_bool, from_bool),
+    "enabled_tagging": ("metadata", to_bool, from_bool),
+    "enabled_poster": ("metadata", to_bool, from_bool),
+    "enable_metadataapi_genres": ("metadata", to_bool, from_bool),
+    "default_genre": ("metadata", None, None),
+    "language": ("metadata", None, None),
+    "preserve_duplicates": ("duplicates", to_bool, from_bool),
+    "max_desired_resolutions": ("duplicates", to_int, from_int),
+    "desired_codec": ("duplicates", to_str_list_lower, from_str_list_lower),
+    "ignored_dir_regex": ("watchdog", to_pattern, from_pattern),
+    "del_other_files": ("watchdog", to_bool, from_bool),
+    "extra_sleep_time": ("watchdog", to_int, from_int),
+    "new_relative_path_name": ("watchdog", None, None),
+    "watch_dir": ("watchdog", to_path, from_path),
+    "work_dir": ("watchdog", to_path, from_path),
+    "failed_dir": ("watchdog", to_path, from_path),
+    "dest_dir": ("watchdog", to_path, from_path),
+    "retry_time": ("watchdog", None, None),
+    "web": ("watchdog", to_bool, from_bool),
+    "port": ("watchdog", to_int, from_int),
+    "host": ("watchdog", None, None),
+    "web_root": ("watchdog", None, None),
+    "allow_delete_files": ("watchdog", to_bool, from_bool),
+    "add_max_percent_column": ("watchdog", to_bool, from_bool),
+    "debug": ("watchdog", to_bool, from_bool),
+    "diagnose_errors": ("watchdog", to_bool, from_bool),
+}
+
+
+def to_ini(config: NamerConfig) -> str:
+    updater = config.config_updater
+    for name in field_info.keys():
+        info = field_info.get(name)
+        if info:
+            section = info[0]
+            if section:
+                value = getattr(config, name)
+                convert: Optional[Callable[[Any], str]] = info[2]
+                if convert:
+                    updater.get(section, name).value = convert(value)
+                else:
+                    updater.get(section, name).value = value
+    return str(updater)
+
+
+def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig:
+    """
+    Given a config parser pointed at a namer.cfg file, return a NamerConfig with the file's parameters.
+    """
+    keys = field_info.keys()
+    for name in keys:
+        info = field_info.get(name)
+        if info and info[0]:
+            new_value = get_str(config, info[0], name)
+            if new_value or not hasattr(namer_config, name):
+                type_converter_lambda: Optional[Callable[[Optional[str]], Any]] = info[1]
+                if type_converter_lambda:
+                    setattr(namer_config, name, type_converter_lambda(new_value))
+                else:
+                    setattr(namer_config, name, new_value)
+
+    if not hasattr(namer_config, "retry_time") or namer_config.retry_time is None:
+        setattr(namer_config, "retry_time", f"03:{random.randint(0, 59):0>2}")
 
     # create a CachedSession objects for request caching.
     if namer_config.enabled_requests_cache:
@@ -191,14 +286,18 @@ def default_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    config = configparser.ConfigParser()
-    default_locations = []
+    config = ConfigUpdater()
+    config.read("namer.cfg.default")
+    namer_config = from_config(config, NamerConfig())
+    namer_config.config_updater = config
+
+    user_config = ConfigUpdater()
     config_loc = os.environ.get("NAMER_CONFIG")
     if config_loc and Path(config_loc).exists():
-        default_locations = [Path(config_loc)]
+        user_config.read(config_loc)
     elif (Path.home() / ".namer.cfg").exists():
-        default_locations = [Path.home() / ".namer.cfg"]
+        user_config.read(str(Path.home() / ".namer.cfg"))
     elif Path("./namer.cfg").exists():
-        default_locations = [Path("./namer.cfg")]
-    config.read(default_locations)
-    return from_config(config)
+        user_config.read(".namer.cfg")
+    user_config.read("namer.cfg.default")
+    return from_config(user_config, namer_config)

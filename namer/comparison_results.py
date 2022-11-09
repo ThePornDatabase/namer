@@ -151,7 +151,7 @@ class LookedUpFileInfo:
             res_str = "4k" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
 
         vr = ""
-        if (self.site and self.site.upper() in config.vr_studios) or any(tag.strip().upper() in config.vr_tags for tag in self.tags):
+        if (self.site and self.site.lower() in config.vr_studios) or any(tag.strip().lower() in config.vr_tags for tag in self.tags):
             vr = "vr"
 
         if self.original_query and '/movies' in self.original_query and self.site not in config.movie_data_prefered:
