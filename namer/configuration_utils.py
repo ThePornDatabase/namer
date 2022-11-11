@@ -83,14 +83,21 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     success = __verify_watchdog_config(config, formatter) and success
     return success
 
+# Read and write .ini files utils below
+
 
 def get_str(updater: ConfigUpdater, section: str, key: str) -> Optional[str]:
+    """
+    Read a string from an ini file if the config exists, else return None if the config does not
+    exist in file.
+    """
     if updater.has_option(section, key):
         output = updater.get(section, key)
         return str(output.value)
     else:
         return None
-        # raise RuntimeError(f"Not a configuration section: {section} key: {key}")
+
+# Ini file string converters, to and from NamerConfig type
 
 
 def to_bool(value: Optional[str]) -> Optional[bool]:
@@ -110,11 +117,11 @@ def from_str_list_lower(value: Optional[List[str]]) -> str:
 
 
 def to_int(value: Optional[str]) -> Optional[int]:
-    return int(value) if value else None
+    return int(value) if value is not None else None
 
 
 def from_int(value: Optional[int]) -> str:
-    return str(value) if value else ""
+    return str(value) if value is not None else ""
 
 
 def to_path(value: Optional[str]) -> Optional[Path]:
@@ -234,6 +241,12 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "debug": ("watchdog", to_bool, from_bool),
     "diagnose_errors": ("watchdog", to_bool, from_bool),
 }
+"""
+A mapping from NamerConfig field to ini file section - the ini property name and the field name
+must be identical.   The conversion of string too and from functions are also provided here allowing
+the conversion of types from NamerConfig to and from strings.   If the converters are not set then the
+the string is unaltered.
+"""
 
 
 def to_ini(config: NamerConfig) -> str:
@@ -282,7 +295,7 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
     return namer_config
 
 
-def default_config() -> NamerConfig:
+def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
@@ -293,11 +306,12 @@ def default_config() -> NamerConfig:
 
     user_config = ConfigUpdater()
     config_loc = os.environ.get("NAMER_CONFIG")
-    if config_loc and Path(config_loc).exists():
+    if user_set:
+        user_config.read(user_set)
+    elif config_loc and Path(config_loc).exists():
         user_config.read(config_loc)
     elif (Path.home() / ".namer.cfg").exists():
         user_config.read(str(Path.home() / ".namer.cfg"))
     elif Path("./namer.cfg").exists():
         user_config.read(".namer.cfg")
-    user_config.read("namer.cfg.default")
     return from_config(user_config, namer_config)

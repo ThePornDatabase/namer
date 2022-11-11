@@ -18,7 +18,7 @@ from loguru import logger
 from namer.command import Command
 from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo
 from namer.configuration import NamerConfig
-from namer.configuration_utils import default_config, from_config, verify_configuration
+from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults, ffprobe
 from namer.filenameparts import FileNameParts
@@ -267,10 +267,8 @@ def main(arg_list: List[str]):
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     check_arguments(args.file, args.dir, args.configfile)
 
-    config = default_config()
-    if args.configfile is not None and args.configfile.is_file():
-        logger.info("Config override specified {}", args.configfile)
-        config = from_config(args.configfile)
+    conf: Optional[Path] = args.configfile
+    config: NamerConfig = default_config(args.configfile) if conf is not conf.is_file() else default_config()
     verify_configuration(config, PartialFormatter())
     target = args.file
     if args.dir is not None:
