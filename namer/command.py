@@ -274,17 +274,18 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         output.target_directory = containing_dir
         output.input_file = containing_dir
 
-    if command.target_directory and not subpath_or_equal(output.target_directory, command.target_directory):
+    if command.target_directory and not is_relative_to(output.target_directory, command.target_directory):
         shutil.rmtree(command.target_directory)
 
     return output
 
 
-def subpath_or_equal(potential_sub: Optional[Path], potential_parent: Optional[Path]) -> bool:
-    if not potential_parent or not potential_sub:
+def is_relative_to(potential_sub: Path, potential_parent: Path) -> bool:
+    try:
+        potential_sub.relative_to(potential_parent)
+        return True
+    except ValueError:
         return False
-
-    return len(potential_parent.parts) <= len(potential_sub.parts) and all(i == j for i, j in zip(potential_parent.parts, potential_sub.parts))
 
 
 def is_interesting_movie(path: Optional[Path], config: NamerConfig) -> bool:
@@ -377,7 +378,7 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
     Ensure we are going to handle the directory relative to another directory, rather than just the file
     specified
     """
-    if subpath_or_equal(input_dir, relative_to):
+    if is_relative_to(input_dir, relative_to):
         relative_path = input_dir.absolute().relative_to(relative_to.absolute())
         if relative_path:
             target_file = relative_to / relative_path.parts[0]

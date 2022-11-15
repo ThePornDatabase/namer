@@ -197,7 +197,7 @@ class NamerConfig:
     a list of abbreviations.
     """
 
-    movie_data_prefered: Sequence[str]
+    movie_data_preferred: Sequence[str]
     """
     Sequence of sites where movie data should be prefered (movies will be marked scenes instead of movie)
     """
@@ -396,7 +396,7 @@ class NamerConfig:
                 "write_namer_failed_log": self.write_namer_failed_log,
                 "trailer_location": self.trailer_location,
                 "sites_with_no_date_info": self.sites_with_no_date_info,
-                "movie_data_prefered": self.movie_data_prefered,
+                "movie_data_preferred": self.movie_data_preferred,
                 "vr_studios": self.vr_studios,
                 "vr_tags": self.vr_tags,
                 "site_abbreviations": {key.pattern: value for key, value in self.site_abbreviations.items()},
