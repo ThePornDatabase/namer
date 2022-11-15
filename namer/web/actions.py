@@ -16,7 +16,7 @@ from werkzeug.routing import Rule
 
 from namer.comparison_results import ComparisonResults
 from namer.configuration import NamerConfig
-from namer.command import gather_target_files_from_dir, is_interesting_movie, subpath_or_equal, Command
+from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
 
 
@@ -52,14 +52,14 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     stat = command.target_movie_file.stat()
 
     res = {
-        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if subpath_or_equal(command.target_movie_file, command.config.failed_dir) else None,
+        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if is_relative_to(command.target_movie_file, command.config.failed_dir) else None,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
         'update_time': int(stat.st_mtime),
         'size': stat.st_size,
     }
 
-    if config and config.add_max_percent_column:
+    if config and config.add_max_percent_column and res['file']:
         log_data = read_failed_log_file(res['file'], config)
         percentage = log_data.results[0].name_match if log_data and log_data.results and log_data.results[0] else 0.0
         res['percentage'] = percentage

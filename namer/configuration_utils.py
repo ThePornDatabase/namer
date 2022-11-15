@@ -152,7 +152,7 @@ def to_site_abreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]
     return new_abbreviation
 
 
-def from_site_abreviation(site_abbreviations: Optional[Dict[Pattern, str]]) -> str:
+def from_site_abbreviation(site_abbreviations: Optional[Dict[Pattern, str]]) -> str:
     out: Dict[str, str] = {x.pattern[1:-6]: y[0:-1] for (x, y) in site_abbreviations.items()} if site_abbreviations else {}
     wrapper = io.StringIO("")
     json.dump(out, wrapper)
@@ -203,10 +203,10 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "set_gid": ("namer", to_int, from_int),
     "trailer_location": ("namer", None, None),
     "sites_with_no_date_info": ("namer", to_str_list_lower, from_str_list_lower),
-    "movie_data_prefered": ("namer", to_str_list_lower, from_str_list_lower),
+    "movie_data_preferred": ("namer", to_str_list_lower, from_str_list_lower),
     "vr_studios": ("namer", to_str_list_lower, from_str_list_lower),
     "vr_tags": ("namer", to_str_list_lower, from_str_list_lower),
-    "site_abbreviations": ("namer", to_site_abreviation, from_site_abreviation),
+    "site_abbreviations": ("namer", to_site_abreviation, from_site_abbreviation),
     "max_performer_names": ("namer", to_int, from_int),
     "use_requests_cache": ("namer", to_bool, from_bool),
     "requests_cache_expire_minutes": ("namer", to_int, from_int),

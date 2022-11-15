@@ -129,7 +129,7 @@ def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: File
 def __metadata_api_lookup(name_parts: FileNameParts, namer_config: NamerConfig) -> List[ComparisonResult]:
     movies = False
     if name_parts.site:
-        if name_parts.site.strip().lower() in namer_config.movie_data_prefered:
+        if name_parts.site.strip().lower() in namer_config.movie_data_preferred:
             movies = True
 
     results = []
@@ -341,7 +341,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query += f"&page={page}"
         query += "&limit=25"
 
-    return f"{namer_config.override_tpdb_address}{query}"
+    return f"{namer_config.override_tpdb_address}/{query}"
 
 
 def __get_metadataapi_net_info(url: str, name_parts: FileNameParts, namer_config: NamerConfig):
