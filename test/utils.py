@@ -6,16 +6,19 @@ import os
 import platform
 import shutil
 import tempfile
+from configupdater import ConfigUpdater
 from dataclasses import dataclass
+from importlib import resources
+
 from pathlib import Path
 from sys import gettrace as sys_gettrace
 from time import sleep, time
-from typing import Callable, Optional, Generator
+from typing import Callable, Optional
 
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
-from namer.configuration_utils import default_config, to_ini
+from namer.configuration_utils import to_ini, from_config
 from test.web.parrot_webserver import ParrotWebServer
 
 
@@ -65,8 +68,16 @@ def sample_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    os.environ["NAMER_CONFIG"] = "namer.cfg.default"
-    return default_config()
+    config = ConfigUpdater()
+    config_str = ""
+    if hasattr(resources, 'files'):
+        config_str = resources.files("namer").joinpath("namer.cfg.default").read_text()
+    elif hasattr(resources, 'read_text'):
+        config_str = resources.read_text("namer", "namer.cfg.default")
+    config.read_string(config_str)
+    namer_config = from_config(config, NamerConfig())
+    namer_config.config_updater = config
+    return namer_config
 
 
 class FakeTPDB(ParrotWebServer):
@@ -115,6 +126,8 @@ class FakeTPDB(ParrotWebServer):
         # Search Results
         self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
         self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way%212&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way%211&limit=25")
         self.add_evil_angel("/scenes?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
         self.add_evil_angel("/scenes?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
         self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.&limit=25")
@@ -168,7 +181,7 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = sample_config()) -> Generator[tuple[Path, FakeTPDB, NamerConfig], None, None]:
+def environment(config: NamerConfig = sample_config()):
     with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
         with FakeTPDB() as fakeTpdb:
             tempdir = Path(tmpdir)

@@ -180,7 +180,7 @@ class NamerConfig:
     Write an nfo file next to the directory in an emby/jellyfin readable format.
     """
 
-    trailer_location: Optional[str] = None
+    trailer_location: Optional[str] = ''
     """
     If you want the trailers downloaded set the value relative to the final location of the movie file here.
     Plex:      Trailers/trailer.{ext}, or extras/Trailer-trailer.{ext}
@@ -334,7 +334,7 @@ class NamerConfig:
     Web server host
     """
 
-    web_root: Optional[str] = None
+    web_root: Optional[str] = ""
     """
     webroot (root url to place pages), useful for reverse proxies
     """

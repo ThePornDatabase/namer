@@ -8,6 +8,7 @@ import io
 import random
 import re
 import tempfile
+from importlib import resources
 from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
 from configupdater import ConfigUpdater
 from datetime import timedelta
@@ -300,13 +301,18 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     Attempts reading various locations to fine a namer.cfg file.
     """
     config = ConfigUpdater()
-    config.read("namer.cfg.default")
+    config_str = ""
+    if hasattr(resources, 'files'):
+        config_str = resources.files("namer").joinpath("namer.cfg.default").read_text()
+    elif hasattr(resources, 'read_text'):
+        config_str = resources.read_text("namer", "namer.cfg.default")
+    config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.config_updater = config
 
     user_config = ConfigUpdater()
     config_loc = os.environ.get("NAMER_CONFIG")
-    if user_set:
+    if user_set and Path(user_set).is_file():
         user_config.read(user_set)
     elif config_loc and Path(config_loc).exists():
         user_config.read(config_loc)

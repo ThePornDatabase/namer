@@ -4,7 +4,6 @@ import unittest
 import warnings
 from pathlib import Path
 from platform import system
-from typing import Generator
 
 import requests
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
@@ -16,10 +15,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from namer.configuration import NamerConfig
-from namer.watchdog import create_watcher, MovieWatcher
+from namer.watchdog import create_watcher
 from test.namer_metadataapi_test import environment
 from test.namer_watchdog_test import new_ea
-from test.utils import is_debugging, FakeTPDB, sample_config
+from test.utils import is_debugging, sample_config
 from test.web.namer_web_pageobjects import FailedPage
 from test.web.parrot_webserver import ParrotWebServer
 
@@ -79,7 +78,7 @@ def default_os_browser(debug: bool) -> WebDriver:
 
 
 @contextlib.contextmanager  # type: ignore
-def make_test_context(config: NamerConfig) -> Generator[tuple[Path, MovieWatcher, WebDriver, FakeTPDB], None, None]:
+def make_test_context(config: NamerConfig):
     with environment(config) as (tempdir, mock_tpdb, config):
         with create_watcher(config) as watcher:
             url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"

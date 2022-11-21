@@ -209,7 +209,7 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     if config.write_namer_log:
         write_log_file(video_file, search_results, config)
 
-    if config.trailer_location and new_metadata is not None:
+    if config.trailer_location and config.trailer_location != '' and new_metadata is not None:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
     if config.write_nfo and new_metadata is not None:
@@ -268,7 +268,7 @@ def main(arg_list: List[str]):
     check_arguments(args.file, args.dir, args.configfile)
 
     conf: Optional[Path] = args.configfile
-    config: NamerConfig = default_config(args.configfile) if conf is not None and conf.is_file() else default_config()
+    config: NamerConfig = default_config(conf)
     verify_configuration(config, PartialFormatter())
     target = args.file
     if args.dir is not None:

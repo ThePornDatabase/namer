@@ -12,7 +12,7 @@ from mutagen.mp4 import MP4
 from namer.configuration import NamerConfig
 from namer.configuration_utils import to_ini
 from namer.namer import check_arguments, main, set_permissions
-from test.utils import new_ea, sample_config, validate_mp4_tags, environment
+from test.utils import new_ea, sample_config, validate_mp4_tags, environment, FakeTPDB
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -63,6 +63,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Process all subdirs of -d.
         """
         with environment() as (tempdir, _fakeTPDB, config):
+            tempdir: Path
+            _fakeTPDB: FakeTPDB
+            config: NamerConfig
             targets = [new_ea(tempdir, use_dir=True, post_stem="1"), new_ea(tempdir, use_dir=True, post_stem="2"), ]
             main(["-d", str(targets[0].file.parent.parent), "-m", "-c", str(config.config_file)])
             output = MP4(targets[0].file.parent.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
@@ -104,7 +107,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test multiple directories are processed when -d (directory) and -m are passed.
         Process all sub-dirs of -d.
         """
-        with environment() as (tempdir, _fakeTPDB, config):
+        config = sample_config()
+        with environment(config) as (tempdir, _fakeTPDB, config):
             targets = [new_ea(tempdir, use_dir=False, post_stem="1"), new_ea(tempdir, use_dir=False, post_stem="2")]
             main(["-d", str(targets[0].file.parent), "-m", "-c", str(config.config_file)])
             output1 = (targets[0].file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
@@ -122,7 +126,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             test_file.write_text("test")
             test_dir = path / "test_dir"
             test_dir.mkdir()
-            config = NamerConfig()
+            config = sample_config()
             if hasattr(os, "getgroups"):
                 config.set_gid = None if len(os.getgroups()) == 0 else os.getgroups()[0]
             if hasattr(os, "getuid"):
