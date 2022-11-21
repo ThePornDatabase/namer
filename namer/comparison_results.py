@@ -154,7 +154,7 @@ class LookedUpFileInfo:
         if (self.site and self.site.lower() in config.vr_studios) or any(tag.strip().lower() in config.vr_tags for tag in self.tags):
             vr = "vr"
 
-        if self.original_query and '/movies' in self.original_query and (self.site and self.site.lower().replace(" ","") not in config.movie_data_preferred):
+        if self.original_query and '/movies' in self.original_query and (self.site and self.site.lower().replace(" ", "") not in config.movie_data_preferred):
             self.type = 'movie'
         else:
             self.type = 'scene'
