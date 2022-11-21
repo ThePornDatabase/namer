@@ -3,13 +3,10 @@ Test namer_watchdog.py
 """
 import contextlib
 import logging
-import os
-import tempfile
 import time
 import unittest
 from pathlib import Path
 from typing import Generator
-from unittest.mock import MagicMock, patch
 
 from mutagen.mp4 import MP4
 
@@ -119,7 +116,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.min_file_size = 0
         config.write_namer_log = True
         config.min_file_size = 0
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):  
+        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
             targets = [new_ea(config.watch_dir)]
             wait_until_processed(watcher)
             self.assertFalse(targets[0].file.exists())
@@ -247,7 +244,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             watcher.stop()
             self.assertTrue(targets[0].file.exists())
 
-
     def test_handler_failure(self):
         """
         Test the handle function works for a directory.
@@ -325,7 +321,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.prefer_dir_name_if_available = True
         config.min_file_size = 0
         config.write_namer_log = True
-        # TODO: 
+        # TODO:
         # config.trailer_location = "Trailers/trailer.{ext}"
         config.min_file_size = 0
         config.write_nfo = True

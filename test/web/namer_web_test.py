@@ -16,7 +16,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from namer.configuration import NamerConfig
-from namer.configuration_utils import default_config
 from namer.watchdog import create_watcher, MovieWatcher
 from test.namer_metadataapi_test import environment
 from test.namer_watchdog_test import new_ea

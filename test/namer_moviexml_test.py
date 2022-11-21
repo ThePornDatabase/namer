@@ -23,6 +23,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         verify tag in place functions.
         """
+
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             copytree(Path(__file__).resolve().parent, tempdir / "test")
@@ -44,12 +45,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             ]
             self.assertListEqual(info.performers, expected_performers)
 
-   
     def test_writing_xml_metadata_genre_flag(self):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        
+
         with environment() as (_path, fakeTPDB, config):
             name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", config)
             config.enable_metadataapi_genres = True
@@ -57,7 +57,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(results.results), 1)
             result = results.results[0]
             output = write_movie_xml_file(result.looked_up, config)
-            
             expected = f"""<?xml version="1.0" encoding="UTF-8"?>
 <movie>
   <plot>Cute brunette Carmela Clutch positions her big, juicy ass for famed director/cocksman Mark Wood's camera to ogle. The well-endowed babe teases, flaunting her voluptuous jugs and derriere. Mark's sexy MILF partner, Francesca Le, finds a 'nice warm place' for her tongue and serves Carmela a lesbian rim job. Francesca takes a labia-licking face ride from the busty babe. Francesca takes over the camera as Mark takes over Carmela's hairy snatch, his big cock ram-fucking her twat. Carmela sucks Mark's meat in a lewd blowjob. Carmela jerks her clit as Mark delivers a vigorous anal pounding! With Mark's prick shoved up her ass, off-screen Francesca orders, 'Keep that pussy busy!' Carmela's huge boobs jiggle as she takes a rectal reaming and buzzes a vibrator on her clit at the same time. Francesca jumps in to make it a threesome, trading ass-to-mouth flavor with the young tramp. This ribald romp reaches its climax as Mark drops a messy, open-mouth cum facial onto Carmela. She lets the jizz drip from her lips, licking the mess from her fingers and rubbing it onto her robust melons.</plot>

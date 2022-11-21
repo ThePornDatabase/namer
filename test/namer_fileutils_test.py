@@ -27,7 +27,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         config = sample_config()
         config.min_file_size = 0
-        with environment(config) as ( tempdir, _parrot, config):
+        with environment(config) as (tempdir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
             target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)

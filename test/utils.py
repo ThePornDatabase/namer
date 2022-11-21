@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from sys import gettrace as sys_gettrace
 from time import sleep, time
-from typing import Callable, List, Optional, Generator
+from typing import Callable, Optional, Generator
 
 from mutagen.mp4 import MP4
 
@@ -86,7 +86,6 @@ class FakeTPDB(ParrotWebServer):
         return super().get_url()
 
     def add_json_response(self, response, target_url: str):
-        test_dir = Path(__file__).resolve().parent
         return_value = response
         modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
@@ -131,7 +130,6 @@ class FakeTPDB(ParrotWebServer):
 
         self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way%21number2&limit=25")
 
-        
         # UI Tests
         self.add_evil_angel("/scenes?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
         self.add_evil_angel("/movies?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
@@ -167,6 +165,7 @@ class FakeTPDB(ParrotWebServer):
         self.add_json_response("{}", "/movies?parse=goodangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
         self.add_json_response("{}", "/movies?parse=goodangel.2022-01-03.&limit=25")
         self.add_json_response("{}", "/movies?parse=goodangel.&limit=25")
+
 
 @contextlib.contextmanager
 def environment(config: NamerConfig = sample_config()) -> Generator[tuple[Path, FakeTPDB, NamerConfig], None, None]:
@@ -277,4 +276,3 @@ def new_ea(target_dir: Path, use_dir: bool = True, post_stem: str = "", match: b
     shutil.copy(test_mp4, target_file)
     test_mp4.chmod(0o600)
     return ProcessingTarget(target_file, '', '', Path("/"), True)
-

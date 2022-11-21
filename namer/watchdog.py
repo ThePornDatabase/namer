@@ -151,7 +151,7 @@ class MovieWatcher:
         self.__background_thread: Optional[Thread] = None
 
     def getConfig(self) -> NamerConfig:
-        return self.__namer_config 
+        return self.__namer_config
 
     def run(self):
         """

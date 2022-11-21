@@ -19,11 +19,11 @@ class NamerConfig:
 
     # pylint: disable=too-many-instance-attributes
 
-    config_file:  Path
+    config_file: Path
     """
     Location of config file used to generate this config.
     """
-    
+
     config_updater: ConfigUpdater
     """
     Configuration for namer and namer_watchdog

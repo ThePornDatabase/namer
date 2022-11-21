@@ -415,7 +415,7 @@ def main(args_list: List[str]):
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
-    config = default_config( Path(args.configfile).absolute() )
+    config = default_config(Path(args.configfile).absolute())
     file_name = make_command(Path(args.file).absolute(), config, ignore_file_restrictions=True)
 
     results: Optional[ComparisonResults] = None
