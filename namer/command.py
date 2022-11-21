@@ -283,7 +283,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
 def is_relative_to(potential_sub: Optional[Path], potential_parent: Optional[Path]) -> bool:
     try:
         if potential_sub and potential_parent:
-            potential_sub.relative_to(potential_parent)
+            potential_sub.absolute().relative_to(potential_parent.absolute())
             return True
         return False
     except ValueError:

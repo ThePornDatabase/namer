@@ -50,19 +50,19 @@ def get_queue_size(queue: Queue) -> int:
 
 def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     stat = command.target_movie_file.stat()
-
+    subpath = str(command.target_movie_file.absolute().relative_to(command.config.failed_dir.absolute())) if is_relative_to(command.target_movie_file,command.config.failed_dir) else None
     res = {
-        'file': str(command.target_movie_file.relative_to(command.config.failed_dir)) if is_relative_to(command.target_movie_file, command.config.failed_dir) else None,
+        'file': subpath,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
         'ext': command.target_movie_file.suffix[1:].upper(),
         'update_time': int(stat.st_mtime),
         'size': stat.st_size,
     }
-
-    if config and config.add_max_percent_column and res['file']:
-        log_data = read_failed_log_file(res['file'], config)
+    percentage = 0.0
+    if config and config.add_max_percent_column and config.write_namer_failed_log and subpath:
+        log_data = read_failed_log_file(subpath, config)
         percentage = log_data.results[0].name_match if log_data and log_data.results and log_data.results[0] else 0.0
-        res['percentage'] = percentage
+    res['percentage'] = percentage
 
     return res
 
