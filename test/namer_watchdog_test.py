@@ -6,14 +6,13 @@ import logging
 import time
 import unittest
 from pathlib import Path
-from typing import Generator
 
 from mutagen.mp4 import MP4
 
 from namer.ffmpeg import ffprobe
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed, MovieWatcher
-from test.utils import Wait, new_ea, validate_mp4_tags, validate_permissions, environment, FakeTPDB, sample_config
+from test.utils import Wait, new_ea, validate_mp4_tags, validate_permissions, environment, sample_config
 
 
 def wait_until_processed(watcher: MovieWatcher):
@@ -26,7 +25,7 @@ def wait_until_processed(watcher: MovieWatcher):
 
 
 @contextlib.contextmanager
-def make_watchdog_context(config: NamerConfig) -> Generator[tuple[Path, MovieWatcher, FakeTPDB], None, None]:
+def make_watchdog_context(config: NamerConfig):
     with environment(config) as (tempdir, mock_tpdb, config):
         with create_watcher(config) as watcher:
             yield tempdir, watcher, mock_tpdb
