@@ -326,7 +326,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
     if uuid:
         query = uuid
     else:
-        query = "movies?q=" if movie else "scenes?parse="
+        query = "movies?parse=" if movie else "scenes?parse="
         if site:
             # There is a known issue in tpdb, where site names are not matched due to casing.
             # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
@@ -415,8 +415,8 @@ def main(args_list: List[str]):
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
-    config = default_config()
-    file_name = make_command(Path(args.file), config, ignore_file_restrictions=True)
+    config = default_config( Path(args.configfile).absolute() )
+    file_name = make_command(Path(args.file).absolute(), config, ignore_file_restrictions=True)
 
     results: Optional[ComparisonResults] = None
     if file_name and file_name.parsed_file:

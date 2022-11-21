@@ -11,7 +11,6 @@ from namer.configuration import NamerConfig
 from namer.configuration_utils import verify_configuration
 from namer.name_formatter import PartialFormatter
 from namer.comparison_results import Performer
-from test.utils import sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -27,20 +26,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(str(Performer("Name", None)), "Name")
         self.assertEqual(str(Performer(None, "Role")), "Unknown (Role)")
         self.assertEqual(str(Performer("Name", "Role")), "Name (Role)")
-
-    def test_local_config(self):
-        """
-        Verify the namer.cfg example in this directory is loaded.
-        """
-        config = sample_config()
-        self.assertEqual(config.del_other_files, False)
-        self.assertEqual(config.inplace_name, "{site} - {date} - {name}.{ext}")
-        self.assertEqual(config.new_relative_path_name, "{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
-        self.assertEqual(config.new_relative_path_name, "{site} - {date} - {name}/{site} - {date} - {name}.{ext}")
-        self.assertEqual(config.dest_dir.relative_to(Path().resolve()).parts, ("test", "dest"))
-        self.assertEqual(config.failed_dir.relative_to(Path().resolve()).parts, ("test", "failed"))
-        self.assertEqual(config.min_file_size, 300)
-        self.assertEqual(config.language, "eng")
 
     def test_default_no_config(self):
         """
@@ -140,15 +125,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config1.new_relative_path_name = "{whahha}/{site} - {date}"
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
-
-    def test_main_method(self):
-        """
-        Test config to string
-        """
-        config = sample_config()
-        conf = str(config)
-        self.assertIn("Namer Config", conf)
-        self.assertIn("Watchdog Config", conf)
 
 
 if __name__ == "__main__":

@@ -150,6 +150,9 @@ class MovieWatcher:
         self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
         self.__background_thread: Optional[Thread] = None
 
+    def getConfig(self) -> NamerConfig:
+        return self.__namer_config 
+
     def run(self):
         """
         Checks for new files in 3 second intervals,

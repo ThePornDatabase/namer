@@ -6,13 +6,12 @@ import tempfile
 import unittest
 from pathlib import Path
 from shutil import copytree
-from unittest import mock
 
 from namer.filenameparts import parse_file_name
 from namer.metadataapi import match
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.comparison_results import Performer
-from test.utils import sample_config
+from test.utils import environment
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -45,21 +44,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             ]
             self.assertListEqual(info.performers, expected_performers)
 
-    @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_writing_xml_metadata_genre_flag(self, mock_response):
+   
+    def test_writing_xml_metadata_genre_flag(self):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "ea.full.json"
-        mock_response.return_value = response.read_text()
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
-        config = sample_config()
-        config.enable_metadataapi_genres = True
-        results = match(name, config)
-        self.assertEqual(len(results.results), 1)
-        result = results.results[0]
-        output = write_movie_xml_file(result.looked_up, config)
-        expected = """<?xml version="1.0" encoding="UTF-8"?>
+        
+        with environment() as (_path, fakeTPDB, config):
+            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", config)
+            config.enable_metadataapi_genres = True
+            results = match(name, config)
+            self.assertEqual(len(results.results), 1)
+            result = results.results[0]
+            output = write_movie_xml_file(result.looked_up, config)
+            
+            expected = f"""<?xml version="1.0" encoding="UTF-8"?>
 <movie>
   <plot>Cute brunette Carmela Clutch positions her big, juicy ass for famed director/cocksman Mark Wood's camera to ogle. The well-endowed babe teases, flaunting her voluptuous jugs and derriere. Mark's sexy MILF partner, Francesca Le, finds a 'nice warm place' for her tongue and serves Carmela a lesbian rim job. Francesca takes a labia-licking face ride from the busty babe. Francesca takes over the camera as Mark takes over Carmela's hairy snatch, his big cock ram-fucking her twat. Carmela sucks Mark's meat in a lewd blowjob. Carmela jerks her clit as Mark delivers a vigorous anal pounding! With Mark's prick shoved up her ass, off-screen Francesca orders, 'Keep that pussy busy!' Carmela's huge boobs jiggle as she takes a rectal reaming and buzzes a vibrator on her clit at the same time. Francesca jumps in to make it a threesome, trading ass-to-mouth flavor with the young tramp. This ribald romp reaches its climax as Mark drops a messy, open-mouth cum facial onto Carmela. She lets the jizz drip from her lips, licking the mess from her fingers and rubbing it onto her robust melons.</plot>
   <outline/>
@@ -106,21 +105,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <name>Carmela Clutch</name>
     <role>Female</role>
-    <image>https://thumb.metadataapi.net/flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F3e%2Fb6%2F0a%2F9a33557155b8a6f3e6c88bee8ed65a6%2Fposter%2F6a00376cbee2aa83c8c2514b89b332276df42c35</image>
+    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F3e%2Fb6%2F0a%2F9a33557155b8a6f3e6c88bee8ed65a6%2Fposter%2F6a00376cbee2aa83c8c2514b89b332276df42c35</image>
     <type>Actor</type>
     <thumb/>
   </actor>
   <actor>
     <name>Francesca Le</name>
     <role>Female</role>
-    <image>https://thumb.metadataapi.net/r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
+    <image>{fakeTPDB.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
     <type>Actor</type>
     <thumb/>
   </actor>
   <actor>
     <name>Mark Wood</name>
     <role>Male</role>
-    <image>https://thumb.metadataapi.net/EIsvo6fVYUuLzp6bO8I0LYUdZmI=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F9d%2Fd5%2F61%2F11eb0285e2534a949839a1a5573be08%2Fposter%2F0955f0ee0c6500c8e17f8dd3cf1a019b6f4d3d3e</image>
+    <image>{fakeTPDB.get_url()}EIsvo6fVYUuLzp6bO8I0LYUdZmI=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F9d%2Fd5%2F61%2F11eb0285e2534a949839a1a5573be08%2Fposter%2F0955f0ee0c6500c8e17f8dd3cf1a019b6f4d3d3e</image>
     <type>Actor</type>
     <thumb/>
   </actor>
@@ -129,22 +128,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 """  # noqa: E501
         self.assertEqual(output, expected)
 
-    @mock.patch("namer.metadataapi.__get_response_json_object")
-    def test_writing_xml_metadata(self, mock_response):
+    def test_writing_xml_metadata(self):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        response = Path(__file__).resolve().parent / "ea.full.json"
-        mock_response.return_value = response.read_text()
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
-        config = sample_config()
-        results = match(name, config)
-        self.assertEqual(len(results.results), 1)
-        result = results.results[0]
-        output = write_movie_xml_file(result.looked_up, config)
-        print("generated:")
-        print(output)
-        expected = """<?xml version="1.0" encoding="UTF-8"?>
+        with environment() as (_path, fakeTPDB, config):
+            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", config)
+            results = match(name, config)
+            self.assertEqual(len(results.results), 1)
+            result = results.results[0]
+            output = write_movie_xml_file(result.looked_up, config)
+            expected = f"""<?xml version="1.0" encoding="UTF-8"?>
 <movie>
   <plot>Cute brunette Carmela Clutch positions her big, juicy ass for famed director/cocksman Mark Wood's camera to ogle. The well-endowed babe teases, flaunting her voluptuous jugs and derriere. Mark's sexy MILF partner, Francesca Le, finds a 'nice warm place' for her tongue and serves Carmela a lesbian rim job. Francesca takes a labia-licking face ride from the busty babe. Francesca takes over the camera as Mark takes over Carmela's hairy snatch, his big cock ram-fucking her twat. Carmela sucks Mark's meat in a lewd blowjob. Carmela jerks her clit as Mark delivers a vigorous anal pounding! With Mark's prick shoved up her ass, off-screen Francesca orders, 'Keep that pussy busy!' Carmela's huge boobs jiggle as she takes a rectal reaming and buzzes a vibrator on her clit at the same time. Francesca jumps in to make it a threesome, trading ass-to-mouth flavor with the young tramp. This ribald romp reaches its climax as Mark drops a messy, open-mouth cum facial onto Carmela. She lets the jizz drip from her lips, licking the mess from her fingers and rubbing it onto her robust melons.</plot>
   <outline/>
@@ -192,21 +186,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <name>Carmela Clutch</name>
     <role>Female</role>
-    <image>https://thumb.metadataapi.net/flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F3e%2Fb6%2F0a%2F9a33557155b8a6f3e6c88bee8ed65a6%2Fposter%2F6a00376cbee2aa83c8c2514b89b332276df42c35</image>
+    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F3e%2Fb6%2F0a%2F9a33557155b8a6f3e6c88bee8ed65a6%2Fposter%2F6a00376cbee2aa83c8c2514b89b332276df42c35</image>
     <type>Actor</type>
     <thumb/>
   </actor>
   <actor>
     <name>Francesca Le</name>
     <role>Female</role>
-    <image>https://thumb.metadataapi.net/r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
+    <image>{fakeTPDB.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
     <type>Actor</type>
     <thumb/>
   </actor>
   <actor>
     <name>Mark Wood</name>
     <role>Male</role>
-    <image>https://thumb.metadataapi.net/EIsvo6fVYUuLzp6bO8I0LYUdZmI=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F9d%2Fd5%2F61%2F11eb0285e2534a949839a1a5573be08%2Fposter%2F0955f0ee0c6500c8e17f8dd3cf1a019b6f4d3d3e</image>
+    <image>{fakeTPDB.get_url()}EIsvo6fVYUuLzp6bO8I0LYUdZmI=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F9d%2Fd5%2F61%2F11eb0285e2534a949839a1a5573be08%2Fposter%2F0955f0ee0c6500c8e17f8dd3cf1a019b6f4d3d3e</image>
     <type>Actor</type>
     <thumb/>
   </actor>

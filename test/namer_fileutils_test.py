@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from platform import system
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from namer.command import main, set_permissions
 from test.utils import environment, sample_config
@@ -21,18 +21,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
 
     @patch("sys.stdout", new_callable=io.StringIO)
-    @patch("namer.command.default_config")
-    def test_main_method(self, config_mock: MagicMock, mock_stdout):
+    def test_main_method(self, mock_stdout):
         """
         Test the main method.
         """
-        with environment() as (tempdir, _parrot, config):
+        config = sample_config()
+        config.min_file_size = 0
+        with environment(config) as ( tempdir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
             target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
-            config.min_file_size = 0
-            config_mock.return_value = config
-            main(arg_list=["-f", str(target_file)])
+            main(arg_list=["-f", str(target_file), "-c", str(config.config_file)])
             self.assertIn("site: EvilAngel", mock_stdout.getvalue())
 
     def test_set_permission(self):

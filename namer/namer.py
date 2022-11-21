@@ -268,7 +268,7 @@ def main(arg_list: List[str]):
     check_arguments(args.file, args.dir, args.configfile)
 
     conf: Optional[Path] = args.configfile
-    config: NamerConfig = default_config(args.configfile) if conf is not conf.is_file() else default_config()
+    config: NamerConfig = default_config(args.configfile) if conf is not None and conf.is_file() else default_config()
     verify_configuration(config, PartialFormatter())
     target = args.file
     if args.dir is not None:

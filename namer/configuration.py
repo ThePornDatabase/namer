@@ -17,12 +17,17 @@ from requests_cache import CachedSession
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class NamerConfig:
 
+    # pylint: disable=too-many-instance-attributes
+
+    config_file:  Path
+    """
+    Location of config file used to generate this config.
+    """
+    
     config_updater: ConfigUpdater
     """
     Configuration for namer and namer_watchdog
     """
-
-    # pylint: disable=too-many-instance-attributes
 
     porndb_token: str
     """

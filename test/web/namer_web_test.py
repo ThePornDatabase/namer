@@ -4,6 +4,7 @@ import unittest
 import warnings
 from pathlib import Path
 from platform import system
+from typing import Generator
 
 import requests
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
@@ -16,10 +17,10 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
-from namer.watchdog import create_watcher
+from namer.watchdog import create_watcher, MovieWatcher
 from test.namer_metadataapi_test import environment
-from test.namer_watchdog_test import make_locations, new_ea
-from test.utils import is_debugging
+from test.namer_watchdog_test import new_ea
+from test.utils import is_debugging, FakeTPDB, sample_config
 from test.web.namer_web_pageobjects import FailedPage
 from test.web.parrot_webserver import ParrotWebServer
 
@@ -79,13 +80,8 @@ def default_os_browser(debug: bool) -> WebDriver:
 
 
 @contextlib.contextmanager  # type: ignore
-def make_test_context(config: NamerConfig):
+def make_test_context(config: NamerConfig) -> Generator[tuple[Path, MovieWatcher, WebDriver, FakeTPDB], None, None]:
     with environment(config) as (tempdir, mock_tpdb, config):
-        new_config = make_locations(tempdir)
-        config.watch_dir = new_config.watch_dir
-        config.dest_dir = new_config.dest_dir
-        config.failed_dir = new_config.failed_dir
-        config.work_dir = new_config.work_dir
         with create_watcher(config) as watcher:
             url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
             with default_os_browser(is_debugging()) as browser:
@@ -102,7 +98,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test we can start the app, install, run and control a browser and shut it all down safely.
         """
-        config = default_config()
+        config = sample_config()
         config.web = True
         config.web_root = "/namer"
         config.host = '127.0.0.1'
@@ -111,6 +107,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_nfo = False
         config.min_file_size = 0
         config.write_namer_failed_log = True
+        config.del_other_files = True
+        config.extra_sleep_time = 1
         with make_test_context(config) as (_tempdir, _watcher, browser, _mock_tpdb):
             new_ea(config.failed_dir, use_dir=False)
             (FailedPage(browser).refresh_items()

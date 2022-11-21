@@ -210,7 +210,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "max_performer_names": ("namer", to_int, from_int),
     "use_requests_cache": ("namer", to_bool, from_bool),
     "requests_cache_expire_minutes": ("namer", to_int, from_int),
-    "override_tpdb_address": ("namer", to_bool, from_bool),
+    "override_tpdb_address": ("namer", None, None),
     "search_phash": ("Phash", to_bool, from_bool),
     "require_match_phash_top": ("Phash", to_bool, from_bool),
     "send_phash_of_matches_to_tpdb": ("Phash", to_bool, from_bool),

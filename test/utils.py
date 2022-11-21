@@ -10,12 +10,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from sys import gettrace as sys_gettrace
 from time import sleep, time
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Generator
 
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
-from namer.configuration_utils import default_config
+from namer.configuration_utils import default_config, to_ini
 from test.web.parrot_webserver import ParrotWebServer
 
 
@@ -85,17 +85,26 @@ class FakeTPDB(ParrotWebServer):
     def get_url(self) -> str:
         return super().get_url()
 
-    def add_example_evil_angel(self, target_url: str):
+    def add_json_response(self, response, target_url: str):
         test_dir = Path(__file__).resolve().parent
-        return_value = (test_dir / "ea.full.json").read_text()
+        return_value = response
         modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
 
-    def add_example_dorcel_club(self, target_url: str):
+    def add_json_response_file(self, jsonfile, target_url: str):
         test_dir = Path(__file__).resolve().parent
-        return_value = (test_dir / "dc.json").read_text()
+        return_value = (test_dir / jsonfile).read_text()
         modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
+
+    def add_evil_angel(self, target_url: str):
+        self.add_json_response_file("ea.full.json", target_url)
+
+    def add_dorcel_club(self, target_url: str):
+        self.add_json_response_file("dc.json", target_url)
+
+    def add_brazzers_extra(self, target_url: str):
+        self.add_json_response_file("ssb2.json", target_url)
 
     def add_poster(self, target_url: str) -> None:
         test_dir = Path(__file__).resolve().parent
@@ -105,35 +114,81 @@ class FakeTPDB(ParrotWebServer):
     def default_additions(self):
         # Evil Angel:
         # Search Results
-        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
-        self.add_example_evil_angel("/scenes?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
-        self.add_example_evil_angel("/scenes?parse=evilangel.2022-01-03&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+        self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.&limit=25")
         # Extra Metadata Lookup
-        self.add_example_evil_angel("/scenes/1678283?")
+        self.add_evil_angel("/scenes/1678283?")
+
+        self.add_evil_angel("/movies?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_evil_angel("/movies?parse=evilangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_evil_angel("/movies?parse=evilangel.2022-01-03.&limit=25")
+        self.add_evil_angel("/movies/1678283?")
+
+        self.add_evil_angel("/movies?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+
+        self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way%21number2&limit=25")
+
+        
         # UI Tests
-        self.add_example_evil_angel("/scenes?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
-        self.add_example_evil_angel("/movies?q=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+        self.add_evil_angel("/scenes?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
+        self.add_evil_angel("/movies?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
         # Image for UI Test:
-        self.add_example_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
+        self.add_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
         self.add_poster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
         # DorcelClub
         # Search Results
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.&limit=25")
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.&limit=25")
+        self.add_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
+        self.add_dorcel_club("/scenes?parse=dorcelclub.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
+        self.add_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.&limit=25")
+        self.add_dorcel_club("/scenes?parse=dorcelclub.&limit=25")
         # Extra Metadata Lookup
-        self.add_example_dorcel_club("/scenes/1674059?")
+        self.add_dorcel_club("/scenes/1674059?")
         # with utf8 characters
-        self.add_example_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20B%D0%B5n%D0%B5tti%20M%D0%B5gane%20Lop%D0%B5z%20And%20B%D0%B5lla%20Tina&limit=25")
+        self.add_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20B%D0%B5n%D0%B5tti%20M%D0%B5gane%20Lop%D0%B5z%20And%20B%D0%B5lla%20Tina&limit=25")
 
+        # Brazzers Exxtra
+        self.add_brazzers_extra("/scenes?parse=brazzersexxtra.2022-02-28.Marykate%20Moss%20Suck%20Suck%20Blow&limit=25")
+        self.add_brazzers_extra("/scenes?parse=brazzersexxtra.Marykate%20Moss%20Suck%20Suck%20Blow&limit=25")
+        self.add_brazzers_extra("/scenes?parse=brazzersexxtra.2022-02-28.&limit=25")
+        self.add_brazzers_extra("/scenes?parse=brazzersexxtra.&limit=25")
+        # Extra Metadata Lookup
+        self.add_brazzers_extra("/scenes/1836175?")
+
+        # None existant Good Angel:
+        # Search Results
+        self.add_json_response("{}", "/scenes?parse=goodangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_json_response("{}", "/scenes?parse=goodangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_json_response("{}", "/scenes?parse=goodangel.2022-01-03.&limit=25")
+        self.add_json_response("{}", "/scenes?parse=goodangel.&limit=25")
+        self.add_json_response("{}", "/movies?parse=goodangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_json_response("{}", "/movies?parse=goodangel.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
+        self.add_json_response("{}", "/movies?parse=goodangel.2022-01-03.&limit=25")
+        self.add_json_response("{}", "/movies?parse=goodangel.&limit=25")
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = sample_config()):
+def environment(config: NamerConfig = sample_config()) -> Generator[tuple[Path, FakeTPDB, NamerConfig], None, None]:
     with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
         with FakeTPDB() as fakeTpdb:
             tempdir = Path(tmpdir)
             config.override_tpdb_address = fakeTpdb.get_url()
+            config.watch_dir = tempdir / "watch"
+            config.watch_dir.mkdir(parents=True, exist_ok=True)
+            config.dest_dir = tempdir / "dest"
+            config.dest_dir.mkdir(parents=True, exist_ok=True)
+            config.work_dir = tempdir / "work"
+            config.work_dir.mkdir(parents=True, exist_ok=True)
+            config.failed_dir = tempdir / "failed"
+            config.failed_dir.mkdir(parents=True, exist_ok=True)
+            config.porndb_token = "notarealtoken"
+            cfgfile = tempdir / 'test_namer.cfg'
+            config.min_file_size = 0
+            with open(cfgfile, "w") as file:
+                content = to_ini(config)
+                file.write(content)
+            config.config_file = cfgfile
             yield tempdir, fakeTpdb, config
 
 
@@ -208,14 +263,12 @@ def new_ea(target_dir: Path, use_dir: bool = True, post_stem: str = "", match: b
     Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
     optionally, names the dir and not the mp4 file to match.
     optionally, inserts a string between the file stem and suffix.
-    optionally, will ensure a match doesn't occure.
+    optionally, will ensure a match doesn't occur.
     """
     current = Path(__file__).resolve().parent
     test_mp4 = current / mp4_file_name
-    search_json_file = current / "ea.json"
-    exact_json_file = current / "ea.full.json"
-    test_poster = current / "poster.png"
-    name = "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" + post_stem
+
+    name = ("Evil" if match else "Ok") + "Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" + post_stem
     target_file = target_dir / (name + ".mp4")
     if use_dir is True:
         target_file = target_dir / name / "qwerty.mp4"
@@ -223,33 +276,5 @@ def new_ea(target_dir: Path, use_dir: bool = True, post_stem: str = "", match: b
     target_file.parent.chmod(0o700)
     shutil.copy(test_mp4, target_file)
     test_mp4.chmod(0o600)
-    poster = Path(tempfile.mktemp(suffix=".png"))
-    shutil.copy(test_poster, poster)
-    return ProcessingTarget(target_file, search_json_file.read_text(), exact_json_file.read_text(), poster, match)
+    return ProcessingTarget(target_file, '', '', Path("/"), True)
 
-
-def prepare(targets: List[ProcessingTarget], mock_poster, mock_response):
-    """
-    Prepares mocks for responses based on targets input.
-    """
-    targets.sort(key=lambda x: str(x.file))
-    posters = []
-    responses = []
-    for target in targets:
-        posters.append(target.poster)
-        if target.expect_match is True:
-            responses.append(target.json_search)
-            responses.append(target.json_exact)
-        else:
-            responses.append("{}")
-            responses.append("{}")
-            responses.append("{}")
-            responses.append("{}")
-            responses.append("{}")
-            responses.append("{}")
-            responses.append("{}")
-            responses.append("{}")
-    if mock_poster:
-        mock_poster.side_effect = posters
-    if mock_response:
-        mock_response.side_effect = responses

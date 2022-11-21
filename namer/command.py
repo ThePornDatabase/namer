@@ -280,10 +280,12 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     return output
 
 
-def is_relative_to(potential_sub: Path, potential_parent: Path) -> bool:
+def is_relative_to(potential_sub: Optional[Path], potential_parent: Optional[Path]) -> bool:
     try:
-        potential_sub.relative_to(potential_parent)
-        return True
+        if potential_sub and potential_parent:
+            potential_sub.relative_to(potential_parent)
+            return True
+        return False
     except ValueError:
         return False
 
@@ -394,9 +396,11 @@ def main(arg_list: List[str]):
     description = "You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileNameParts, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileNameParts.\n"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
+    parser.add_argument("-c", "--configfile", help="override location for a configuration file.", type=Path)
     args = parser.parse_args(arg_list)
     target = Path(args.file).absolute()
-    target_file = make_command(target, default_config())
+    config_file = Path(args.configfile).absolute()
+    target_file = make_command(target, default_config(config_file))
     if target_file:
         print(target_file.parsed_file)
 
