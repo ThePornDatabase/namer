@@ -263,7 +263,7 @@ def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> I
     out, _ = (
         ffmpeg
         .input(file, ss=time)
-        .filter('scale', screenshot_width, -1)
+        .filter('scale', screenshot_width, -2)
         .output('pipe:', vframes=1, format='apng')
         .run(quiet=True, capture_stdout=True)
     )

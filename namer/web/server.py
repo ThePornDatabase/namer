@@ -86,6 +86,9 @@ class GenericWebServer:
 
         self.__app.jinja_env.add_extension('jinja2.ext.do')
 
+        self.__app.jinja_env.trim_blocks = True
+        self.__app.jinja_env.lstrip_blocks = True
+
     def start(self):
         logger.info(f'Starting server: {self.get_url()}')
         self.__thread.start()
