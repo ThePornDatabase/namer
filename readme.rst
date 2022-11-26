@@ -178,6 +178,13 @@ Development
 
 .. code-block:: sh
 
+  # Install Python
+  # Install poetry
+  # Install poe the poet
+  poetry self add 'poethepoet[poetry_plugin]'
+  # or
+  pip add poethepoet
+
   # Building:
   # install yarn deps
   yarn intall   

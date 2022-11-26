@@ -19,8 +19,11 @@ def get_routes(responses: Dict[str, bytes]) -> Blueprint:
     @blueprint.route('/<path:path>')
     def get_files(path) -> Response:
         # args = request.args
-        output = responses[request.full_path]
-        response = make_response(output, 200)
+        output = responses.get(request.full_path)
+        if output:
+            response = make_response(output, 200)
+        else:
+            response = make_response('', 404)
         # response.mimetype = "text/plain"
         return response
 
