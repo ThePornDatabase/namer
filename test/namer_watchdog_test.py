@@ -20,8 +20,11 @@ def wait_until_processed(watcher: MovieWatcher):
     Waits until all files have been moved out of watch/working dirs.
     """
     config = watcher.getConfig()
-    Wait().until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    logging.info("waiting for files to be processes")
+    Wait().seconds(30).checking(.5).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    logging.info("past waiting for files")
     watcher.stop()
+    logging.info("past stopping")
 
 
 @contextlib.contextmanager

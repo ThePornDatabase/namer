@@ -4,7 +4,7 @@ version = "1.9.10"
 description = "A namer of video files based on metadata from the porndb."
 readme = "readme.rst"
 authors = ["4c0d3r <4c0d3r@protonmail.com>"]
-include = ["**/web/public/assets/**/*", "**/web/templates/**/*", "**/namer.cfg.default"]
+include = ["**/web/public/assets/**/*", "**/web/templates/**/*", "**/namer.cfg.default", "**/videohashtools/*"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -23,9 +23,9 @@ Flask-Compress = "^1.12"
 Pillow = "^9.1.1"
 requests-cache = "^0.9.4"
 ffmpeg-python = "^0.2.0"
-ImageHash = "^4.2.1"
 jsonpickle = "^2.2.0"
 ConfigUpdater = "^3.1.1"
+imagehash = "^4.3.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"
@@ -38,6 +38,7 @@ assertpy = "^1.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
+poethepoet = ">=0.16.0"
 
 [tool.flakeheaven]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]
@@ -53,6 +54,20 @@ pylint = ["+*", "-C0301", "-I1101"]
 
 [tool.pylint.'MASTER']
 max-line-length = 150
+
+[tool.poe.tasks]
+install_npm = {shell="yarn install"}
+build_yarn = {shell="yarn run build"}
+install_videohashes_src = {shell="git submodule update"}
+build_videohashes = {shell="make build phashcompare-build -C ./videohashes"}
+move_videohashes = {"script" = "shutil:copytree('./videohashes/dist', './namer/videohashtools', dirs_exist_ok=True)"}
+build_namer = {shell="poetry build"}
+build_deps = ["install_npm", "build_yarn", "install_videohashes_src", "build_videohashes", "move_videohashes"]
+test_format = {shell="poetry run flakeheaven lint"}
+test_namer = {shell="poetry run pytest --log-cli-level=info"}
+test = ["test_format", "test_namer"]
+build_all = ["build_deps", "test", "build_namer"]
+
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]

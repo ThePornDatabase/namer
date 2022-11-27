@@ -1,0 +1,3 @@
+[submodule "videohashes"]
+	path = videohashes
+	url = https://github.com/peolic/videohashes.git
