@@ -1,11 +1,14 @@
 import concurrent.futures
 import subprocess
 import platform
-import zipfile
+import shutil
+from importlib import resources
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
+from types import SimpleNamespace
 from typing import List, Literal, Optional
 
+import json
 import imagehash
 import numpy
 import scipy.fft
@@ -14,7 +17,6 @@ from loguru import logger
 from PIL import Image
 
 from namer.ffmpeg import extract_screenshot, ffprobe
-from namer.http import Http
 
 
 class VideoPerceptualHash:
@@ -22,20 +24,18 @@ class VideoPerceptualHash:
     __columns: int = 5
     __rows: int = 5
 
-    __phash_path: Optional[Path]
-    __phash_name: str = 'stash_phash'
+    __phash_path: Path
+    __phash_name: str = 'videohash'
 
     def __init__(self):
         self.__phash_path = Path(__file__).parent.parent / 'tools'
         if not self.__phash_path.is_dir():
             self.__phash_path.mkdir(exist_ok=True, parents=True)
-
         if not [file for file in self.__phash_path.glob('*') if self.__phash_name == file.stem]:
-            self.__download_stash_phash()
+            self.__prepare_stash_phash()
 
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
-
         thumbnail_image = self.__generate_image_thumbnail(file)
         if thumbnail_image:
             phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
@@ -60,37 +60,56 @@ class VideoPerceptualHash:
     def get_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         return self.__execute_stash_phash(file)
 
-    def __download_stash_phash(self):
+    def copy_resource_to_file(self, full_path: str, output: Path) -> bool:
+        parts = full_path.split('/')
+        if hasattr(resources, 'files'):
+            trav = resources.files(parts[0])
+            for part in parts[1:]:
+                trav = trav.joinpath(part)
+            with trav.open("rb") as bin, open(output, mode="+bw") as out:
+                shutil.copyfileobj(bin, out)
+                return True
+        if hasattr(resources, 'open_binary'):
+            with resources.open_binary(".".join(parts[0:-1]), parts[-1]) as bin, open(output, mode="+bw") as out:
+                shutil.copyfileobj(bin, out)
+                return True
+        return False
+
+    def __prepare_stash_phash(self):
         os = platform.system().lower()
-        url = f'https://github.com/DirtyRacer1337/stash_phash/releases/download/nightly/stash_phash-{os}.zip'
-        http_file = Http.download_file(url)
-        if http_file:
-            zipfile.ZipFile(http_file).extractall(self.__phash_path)
-            if os != 'windows' and self.__phash_path:
+        success = False
+        post: str = '.exe'
+        if os == "linux":
+            post = '-linux'
+        elif os == 'darwin':
+            post = '-macos'
+        if self.__phash_path:
+            success = self.copy_resource_to_file('namer/videohashtools/videohashes' + post, self.__phash_path / self.__phash_name)
+            if os != 'windows' and self.__phash_path and success:
                 file = self.__phash_path / self.__phash_name
                 file.chmod(0o777)
-
-        return bool(http_file)
+        return success
 
     def __execute_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
-        phash = None
+        output = None
         if not self.__phash_path:
-            return phash
+            return output
 
-        args = [
-            str(self.__phash_path / self.__phash_name),
-            '-f', str(file),
-        ]
+        args = [str(self.__phash_path / self.__phash_name), '-json', '--video', str(file)]
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
             stdout, stderr = process.communicate()
             stdout, stderr = stdout.strip(), stderr.strip()
             success = process.returncode == 0
             if success:
-                phash = imagehash.hex_to_hash(stdout)
+                print(stdout)
+                data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
+                # duration = data.duration
+                phash = data.phash
+                # oshash = data.oshash
+                output = imagehash.hex_to_hash(phash)
             else:
                 logger.error(stderr)
-
-        return phash
+        return output
 
     def __generate_thumbnails(self, file: Path, duration: float) -> List[Image.Image]:
         duration = int(Decimal(duration * 100).quantize(0, ROUND_HALF_UP)) / 100
