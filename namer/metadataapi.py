@@ -415,8 +415,8 @@ def main(args_list: List[str]):
     level = "DEBUG" if args.verbose else "ERROR"
     logger.remove()
     logger.add(sys.stdout, format="{time} {level} {message}", level=level)
-    config = default_config(Path(args.configfile).absolute())
-    file_name = make_command(Path(args.file).absolute(), config, ignore_file_restrictions=True)
+    config = default_config(args.configfile.absolute() if args.configfile else None)
+    file_name = make_command(args.file.absolute(), config, ignore_file_restrictions=True)
 
     results: Optional[ComparisonResults] = None
     if file_name and file_name.parsed_file:
