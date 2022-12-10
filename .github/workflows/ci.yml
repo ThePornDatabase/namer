@@ -56,7 +56,9 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -65,6 +67,10 @@ jobs:
 
       - name: Display Python version
         run: python --version
+      
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.19.0'
 
       - name: Install ffmpeg
         run: |
@@ -89,11 +95,7 @@ jobs:
           cache: 'yarn'
           node-version: '16'
 
-      - name: Install Node packages
-        run: yarn install
-
-      - name: Build Assets
-        run: yarn run build
+      - run: poetry run poe build_all
 
       - run: poetry run pytest --cov
 
@@ -109,7 +111,9 @@ jobs:
   dockerbuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - run: ./docker_build.sh
 
   auto-tag:

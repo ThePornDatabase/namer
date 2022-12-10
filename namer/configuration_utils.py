@@ -8,6 +8,7 @@ import io
 import random
 import re
 import tempfile
+import shutil
 from importlib import resources
 from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
 from configupdater import ConfigUpdater
@@ -296,16 +297,33 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
     return namer_config
 
 
+def resource_file_to_str(package: str, file_name: str) -> str:
+    config_str = ""
+    if hasattr(resources, 'files'):
+        config_str = resources.files(package).joinpath(file_name).read_text()
+    elif hasattr(resources, 'read_text'):
+        config_str = resources.read_text(package, file_name)
+    return config_str
+
+
+def copy_resource_to_file(package: str, file_name: str, output: Path) -> bool:
+    if hasattr(resources, 'files'):
+        with resources.files(package).joinpath(file_name).open("rb") as bin, open(output, mode="+bw") as out:
+            shutil.copyfileobj(bin, out)
+            return True
+    elif hasattr(resources, 'read_text'):
+        with resources.open_binary(package, file_name) as bin, open(output, mode="+bw") as out:
+            shutil.copyfileobj(bin, out)
+            return True
+    return False
+
+
 def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
     config = ConfigUpdater()
-    config_str = ""
-    if hasattr(resources, 'files'):
-        config_str = resources.files("namer").joinpath("namer.cfg.default").read_text()
-    elif hasattr(resources, 'read_text'):
-        config_str = resources.read_text("namer", "namer.cfg.default")
+    config_str = resource_file_to_str("namer", "namer.cfg.default")
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.config_updater = config

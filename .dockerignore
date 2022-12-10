@@ -1,6 +1,5 @@
 .coverage
 .coveragerc
-.git
 .github
 .gitignore
 .pytest_cache

@@ -29,6 +29,8 @@ RUN apt-get update \
        wget \
        gnupg2 \
        xvfb \
+       golang \
+       git \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
@@ -58,12 +60,8 @@ ENV PATH="/root/.local/bin:$PATH"
 WORKDIR /work
 RUN rm -rf /work/namer/__pycache__/ || true \
     && rm -rf /work/test/__pycache__/ || true \
-    && poetry install \
-    && yarn install \
-    && yarn run build \
-    && poetry run flakeheaven lint \
-    && poetry build
-RUN  ( Xvfb :99 & cd /work/ && poetry run pytest )
+    && poetry install
+RUN ( Xvfb :99 & cd /work/ && poetry run poe build_all )
 
 FROM base
 COPY --from=build /work/dist/namer-*.tar.gz /
