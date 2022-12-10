@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from shutil import copytree
 
-from namer.filenameparts import parse_file_name
+from namer.fileinfo import parse_file_name
 from namer.metadataapi import match
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.comparison_results import Performer

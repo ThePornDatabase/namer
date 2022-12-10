@@ -14,7 +14,7 @@ DEFAULT_REGEX_TOKENS = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class FileNameParts:
+class FileInfo:
     """
     Represents info parsed from a file name, usually of a nzb, named something like:
     'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.2160p.MP4-GAYME-xpost'
@@ -116,14 +116,14 @@ def parser_config_to_regex(tokens: str) -> Pattern[str]:
     return re.compile(regex)
 
 
-def parse_file_name(filename: str, namer_config: NamerConfig) -> FileNameParts:
+def parse_file_name(filename: str, namer_config: NamerConfig) -> FileInfo:
     """
     Given an input name of the form site-yy.mm.dd-some.name.part.1.XXX.2160p.mp4,
     parses out the relevant information in to a structure form.
     """
     filename = replace_abbreviations(filename, namer_config)
     regex = parser_config_to_regex(namer_config.name_parser)
-    file_name_parts = FileNameParts()
+    file_name_parts = FileInfo()
     file_name_parts.extension = PurePath(filename).suffix[1:]
     match = regex.search(filename)
     if match:

@@ -21,7 +21,7 @@ from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults, ffprobe
-from namer.filenameparts import FileNameParts
+from namer.fileinfo import FileInfo
 from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
@@ -75,7 +75,7 @@ class ProcessingResults:
     The location of the found video file.
     """
 
-    parsed_file: Optional[FileNameParts] = None
+    parsed_file: Optional[FileInfo] = None
     """
     The parsed file name.
     """

@@ -5,7 +5,7 @@ from typing import List, Optional
 from pathvalidate import Platform, sanitize_filename
 
 from namer.configuration import NamerConfig
-from namer.filenameparts import FileNameParts
+from namer.fileinfo import FileInfo
 from namer.name_formatter import PartialFormatter
 
 
@@ -94,9 +94,9 @@ class LookedUpFileInfo:
     """
     url query used to get the above json response
     """
-    original_parsed_filename: Optional[FileNameParts] = None
+    original_parsed_filename: Optional[FileInfo] = None
     """
-    The FileNameParts used to build the original_query
+    The FileInfo used to build the original_query
     """
     look_up_site_id: Optional[str] = None
     """
@@ -135,7 +135,7 @@ class LookedUpFileInfo:
         self.performers = []
         self.tags = []
         self.resolution = None
-        self.original_parsed_filename = FileNameParts()
+        self.original_parsed_filename = FileInfo()
 
     def as_dict(self, config: NamerConfig):
         """
@@ -143,7 +143,7 @@ class LookedUpFileInfo:
         by PartialFormatter to return a new path for a file.
         """
         if not self.original_parsed_filename:
-            self.original_parsed_filename = FileNameParts()
+            self.original_parsed_filename = FileInfo()
 
         res = self.resolution
         res_str: Optional[str] = None
@@ -195,11 +195,14 @@ class LookedUpFileInfo:
 
         return name
 
+    def found_via_phash(self) -> bool:
+        return True if self.source_url and "/hash/" in self.source_url else False
+
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ComparisonResult:
     """
-    Represents the comparison from a FileNameParts and a LookedUpFileInfo, it will be
+    Represents the comparison from a FileInfo and a LookedUpFileInfo, it will be
     considered a match if the creation dates match, the studio matches, and the original
     scene/perform part of a file name can match any combination of the metadata about
     actor names and/or scene name.   RapidFuzz is used to make the comparison.
@@ -208,7 +211,7 @@ class ComparisonResult:
     name: str
     name_match: float
     """
-    How closely did the name found in FileNameParts match (via RapidFuzz string comparison)
+    How closely did the name found in FileInfo match (via RapidFuzz string comparison)
     The performers and scene name found in LookedUpFileInfo.  Various combinations of performers
     and scene namer are used for attempted matching.
     """
@@ -223,7 +226,7 @@ class ComparisonResult:
     Did the dates match between filenameparts and looked up
     """
 
-    name_parts: FileNameParts
+    name_parts: FileInfo
     """
     Parts of the file name that were parsed and used as search parameters.
     """
@@ -234,13 +237,18 @@ class ComparisonResult:
     performing a lookup by id (which is done only after a match is made.)
     """
 
+    phash_match: bool
+    """
+    Was this matched found via a phash, and not the name.
+    """
+
     def is_match(self) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name).
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 94.9)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 94.9) or self.phash_match
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

@@ -35,14 +35,15 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test phash calculation.
         """
+        expected_hash = imagehash.hex_to_hash('88982eebd3552d9c')
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
             res = self.__generator.get_stash_phash(file)
-
-        expected_hash = imagehash.hex_to_hash('88982eebd3552d9c')
-        self.assertEqual(res, expected_hash)
+            self.assertIsNotNone(res)
+            if res:
+                self.assertEqual(res.phash, expected_hash)
 
 
 if __name__ == "__main__":

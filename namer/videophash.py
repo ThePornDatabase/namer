@@ -3,6 +3,7 @@ import subprocess
 import platform
 import shutil
 from importlib import resources
+from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from types import SimpleNamespace
@@ -17,6 +18,13 @@ from loguru import logger
 from PIL import Image
 
 from namer.ffmpeg import extract_screenshot, ffprobe
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class PerceptualHash:
+    duration: float
+    phash: imagehash.ImageHash
+    oshash: str
 
 
 class VideoPerceptualHash:
@@ -57,7 +65,7 @@ class VideoPerceptualHash:
 
         return thumbnail_image
 
-    def get_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
+    def get_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         return self.__execute_stash_phash(file)
 
     def copy_resource_to_file(self, full_path: str, output: Path) -> bool:
@@ -90,7 +98,7 @@ class VideoPerceptualHash:
                 file.chmod(0o777)
         return success
 
-    def __execute_stash_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
+    def __execute_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         output = None
         if not self.__phash_path:
             return output
@@ -101,12 +109,11 @@ class VideoPerceptualHash:
             stdout, stderr = stdout.strip(), stderr.strip()
             success = process.returncode == 0
             if success:
-                print(stdout)
                 data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
-                # duration = data.duration
-                phash = data.phash
-                # oshash = data.oshash
-                output = imagehash.hex_to_hash(phash)
+                output = PerceptualHash()
+                output.duration = data.duration
+                output.phash = imagehash.hex_to_hash(data.phash)
+                output.oshash = data.oshash
             else:
                 logger.error(stderr)
         return output
