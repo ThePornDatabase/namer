@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from namer.filenameparts import parse_file_name
+from namer.fileinfo import parse_file_name
 from namer.command import make_command
 from test.utils import environment, sample_config
 

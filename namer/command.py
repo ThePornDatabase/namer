@@ -18,7 +18,7 @@ from loguru import logger
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import ffprobe, FFProbeResults
-from namer.filenameparts import parse_file_name, FileNameParts
+from namer.fileinfo import parse_file_name, FileInfo
 from namer.comparison_results import ComparisonResults, LookedUpFileInfo
 
 
@@ -44,18 +44,25 @@ class Command:
     """
     Was the input file a directory and is parsing directory names configured?
     """
-    parsed_file: Optional[FileNameParts] = None
+    parsed_file: Optional[FileInfo] = None
     """
     The parsed file name.
     """
 
     inplace: bool = False
+    """
+    Was the command told to keep the files in place.
+    """
 
     write_from_nfos: bool = False
+    """
+    Should .nfo files be used as a source of metadata and writen into file tag info and used for naming.
+    """
 
     tpdb_id: Optional[str] = None
-
-    ff_probe_results: Optional[FFProbeResults]
+    """
+    The _id used to identify video in tpdb
+    """
 
     config: NamerConfig
 
@@ -367,9 +374,6 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
 
-    if use_ffprobe:
-        target_file.ff_probe_results = ffprobe(target_movie)
-
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) or ignore_file_restrictions else None
 
     return output
@@ -393,7 +397,7 @@ def main(arg_list: List[str]):
     """
     Attempt to parse a name.
     """
-    description = "You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileNameParts, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileNameParts.\n"
+    description = "You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileInfo, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileInfo.\n"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
     parser.add_argument("-c", "--configfile", help="override location for a configuration file.", type=Path)

@@ -270,6 +270,21 @@ class NamerConfig:
     taken, no streams (audio/video) are re-encoded.  Available here: https://iso639-3.sil.org/code_tables/639/data/
     """
 
+    search_phash: bool = True
+    """
+    Calculate and use phashes in search for matches
+    """
+
+    require_match_phash_top: int = 3
+    """
+    If there is a phash match, require any name match be in the top N results
+    """
+
+    send_phash_of_matches_to_tpdb: bool = True
+    """
+    If true will push phash of matched videos by name back to tpdb.
+    """
+
     ignored_dir_regex: Pattern = re.compile(r".*_UNPACK_.*", re.IGNORECASE)
     """
     If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
@@ -414,6 +429,11 @@ class NamerConfig:
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address
+            },
+            "Phash": {
+                "search_phash": self.search_phash,
+                "require_match_phash_top": self.require_match_phash_top,
+                "send_phash_of_matches_to_tpdb": self.send_phash_of_matches_to_tpdb,
             },
             "Duplicate Config": {
                 "preserve_duplicates": self.preserve_duplicates,

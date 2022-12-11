@@ -10,7 +10,7 @@ import hashlib
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
-from namer.filenameparts import parse_file_name
+from namer.fileinfo import parse_file_name
 from namer.ffmpeg import ffprobe
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file

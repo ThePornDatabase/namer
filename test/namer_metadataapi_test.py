@@ -5,7 +5,7 @@ import io
 import unittest
 from unittest import mock
 
-from namer.filenameparts import parse_file_name
+from namer.fileinfo import parse_file_name
 from namer.command import make_command
 from namer.metadataapi import main, match
 from test.utils import environment, sample_config
