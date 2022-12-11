@@ -26,6 +26,7 @@ from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, 
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
+from namer.videophash import VideoPerceptualHash
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -171,8 +172,9 @@ def process_file(command: Command) -> Optional[Command]:
             file_infos = get_complete_metadataapi_net_fileinfo(command.parsed_file, command.tpdb_id, command.config)
             if file_infos is not None:
                 new_metadata = file_infos
-        elif new_metadata is None and command.parsed_file is not None and command.parsed_file.name is not None:
-            search_results = match(command.parsed_file, command.config)
+        elif new_metadata is None and ((command.parsed_file is not None and command.parsed_file.name is not None) or command.config.search_phash):
+            phash = VideoPerceptualHash().get_stash_phash(command.target_movie_file) if command.config.search_phash else None
+            search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
                 matched = search_results.get_match()
                 if matched:

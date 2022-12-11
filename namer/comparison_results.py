@@ -200,7 +200,7 @@ class LookedUpFileInfo:
         return name
 
     def found_via_phash(self) -> bool:
-        return True if self.source_url and "/hash/" in self.source_url else False
+        return True if self.original_query and "/hash/" in self.original_query else False
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -230,7 +230,7 @@ class ComparisonResult:
     Did the dates match between filenameparts and looked up
     """
 
-    name_parts: FileInfo
+    name_parts: Optional[FileInfo]
     """
     Parts of the file name that were parsed and used as search parameters.
     """
@@ -241,7 +241,7 @@ class ComparisonResult:
     performing a lookup by id (which is done only after a match is made.)
     """
 
-    phash_match: bool
+    phash_match: bool = False
     """
     Was this matched found via a phash, and not the name.
     """
@@ -267,6 +267,7 @@ class ComparisonResults:
             # to sort it out.
             match: Optional[ComparisonResult] = self.results[0]
             for potential in self.results[1:]:
-                if match and match.name_match < potential.name_match:
+                # Now that matches are unique in the list, don't match if their are multiple
+                if match and match.name_match < potential.name_match or potential.is_match():
                     match = None
         return match

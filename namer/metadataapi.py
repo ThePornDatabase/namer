@@ -56,45 +56,47 @@ def __attempt_better_match(existing: Tuple[str, float], query: Optional[str], ma
     return existing if existing[1] >= found[1] else found
 
 
-def __evaluate_match(name_parts: FileInfo, looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
+def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
     site = False
     found_site = None
-    if looked_up.site:
-        found_site = re.sub(r"[^a-z0-9]", "", looked_up.site.lower())
-        if not name_parts.site:
-            site = True
-        else:
-            site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode(name_parts.site.lower())) in found_site
-
-    if found_site in namer_config.sites_with_no_date_info:
-        release_date = True
-    else:
-        release_date = bool(name_parts.date and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date))
-
+    release_date = False
     result: Tuple[str, float] = ('', 0.0)
 
-    # Full Name
-    # Deal with some movies having 50+ performers by throwing performer info away for essamble casts :D
-    performers = looked_up.performers
-    if len(looked_up.performers) > 6:
-        performers = []
+    if name_parts:
+        if looked_up.site:
+            found_site = re.sub(r"[^a-z0-9]", "", looked_up.site.lower())
+            if not name_parts.site:
+                site = True
+            else:
+                site = re.sub(r"[^a-z0-9]", "", name_parts.site.lower()) in found_site or re.sub(r"[^a-z0-9]", "", unidecode(name_parts.site.lower())) in found_site
 
-    all_performers = list(map(lambda p: p.name, performers))
-    if looked_up.name:
-        all_performers.insert(0, looked_up.name)
+        if found_site in namer_config.sites_with_no_date_info:
+            release_date = True
+        else:
+            release_date = bool(name_parts.date and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date))
 
-    result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
-    if name_parts.name:
-        result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
+        # Full Name
+        # Deal with some movies having 50+ performers by throwing performer info away for essamble casts :D
+        performers = looked_up.performers
+        if len(looked_up.performers) > 6:
+            performers = []
 
-    # First Name Powerset.
-    if result and result[1] < 89.9:
-        all_performers = list(map(lambda p: p.name.split(" ")[0], performers))
+        all_performers = list(map(lambda p: p.name, performers))
         if looked_up.name:
             all_performers.insert(0, looked_up.name)
+
         result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
         if name_parts.name:
             result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
+
+        # First Name Powerset.
+        if result and result[1] < 89.9:
+            all_performers = list(map(lambda p: p.name.split(" ")[0], performers))
+            if looked_up.name:
+                all_performers.insert(0, looked_up.name)
+            result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
+            if name_parts.name:
+                result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     return ComparisonResult(
         name=result[0],
@@ -107,7 +109,7 @@ def __evaluate_match(name_parts: FileInfo, looked_up: LookedUpFileInfo, namer_co
     )
 
 
-def __update_results(results: List[ComparisonResult], name_parts: FileInfo, namer_config: NamerConfig, skip_date: bool = False, skip_name: bool = False, movie: bool = False, phash: Optional[PerceptualHash] = None):
+def __update_results(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, skip_date: bool = False, skip_name: bool = False, movie: bool = False, phash: Optional[PerceptualHash] = None):
     if not results or not results[0].is_match():
         for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, movie, phash=phash):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
@@ -121,11 +123,11 @@ def __update_results(results: List[ComparisonResult], name_parts: FileInfo, name
     return results
 
 
-def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: FileInfo, namer_config: NamerConfig, movies: bool, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
+def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, movies: bool, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
     results = __update_results(results, name_parts, namer_config, movie=movies, phash=phash)
     results = __update_results(results, name_parts, namer_config, skip_name=True, movie=movies, phash=phash)
 
-    if name_parts.date:
+    if name_parts and name_parts.date:
         results = __update_results(results, name_parts, namer_config, skip_date=True, movie=movies)
         results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True, movie=movies)
 
@@ -235,7 +237,7 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
         return trailer if trailer.exists() and trailer.is_file() else None
 
 
-def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo:
+def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[FileInfo]) -> LookedUpFileInfo:
     movie = True if "/movie" in url else False
     file_info = LookedUpFileInfo()
 
@@ -313,7 +315,7 @@ def __json_to_fileinfo(data, url, json_response, name_parts) -> LookedUpFileInfo
     return file_info
 
 
-def __metadataapi_response_to_data(json_object, url, json_response, name_parts) -> List[LookedUpFileInfo]:
+def __metadataapi_response_to_data(json_object, url: str, json_response: str, name_parts: Optional[FileInfo]) -> List[LookedUpFileInfo]:
     file_infos: List[LookedUpFileInfo] = []
     if hasattr(json_object, "data"):
         if isinstance(json_object.data, list):
@@ -327,12 +329,14 @@ def __metadataapi_response_to_data(json_object, url, json_response, name_parts) 
     return file_infos
 
 
-def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, movie: Optional[bool] = None, phash: Optional[PerceptualHash] = None) -> str:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, movie: Optional[bool] = None, phash: Optional[PerceptualHash] = None) -> Optional[str]:
+    query = None
     if uuid:
         query = uuid
     elif phash:
-        query: str = f"movies/hash/{phash.phash}" if movie else f"scene/hash/{phash.phash}"
-    else:
+        # Movie phashes are note supported by tpdb at this time.
+        query = None if movie else f"scenes/hash/{phash.phash}"
+    elif site or release_date or name:
         query = "movies?parse=" if movie else "scenes?parse="
         if site:
             # There is a known issue in tpdb, where site names are not matched due to casing.
@@ -347,11 +351,10 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
         if page and page > 1:
             query += f"&page={page}"
         query += "&limit=25"
+    return f"{namer_config.override_tpdb_address}/{query}" if query else None
 
-    return f"{namer_config.override_tpdb_address}/{query}"
 
-
-def __get_metadataapi_net_info(url: str, name_parts: FileInfo, namer_config: NamerConfig):
+def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_config: NamerConfig):
     json_response = __get_response_json_object(url, namer_config)
     file_infos = []
     if json_response and json_response.strip() != "":
@@ -363,26 +366,24 @@ def __get_metadataapi_net_info(url: str, name_parts: FileInfo, namer_config: Nam
     return file_infos
 
 
-def __get_metadataapi_net_fileinfo(name_parts: FileInfo, namer_config: NamerConfig, skip_date: bool, skip_name: bool, movie: bool = False, phash: Optional[PerceptualHash] = None) -> List[LookedUpFileInfo]:
-    release_date = name_parts.date if not skip_date else None
-    name = name_parts.name if not skip_name else None
-    url = __build_url(namer_config, name_parts.site, release_date, name, movie=movie, phash=phash)
-    file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
-
-    return file_infos
-
-
-def __get_metadataapi_net_fileinfo_phash(name_parts: FileInfo, namer_config: NamerConfig, movie: bool = False, phash: Optional[PerceptualHash] = None) -> List[LookedUpFileInfo]:
-    url = __build_url(namer_config, name_parts.site, movie=movie, phash=phash)
-    file_infos: List[LookedUpFileInfo] = __get_metadataapi_net_info(url, name_parts, namer_config)
-    return file_infos
+def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config: NamerConfig, skip_date: bool, skip_name: bool, movie: bool = False, phash: Optional[PerceptualHash] = None) -> List[LookedUpFileInfo]:
+    if namer_config or phash:
+        release_date = name_parts.date if name_parts and not skip_date else None
+        name = name_parts.name if name_parts and not skip_name else None
+        site = name_parts.site if name_parts else None
+        url = __build_url(namer_config, site, release_date, name, movie=movie, phash=phash)
+        if url:
+            file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
+            return file_infos
+    return []
 
 
-def get_complete_metadataapi_net_fileinfo(name_parts: FileInfo, uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
+def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
     url = __build_url(namer_config, uuid=uuid)
-    file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
-    if file_infos:
-        return file_infos[0]
+    if url:
+        file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
+        if file_infos:
+            return file_infos[0]
 
     return None
 
@@ -392,20 +393,26 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
     Give parsed file name parts, and a porndb token, returns a sorted list of possible matches.
     Matches will appear first.
     """
+    results: List[ComparisonResult] = []
     if not file_name_parts:
-        return ComparisonResults([])
+        # Movies with phashes are not supported
+        # results = __metadata_api_lookup_type(results, None, namer_config, True, phash)
+        results = __metadata_api_lookup_type(results, None, namer_config, False, phash)
+    else:
+        results: List[ComparisonResult] = __metadata_api_lookup(file_name_parts, namer_config, phash)
 
-    comparison_results = __metadata_api_lookup(file_name_parts, namer_config, phash)
-    comparison_results = sorted(comparison_results, key=__match_percent, reverse=True)
+    comparison_results = sorted(results, key=__match_percent, reverse=True)
 
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.
-    if comparison_results and comparison_results[0].is_match():
-        uuid = comparison_results[0].looked_up.uuid
-        if uuid:
-            file_infos: Optional[LookedUpFileInfo] = get_complete_metadataapi_net_fileinfo(file_name_parts, uuid, namer_config)
-            if file_infos:
-                comparison_results[0].looked_up = file_infos
+    for comparison_result in comparison_results:
+        if comparison_result.is_match():
+            uuid = comparison_results[0].looked_up.uuid
+            if uuid:
+                file_infos: Optional[LookedUpFileInfo] = get_complete_metadataapi_net_fileinfo(file_name_parts, uuid, namer_config)
+                if file_infos:
+                    file_infos.original_query = comparison_results[0].looked_up.original_query
+                    comparison_results[0].looked_up = file_infos
 
     return ComparisonResults(comparison_results)
 

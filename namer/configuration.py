@@ -433,12 +433,13 @@ class NamerConfig:
                 "max_performer_names": self.max_performer_names,
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
-                "override_tpdb_address": self.override_tpdb_address
+                "override_tpdb_address": self.override_tpdb_address,
+                "plex_hack": self.plex_hack
             },
             "Phash": {
                 "search_phash": self.search_phash,
-                "require_match_phash_top": self.require_match_phash_top,
-                "send_phash_of_matches_to_tpdb": self.send_phash_of_matches_to_tpdb,
+                # "require_match_phash_top": self.require_match_phash_top,
+                # "send_phash_of_matches_to_tpdb": self.send_phash_of_matches_to_tpdb,
             },
             "Duplicate Config": {
                 "preserve_duplicates": self.preserve_duplicates,
