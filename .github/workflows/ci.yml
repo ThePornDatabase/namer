@@ -169,34 +169,43 @@ jobs:
     if: ${{ needs.auto-tag.outputs.created-tag != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-          #cache: 'poetry'
+          python-version: ${{ matrix.python-version }}
 
       - name: Display Python version
         run: python --version
+
+      - name: install poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: '1.2.2'
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.19.0'
+      - name: Install ffmpeg
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+              choco install -q -y ffmpeg
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              env HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg
+          fi
+        shell: bash
 
       - uses: actions/setup-node@v3
         with:
           cache: 'yarn'
           node-version: '16'
 
-      - name: Install Node packages
-        run: yarn install
-
-      - name: Build Assets
-        run: yarn run build
-
-      - name: install poetry
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: '1.2.2'
       - run: poetry install
-      - run: poetry build
+
+      - run: poetry run poe build_all
 
       - name: Prepare to publish python pips.
         if:  "${{ env.PYPI_TOKEN != '' }}"
@@ -225,8 +234,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: build and tag
         run: |
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
