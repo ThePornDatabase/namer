@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass, field
 from pathlib import PurePath
 from typing import List, Optional
@@ -192,6 +193,9 @@ class LookedUpFileInfo:
             name = path.stem + infix + path.suffix
             if path.parts:
                 name = str(path.parent / name)
+
+        if config.plex_hack:
+            name = re.sub(r'[sS]\d{1,3}:?[eE]\d{1,3}', '', name)
 
         return name
 

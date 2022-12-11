@@ -213,6 +213,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "use_requests_cache": ("namer", to_bool, from_bool),
     "requests_cache_expire_minutes": ("namer", to_int, from_int),
     "override_tpdb_address": ("namer", None, None),
+    "plex_hack": ("namer", to_bool, from_bool),
     "search_phash": ("Phash", to_bool, from_bool),
     # "require_match_phash_top": ("Phash", to_int, from_int),
     # "send_phash_of_matches_to_tpdb": ("Phash", to_bool, from_bool),
