@@ -129,7 +129,7 @@ override_tpdb_address =
 
 [Phash]
 # Calculate and use phashes in search for matches
-search_phash = False
+search_phash = True
 
 [metadata]
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
