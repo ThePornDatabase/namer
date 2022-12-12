@@ -4,6 +4,7 @@ Test namer_watchdog.py
 import contextlib
 import logging
 import time
+import os
 import unittest
 from pathlib import Path
 
@@ -21,7 +22,7 @@ def wait_until_processed(watcher: MovieWatcher):
     """
     config = watcher.getConfig()
     logging.info("waiting for files to be processes")
-    Wait().seconds(30).checking(.5).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    Wait().seconds(60).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
     logging.info("past waiting for files")
     watcher.stop()
     logging.info("past stopping")
@@ -72,6 +73,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output2.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_collisions_success_choose_best(self):
         """
@@ -108,6 +110,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                     self.assertEqual(stream.codec_name, "hevc")
             output_file2 = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4"
             self.assertFalse(output_file2.exists())
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_event_listener_success(self):
         """
@@ -128,6 +131,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_no_dirname(self):
         """
@@ -154,6 +158,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file2, 664)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_no_dirname_extra_files(self):
         """
@@ -183,6 +188,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output_test_file.read_text(), contents)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success(self):
         """
@@ -208,6 +214,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_custom_location(self):
         """
@@ -233,6 +240,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_ignore(self):
         """
@@ -245,6 +253,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             time.sleep(2)
             watcher.stop()
             self.assertTrue(targets[0].file.exists())
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_failure(self):
         """
@@ -268,6 +277,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             retry_failed(config)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertGreater(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_name_parser_success(self):
         """
@@ -290,6 +300,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_name_parser_failure_with_startup_processing(self):
         """
@@ -314,6 +325,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
                 self.assertEqual(len(list(config.work_dir.iterdir())), 0)
                 self.assertEqual(len(list(config.dest_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_fetch_trailer_write_nfo_success(self):
         """
@@ -339,6 +351,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertTrue(nfo_file.exists() and nfo_file.is_file() and nfo_file.stat().st_size != 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
 
 if __name__ == "__main__":
