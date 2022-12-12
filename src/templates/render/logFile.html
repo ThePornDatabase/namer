@@ -1,5 +1,5 @@
 <div class="row row-cols-auto justify-content-center">
-    {% set results = data['data']['results']|selectattr('name_match', '>=', 80)|list %}
+    {% set results = (data['data']['results']| selectattr('phash_match', '==', True)|list) + (data['data']['results']| selectattr('name_match', '>=', 80)|list) %}
     {% if results %}
         {% for file in results %}
             <div class="col m-1 mb-2">
