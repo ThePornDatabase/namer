@@ -19,8 +19,19 @@
 .. image:: https://static.pepy.tech/personalized-badge/namer?period=month&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads/Month
   :target: https://pepy.tech/project/namer
 
-Namer is a powerful command line tool and web app for renaming and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
+Namer is a powerful web app, folder watchdog and command line tool for renaming video files and tagging mp4 video files in a way that helps plex/jellyfin/emby and related plugins extract that data or lookup data with the PornDB_'s plugins for plex or jellyfin/emby.
+
 Namer is easily installed as a python pip and can:
+
+* namer now support perceptual hashes by default and can identify video files that don't have parsable names.
+
+* can be run watching a directory for new files to name, tag and move to an output location, possible setting file permissions, writing .nfo files with downloaded images, attempting to grab trailers, and retrying failed files nightly.
+
+  ``python -m namer watchdog``  
+
+* while running watchdog, will also have a webui that can be used to manually match and rename any files that could not be automatically matched.  You can set the webroot, port, bound ip, enable/disable in your namer.cfg file.
+
+  ``http://<ip>:6980/``
 
 * can be used to name and embed tags in individual files with metadata from porndb:
 
@@ -42,15 +53,8 @@ Namer is easily installed as a python pip and can:
 
   ``python -m namer suggest -f Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4``
 
-* can be run watching a directory for new files to name, tag and move to an output location, possible setting file permissions, writing .nfo files with downloaded images, attempting to grab trailers, and retrying failed files nightly.
 
-  ``python -m namer watchdog``  
-
-* while running watchdog, will also have a webui that can be used to manually match and rename any failed files.  You can set the webroot, port, bound ip, enable/disable in the namer.cfg file.
-
-  ``http:\\<ip>:6980\``
-
-For all of the above it's recommended to have a config file in your home directory (copied from namer.cfg.sample in this git repo)
+For all of the above it's recommended to have a config file in your home directory (copied from namer/namer.cfg.default in this git repo)
 
 Also provided is a docker file if you prefer.
 
@@ -66,7 +70,7 @@ Why should I use this?
 How successful at matching videos is this tool?
 ------------------------------------------------
 
-For data pulled from the internet with rss feeds (which are often in the file format listed below) .... perfect.  The author and others have only experienced one mismatch, and that type of failure can never occur again.
+For data pulled from the internet with rss feeds (which are often in the file format listed below) .... very near perfect.  The author and others have only experienced two mismatches, and those type of failures can never occur again.
 
 If running in a background watchdog mode, files that were failed to match are retried every 24 hours, letting the PornDB_ scrapers catch up with any metadata they may be missing.
 
@@ -76,7 +80,7 @@ Optionally, a log file can be enabled to show the original file name parts, what
 For the curious, how is a match made?
 ------------------------------------------------
 
-It assumes that file names exist as in a format like ```sitename-[YY]YY-MM-DD-Scene.and.or.performer.name.mp4.```.  A powerful regex tries to determine the various parts of a file's name.   Note that the separating dashes and dots above are interchangeable, and spaces may also be used as separators (or any number of any combo of the three.)   This regex is overridable, but you really need to know what you're doing and if you don't have all the match groups for the regex, the match from the the PornDB_ will likely not be any where near as robust as it is with a site, a date, and a scene/perform name section.
+Namer assumes that file names exist as in a format like ```sitename-[YY]YY-MM-DD-Scene.and.or.performer.name.mp4.```.  A powerful regex tries to determine the various parts of a file's name.   Note that the separating dashes and dots above are interchangeable, and spaces may also be used as separators (or any number of any combo of the three.)   This regex is overridable, but you really need to know what you're doing and if you don't have all the match groups for the regex, the match from the the PornDB_ will likely not be any where near as robust as it is with a site, a date, and a scene/perform name section.
 You'll have to read the code to figure out how to set this.   You really shouldn't do it.
 
 When determining a possible queried match from the PornDB_:
@@ -85,7 +89,11 @@ Sitename my not need be the full name of the site, as long as a the looked up si
 
 The date may have a four digit or two digit year.  If two digit, "20" is assumed as the default century, not "19".  A potential match must be with one day plus/minus the file's date to be considered a match.
 
-Finally the looked up scene name and all performers first and last names are combined in to what is called a powerset (every combo of including or not including each artist and/or scene name), and that is compared against the file's 'Scene.and.or.performer.name' section with a tool called rapidfuzz.   A name must be 90% similar to a member of the powerset to be considered a match, though all potential matches are evaluated and sorted before selecting the best match.   Information about all potential matches are stored in the local log file if it is enabled.
+Finally the looked up scene name and all performers first and last names are combined in to what is called a powerset (every combo of including or not including each artist and/or scene name), and that is compared against the file's 'Scene.and.or.performer.name' section with a tool called rapidfuzz.   A name must be 95% similar to a member of the powerset to be considered a match, though all potential matches are evaluated and sorted before selecting the best match.   Information about all potential matches are stored in the local log file if it is enabled.
+
+At the same time name based matching is occuring, a perceptual hash is built and queried againt the PornDB_.
+
+All matches, regardless of source are made unique with the PornDB_'s UUID (universally unique identifier).   If more than one unique match exist, or no match exists but partial name matches exist, all data is availble in the web ui for users to select the correct match.
 
 I'm sold how do I install it!
 --------------------------------------------------
@@ -106,8 +114,8 @@ You have two choices.   Do you use docker?  Pull the docker image, here's docker
         - TZ=America/Los_Angeles
         - NAMER_CONFIG=/config/namer.cfg
       volumes:
-        - /apps/namer/:/config <- this will store the namer.cfg file.
-        - /media:/data <- this will have the four folders namer needs to work, referenced in the config file.
+        - /apps/namer/:/config <- this will store the namer.cfg file copied by you from the git repo ( namer/namer.cfg.default )
+        - /media:/data <- this will have the four folders namer needs to work, referenced in the namer.cfg file you create.
       restart: always
 
 Copy namer.cfg to your config location (a path mapped to /config/namer.cfg above), and set values for your setup.   
@@ -180,32 +188,19 @@ Development
 
   # Install Python
   # Install poetry
+  # Install yarn
+  # Install golang
+
   # Install poe the poet
   poetry self add 'poethepoet[poetry_plugin]'
   # or
   pip add poethepoet
 
-  # Building:
-  # install yarn deps
-  yarn intall   
+  # Set python version if not using the latest python as your default
+  poetry env use 3.11
 
-  # build css/js/copy templates
-  yarn run build
-
-  # install poetry dependencies
-  poetry install
-
-  # build python package in dist dir
-  poetry build
-
-  # Linting:
-  poetry run flakeheaven lint
-
-  # Testing:
-  poetry run pytest
-
-  # Formatting, maybe....:
-  poetry run autopep8 --in-place namer/*.py test/*.py
+  # Build everything
+  poetry run poe build_all
 
   # Code Coverage:
   poetry run pytest --cov
@@ -221,6 +216,7 @@ Development
   poetry config pypi-token.pypi <token>
 
   # Perhaps update the version number?
+  poetry version <new number>
 
   # Publishing a release to pypi.org:
   poetry publish
@@ -234,16 +230,16 @@ Pull Requests Are Welcome!
 Just be sure to pay attention to the tests and any failing pylint results.   If you want to vet a pr will be accepted before building code, file an new feature request issue, and 4c0d3r will comment on it and set you up for success.   Tests are must.
 
 .. _PornDB: http://metadataapi.net/
-.. _namer section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L1
-.. _metadata section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L59
-.. _watchdog section: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L89
-.. _watch_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L100
-.. _work_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L104
-.. _fail_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L109
-.. _dest_dir: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L112
-.. _retry_time: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L115
-.. _new_relative_path_name: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L97
-.. _enabled_tagging: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L67
-.. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer.cfg.sample#L72
+.. _namer section: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L1
+.. _metadata section: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L59
+.. _watchdog section: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L89
+.. _watch_dir: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L100
+.. _work_dir: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L104
+.. _fail_dir: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L109
+.. _dest_dir: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L112
+.. _retry_time: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L115
+.. _new_relative_path_name: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L97
+.. _enabled_tagging: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L67
+.. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L72
 .. _Homebrew: https://docs.brew.sh/Installation
 .. _Chocolatey: https://chocolatey.org/install
