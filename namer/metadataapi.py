@@ -255,12 +255,13 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     if hasattr(data, 'external_id'):
         file_info.external_id = data.external_id
 
+    file_info.poster_url = None
     if hasattr(data, 'poster'):
         file_info.poster_url = data.poster
-    elif hasattr(data, 'front'):
-        file_info.poster_url = data.front
-    else:
-        file_info.poster_url = None
+    # if movie and hasattr(data, 'media') and hasattr(data.media, 'url'):
+    #    file_info.poster_url = data.media.url
+    if movie and hasattr(data, 'image'):
+        file_info.poster_url = data.image
 
     if hasattr(data, 'background') and data.background:
         file_info.background_url = data.background.large
