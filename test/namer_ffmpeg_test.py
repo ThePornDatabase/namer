@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from namer.ffmpeg import get_audio_stream_for_lang, update_audio_stream_if_needed, ffprobe
+from namer.ffmpeg import get_audio_stream_for_lang, update_audio_stream_if_needed, ffprobe, ffmpeg_version
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -85,6 +85,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             update_audio_stream_if_needed(file, "eng")
             stream_number = get_audio_stream_for_lang(file, "eng")
             self.assertEqual(stream_number, -1)
+
+    def test_file_ffmpeg(self):
+        version = ffmpeg_version()
+        self.assertIsNotNone(version)
 
 
 if __name__ == "__main__":

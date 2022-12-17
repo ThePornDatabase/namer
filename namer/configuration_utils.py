@@ -21,6 +21,7 @@ from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 from namer.configuration import NamerConfig
 from namer.database import abbreviations
 from namer.name_formatter import PartialFormatter
+from namer.ffmpeg import ffmpeg_version
 
 
 def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> bool:
@@ -77,12 +78,23 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
         return False
 
 
+def __verify_ffmpeg() -> bool:
+    version = ffmpeg_version()
+    if not version:
+        logger.error("No ffmpeg found, please install ffmpeg")
+        return False
+    else:
+        logger.info(f"FFmpeg version {version} found.")
+        return True
+
+
 def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bool:
     """
     Can verify a NamerConfig with a formatter
     """
     success = __verify_naming_config(config, formatter)
     success = __verify_watchdog_config(config, formatter) and success
+    success: bool = __verify_ffmpeg() and success
     return success
 
 # Read and write .ini files utils below

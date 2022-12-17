@@ -9,6 +9,8 @@ import json
 from dataclasses import dataclass
 import shutil
 import string
+import os
+import re
 from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
@@ -271,3 +273,14 @@ def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> I
     image = Image.open(out)
 
     return image
+
+
+def ffmpeg_version() -> Optional[str]:
+    pipe = os.popen("ffmpeg -version")
+    pipe.flush()
+    output = (pipe.read())
+    pipe.close()
+    line1: str = output.split('\n')[0]
+    reg = re.compile(r'ffmpeg version (?P<version>[\d|.]*)')
+    matches = reg.search(line1)
+    return matches.groupdict().get('version') if matches else None
