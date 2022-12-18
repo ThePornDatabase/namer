@@ -16,6 +16,7 @@ from urllib.parse import quote
 import rapidfuzz
 from loguru import logger
 from PIL import Image
+from requests import JSONDecodeError
 from unidecode import unidecode
 
 from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer
@@ -169,9 +170,24 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    with Http.get(url, cache_session=config.cache_session, headers=headers) as response:
-        response.raise_for_status()
-        return response.text
+    http = Http.get(url, cache_session=config.cache_session, headers=headers)
+    response = ''
+    if http.ok:
+        response = http.text
+    else:
+        data = None
+        try:
+            data = http.json()
+        except JSONDecodeError:
+            pass
+
+        message = 'Unknown error'
+        if data and 'message' in data:
+            message = data['message']
+
+        logger.error(f'Server API error: "{message}"')
+
+    return response
 
 
 @logger.catch
