@@ -33,14 +33,12 @@ class VideoPerceptualHash:
     __rows: int = 5
 
     __phash_path: Path
-    __phash_name: str = 'videohash'
+    __phash_name: str = 'videohashes'
 
     def __init__(self):
         self.__phash_path = Path(__file__).parent.parent / 'tools'
         if not self.__phash_path.is_dir():
             self.__phash_path.mkdir(exist_ok=True, parents=True)
-        if not [file for file in self.__phash_path.glob('*') if self.__phash_name == file.stem]:
-            self.__prepare_stash_phash()
 
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
@@ -68,45 +66,20 @@ class VideoPerceptualHash:
     def get_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         return self.__execute_stash_phash(file)
 
-    def copy_resource_to_file(self, full_path: str, output: Path) -> bool:
-        parts = full_path.split('/')
-        if hasattr(resources, 'files'):
-            trav = resources.files(parts[0])
-            for part in parts[1:]:
-                trav = trav.joinpath(part)
-            with trav.open("rb") as bin, open(output, mode="+bw") as out:
-                shutil.copyfileobj(bin, out)
-                return True
-        if hasattr(resources, 'open_binary'):
-            with resources.open_binary(".".join(parts[0:-1]), parts[-1]) as bin, open(output, mode="+bw") as out:
-                shutil.copyfileobj(bin, out)
-                return True
-        return False
-
-    def __prepare_stash_phash(self):
-        os = platform.system().lower()
-        success = False
-        post: str = '.exe'
-        if os == "linux":
-            post = '-linux'
-        elif os == 'darwin':
-            post = '-macos'
-        if self.__phash_path:
-            success = self.copy_resource_to_file('namer/videohashtools/videohashes' + post, self.__phash_path / self.__phash_name)
-            if os != 'windows' and self.__phash_path and success:
-                file = self.__phash_path / self.__phash_name
-                file.chmod(0o777)
-        return success
-
     def __execute_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         output = None
         if not self.__phash_path:
             return output
 
-        args = [str(self.__phash_path / self.__phash_name), '-json', '--video', str(file)]
+        args = [
+            str(self.__phash_path / self.__phash_name),
+            '-json',
+            '--video', str(file)
+        ]
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
             stdout, stderr = process.communicate()
             stdout, stderr = stdout.strip(), stderr.strip()
+
             success = process.returncode == 0
             if success:
                 data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
@@ -116,6 +89,7 @@ class VideoPerceptualHash:
                 output.oshash = data.oshash
             else:
                 logger.error(stderr)
+
         return output
 
     def __generate_thumbnails(self, file: Path, duration: float) -> List[Image.Image]:
