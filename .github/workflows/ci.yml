@@ -15,9 +15,11 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [ '3.8', '3.9', '3.10', '3.11' ]
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: true
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -26,13 +28,16 @@ jobs:
       - name: Display Python version
         run: python --version
 
-      - name: install poetry
+      - name: Install poetry
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: '1.2.2'
-      - uses: actions/setup-go@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v3
         with:
           go-version: '>=1.19.0'
+
       - name: Install ffmpeg
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -44,19 +49,23 @@ jobs:
           fi
         shell: bash
 
-      - uses: actions/setup-node@v3
+      - name: Install Node
+        uses: actions/setup-node@v3
         with:
           cache: 'yarn'
           node-version: '16'
 
-      - run: poetry install
+      - name: Intall Poetry Dependencies
+        run: poetry install
 
-      - run: poetry run poe build_all
+      - name: Build All
+        run: poetry run poe build_all
 
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: true
 
@@ -68,7 +77,8 @@ jobs:
       - name: Display Python version
         run: python --version
       
-      - uses: actions/setup-go@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
         with:
           go-version: '>=1.19.0'
 
@@ -83,23 +93,28 @@ jobs:
           fi
         shell: bash
 
-      - name: install poetry
+      - name: Install poetry
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: '1.2.2'
-
-      - run: poetry install
       
-      - uses: actions/setup-node@v3
+      - name: Install Node
+        uses: actions/setup-node@v3
         with:
           cache: 'yarn'
           node-version: '16'
 
-      - run: poetry run poe build_all
+      - name: Intall Poetry Dependencies
+        run: poetry install
 
-      - run: poetry run pytest --cov
+      - name: Build All
+        run: poetry run poe build_all
 
-      - run: poetry run coverage xml
+      - name: Run tests
+        run: poetry run pytest --cov
+
+      - name: Run coverage
+        run: poetry run coverage xml
 
       - uses: codecov/codecov-action@v2
         with:
@@ -111,9 +126,11 @@ jobs:
   dockerbuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: true
+
       - run: ./docker_build.sh
 
   auto-tag:
@@ -125,7 +142,8 @@ jobs:
       created-tag: ${{ steps.auto-tag.outputs.tag }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
@@ -169,9 +187,11 @@ jobs:
     if: ${{ needs.auto-tag.outputs.created-tag != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: true
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -180,13 +200,16 @@ jobs:
       - name: Display Python version
         run: python --version
 
-      - name: install poetry
+      - name: Install poetry
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: '1.2.2'
-      - uses: actions/setup-go@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v3
         with:
           go-version: '>=1.19.0'
+
       - name: Install ffmpeg
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -203,9 +226,11 @@ jobs:
           cache: 'yarn'
           node-version: '16'
 
-      - run: poetry install
+      - name: Intall Poetry Dependencies
+        run: poetry install
 
-      - run: poetry run poe build_all
+      - name: Build All
+        run: poetry run poe build_all
 
       - name: Prepare to publish python pips.
         if:  "${{ env.PYPI_TOKEN != '' }}"
@@ -234,9 +259,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v3
+
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: true
+
       - name: build and tag
         run: |
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')

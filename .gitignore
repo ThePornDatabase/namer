@@ -15,6 +15,4 @@ node_modules
 .env
 namer/web/public/assets
 namer/web/templates
-namer/videohashtools/phashcompare*
-namer/videohashtools/videohashes*
-tools
+namer/tools

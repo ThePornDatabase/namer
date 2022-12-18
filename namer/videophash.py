@@ -1,17 +1,17 @@
 import concurrent.futures
 import subprocess
 import platform
-import shutil
-from importlib import resources
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 import json
 import imagehash
 import numpy
+import oshash
 import scipy.fft
 import scipy.fftpack
 from loguru import logger
@@ -32,17 +32,28 @@ class VideoPerceptualHash:
     __columns: int = 5
     __rows: int = 5
 
-    __phash_path: Path
-    __phash_name: str = 'videohash'
+    __home_path: Path = Path(__file__).parent
+    __phash_path: Path = __home_path / 'tools'
+    __phash_name: str = 'videohashes'
+    __phash_suffixes: dict = {
+        'windows': '.exe',
+        'linux': '-linux',
+        'darwin': '-macos',
+    }
 
     def __init__(self):
-        self.__phash_path = Path(__file__).parent.parent / 'tools'
         if not self.__phash_path.is_dir():
             self.__phash_path.mkdir(exist_ok=True, parents=True)
-        if not [file for file in self.__phash_path.glob('*') if self.__phash_name == file.stem]:
-            self.__prepare_stash_phash()
 
+        system = platform.system().lower()
+        self.__phash_name += self.__phash_suffixes[system]
+
+    @lru_cache(maxsize=1024)
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
+        stat = file.stat()
+        return self._get_phash(file, stat.st_size, stat.st_mtime)
+
+    def _get_phash(self, file: Path, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
         phash = None
         thumbnail_image = self.__generate_image_thumbnail(file)
         if thumbnail_image:
@@ -66,56 +77,55 @@ class VideoPerceptualHash:
         return thumbnail_image
 
     def get_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
+        stat = file.stat()
+        return self._get_stash_phash(file, stat.st_size, stat.st_mtime)
+
+    @lru_cache(maxsize=1024)
+    def _get_stash_phash(self, file: Path, file_size: int, file_update: float) -> Optional[PerceptualHash]:
+        logger.info(f'Calculating phash for file "{file}"')
         return self.__execute_stash_phash(file)
 
-    def copy_resource_to_file(self, full_path: str, output: Path) -> bool:
-        parts = full_path.split('/')
-        if hasattr(resources, 'files'):
-            trav = resources.files(parts[0])
-            for part in parts[1:]:
-                trav = trav.joinpath(part)
-            with trav.open("rb") as bin, open(output, mode="+bw") as out:
-                shutil.copyfileobj(bin, out)
-                return True
-        if hasattr(resources, 'open_binary'):
-            with resources.open_binary(".".join(parts[0:-1]), parts[-1]) as bin, open(output, mode="+bw") as out:
-                shutil.copyfileobj(bin, out)
-                return True
-        return False
+    @lru_cache(maxsize=1024)
+    def get_oshash(self, file: Path) -> str:
+        stat = file.stat()
+        return self._get_oshash(file, stat.st_size, stat.st_mtime)
 
-    def __prepare_stash_phash(self):
-        os = platform.system().lower()
-        success = False
-        post: str = '.exe'
-        if os == "linux":
-            post = '-linux'
-        elif os == 'darwin':
-            post = '-macos'
-        if self.__phash_path:
-            success = self.copy_resource_to_file('namer/videohashtools/videohashes' + post, self.__phash_path / self.__phash_name)
-            if os != 'windows' and self.__phash_path and success:
-                file = self.__phash_path / self.__phash_name
-                file.chmod(0o777)
-        return success
+    @lru_cache(maxsize=1024)
+    def _get_oshash(self, file: Path, file_size: int, file_update: float) -> str:
+        logger.info(f'Calculating oshash for file "{file}"')
+        file_hash = oshash.oshash(str(file))
+        return file_hash
+
+    @staticmethod
+    def return_perceptual_hash(duration: float, phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
+        output = PerceptualHash()
+        output.duration = duration
+        output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
+        output.oshash = file_oshash
+
+        return output
 
     def __execute_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         output = None
         if not self.__phash_path:
             return output
 
-        args = [str(self.__phash_path / self.__phash_name), '-json', '--video', str(file)]
+        args = [
+            str(self.__phash_path / self.__phash_name),
+            '-json',
+            '--video', str(file)
+        ]
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
             stdout, stderr = process.communicate()
             stdout, stderr = stdout.strip(), stderr.strip()
+
             success = process.returncode == 0
             if success:
                 data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
-                output = PerceptualHash()
-                output.duration = data.duration
-                output.phash = imagehash.hex_to_hash(data.phash)
-                output.oshash = data.oshash
+                output = self.return_perceptual_hash(data.duration, data.phash, data.oshash)
             else:
                 logger.error(stderr)
+
         return output
 
     def __generate_thumbnails(self, file: Path, duration: float) -> List[Image.Image]:

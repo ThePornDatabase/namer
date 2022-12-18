@@ -79,13 +79,14 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
 
 
 def __verify_ffmpeg() -> bool:
-    version = ffmpeg_version()
-    if not version:
-        logger.error("No ffmpeg found, please install ffmpeg")
-        return False
-    else:
-        logger.info(f"FFmpeg version {version} found.")
-        return True
+    versions = ffmpeg_version()
+    for tool, version in versions.items():
+        if not version:
+            logger.error(f'No {tool} found, please install {tool}')
+        else:
+            logger.info(f'{tool} version {version} found')
+
+    return None not in versions.values()
 
 
 def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bool:
