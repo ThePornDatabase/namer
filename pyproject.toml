@@ -61,7 +61,7 @@ build_yarn = {shell="yarn run build"}
 install_videohashes_src = {shell="command -v git >/dev/null && git submodule update || echo 'Skipping git sub module update'"}
 build_videohashes = {shell="make build"}
 move_videohashes = {"script" = "shutil:copytree('./dist', '../tools', dirs_exist_ok=True)"}
-build_namer = {shell="poetry build"}
+build_namer = {shell="poetry build -C ./videohashes"}
 build_deps = ["install_npm", "build_yarn", "install_videohashes_src", "build_videohashes", "move_videohashes"]
 test_format = {shell="poetry run flakeheaven lint"}
 test_namer = {shell="poetry run pytest --log-cli-level=info"}
