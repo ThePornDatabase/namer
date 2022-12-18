@@ -30,7 +30,8 @@ class VideoPerceptualHash:
     __columns: int = 5
     __rows: int = 5
 
-    __phash_path: Path
+    __home_path: Path = Path(__file__).parent.parent
+    __phash_path: Path = __home_path / 'tools'
     __phash_name: str = 'videohashes'
     __phash_suffixes: dict = {
         'windows': '.exe',
@@ -39,7 +40,6 @@ class VideoPerceptualHash:
     }
 
     def __init__(self):
-        self.__phash_path = Path(__file__).parent.parent / 'tools'
         if not self.__phash_path.is_dir():
             self.__phash_path.mkdir(exist_ok=True, parents=True)
 
