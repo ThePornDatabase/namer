@@ -6,6 +6,7 @@ code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
 import json
+import subprocess
 from dataclasses import dataclass
 import shutil
 import string
@@ -275,12 +276,21 @@ def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> I
     return image
 
 
-def ffmpeg_version() -> Optional[str]:
-    pipe = os.popen("ffmpeg -version")
-    pipe.flush()
-    output = (pipe.read())
-    pipe.close()
-    line1: str = output.split('\n')[0]
-    reg = re.compile(r'ffmpeg version (?P<version>[\d|.]*)')
-    matches = reg.search(line1)
-    return matches.groupdict().get('version') if matches else None
+def ffmpeg_version() -> Dict:
+    tools = ['ffmpeg', 'ffprobe']
+    re_tools = '|'.join(tools)
+    reg = re.compile(fr'({re_tools}) version (?P<version>[\d|.]*)')
+
+    versions = {}
+    for tool in tools:
+        process = subprocess.Popen(f'{tool} -version', shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        stdout, _ = process.communicate()
+
+        matches = None
+        if stdout:
+            line: str = stdout.decode('UTF-8').split('\n')[0]
+            matches = reg.search(line)
+
+        versions[tool] = matches.groupdict().get('version') if matches else None
+
+    return versions

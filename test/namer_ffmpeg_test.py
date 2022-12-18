@@ -87,8 +87,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(stream_number, -1)
 
     def test_file_ffmpeg(self):
-        version = ffmpeg_version()
-        self.assertIsNotNone(version)
+        versions = ffmpeg_version()
+        for tool, version in versions.items():
+            self.assertIsNotNone(version)
 
 
 if __name__ == "__main__":
