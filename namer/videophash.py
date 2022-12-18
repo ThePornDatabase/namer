@@ -1,8 +1,6 @@
 import concurrent.futures
 import subprocess
 import platform
-import shutil
-from importlib import resources
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
@@ -34,11 +32,19 @@ class VideoPerceptualHash:
 
     __phash_path: Path
     __phash_name: str = 'videohashes'
+    __phash_suffixes: dict = {
+        'windows': '.exe',
+        'linux': '-linux',
+        'darwin': '-macos',
+    }
 
     def __init__(self):
         self.__phash_path = Path(__file__).parent.parent / 'tools'
         if not self.__phash_path.is_dir():
             self.__phash_path.mkdir(exist_ok=True, parents=True)
+
+        system = platform.system().lower()
+        self.__phash_name += self.__phash_suffixes[system]
 
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
         phash = None
