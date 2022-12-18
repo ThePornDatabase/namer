@@ -23,7 +23,7 @@ Flask-Compress = "^1.12"
 Pillow = "^9.1.1"
 requests-cache = "^0.9.4"
 ffmpeg-python = "^0.2.0"
-jsonpickle = "^2.2.0"
+jsonpickle = "^3.0.1"
 ConfigUpdater = "^3.1.1"
 imagehash = "^4.3.1"
 
