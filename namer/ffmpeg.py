@@ -10,7 +10,6 @@ import subprocess
 from dataclasses import dataclass
 import shutil
 import string
-import os
 import re
 from functools import lru_cache
 from io import BytesIO
