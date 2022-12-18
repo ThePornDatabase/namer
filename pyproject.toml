@@ -26,6 +26,7 @@ ffmpeg-python = "^0.2.0"
 jsonpickle = "^3.0.1"
 ConfigUpdater = "^3.1.1"
 imagehash = "^4.3.1"
+oshash = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"

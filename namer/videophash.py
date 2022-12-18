@@ -3,13 +3,15 @@ import subprocess
 import platform
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 import json
 import imagehash
 import numpy
+import oshash
 import scipy.fft
 import scipy.fftpack
 from loguru import logger
@@ -46,7 +48,12 @@ class VideoPerceptualHash:
         system = platform.system().lower()
         self.__phash_name += self.__phash_suffixes[system]
 
+    @lru_cache(maxsize=1024)
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
+        stat = file.stat()
+        return self._get_phash(file, stat.st_size, stat.st_mtime)
+
+    def _get_phash(self, file: Path, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
         phash = None
         thumbnail_image = self.__generate_image_thumbnail(file)
         if thumbnail_image:
@@ -70,7 +77,33 @@ class VideoPerceptualHash:
         return thumbnail_image
 
     def get_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
+        stat = file.stat()
+        return self._get_stash_phash(file, stat.st_size, stat.st_mtime)
+
+    @lru_cache(maxsize=1024)
+    def _get_stash_phash(self, file: Path, file_size: int, file_update: float) -> Optional[PerceptualHash]:
+        logger.info(f'Calculating phash for file "{file}"')
         return self.__execute_stash_phash(file)
+
+    @lru_cache(maxsize=1024)
+    def get_oshash(self, file: Path) -> str:
+        stat = file.stat()
+        return self._get_oshash(file, stat.st_size, stat.st_mtime)
+
+    @lru_cache(maxsize=1024)
+    def _get_oshash(self, file: Path, file_size: int, file_update: float) -> str:
+        logger.info(f'Calculating oshash for file "{file}"')
+        file_hash = oshash.oshash(str(file))
+        return file_hash
+
+    @staticmethod
+    def return_perceptual_hash(duration: float, phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
+        output = PerceptualHash()
+        output.duration = duration
+        output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
+        output.oshash = file_oshash
+
+        return output
 
     def __execute_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         output = None
@@ -89,10 +122,7 @@ class VideoPerceptualHash:
             success = process.returncode == 0
             if success:
                 data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
-                output = PerceptualHash()
-                output.duration = data.duration
-                output.phash = imagehash.hex_to_hash(data.phash)
-                output.oshash = data.oshash
+                output = self.return_perceptual_hash(data.duration, data.phash, data.oshash)
             else:
                 logger.error(stderr)
 

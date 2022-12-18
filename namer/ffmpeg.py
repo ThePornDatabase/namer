@@ -122,7 +122,7 @@ def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbe
     Get the typed results of probing a video stream with ffprobe.
     """
 
-    logger.info("ffprobe file {}", file)
+    logger.info(f'ffprobe file "{file}"')
     ffprobe_out: Optional[Any] = None
     try:
         ffprobe_out = ffmpeg.probe(file)
