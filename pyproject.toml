@@ -4,7 +4,7 @@ version = "1.10.1"
 description = "A namer of video files based on metadata from the porndb."
 readme = "readme.rst"
 authors = ["4c0d3r <4c0d3r@protonmail.com>"]
-include = ["**/web/public/assets/**/*", "**/web/templates/**/*", "**/namer.cfg.default", "**/videohashtools/*"]
+include = ["**/web/public/assets/**/*", "**/web/templates/**/*", "**/namer.cfg.default", "tools/videohashes*"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -68,7 +68,6 @@ test_format = {shell="poetry run flakeheaven lint"}
 test_namer = {shell="poetry run pytest --log-cli-level=info"}
 test = ["test_format", "test_namer"]
 build_all = ["build_deps", "test", "build_namer"]
-
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]
