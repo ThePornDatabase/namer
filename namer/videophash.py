@@ -32,7 +32,7 @@ class VideoPerceptualHash:
     __columns: int = 5
     __rows: int = 5
 
-    __home_path: Path = Path(__file__).parent.parent
+    __home_path: Path = Path(__file__).parent
     __phash_path: Path = __home_path / 'tools'
     __phash_name: str = 'videohashes'
     __phash_suffixes: dict = {
