@@ -274,10 +274,6 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info.poster_url = None
     if hasattr(data, 'poster'):
         file_info.poster_url = data.poster
-    # if movie and hasattr(data, 'media') and hasattr(data.media, 'url'):
-    #    file_info.poster_url = data.media.url
-    if movie and hasattr(data, 'image'):
-        file_info.poster_url = data.image
 
     if hasattr(data, 'background') and data.background:
         file_info.background_url = data.background.large
