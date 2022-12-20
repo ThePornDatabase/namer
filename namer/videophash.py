@@ -35,6 +35,12 @@ class VideoPerceptualHash:
     __home_path: Path = Path(__file__).parent
     __phash_path: Path = __home_path / 'tools'
     __phash_name: str = 'videohashes'
+    __supported_arch: dict = {
+        'amd64': 'amd64',
+        'x86_64': 'amd64',
+        'arm64': 'arm64',
+        'arm': 'arm',
+    }
     __phash_suffixes: dict = {
         'windows': '.exe',
         'linux': '-linux',
@@ -46,7 +52,10 @@ class VideoPerceptualHash:
             self.__phash_path.mkdir(exist_ok=True, parents=True)
 
         system = platform.system().lower()
-        self.__phash_name += self.__phash_suffixes[system]
+        arch = platform.machine().lower()
+        if arch not in self.__supported_arch.keys():
+            raise SystemError(f"Unsupport architecture error {arch}")
+        self.__phash_name += '-' + self.__supported_arch[arch] + self.__phash_suffixes[system]
 
     @lru_cache(maxsize=1024)
     def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
