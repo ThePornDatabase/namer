@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "namer"
-version = "1.10.2"
+version = "1.10.3"
 description = "A namer of video files based on metadata from the porndb."
 readme = "readme.rst"
 authors = ["4c0d3r <4c0d3r@protonmail.com>"]
