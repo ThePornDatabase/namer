@@ -4,6 +4,7 @@ import platform
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from functools import lru_cache
+from json import JSONDecodeError
 from pathlib import Path
 from types import SimpleNamespace
 from typing import List, Literal, Optional, Union
@@ -131,8 +132,15 @@ class VideoPerceptualHash:
 
             success = process.returncode == 0
             if success:
-                data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
-                output = self.return_perceptual_hash(data.duration, data.phash, data.oshash)
+                data = None
+                try:
+                    data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
+                except JSONDecodeError:
+                    logger.error(stdout)
+                    pass
+
+                if data:
+                    output = self.return_perceptual_hash(data.duration, data.phash, data.oshash)
             else:
                 logger.error(stderr)
 
