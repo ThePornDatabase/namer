@@ -282,13 +282,19 @@ def ffmpeg_version() -> Dict:
 
     versions = {}
     for tool in tools:
-        process = subprocess.Popen(f'{tool} -version', shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        stdout, _ = process.communicate()
+        process = None
+        try:
+            process = subprocess.Popen(f'{tool} -version', stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
+        except:
+            pass
 
         matches = None
-        if stdout:
-            line: str = stdout.decode('UTF-8').split('\n')[0]
-            matches = reg.search(line)
+        if process:
+            stdout, _ = process.communicate()
+
+            if stdout:
+                line: str = stdout.split('\n')[0]
+                matches = reg.search(line)
 
         versions[tool] = matches.groupdict().get('version') if matches else None
 
