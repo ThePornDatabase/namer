@@ -282,9 +282,14 @@ def ffmpeg_version() -> Dict:
 
     versions = {}
     for tool in tools:
+        args = [
+            tool,
+            '-version'
+        ]
+
         process = None
         try:
-            process = subprocess.Popen(f'{tool} -version', stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
+            process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
         except:
             pass
 
