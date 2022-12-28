@@ -7,6 +7,7 @@ import {escape} from 'lodash'
 import hljs from 'highlight.js'
 
 import {Helpers} from './helpers'
+import './themes'
 
 window.jQuery = $
 
