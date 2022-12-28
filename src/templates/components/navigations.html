@@ -11,4 +11,29 @@
     <li class="nav-item me-2">
         <a class="nav-link{% if active_page == 'settings' %} active{% endif %}" href="./settings">Settings</a>
     </li>
+    <li class="nav-item dropdown me-2">
+        <button id="theme-icon-active" class="btn-link nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-circle-half me-2"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <button type="button" class="dropdown-item" data-bs-theme-value="light">
+                    <i class="bi bi-brightness-high me-2"></i>
+                    Light
+                </button>
+            </li>
+            <li>
+                <button type="button" class="dropdown-item" data-bs-theme-value="dark">
+                    <i class="bi bi-moon-stars me-2"></i>
+                    Dark
+                </button>
+            </li>
+            <li>
+                <button type="button" class="dropdown-item" data-bs-theme-value="auto">
+                    <i class="bi bi-circle-half me-2"></i>
+                    Auto
+                </button>
+            </li>
+        </ul>
+    </li>
 </ul>
