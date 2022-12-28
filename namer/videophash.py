@@ -23,16 +23,21 @@ from namer.ffmpeg import extract_screenshot, ffprobe
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class PerceptualHash:
-    duration: float
+    duration: int
     phash: imagehash.ImageHash
     oshash: str
 
 
-class VideoPerceptualHash:
-    __screenshot_width: int = 160
-    __columns: int = 5
-    __rows: int = 5
+def return_perceptual_hash(duration: Union[float, int], phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
+    output = PerceptualHash()
+    output.duration = int(duration) if isinstance(duration, float) else duration
+    output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
+    output.oshash = file_oshash
 
+    return output
+
+
+class StashVideoPerceptualHash:
     __home_path: Path = Path(__file__).parent
     __phash_path: Path = __home_path / 'tools'
     __phash_name: str = 'videohashes'
@@ -56,38 +61,11 @@ class VideoPerceptualHash:
         system = platform.system().lower()
         arch = platform.machine().lower()
         if arch not in self.__supported_arch.keys():
-            raise SystemError(f"Unsupport architecture error {arch}")
+            raise SystemError(f"Unsupported architecture error {arch}")
+
         self.__phash_name += '-' + self.__supported_arch[arch] + self.__phash_suffixes[system]
 
-    @lru_cache(maxsize=1024)
-    def get_phash(self, file: Path) -> Optional[imagehash.ImageHash]:
-        stat = file.stat()
-        return self._get_phash(file, stat.st_size, stat.st_mtime)
-
-    def _get_phash(self, file: Path, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
-        phash = None
-        thumbnail_image = self.__generate_image_thumbnail(file)
-        if thumbnail_image:
-            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
-
-        return phash
-
-    def __generate_image_thumbnail(self, file: Path) -> Optional[Image.Image]:
-        thumbnail_image = None
-
-        probe = ffprobe(file)
-        if not probe:
-            return thumbnail_image
-
-        duration = probe.get_format().duration
-
-        thumbnail_list = self.__generate_thumbnails(file, duration)
-        if thumbnail_list:
-            thumbnail_image = self.__concat_images(thumbnail_list)
-
-        return thumbnail_image
-
-    def get_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
+    def get_hashes(self, file: Path) -> Optional[PerceptualHash]:
         stat = file.stat()
         return self._get_stash_phash(file, stat.st_size, stat.st_mtime)
 
@@ -95,26 +73,6 @@ class VideoPerceptualHash:
     def _get_stash_phash(self, file: Path, file_size: int, file_update: float) -> Optional[PerceptualHash]:
         logger.info(f'Calculating phash for file "{file}"')
         return self.__execute_stash_phash(file)
-
-    @lru_cache(maxsize=1024)
-    def get_oshash(self, file: Path) -> str:
-        stat = file.stat()
-        return self._get_oshash(file, stat.st_size, stat.st_mtime)
-
-    @lru_cache(maxsize=1024)
-    def _get_oshash(self, file: Path, file_size: int, file_update: float) -> str:
-        logger.info(f'Calculating oshash for file "{file}"')
-        file_hash = oshash.oshash(str(file))
-        return file_hash
-
-    @staticmethod
-    def return_perceptual_hash(duration: float, phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
-        output = PerceptualHash()
-        output.duration = duration
-        output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
-        output.oshash = file_oshash
-
-        return output
 
     def __execute_stash_phash(self, file: Path) -> Optional[PerceptualHash]:
         output = None
@@ -140,11 +98,71 @@ class VideoPerceptualHash:
                     pass
 
                 if data:
-                    output = self.return_perceptual_hash(data.duration, data.phash, data.oshash)
+                    output = return_perceptual_hash(data.duration, data.phash, data.oshash)
             else:
                 logger.error(stderr)
 
         return output
+
+
+class VideoPerceptualHash:
+    __screenshot_width: int = 160
+    __columns: int = 5
+    __rows: int = 5
+
+    def get_hashes(self, file: Path) -> Optional[PerceptualHash]:
+        data = None
+
+        probe = ffprobe(file)
+        if not probe:
+            return data
+
+        duration = probe.get_format().duration
+        phash = self.get_phash(file, duration)
+        file_oshash = self.get_oshash(file)
+
+        data = return_perceptual_hash(duration, phash, file_oshash)
+
+        return data
+
+    def get_phash(self, file: Path, duration: float) -> Optional[imagehash.ImageHash]:
+        stat = file.stat()
+        return self._get_phash(file, duration, stat.st_size, stat.st_mtime)
+
+    @lru_cache(maxsize=1024)
+    def _get_phash(self, file: Path, duration: float, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
+        logger.info(f'Calculating phash for file "{file}"')
+        phash = self.__calculate_phash(file, duration)
+        return phash
+
+    def __calculate_phash(self, file: Path, duration: float) -> Optional[imagehash.ImageHash]:
+        phash = None
+
+        thumbnail_image = self.__generate_image_thumbnail(file, duration)
+        if thumbnail_image:
+            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
+
+        return phash
+
+    def __generate_image_thumbnail(self, file: Path, duration: float) -> Optional[Image.Image]:
+        thumbnail_image = None
+
+        thumbnail_list = self.__generate_thumbnails(file, duration)
+        if thumbnail_list:
+            thumbnail_image = self.__concat_images(thumbnail_list)
+
+        return thumbnail_image
+
+    @lru_cache(maxsize=1024)
+    def get_oshash(self, file: Path) -> str:
+        stat = file.stat()
+        return self._get_oshash(file, stat.st_size, stat.st_mtime)
+
+    @lru_cache(maxsize=1024)
+    def _get_oshash(self, file: Path, file_size: int, file_update: float) -> str:
+        logger.info(f'Calculating oshash for file "{file}"')
+        file_hash = oshash.oshash(str(file))
+        return file_hash
 
     def __generate_thumbnails(self, file: Path, duration: float) -> List[Image.Image]:
         duration = int(Decimal(duration * 100).quantize(0, ROUND_HALF_UP)) / 100
