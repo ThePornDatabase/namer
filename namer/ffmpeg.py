@@ -216,6 +216,7 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
         )
 
         stdout, stderr = process.communicate()
+        stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
         success = process.returncode == 0
         if not success:
             logger.warning("Could not update audio stream for {}", mp4_file)
@@ -248,6 +249,7 @@ def attempt_fix_corrupt(mp4_file: Path) -> bool:
     )
 
     stdout, stderr = process.communicate()
+    stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
     success = process.returncode == 0
     if not success:
         logger.warning("Could not fix mp4 files {}", mp4_file)
@@ -298,7 +300,7 @@ def ffmpeg_version() -> Dict:
             stdout, _ = process.communicate()
 
             if stdout:
-                line: str = stdout.split('\n')[0]
+                line: str = stdout.split('\n', 1)[0]
                 matches = reg.search(line)
 
         versions[tool] = matches.groupdict().get('version') if matches else None
