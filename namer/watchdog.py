@@ -192,7 +192,9 @@ class MovieWatcher:
     def __simple_exit__(self):
         self.stop()
         if self.__background_thread:
+            logger.info("backgroung thread join")
             self.__background_thread.join()
+            logger.info("backgroung thread joined")
             self.__background_thread = None
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -239,14 +241,19 @@ class MovieWatcher:
         """
         if not self.__stopped:
             self.__stopped = True
-            logger.info("Exiting")
+            logger.info("Exiting watchdog")
             self.__event_observer.stop()
+            logger.info("observer stop")
             self.__event_observer.join()
+            logger.info("observer join")
             if self.__webserver:
+                logger.info("webserver stop")
                 self.__webserver.stop()
+            logger.info("command queue None")
             self.__command_queue.put(None)
+            logger.info("command join")
             self.__command_queue.join()
-            logger.info("Exited")
+            logger.info("command joined")
 
     def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:
