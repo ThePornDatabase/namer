@@ -300,7 +300,7 @@ def ffmpeg_version() -> Dict:
             stdout, _ = process.communicate()
 
             if stdout:
-                line: str = stdout.split('\n')[0]
+                line: str = stdout.split('\n', 1)[0]
                 matches = reg.search(line)
 
         versions[tool] = matches.groupdict().get('version') if matches else None
