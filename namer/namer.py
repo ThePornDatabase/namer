@@ -8,7 +8,6 @@ import argparse
 from dataclasses import dataclass
 import pathlib
 import string
-import sys
 from pathlib import Path
 from random import choices
 from typing import List, Optional
@@ -264,9 +263,6 @@ def main(arg_list: List[str]):
     parser.add_argument("-i", "--infos", action="store_true", help="if set, .nfo files will attempt to be accessed next to movie files, if info files are found and parsed successfully, that metadata will be used rather than porndb matching. If using jellyfin .nfo files, please bump your release date by one day until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose, print logs")
     args = parser.parse_args(arg_list)
-    level = "DEBUG" if args.verbose else "ERROR"
-    logger.remove()
-    logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     check_arguments(args.file, args.dir, args.configfile)
 
     conf: Optional[Path] = args.configfile
@@ -281,7 +277,3 @@ def main(arg_list: List[str]):
         command = make_command(target.absolute(), config, inplace=True, nfo=args.infos)
         if command is not None:
             process_file(command)
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
