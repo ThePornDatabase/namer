@@ -15,6 +15,8 @@ import pathlib
 import sys
 from typing import List
 
+from loguru import logger
+
 import namer.metadataapi
 import namer.namer
 import namer.watchdog
@@ -47,9 +49,14 @@ def main(arg_list: List[str]):
     """
     Call main method in namer.namer or namer.watchdog.
     """
+    config = default_config()
+    logger.remove()
+
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == "watchdog":
-        namer.watchdog.create_watcher(default_config()).run()
+        level = 'DEBUG' if config.debug else 'INFO'
+        logger.add(sys.stdout, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}", level=level, diagnose=config.diagnose_errors)
+        namer.watchdog.create_watcher(config).run()
     elif arg1 == "rename":
         namer.namer.main(arg_list[1:])
     elif arg1 == "suggest":

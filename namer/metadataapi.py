@@ -7,7 +7,6 @@ import argparse
 import itertools
 import json
 import re
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
@@ -445,9 +444,6 @@ def main(args_list: List[str]):
     parser.add_argument("-v", "--verbose", help="verbose, print logs", action="store_true")
     args = parser.parse_args(args=args_list)
 
-    level = "DEBUG" if args.verbose else "ERROR"
-    logger.remove()
-    logger.add(sys.stdout, format="{time} {level} {message}", level=level)
     config = default_config(args.configfile.absolute() if args.configfile else None)
     file_name: Optional[Command] = make_command(args.file.absolute(), config, ignore_file_restrictions=True)
 
@@ -461,7 +457,3 @@ def main(args_list: List[str]):
             print(matched.looked_up.new_file_name(config.inplace_name, config))
             if args.jsonfile and matched.looked_up and matched.looked_up.original_response:
                 Path(args.jsonfile).write_text(matched.looked_up.original_response, encoding="UTF-8")
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
