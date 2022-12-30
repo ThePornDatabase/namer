@@ -53,7 +53,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          node-version: '16'
+          node-version: '18'
 
       - name: Intall Poetry Dependencies
         run: poetry install
@@ -102,7 +102,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          node-version: '16'
+          node-version: '18'
 
       - name: Intall Poetry Dependencies
         run: poetry install
@@ -224,7 +224,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          node-version: '16'
+          node-version: '18'
 
       - name: Intall Poetry Dependencies
         run: poetry install
