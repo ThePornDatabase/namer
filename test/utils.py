@@ -284,7 +284,11 @@ class ProcessingTarget:
         self.file = target_dir / self.relative
         os.makedirs(self.file.parent, exist_ok=True)
         self.file.parent.chmod(0o700)
-        shutil.copy(test_mp4, self.file)
+        try:
+            shutil.copy(test_mp4, self.file)
+        except:
+            # shutil isn't thread safe, it copies, then sets the mode if linux/mac
+            pass
         try:
             test_mp4.chmod(0o600)
         except:

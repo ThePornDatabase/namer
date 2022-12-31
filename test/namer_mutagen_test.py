@@ -11,7 +11,7 @@ from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
 from namer.fileinfo import parse_file_name
-from namer.ffmpeg import ffprobe
+from namer.ffmpeg import FFMpeg
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer.comparison_results import LookedUpFileInfo
@@ -47,7 +47,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
-            ffprobe_results = ffprobe(target_file)
+            ffprobe_results = FFMpeg().ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             output = MP4(target_file)
             self.assertEqual(output.get("\xa9nam"), ["Peeping Tom"])
@@ -65,7 +65,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "poster.png", poster)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
-            ffprobe_results = ffprobe(target_file)
+            ffprobe_results = FFMpeg().ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
 
@@ -87,7 +87,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "poster.png", poster)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
-            ffprobe_results = ffprobe(target_file)
+            ffprobe_results = FFMpeg().ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
             sha_1 = hashlib.sha256(target_file.read_bytes()).digest().hex()
@@ -99,7 +99,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             shutil.copy(test_dir / "poster.png", poster)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
-            ffprobe_results = ffprobe(target_file)
+            ffprobe_results = FFMpeg().ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
             sha_2 = hashlib.sha256(target_file.read_bytes()).digest().hex()
@@ -118,7 +118,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             poster = None
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
-            ffprobe_results = ffprobe(target_file)
+            ffprobe_results = FFMpeg().ffprobe(target_file)
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
 
@@ -132,7 +132,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             poster = None
             name_parts = parse_file_name(targetfile.name, config)
             info = match(name_parts, config)
-            ffprobe_results = ffprobe(targetfile)
+            ffprobe_results = FFMpeg().ffprobe(targetfile)
             update_mp4_file(targetfile, info.results[0].looked_up, poster, ffprobe_results, config)
             self.assertFalse(targetfile.exists())
 
@@ -148,7 +148,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             test_dir = Path(__file__).resolve().parent
             shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
             info = LookedUpFileInfo()
-            ffprobe_results = ffprobe(target_file)
+            ffprobe_results = FFMpeg().ffprobe(target_file)
             update_mp4_file(target_file, info, None, ffprobe_results, NamerConfig())
             self.assertTrue(target_file.exists())
             mp4 = MP4(target_file)

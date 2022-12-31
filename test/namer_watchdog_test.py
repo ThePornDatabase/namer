@@ -11,19 +11,19 @@ from typing import List
 
 from mutagen.mp4 import MP4
 
-from namer.ffmpeg import ffprobe
+from namer.ffmpeg import FFMpeg
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed, MovieWatcher
 from test.utils import Wait, new_ea, validate_mp4_tags, validate_permissions, environment, sample_config, ProcessingTarget
 
 
-def wait_until_processed(watcher: MovieWatcher):
+def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
     """
     Waits until all files have been moved out of watch/working dirs.
     """
     config = watcher.getConfig()
     logging.info("waiting for files to be processes")
-    Wait().seconds(60).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    Wait().seconds(durration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
     logging.info("past waiting for files")
     watcher.stop()
     logging.info("past stopping")
@@ -99,12 +99,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 new_ea(config.watch_dir, use_dir=False, post_stem="2", mp4_file_name=better),
                 new_ea(config.watch_dir, use_dir=False, post_stem="1", mp4_file_name=best)
             ]
-            wait_until_processed(watcher)
+            wait_until_processed(watcher, 120)
             self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             self.assertEqual(MP4(output_file).get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
-            results = ffprobe(output_file)
+            results = FFMpeg().ffprobe(output_file)
             self.assertIsNotNone(results)
             if results:
                 stream = results.get_default_video_stream()

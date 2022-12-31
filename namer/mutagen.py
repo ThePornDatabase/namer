@@ -9,7 +9,7 @@ from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
 from namer.configuration import NamerConfig
-from namer.ffmpeg import FFProbeResults, attempt_fix_corrupt, update_audio_stream_if_needed
+from namer.ffmpeg import FFProbeResults, FFMpeg
 from namer.comparison_results import LookedUpFileInfo
 
 
@@ -49,7 +49,7 @@ def get_mp4_if_possible(mp4: Path) -> MP4:
     try:
         video = MP4(mp4)
     except MP4StreamInfoError:
-        attempt_fix_corrupt(mp4)
+        FFMpeg().attempt_fix_corrupt(mp4)
         video = MP4(mp4)
     return video
 
@@ -76,7 +76,7 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Pat
     """
 
     logger.info("Updating audio and tags for: {}", mp4)
-    success = update_audio_stream_if_needed(mp4, config.language)
+    success = FFMpeg().update_audio_stream_if_needed(mp4, config.language)
     if not success:
         logger.info("Could not process audio or copy {}", mp4)
     logger.info("Updating atom tags on: {}", mp4)

@@ -21,7 +21,7 @@ from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 from namer.configuration import NamerConfig
 from namer.database import abbreviations
 from namer.name_formatter import PartialFormatter
-from namer.ffmpeg import ffmpeg_version
+from namer.ffmpeg import FFMpeg
 
 
 def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> bool:
@@ -79,7 +79,7 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
 
 
 def __verify_ffmpeg() -> bool:
-    versions = ffmpeg_version()
+    versions = FFMpeg().ffmpeg_version()
     for tool, version in versions.items():
         if not version:
             logger.error(f'No {tool} found, please install {tool}')
