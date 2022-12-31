@@ -86,10 +86,10 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     __namer_config: NamerConfig
 
-    def __init__(self, namer_config: NamerConfig, queue: Queue):
+    def __init__(self, namer_config: NamerConfig, enque_work_fn):
         super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.__namer_config = namer_config
-        self.__command_queue = queue
+        self.__enque_work_fn = enque_work_fn
 
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
@@ -115,7 +115,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         command = make_command_relative_to(input_dir=path, relative_to=self.__namer_config.watch_dir, config=self.__namer_config)
         working_command = move_command_files(command, self.__namer_config.work_dir)
         if working_command is not None:
-            self.__command_queue.put(working_command)
+            self.__enque_work_fn(working_command)
 
 
 class MovieWatcher:
@@ -128,12 +128,17 @@ class MovieWatcher:
     See NamerConfig
     """
 
+    def enque_work(self, command: Command):
+        if not self.__stopped:
+            self.__command_queue.put(command)
+        else:
+            raise RuntimeError("Command not added to work queue, server is stopping")
+
     def __processing_thread(self):
         while True:
             command = self.__command_queue.get()
             if command is None:
                 break
-
             handle(command)
             self.__command_queue.task_done()
         self.__command_queue.task_done()
@@ -147,7 +152,7 @@ class MovieWatcher:
         self.__webserver: Optional[NamerWebServer] = None
         self.__command_queue: Queue = Queue()
         self.__worker_thread: Thread = Thread(target=self.__processing_thread, daemon=True)
-        self.__event_handler = MovieEventHandler(namer_config, self.__command_queue)
+        self.__event_handler = MovieEventHandler(namer_config, self.enque_work)
         self.__background_thread: Optional[Thread] = None
 
     def getConfig(self) -> NamerConfig:
@@ -241,19 +246,19 @@ class MovieWatcher:
         """
         if not self.__stopped:
             self.__stopped = True
-            logger.info("Exiting watchdog")
+            logger.debug("Exiting watchdog")
             self.__event_observer.stop()
-            logger.info("observer stop")
+            logger.debug("observer stop")
             self.__event_observer.join()
-            logger.info("observer join")
+            logger.debug("observer join")
             if self.__webserver:
                 logger.info("webserver stop")
                 self.__webserver.stop()
-            logger.info("command queue None")
+            logger.debug("command queue None")
             self.__command_queue.put(None)
-            logger.info("command join")
+            logger.debug("command join")
             self.__command_queue.join()
-            logger.info("command joined")
+            logger.debug("command joined")
 
     def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:

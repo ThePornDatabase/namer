@@ -76,6 +76,7 @@ def sample_config() -> NamerConfig:
         config_str = resources.read_text("namer", "namer.cfg.default")
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
+    namer_config.extra_sleep_time = 0
     namer_config.config_updater = config
     return namer_config
 
