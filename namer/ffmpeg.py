@@ -20,6 +20,9 @@ from typing import Any, Dict, List, Optional
 import ffmpeg
 from loguru import logger
 from PIL import Image
+from pathvalidate import ValidationError
+
+from namer.videophashstash import StashVideoPerceptualHash
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -107,119 +110,170 @@ class FFProbeResults:
             return stream.height if stream.height else 0
 
 
-@logger.catch
-def ffprobe(file: Path) -> Optional[FFProbeResults]:
-    """
-    Get the typed results of probing a video stream with ffprobe.
-    """
-    stat = file.stat()
-    return _ffprobe(file, stat.st_size, stat.st_mtime)
+class FFMpeg:
+    __local_dir: Optional[Path] = None
+    __ffmpeg_cmd: str = 'ffmpeg'
+    __ffprobe_cmd: str = 'ffprobe'
 
+    def __init__(self):
+        versions = self.__ffmpeg_version(None)
+        if not versions['ffmpeg'] or not versions['ffprobe']:
+            home_path: Path = Path(__file__).parent
+            phash_path: Path = home_path / 'tools'
+            if not phash_path.is_dir():
+                phash_path.mkdir(exist_ok=True, parents=True)
+            self.__local_dir = phash_path
+            versions = self.__ffmpeg_version(phash_path)
+            if not versions['ffmpeg'] and not versions['ffprobe']:
+                StashVideoPerceptualHash().install_ffmpeg()
+            versions = self.__ffmpeg_version(phash_path)
+            if not versions['ffmpeg'] and not versions['ffprobe']:
+                raise ValidationError(f"could not find ffmpeg/ffprobe on path, or in tools dir: {self.__local_dir}")
+            self.__ffmpeg_cmd = str(phash_path / 'ffmpeg')
+            self.__ffprobe_cmd = str(phash_path / 'ffprobe')
 
-@lru_cache(maxsize=1024)
-def _ffprobe(file: Path, file_size: int, file_update: float) -> Optional[FFProbeResults]:
-    """
-    Get the typed results of probing a video stream with ffprobe.
-    """
+    @logger.catch
+    def ffprobe(self, file: Path) -> Optional[FFProbeResults]:
+        """
+        Get the typed results of probing a video stream with ffprobe.
+        """
+        stat = file.stat()
+        return self._ffprobe(file, stat.st_size, stat.st_mtime)
 
-    logger.info(f'ffprobe file "{file}"')
-    ffprobe_out: Optional[Any] = None
-    try:
-        ffprobe_out = ffmpeg.probe(file)
-    except:
-        pass
+    @lru_cache(maxsize=1024)
+    def _ffprobe(self, file: Path, file_size: int, file_update: float) -> Optional[FFProbeResults]:
+        """
+        Get the typed results of probing a video stream with ffprobe.
+        """
 
-    if not ffprobe_out:
-        return
+        logger.info(f'ffprobe file "{file}"')
+        ffprobe_out: Optional[Any] = None
+        try:
+            ffprobe_out = ffmpeg.probe(file, self.__ffprobe_cmd)
+        except:
+            pass
 
-    streams = [stream for stream in ffprobe_out['streams'] if stream['codec_type'] in ('video', 'audio')]
-    if not streams:
-        return
+        if not ffprobe_out:
+            return
 
-    output: List[FFProbeStream] = []
-    for stream in streams:
-        ff_stream = FFProbeStream()
-        ff_stream.bit_rate = int(stream['bit_rate']) if 'bit_rate' in stream else -1
-        ff_stream.codec_name = stream['codec_name']
-        ff_stream.codec_type = stream['codec_type']
-        ff_stream.index = int(stream['index'])
-        ff_stream.duration = float(stream['duration']) if 'duration' in stream else -1
+        streams = [stream for stream in ffprobe_out['streams'] if stream['codec_type'] in ('video', 'audio')]
+        if not streams:
+            return
 
-        ff_stream.height = int(stream['height']) if 'height' in stream else -1
-        ff_stream.width = int(stream['width']) if 'width' in stream else -1
-        ff_stream.tags_language = stream['tags']['language'] if 'tags' in stream and 'language' in stream['tags'] else None
+        output: List[FFProbeStream] = []
+        for stream in streams:
+            ff_stream = FFProbeStream()
+            ff_stream.bit_rate = int(stream['bit_rate']) if 'bit_rate' in stream else -1
+            ff_stream.codec_name = stream['codec_name']
+            ff_stream.codec_type = stream['codec_type']
+            ff_stream.index = int(stream['index'])
+            ff_stream.duration = float(stream['duration']) if 'duration' in stream else -1
 
-        if 'disposition' in stream:
-            ff_stream.disposition_attached_pic = stream['disposition']['attached_pic'] == 1
-            ff_stream.disposition_default = stream['disposition']['default'] == 1
+            ff_stream.height = int(stream['height']) if 'height' in stream else -1
+            ff_stream.width = int(stream['width']) if 'width' in stream else -1
+            ff_stream.tags_language = stream['tags']['language'] if 'tags' in stream and 'language' in stream['tags'] else None
 
-        if 'avg_frame_rate' in stream:
-            numer, denom = stream['avg_frame_rate'].split('/', 2)
-            numer, denom = int(numer), int(denom)
-            if numer != 0 and denom != 0:
-                ff_stream.avg_frame_rate = numer / denom
+            if 'disposition' in stream:
+                ff_stream.disposition_attached_pic = stream['disposition']['attached_pic'] == 1
+                ff_stream.disposition_default = stream['disposition']['default'] == 1
 
-        output.append(ff_stream)
+            if 'avg_frame_rate' in stream:
+                numer, denom = stream['avg_frame_rate'].split('/', 2)
+                numer, denom = int(numer), int(denom)
+                if numer != 0 and denom != 0:
+                    ff_stream.avg_frame_rate = numer / denom
 
-    probe_format = FFProbeFormat()
-    if 'format' in ffprobe_out:
-        probe_format.bit_rate = int(ffprobe_out['format']['bit_rate'])
-        probe_format.duration = float(ffprobe_out['format']['duration'])
-        probe_format.size = int(ffprobe_out['format']['size'])
-        probe_format.tags = ffprobe_out['format']['tags'] if 'tags' in ffprobe_out['format'] else {}
+            output.append(ff_stream)
 
-    return FFProbeResults(output, probe_format)
+        probe_format = FFProbeFormat()
+        if 'format' in ffprobe_out:
+            probe_format.bit_rate = int(ffprobe_out['format']['bit_rate'])
+            probe_format.duration = float(ffprobe_out['format']['duration'])
+            probe_format.size = int(ffprobe_out['format']['size'])
+            probe_format.tags = ffprobe_out['format']['tags'] if 'tags' in ffprobe_out['format'] else {}
 
+        return FFProbeResults(output, probe_format)
 
-def get_audio_stream_for_lang(file: Path, language: str) -> int:
-    """
-    given a mp4 input file and a desired language will return the stream position of that language in the mp4.
-    if the language is None, or the stream is not found, or the desired stream is the only default stream, None is returned.
-    See: https://iso639-3.sil.org/code_tables/639/data/
+    def get_audio_stream_for_lang(self, file: Path, language: str) -> int:
+        """
+        given a mp4 input file and a desired language will return the stream position of that language in the mp4.
+        if the language is None, or the stream is not found, or the desired stream is the only default stream, None is returned.
+        See: https://iso639-3.sil.org/code_tables/639/data/
 
-    Returns -1 if stream can not be determined
-    """
+        Returns -1 if stream can not be determined
+        """
 
-    stream_index = -1
-    probe = ffprobe(file)
-    if probe:
-        stream = probe.get_audio_stream(language)
-        if stream:
-            stream_index = stream.index - 1 if not stream.disposition_default else -1
+        stream_index = -1
+        probe = self.ffprobe(file)
+        if probe:
+            stream = probe.get_audio_stream(language)
+            if stream:
+                stream_index = stream.index - 1 if not stream.disposition_default else -1
 
-    return stream_index
+        return stream_index
 
+    def update_audio_stream_if_needed(self, mp4_file: Path, language: Optional[str]) -> bool:
+        """
+        Returns true if the file had to be edited to have a default audio stream equal to the desired language,
+        mostly a concern for apple players (Quicktime/Apple TV/etc.)
+        Copies, and potentially updates the default audio stream of a video file.
+        """
 
-def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bool:
-    """
-    Returns true if the file had to be edited to have a default audio stream equal to the desired language,
-    mostly a concern for apple players (Quicktime/Apple TV/etc.)
-    Copies, and potentially updates the default audio stream of a video file.
-    """
+        random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
+        work_file = mp4_file.parent / temp_filename
 
-    random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
-    work_file = mp4_file.parent / temp_filename
+        stream = self.get_audio_stream_for_lang(mp4_file, language) if language else None
+        if stream and stream >= 0:
+            process = (
+                ffmpeg
+                .input(mp4_file)
+                .output(str(work_file), **{
+                    'map': 0,  # copy all stream
+                    'disposition:a': 'none',  # mark all audio streams as not default
+                    f'disposition:a:{stream}': 'default',  # mark this audio stream as default
+                    'c': 'copy'  # don't re-encode anything.
+                })
+                .run_async(quiet=True, cmd=self.__ffmpeg_cmd)
+            )
 
-    stream = get_audio_stream_for_lang(mp4_file, language) if language else None
-    if stream and stream >= 0:
+            stdout, stderr = process.communicate()
+            stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
+            success = process.returncode == 0
+            if not success:
+                logger.warning("Could not update audio stream for {}", mp4_file)
+                if stderr:
+                    logger.error(stderr)
+            else:
+                logger.warning("Return code: {}", process.returncode)
+                mp4_file.unlink()
+                shutil.move(work_file, mp4_file)
+
+            return success
+
+        return True
+
+    def attempt_fix_corrupt(self, mp4_file: Path) -> bool:
+        """
+        Attempt to fix corrupt mp4 files.
+        """
+        random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
+        work_file = mp4_file.parent / temp_filename
+
+        logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
         process = (
             ffmpeg
             .input(mp4_file)
-            .output(str(work_file), **{
-                'map': 0,  # copy all stream
-                'disposition:a': 'none',  # mark all audio streams as not default
-                f'disposition:a:{stream}': 'default',  # mark this audio stream as default
-                'c': 'copy'  # don't re-encode anything.
-            })
-            .run_async(quiet=True)
+            .output(str(work_file), c='copy')
+            .run_async(quiet=True, cmd=self.__ffmpeg_cmd)
         )
 
         stdout, stderr = process.communicate()
         stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
         success = process.returncode == 0
         if not success:
-            logger.warning("Could not update audio stream for {}", mp4_file)
+            logger.warning("Could not fix mp4 files {}", mp4_file)
             if stderr:
                 logger.error(stderr)
         else:
@@ -229,80 +283,50 @@ def update_audio_stream_if_needed(mp4_file: Path, language: Optional[str]) -> bo
 
         return success
 
-    return True
+    def extract_screenshot(self, file: Path, time: float, screenshot_width: int = -1) -> Image.Image:
+        out, _ = (
+            ffmpeg
+            .input(file, ss=time)
+            .filter('scale', screenshot_width, -2)
+            .output('pipe:', vframes=1, format='apng')
+            .run(quiet=True, capture_stdout=True, cmd=self.__ffmpeg_cmd)
+        )
+        out = BytesIO(out)
+        image = Image.open(out)
 
+        return image
 
-def attempt_fix_corrupt(mp4_file: Path) -> bool:
-    """
-    Attempt to fix corrupt mp4 files.
-    """
-    random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-    temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
-    work_file = mp4_file.parent / temp_filename
+    def ffmpeg_version(self) -> Dict:
+        return self.__ffmpeg_version(self.__local_dir)
 
-    logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
-    process = (
-        ffmpeg
-        .input(mp4_file)
-        .output(str(work_file), c='copy')
-        .run_async(quiet=True)
-    )
+    def __ffmpeg_version(self, local_dir: Optional[Path]) -> Dict:
+        tools = ['ffmpeg', 'ffprobe']
+        re_tools = '|'.join(tools)
+        reg = re.compile(fr'({re_tools}) version (?P<version>[\d|.]*)')
 
-    stdout, stderr = process.communicate()
-    stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
-    success = process.returncode == 0
-    if not success:
-        logger.warning("Could not fix mp4 files {}", mp4_file)
-        if stderr:
-            logger.error(stderr)
-    else:
-        logger.warning("Return code: {}", process.returncode)
-        mp4_file.unlink()
-        shutil.move(work_file, mp4_file)
+        versions = {}
 
-    return success
+        for tool in tools:
+            executable = str(local_dir / tool) if local_dir else tool
+            args = [
+                executable,
+                '-version'
+            ]
 
+            process = None
+            try:
+                process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
+            except:
+                pass
 
-def extract_screenshot(file: Path, time: float, screenshot_width: int = -1) -> Image.Image:
-    out, _ = (
-        ffmpeg
-        .input(file, ss=time)
-        .filter('scale', screenshot_width, -2)
-        .output('pipe:', vframes=1, format='apng')
-        .run(quiet=True, capture_stdout=True)
-    )
-    out = BytesIO(out)
-    image = Image.open(out)
+            matches = None
+            if process:
+                stdout, _ = process.communicate()
 
-    return image
+                if stdout:
+                    line: str = stdout.split('\n', 1)[0]
+                    matches = reg.search(line)
 
+            versions[tool] = matches.groupdict().get('version') if matches else None
 
-def ffmpeg_version() -> Dict:
-    tools = ['ffmpeg', 'ffprobe']
-    re_tools = '|'.join(tools)
-    reg = re.compile(fr'({re_tools}) version (?P<version>[\d|.]*)')
-
-    versions = {}
-    for tool in tools:
-        args = [
-            tool,
-            '-version'
-        ]
-
-        process = None
-        try:
-            process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
-        except:
-            pass
-
-        matches = None
-        if process:
-            stdout, _ = process.communicate()
-
-            if stdout:
-                line: str = stdout.split('\n', 1)[0]
-                matches = reg.search(line)
-
-        versions[tool] = matches.groupdict().get('version') if matches else None
-
-    return versions
+        return versions

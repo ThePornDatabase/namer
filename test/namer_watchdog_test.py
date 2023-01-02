@@ -7,30 +7,34 @@ import time
 import os
 import unittest
 from pathlib import Path
+from typing import List
 
 from mutagen.mp4 import MP4
 
-from namer.ffmpeg import ffprobe
+from namer.ffmpeg import FFMpeg
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed, MovieWatcher
-from test.utils import Wait, new_ea, validate_mp4_tags, validate_permissions, environment, sample_config
+from test.utils import Wait, new_ea, validate_mp4_tags, validate_permissions, environment, sample_config, ProcessingTarget
 
 
-def wait_until_processed(watcher: MovieWatcher):
+def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
     """
     Waits until all files have been moved out of watch/working dirs.
     """
     config = watcher.getConfig()
     logging.info("waiting for files to be processes")
-    Wait().seconds(60).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    Wait().seconds(durration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
     logging.info("past waiting for files")
     watcher.stop()
     logging.info("past stopping")
 
 
 @contextlib.contextmanager
-def make_watchdog_context(config: NamerConfig):
+def make_watchdog_context(config: NamerConfig, targets: List[ProcessingTarget] = []):
     with environment(config) as (tempdir, mock_tpdb, config):
+        for target in targets:
+            if target.file is None:
+                target.setup(config.watch_dir)
         with create_watcher(config) as watcher:
             yield tempdir, watcher, mock_tpdb
 
@@ -56,13 +60,13 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.prefer_dir_name_if_available = True
         config.write_namer_log = True
         config.min_file_size = 0
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
-            targets = [
-                new_ea(config.watch_dir),
-                new_ea(config.watch_dir, use_dir=False)
-            ]
+        targets: list[ProcessingTarget] = [
+            new_ea(),
+            new_ea(use_dir=False)
+        ]
+        with make_watchdog_context(config, targets) as (tempdir, watcher, fakeTPDB):
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             output = MP4(output_file)
@@ -90,17 +94,17 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.max_desired_resolutions = -1
         config.desired_codec = ["hevc", "h264"]
         with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
-            targets = [
+            targets: list[ProcessingTarget] = [
                 new_ea(config.watch_dir, mp4_file_name=okay),
                 new_ea(config.watch_dir, use_dir=False, post_stem="2", mp4_file_name=better),
                 new_ea(config.watch_dir, use_dir=False, post_stem="1", mp4_file_name=best)
             ]
-            wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            wait_until_processed(watcher, 120)
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             self.assertEqual(MP4(output_file).get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
-            results = ffprobe(output_file)
+            results = FFMpeg().ffprobe(output_file)
             self.assertIsNotNone(results)
             if results:
                 stream = results.get_default_video_stream()
@@ -124,7 +128,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
             targets = [new_ea(config.watch_dir)]
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             output = MP4(output_file)
@@ -148,7 +152,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 new_ea(config.watch_dir, post_stem="number2", use_dir=False),
             ]
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
@@ -179,7 +183,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             with open(testfile, "w", encoding="utf-8") as file:
                 file.write(contents)
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
@@ -206,7 +210,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 new_ea(config.watch_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
             ]
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             watcher.stop()
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
@@ -233,7 +237,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 new_ea(config.watch_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
             ]
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! - scenes1678283 - 198543 - (240).mp4"
             validate_mp4_tags(self, output_file)
@@ -252,7 +256,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             ]
             time.sleep(2)
             watcher.stop()
-            self.assertTrue(targets[0].file.exists())
+            self.assertTrue(targets[0].get_file().exists())
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_failure(self):
@@ -266,8 +270,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
             targets = [new_ea(config.watch_dir, use_dir=False, match=False)]
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
-            relative = targets[0].file.relative_to(config.watch_dir)
+            self.assertFalse(targets[0].get_file().exists())
+            relative = targets[0].get_file().relative_to(config.watch_dir)
             work_file = config.work_dir / relative
             self.assertFalse(work_file.exists())
             failed_file = config.failed_dir / relative
@@ -294,7 +298,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 new_ea(config.watch_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
             ]
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
@@ -311,20 +315,19 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.min_file_size = 0
         config.name_parser = "{_site}{_sep}{_date}{_sep}{_ts}{_name}.{_ext}"
-        with environment(config) as (tempdir, mock_tpdb, config):
-            targets = [
-                new_ea(config.watch_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
-            ]
-            with create_watcher(config) as watcher:
-                wait_until_processed(watcher)
-                self.assertFalse(targets[0].file.exists())
-                output_file = (config.failed_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way")
-                self.assertTrue(output_file.exists() and output_file.is_dir())
-                validate_permissions(self, output_file, 775)
-                self.assertEqual(len(list(config.failed_dir.iterdir())), 1)
-                self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-                self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-                self.assertEqual(len(list(config.dest_dir.iterdir())), 0)
+        targets = [
+            new_ea(relative="EvilAngel - Carmela Clutch Fabulous Anal 3-Way/", use_dir=True),
+        ]
+        with make_watchdog_context(config, targets) as (tempdir, watcher, fakeTPDB):
+            wait_until_processed(watcher)
+            self.assertFalse(targets[0].get_file().exists())
+            output_file = (config.failed_dir / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way")
+            self.assertTrue(output_file.exists() and output_file.is_dir())
+            validate_permissions(self, output_file, 775)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 1)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.dest_dir.iterdir())), 0)
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_fetch_trailer_write_nfo_success(self):
@@ -339,10 +342,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         # config.trailer_location = "Trailers/trailer.{ext}"
         config.min_file_size = 0
         config.write_nfo = True
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
-            targets = [new_ea(config.watch_dir)]
+        targets = [new_ea()]
+        with make_watchdog_context(config, targets) as (tempdir, watcher, fakeTPDB):
             wait_until_processed(watcher)
-            self.assertFalse(targets[0].file.exists())
+            self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             nfo_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.nfo"

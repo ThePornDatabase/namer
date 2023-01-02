@@ -76,6 +76,7 @@ def sample_config() -> NamerConfig:
         config_str = resources.read_text("namer", "namer.cfg.default")
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
+    namer_config.extra_sleep_time = 0
     namer_config.config_updater = config
     return namer_config
 
@@ -263,29 +264,53 @@ class ProcessingTarget:
     Test data.
     """
 
-    file: Path
+    relative: Path
+    file: Optional[Path]
     json_search: str
     json_exact: str
     poster: Path
     expect_match: bool
+    source_file: str
+
+    def setup(self, target_dir: Path):
+        """
+        Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
+        optionally, names the dir and not the mp4 file to match.
+        optionally, inserts a string between the file stem and suffix.
+        optionally, will ensure a match doesn't occur.
+        """
+        current = Path(__file__).resolve().parent
+        test_mp4 = current / self.source_file
+        self.file = target_dir / self.relative
+        os.makedirs(self.file.parent, exist_ok=True)
+        self.file.parent.chmod(0o700)
+        try:
+            shutil.copy(test_mp4, self.file)
+        except:
+            # shutil isn't thread safe, it copies, then sets the mode if linux/mac
+            pass
+        try:
+            test_mp4.chmod(0o600)
+        except:
+            # if called while Watchdog is running will result in race (file could alredy be moved.)
+            pass
+
+    def get_file(self) -> Path:
+        if self.file is None:
+            raise RuntimeError("The ProcessingTarget has not had 'setup()' called, and hence file doesn't exist")
+        return self.file
 
 
-def new_ea(target_dir: Path, use_dir: bool = True, post_stem: str = "", match: bool = True, mp4_file_name: str = "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"):
+def new_ea(target_dir: Optional[Path] = None, relative: str = "", use_dir: bool = True, post_stem: str = "", match: bool = True, mp4_file_name: str = "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"):
     """
     Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
     optionally, names the dir and not the mp4 file to match.
     optionally, inserts a string between the file stem and suffix.
     optionally, will ensure a match doesn't occur.
     """
-    current = Path(__file__).resolve().parent
-    test_mp4 = current / mp4_file_name
-
-    name = ("Evil" if match else "Ok") + "Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" + post_stem
-    target_file = target_dir / (name + ".mp4")
-    if use_dir is True:
-        target_file = target_dir / name / "qwerty.mp4"
-    os.makedirs(target_file.parent, exist_ok=True)
-    target_file.parent.chmod(0o700)
-    shutil.copy(test_mp4, target_file)
-    test_mp4.chmod(0o600)
-    return ProcessingTarget(target_file, '', '', Path("/"), True)
+    name = relative + ("Evil" if match else "Ok") + "Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" + post_stem
+    full_relative = Path(name) / (relative + "qwerty.mp4") if use_dir else Path(name + ".mp4")
+    processing_target: ProcessingTarget = ProcessingTarget(full_relative, None, '', '', Path("/"), True, mp4_file_name)
+    if target_dir:
+        processing_target.setup(target_dir)
+    return processing_target

@@ -17,7 +17,7 @@ from loguru import logger
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
-from namer.ffmpeg import ffprobe, FFProbeResults
+from namer.ffmpeg import FFMpeg, FFProbeResults
 from namer.fileinfo import parse_file_name, FileInfo
 from namer.comparison_results import ComparisonResults, LookedUpFileInfo
 
@@ -65,6 +65,9 @@ class Command:
     """
 
     config: NamerConfig
+
+    def get_command_target(self):
+        return str(self.target_movie_file.absolute())
 
 
 def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
@@ -176,10 +179,10 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
     # This could use a lot of work.
     if movies:
         selected = Path(movies[0])
-        selected_values = extract_relevant_attributes(ffprobe(selected), config)
+        selected_values = extract_relevant_attributes(FFMpeg().ffprobe(selected), config)
         for current_movie_str in movies:
             current_movie = Path(current_movie_str)
-            current_values = extract_relevant_attributes(ffprobe(current_movie), config)
+            current_values = extract_relevant_attributes(FFMpeg().ffprobe(current_movie), config)
             if current_values[1] <= config.max_desired_resolutions or config.max_desired_resolutions == -1:
                 if greater_than(current_values, selected_values):
                     selected_values = current_values

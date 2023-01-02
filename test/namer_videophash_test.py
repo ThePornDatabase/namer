@@ -9,7 +9,8 @@ from pathlib import Path
 
 import imagehash
 
-from namer.videophash import StashVideoPerceptualHash, VideoPerceptualHash
+from namer.videophashstash import StashVideoPerceptualHash
+from namer.videophash import VideoPerceptualHash
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

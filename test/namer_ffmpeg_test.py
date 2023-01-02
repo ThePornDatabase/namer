@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from namer.ffmpeg import get_audio_stream_for_lang, update_audio_stream_if_needed, ffprobe, ffmpeg_version
+from namer.ffmpeg import FFMpeg
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -22,7 +22,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            results = ffprobe(file)
+            results = FFMpeg().ffprobe(file)
             self.assertIsNotNone(results)
             if results:
                 res = results.get_resolution()
@@ -36,9 +36,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"
-            stream_number = get_audio_stream_for_lang(file, "und")
+            stream_number = FFMpeg().get_audio_stream_for_lang(file, "und")
             self.assertEqual(stream_number, -1)
-            stream_number = get_audio_stream_for_lang(file, "eng")
+            stream_number = FFMpeg().get_audio_stream_for_lang(file, "eng")
             self.assertEqual(stream_number, -1)
 
     def test_ffprobe(self) -> None:
@@ -49,7 +49,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost_wrong.mp4"
-            results = ffprobe(file)
+            results = FFMpeg().ffprobe(file)
             self.assertIsNotNone(results)
             if results:
                 self.assertTrue(results.get_all_streams()[0].is_video())
@@ -78,16 +78,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             tempdir = Path(tmpdir)
             shutil.copytree(Path(__file__).resolve().parent, tempdir / "test")
             file = tempdir / "test" / "Site.22.01.01.painful.pun.XXX.720p.xpost_wrong.mp4"
-            stream_number = get_audio_stream_for_lang(file, "und")
+            stream_number = FFMpeg().get_audio_stream_for_lang(file, "und")
             self.assertEqual(stream_number, -1)
-            stream_number = get_audio_stream_for_lang(file, "eng")
+            stream_number = FFMpeg().get_audio_stream_for_lang(file, "eng")
             self.assertEqual(stream_number, 1)
-            update_audio_stream_if_needed(file, "eng")
-            stream_number = get_audio_stream_for_lang(file, "eng")
+            FFMpeg().update_audio_stream_if_needed(file, "eng")
+            stream_number = FFMpeg().get_audio_stream_for_lang(file, "eng")
             self.assertEqual(stream_number, -1)
 
     def test_file_ffmpeg(self):
-        versions = ffmpeg_version()
+        versions = FFMpeg().ffmpeg_version()
         for tool, version in versions.items():
             self.assertIsNotNone(version)
 

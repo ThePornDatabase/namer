@@ -65,7 +65,7 @@ move_videohashes = {"script" = "shutil:copytree('./videohashes/dist', './namer/t
 build_namer = {shell="poetry build"}
 build_deps = ["install_npm", "build_yarn", "install_videohashes_src", "build_videohashes", "move_videohashes"]
 test_format = {shell="poetry run flakeheaven lint"}
-test_namer = {shell="poetry run pytest --log-cli-level=info"}
+test_namer = {shell="poetry run pytest --log-cli-level=info --capture=no"}
 test = ["test_format", "test_namer"]
 build_all = ["build_deps", "test", "build_namer"]
 

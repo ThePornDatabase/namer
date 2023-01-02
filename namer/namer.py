@@ -19,13 +19,13 @@ from namer.comparison_results import ComparisonResult, ComparisonResults, Looked
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
-from namer.ffmpeg import FFProbeResults, ffprobe
+from namer.ffmpeg import FFProbeResults, FFMpeg
 from namer.fileinfo import FileInfo
 from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
-from namer.videophash import StashVideoPerceptualHash as VideoPerceptualHash
+from namer.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -187,7 +187,7 @@ def process_file(command: Command) -> Optional[Command]:
         target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
-            ffprobe_results = ffprobe(command.target_movie_file)
+            ffprobe_results = FFMpeg().ffprobe(command.target_movie_file)
             if ffprobe_results:
                 new_metadata.resolution = ffprobe_results.get_resolution()
             target = move_to_final_location(command, new_metadata)
