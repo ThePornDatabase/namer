@@ -346,7 +346,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
     if uuid:
         query = uuid
     elif phash:
-        # Movie phashes are note supported by tpdb at this time.
+        # Movie phashes are not supported by tpdb at this time.
         query = None if movie else f"scenes/hash/{phash.phash}"
     elif site or release_date or name:
         query = "movies?parse=" if movie else "scenes?parse="

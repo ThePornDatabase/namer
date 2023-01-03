@@ -162,7 +162,7 @@ class MovieWatcher:
         self.__event_handler = MovieEventHandler(namer_config, self.enque_work)
         self.__background_thread: Optional[Thread] = None
 
-    def getConfig(self) -> NamerConfig:
+    def get_config(self) -> NamerConfig:
         return self.__namer_config
 
     def run(self):

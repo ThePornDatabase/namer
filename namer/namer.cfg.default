@@ -34,8 +34,8 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # * 'name' - the scene/movie name
 # * 'site' - the site or studio name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
 # * 'full_site' - the full site/studio name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
-# * 'performers' - space seperated list of female performers
-# * 'all_performers' - space seperated list of all performers
+# * 'performers' - comma seperated list of female performers
+# * 'all_performers' - comma seperated list of all performers
 # * 'act' - an act, parsed from original file name, don't use.
 # * 'ext' - original file's extension, you should keep this.
 # * 'trans' - 'TS', or 'ts' if detected in original file name.
@@ -114,9 +114,6 @@ site_abbreviations = {"bex" : "BrazzersExxtra", "ps": "PropertySex"}
 # Plus who lists all the performers if over 6 on a scene's name?   You can increase this, but the cpu/runtime cost increases
 # rapidly (combinatorial)
 max_performer_names = 6
-
-# When plex hack is set to True, any matches of e##s## are removed from the Scene name.
-plex_hack = False
 
 # Cache http requests
 use_requests_cache = True

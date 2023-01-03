@@ -21,7 +21,7 @@ def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
     """
     Waits until all files have been moved out of watch/working dirs.
     """
-    config = watcher.getConfig()
+    config = watcher.get_config()
     logging.info("waiting for files to be processes")
     Wait().seconds(durration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
     logging.info("past waiting for files")
@@ -252,7 +252,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         with make_watchdog_context(sample_config()) as (tempdir, watcher, fakeTPDB):
             targets = [
-                new_ea(watcher.getConfig().watch_dir / "_UNPACK_stuff" / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
+                new_ea(watcher.get_config().watch_dir / "_UNPACK_stuff" / "EvilAngel - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
             ]
             time.sleep(2)
             watcher.stop()

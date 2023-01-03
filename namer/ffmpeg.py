@@ -122,13 +122,16 @@ class FFMpeg:
             phash_path: Path = home_path / 'tools'
             if not phash_path.is_dir():
                 phash_path.mkdir(exist_ok=True, parents=True)
+
             self.__local_dir = phash_path
             versions = self.__ffmpeg_version(phash_path)
             if not versions['ffmpeg'] and not versions['ffprobe']:
                 StashVideoPerceptualHash().install_ffmpeg()
+
             versions = self.__ffmpeg_version(phash_path)
             if not versions['ffmpeg'] and not versions['ffprobe']:
                 raise ValidationError(f"could not find ffmpeg/ffprobe on path, or in tools dir: {self.__local_dir}")
+
             self.__ffmpeg_cmd = str(phash_path / 'ffmpeg')
             self.__ffprobe_cmd = str(phash_path / 'ffprobe')
 
@@ -325,7 +328,7 @@ class FFMpeg:
                 stdout, _ = process.communicate()
 
                 if stdout:
-                    line: str = stdout.split('\n', 1)[0]
+                    line = stdout.split('\n', 1)[0]
                     matches = reg.search(line)
 
             versions[tool] = matches.groupdict().get('version') if matches else None

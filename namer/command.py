@@ -150,9 +150,11 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
 def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[float, int, int]:
     if not ffprobe_results:
         return 0, 0, 0
+
     stream = ffprobe_results.get_default_video_stream()
     if not stream:
         return 0, 0, 0
+
     return stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.lower(), config)
 
 
@@ -161,6 +163,7 @@ def get_codec_value(codec: str, config: NamerConfig) -> int:
     desired_codecs.reverse()
     if codec in desired_codecs:
         return desired_codecs.index(codec) + 1
+
     return 0
 
 
@@ -168,10 +171,12 @@ def greater_than(seq1: Sequence, seq2: Sequence) -> bool:
     for val in zip(seq1, seq2):
         if val[0] > val[1]:
             return True
+
         if val[0] == val[1]:
             continue
         else:
             return False
+
     return False  # equal
 
 
@@ -187,8 +192,8 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
                 if greater_than(current_values, selected_values):
                     selected_values = current_values
                     selected = current_movie
+
         return selected
-    return None
 
 
 def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
@@ -247,6 +252,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
                 final_location.unlink()
                 shutil.move(selected_movie, final_location)
                 movie_name = final_location
+
             for movie in movies:
                 Path(movie).unlink()
 
@@ -392,8 +398,6 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
         if relative_path:
             target_file = relative_to / relative_path.parts[0]
             return make_command(target_file, config, nfo, inplace, uuid)
-
-    return
 
 
 def main(arg_list: List[str]):
