@@ -383,7 +383,7 @@ class NamerConfig:
     if you are going to check an logs you share for your token.
     """
 
-    ffmpeg: FFMpeg = None
+    ffmpeg: FFMpeg = FFMpeg()
 
     def __init__(self):
         if sys.platform != "win32":

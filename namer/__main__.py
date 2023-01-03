@@ -52,7 +52,6 @@ def main(arg_list: List[str]):
     """
     logger.remove()
     config = default_config()
-    config.ffmpeg = FFMpeg()
 
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == "watchdog":
