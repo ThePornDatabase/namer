@@ -162,7 +162,7 @@ class MovieWatcher:
         self.__event_handler = MovieEventHandler(namer_config, self.enque_work)
         self.__background_thread: Optional[Thread] = None
 
-    def getConfig(self) -> NamerConfig:
+    def get_config(self) -> NamerConfig:
         return self.__namer_config
 
     def run(self):
@@ -204,9 +204,9 @@ class MovieWatcher:
     def __simple_exit__(self):
         self.stop()
         if self.__background_thread:
-            logger.info("backgroung thread join")
+            logger.info("Background thread join")
             self.__background_thread.join()
-            logger.info("backgroung thread joined")
+            logger.info("Background thread joined")
             self.__background_thread = None
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -255,25 +255,25 @@ class MovieWatcher:
             self.__stopped = True
             logger.debug("Exiting watchdog")
             self.__event_observer.stop()
-            logger.debug("observer stop")
+            logger.debug("Observer stop")
             self.__event_observer.join()
-            logger.debug("observer join")
+            logger.debug("Observer join")
             if self.__webserver:
-                logger.info("webserver stop")
+                logger.info("Webserver stop")
                 self.__webserver.stop()
             self.__command_queue.put(None)
 
             # let the thread processing work items complete.
             self.__worker_thread.join()
-            logger.debug("command queue None")
+            logger.debug("Command queue None")
             test = os.environ.get('PYTEST_CURRENT_TEST', "")
-            logger.debug(f"{test}: command join")
+            logger.debug(f"{test}: Command join")
 
             items = list(map(lambda x: x.get_command_target() if x else None, self.__command_queue.queue))
-            logger.info(f"waiting for items to process {items}")
+            logger.info(f"Waiting for items to process {items}")
             # we already wait for the worker thread.
             # self.__command_queue.join()
-            logger.debug("command joined")
+            logger.debug("Command joined")
 
     def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:

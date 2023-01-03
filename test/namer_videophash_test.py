@@ -9,15 +9,17 @@ from pathlib import Path
 
 import imagehash
 
-from namer.videophashstash import StashVideoPerceptualHash
-from namer.videophash import VideoPerceptualHash
+from namer.videophash.videophashstash import StashVideoPerceptualHash
+from namer.videophash.videophash import VideoPerceptualHash
+from test.utils import sample_config
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
-    __generator = VideoPerceptualHash()
+    config = sample_config()
+    __generator = VideoPerceptualHash(config.ffmpeg)
     __stash_generator = StashVideoPerceptualHash()
 
     def test_get_phash(self):

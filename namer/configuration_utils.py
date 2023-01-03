@@ -20,8 +20,8 @@ from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 from namer.configuration import NamerConfig
 from namer.database import abbreviations
-from namer.name_formatter import PartialFormatter
 from namer.ffmpeg import FFMpeg
+from namer.name_formatter import PartialFormatter
 
 
 def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> bool:
@@ -78,8 +78,8 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
         return False
 
 
-def __verify_ffmpeg() -> bool:
-    versions = FFMpeg().ffmpeg_version()
+def __verify_ffmpeg(ffmpeg: FFMpeg) -> bool:
+    versions = ffmpeg.ffmpeg_version()
     for tool, version in versions.items():
         if not version:
             logger.error(f'No {tool} found, please install {tool}')
@@ -95,7 +95,7 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     """
     success = __verify_naming_config(config, formatter)
     success = __verify_watchdog_config(config, formatter) and success
-    success: bool = __verify_ffmpeg() and success
+    success: bool = __verify_ffmpeg(config.ffmpeg) and success
     return success
 
 # Read and write .ini files utils below
@@ -155,7 +155,7 @@ def from_regex_list(value: Optional[List[Pattern]]) -> str:
     return ", ".join([x.pattern for x in value]) if value else ""
 
 
-def to_site_abreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
+def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
     abbreviations_db = abbreviations.copy()
     if site_abbreviations:
         data = json.loads(site_abbreviations)
@@ -221,12 +221,11 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "movie_data_preferred": ("namer", to_str_list_lower, from_str_list_lower),
     "vr_studios": ("namer", to_str_list_lower, from_str_list_lower),
     "vr_tags": ("namer", to_str_list_lower, from_str_list_lower),
-    "site_abbreviations": ("namer", to_site_abreviation, from_site_abbreviation),
+    "site_abbreviations": ("namer", to_site_abbreviation, from_site_abbreviation),
     "max_performer_names": ("namer", to_int, from_int),
     "use_requests_cache": ("namer", to_bool, from_bool),
     "requests_cache_expire_minutes": ("namer", to_int, from_int),
     "override_tpdb_address": ("namer", None, None),
-    "plex_hack": ("namer", to_bool, from_bool),
     "search_phash": ("Phash", to_bool, from_bool),
     # "require_match_phash_top": ("Phash", to_int, from_int),
     # "send_phash_of_matches_to_tpdb": ("Phash", to_bool, from_bool),
@@ -322,12 +321,12 @@ def resource_file_to_str(package: str, file_name: str) -> str:
 
 def copy_resource_to_file(package: str, file_name: str, output: Path) -> bool:
     if hasattr(resources, 'files'):
-        with resources.files(package).joinpath(file_name).open("rb") as bin, open(output, mode="+bw") as out:
-            shutil.copyfileobj(bin, out)
+        with resources.files(package).joinpath(file_name).open("rb") as _bin, open(output, mode="+bw") as out:
+            shutil.copyfileobj(_bin, out)
             return True
     elif hasattr(resources, 'read_text'):
-        with resources.open_binary(package, file_name) as bin, open(output, mode="+bw") as out:
-            shutil.copyfileobj(bin, out)
+        with resources.open_binary(package, file_name) as _bin, open(output, mode="+bw") as out:
+            shutil.copyfileobj(_bin, out)
             return True
     return False
 

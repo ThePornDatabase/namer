@@ -22,7 +22,7 @@ from loguru import logger
 from PIL import Image
 from pathvalidate import ValidationError
 
-from namer.videophashstash import StashVideoPerceptualHash
+from namer.videophash.videophashstash import StashVideoPerceptualHash
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -116,19 +116,22 @@ class FFMpeg:
     __ffprobe_cmd: str = 'ffprobe'
 
     def __init__(self):
-        versions = self.__ffmpeg_version(None)
+        versions = self.__ffmpeg_version()
         if not versions['ffmpeg'] or not versions['ffprobe']:
             home_path: Path = Path(__file__).parent
             phash_path: Path = home_path / 'tools'
             if not phash_path.is_dir():
                 phash_path.mkdir(exist_ok=True, parents=True)
+
             self.__local_dir = phash_path
             versions = self.__ffmpeg_version(phash_path)
             if not versions['ffmpeg'] and not versions['ffprobe']:
                 StashVideoPerceptualHash().install_ffmpeg()
+
             versions = self.__ffmpeg_version(phash_path)
             if not versions['ffmpeg'] and not versions['ffprobe']:
                 raise ValidationError(f"could not find ffmpeg/ffprobe on path, or in tools dir: {self.__local_dir}")
+
             self.__ffmpeg_cmd = str(phash_path / 'ffmpeg')
             self.__ffprobe_cmd = str(phash_path / 'ffprobe')
 
@@ -299,7 +302,8 @@ class FFMpeg:
     def ffmpeg_version(self) -> Dict:
         return self.__ffmpeg_version(self.__local_dir)
 
-    def __ffmpeg_version(self, local_dir: Optional[Path]) -> Dict:
+    @staticmethod
+    def __ffmpeg_version(local_dir: Optional[Path] = None) -> Dict:
         tools = ['ffmpeg', 'ffprobe']
         re_tools = '|'.join(tools)
         reg = re.compile(fr'({re_tools}) version (?P<version>[\d|.]*)')
@@ -307,9 +311,9 @@ class FFMpeg:
         versions = {}
 
         for tool in tools:
-            executable = str(local_dir / tool) if local_dir else tool
+            executable = local_dir / tool if local_dir else tool
             args = [
-                executable,
+                str(executable),
                 '-version'
             ]
 
@@ -324,7 +328,7 @@ class FFMpeg:
                 stdout, _ = process.communicate()
 
                 if stdout:
-                    line: str = stdout.split('\n', 1)[0]
+                    line = stdout.split('\n', 1)[0]
                     matches = reg.search(line)
 
             versions[tool] = matches.groupdict().get('version') if matches else None

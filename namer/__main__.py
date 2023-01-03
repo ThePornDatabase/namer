@@ -49,8 +49,8 @@ def main(arg_list: List[str]):
     """
     Call main method in namer.namer or namer.watchdog.
     """
-    config = default_config()
     logger.remove()
+    config = default_config()
 
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == "watchdog":

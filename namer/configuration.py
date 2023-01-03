@@ -12,6 +12,8 @@ from configupdater import ConfigUpdater
 
 from requests_cache import CachedSession
 
+from namer.ffmpeg import FFMpeg
+
 
 # noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -88,8 +90,8 @@ class NamerConfig:
     * 'name' - the scene name
     * 'site' - the site name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
     * 'full_site' - the site name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
-    * 'performers' - space seperated list of female performers
-    * 'all_performers' - space seperated list of all performers
+    * 'performers' - comma seperated list of female performers
+    * 'all_performers' - comma seperated list of all performers
     * 'act' - an act, parsed from original file name, don't use.
     * 'ext' - original file's extension, you should keep this.
     * 'trans' - 'TS', or 'ts' if detected in original file name.
@@ -225,11 +227,6 @@ class NamerConfig:
     requests_cache_expire_minutes: int = 10
     """
     Amount of minutes that http request would be in cache
-    """
-
-    plex_hack: bool = False
-    """
-    Should plex movies have S##E## stripped out of movie names (to allow videos to be visible in plex)
     """
 
     override_tpdb_address: str = "https://api.metadataapi.net"
@@ -386,6 +383,8 @@ class NamerConfig:
     if you are going to check an logs you share for your token.
     """
 
+    ffmpeg: FFMpeg = FFMpeg()
+
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
@@ -434,7 +433,6 @@ class NamerConfig:
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address,
-                "plex_hack": self.plex_hack
             },
             "Phash": {
                 "search_phash": self.search_phash,

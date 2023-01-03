@@ -17,7 +17,7 @@ from loguru import logger
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
-from namer.ffmpeg import FFMpeg, FFProbeResults
+from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import parse_file_name, FileInfo
 from namer.comparison_results import ComparisonResults, LookedUpFileInfo
 
@@ -150,9 +150,11 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
 def extract_relevant_attributes(ffprobe_results: Optional[FFProbeResults], config: NamerConfig) -> Tuple[float, int, int]:
     if not ffprobe_results:
         return 0, 0, 0
+
     stream = ffprobe_results.get_default_video_stream()
     if not stream:
         return 0, 0, 0
+
     return stream.duration, stream.height if stream.height else 0, get_codec_value(stream.codec_name.lower(), config)
 
 
@@ -161,6 +163,7 @@ def get_codec_value(codec: str, config: NamerConfig) -> int:
     desired_codecs.reverse()
     if codec in desired_codecs:
         return desired_codecs.index(codec) + 1
+
     return 0
 
 
@@ -168,10 +171,12 @@ def greater_than(seq1: Sequence, seq2: Sequence) -> bool:
     for val in zip(seq1, seq2):
         if val[0] > val[1]:
             return True
+
         if val[0] == val[1]:
             continue
         else:
             return False
+
     return False  # equal
 
 
@@ -179,16 +184,16 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
     # This could use a lot of work.
     if movies:
         selected = Path(movies[0])
-        selected_values = extract_relevant_attributes(FFMpeg().ffprobe(selected), config)
+        selected_values = extract_relevant_attributes(config.ffmpeg.ffprobe(selected), config)
         for current_movie_str in movies:
             current_movie = Path(current_movie_str)
-            current_values = extract_relevant_attributes(FFMpeg().ffprobe(current_movie), config)
+            current_values = extract_relevant_attributes(config.ffmpeg.ffprobe(current_movie), config)
             if current_values[1] <= config.max_desired_resolutions or config.max_desired_resolutions == -1:
                 if greater_than(current_values, selected_values):
                     selected_values = current_values
                     selected = current_movie
+
         return selected
-    return None
 
 
 def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
@@ -247,6 +252,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
                 final_location.unlink()
                 shutil.move(selected_movie, final_location)
                 movie_name = final_location
+
             for movie in movies:
                 Path(movie).unlink()
 
@@ -317,7 +323,7 @@ def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iter
     """
     if dir_to_scan and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
-        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config, use_ffprobe=False), dir_to_scan.iterdir())
+        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
 
@@ -362,7 +368,7 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     return file
 
 
-def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, use_ffprobe: bool = False, ignore_file_restrictions: bool = False) -> Optional[Command]:
+def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, ignore_file_restrictions: bool = False) -> Optional[Command]:
     """
     after finding target directory and target movie from input, returns file name descriptors.
     """
@@ -392,8 +398,6 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
         if relative_path:
             target_file = relative_to / relative_path.parts[0]
             return make_command(target_file, config, nfo, inplace, uuid)
-
-    return
 
 
 def main(arg_list: List[str]):

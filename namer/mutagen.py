@@ -9,7 +9,7 @@ from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
 from namer.configuration import NamerConfig
-from namer.ffmpeg import FFProbeResults, FFMpeg
+from namer.ffmpeg import FFMpeg, FFProbeResults
 from namer.comparison_results import LookedUpFileInfo
 
 
@@ -42,14 +42,14 @@ def set_array_if_not_none(video: MP4, atom: str, value: List[str]):
     video[atom] = value if value is not None else []
 
 
-def get_mp4_if_possible(mp4: Path) -> MP4:
+def get_mp4_if_possible(mp4: Path, ffmpeg: FFMpeg) -> MP4:
     """
     Attempt to read a mp4 file to prepare for edit.
     """
     try:
         video = MP4(mp4)
     except MP4StreamInfoError:
-        FFMpeg().attempt_fix_corrupt(mp4)
+        ffmpeg.attempt_fix_corrupt(mp4)
         video = MP4(mp4)
     return video
 
@@ -76,12 +76,12 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Pat
     """
 
     logger.info("Updating audio and tags for: {}", mp4)
-    success = FFMpeg().update_audio_stream_if_needed(mp4, config.language)
+    success = config.ffmpeg.update_audio_stream_if_needed(mp4, config.language)
     if not success:
         logger.info("Could not process audio or copy {}", mp4)
     logger.info("Updating atom tags on: {}", mp4)
     if mp4 and mp4.exists():
-        video: MP4 = get_mp4_if_possible(mp4)
+        video: MP4 = get_mp4_if_possible(mp4, config.ffmpeg)
         video.clear()
         set_single_if_not_none(video, "\xa9nam", looked_up.name)
         video["\xa9day"] = [looked_up.date + "T09:00:00Z"] if looked_up.date else []

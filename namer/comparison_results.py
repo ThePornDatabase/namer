@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass, field
 from pathlib import PurePath
 from typing import List, Optional
@@ -157,6 +156,8 @@ class LookedUpFileInfo:
 
         if self.original_query and '/movies' in self.original_query and (self.site and self.site.lower().replace(" ", "") not in config.movie_data_preferred):
             self.type = 'movie'
+        elif self.original_query and '/jav' in self.original_query:
+            self.type = 'jav'
         else:
             self.type = 'scene'
 
@@ -167,8 +168,8 @@ class LookedUpFileInfo:
             "name": self.name,
             "site": self.site.replace(" ", "") if self.site else None,
             "full_site": self.site,
-            "performers": " ".join(map(lambda p: p.name, filter(lambda p: p.role == "Female", self.performers))) if self.performers else None,
-            "all_performers": " ".join(map(lambda p: p.name, self.performers)) if self.performers else None,
+            "performers": ", ".join(map(lambda p: p.name, filter(lambda p: p.role == "Female", self.performers))) if self.performers else None,
+            "all_performers": ", ".join(map(lambda p: p.name, self.performers)) if self.performers else None,
             "ext": self.original_parsed_filename.extension if self.original_parsed_filename else None,
             "trans": self.original_parsed_filename.trans if self.original_parsed_filename else None,
             "vr": vr,
@@ -193,9 +194,6 @@ class LookedUpFileInfo:
             name = path.stem + infix + path.suffix
             if path.parts:
                 name = str(path.parent / name)
-
-        if config.plex_hack:
-            name = re.sub(r'[sS]\d{1,3}:?[eE]\d{1,3}', '', name)
 
         return name
 
@@ -267,7 +265,7 @@ class ComparisonResults:
             # to sort it out.
             match: Optional[ComparisonResult] = self.results[0]
             for potential in self.results[1:]:
-                # Now that matches are unique in the list, don't match if their are multiple
+                # Now that matches are unique in the list, don't match if there are multiple
                 if match and match.name_match < potential.name_match or potential.is_match():
                     match = None
         return match
