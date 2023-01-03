@@ -22,7 +22,7 @@ from loguru import logger
 from PIL import Image
 from pathvalidate import ValidationError
 
-from namer.videophashstash import StashVideoPerceptualHash
+from namer.videophash.videophashstash import StashVideoPerceptualHash
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

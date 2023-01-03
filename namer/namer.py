@@ -25,7 +25,7 @@ from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, 
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
-from namer.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
+from namer.videophash.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,

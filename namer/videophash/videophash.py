@@ -13,7 +13,7 @@ from loguru import logger
 from PIL import Image
 
 from namer.ffmpeg import FFMpeg
-from namer.videophashstash import PerceptualHash, return_perceptual_hash
+from namer.videophash import PerceptualHash, return_perceptual_hash
 
 
 class VideoPerceptualHash:
@@ -21,10 +21,15 @@ class VideoPerceptualHash:
     __columns: int = 5
     __rows: int = 5
 
+    __ffmpeg: FFMpeg = None
+
+    def __init__(self, ffmpeg: FFMpeg):
+        self.__ffmpeg = ffmpeg
+
     def get_hashes(self, file: Path) -> Optional[PerceptualHash]:
         data = None
 
-        probe = FFMpeg().ffprobe(file)
+        probe = self.__ffmpeg.ffprobe(file)
         if not probe:
             return data
 
@@ -86,11 +91,10 @@ class VideoPerceptualHash:
             return []
 
         queue = []
-        ffmpeg = FFMpeg()
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for idx in range(chunk_count):
                 time = offset + (idx * step_size)
-                future = executor.submit(ffmpeg.extract_screenshot, file, time, self.__screenshot_width)
+                future = executor.submit(self.__ffmpeg.extract_screenshot, file, time, self.__screenshot_width)
                 queue.append(future)
 
         concurrent.futures.wait(queue)

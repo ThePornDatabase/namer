@@ -1,36 +1,19 @@
-import subprocess
+import json
 import platform
-from dataclasses import dataclass
+import subprocess
 from functools import lru_cache
 from json import JSONDecodeError
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Optional, Union
+from typing import Optional
 
-import json
-import imagehash
 from loguru import logger
 
-
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
-class PerceptualHash:
-    duration: int
-    phash: imagehash.ImageHash
-    oshash: str
-
-
-def return_perceptual_hash(duration: Union[float, int], phash: Optional[Union[str, imagehash.ImageHash]], file_oshash: str) -> PerceptualHash:
-    output = PerceptualHash()
-    output.duration = int(duration) if isinstance(duration, float) else duration
-    if phash:
-        output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
-    output.oshash = file_oshash
-
-    return output
+from namer.videophash import PerceptualHash, return_perceptual_hash
 
 
 class StashVideoPerceptualHash:
-    __home_path: Path = Path(__file__).parent
+    __home_path: Path = Path(__file__).parent.parent
     __phash_path: Path = __home_path / 'tools'
     __phash_name: str = 'videohashes'
     __supported_arch: dict = {
@@ -76,10 +59,7 @@ class StashVideoPerceptualHash:
         if not self.__phash_path:
             return output
 
-        args = [
-            str(self.__phash_path / self.__phash_name),
-            '-json',
-        ]
+        args = [str(self.__phash_path / self.__phash_name), '-json', ]
         if file:
             args.append('--video')
             args.append(str(file))
