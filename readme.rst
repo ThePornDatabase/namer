@@ -128,7 +128,7 @@ Pip/Python usage
 --------------------
 
 What if you don't want to use docker and/or containers?  Do you have python 3 and pip (sometimes pip3) and the command line tool ``ffmpeg`` installed locally?  If so,  ``pip install namer`` gets the job done.  If
-you don't have python (3), pip and ``ffmpeg`` installed Homebrew_ can help you on Mac, and Chocolatey_ can help you on windows
+you don't have python (3), pip and ``ffmpeg`` installed Homebrew_ can help you on Mac, and Chocolatey_ can help you on windows.   Alternatively, namer can now install ffmpeg for you if you ffmpeg is not on the PATH at execution time, just make sure the user running it can write to the pip directory.
 
 
 .. code-block:: sh
