@@ -17,7 +17,7 @@ from loguru import logger
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
-from namer.ffmpeg import FFMpeg, FFProbeResults
+from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import parse_file_name, FileInfo
 from namer.comparison_results import ComparisonResults, LookedUpFileInfo
 
@@ -179,10 +179,10 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
     # This could use a lot of work.
     if movies:
         selected = Path(movies[0])
-        selected_values = extract_relevant_attributes(FFMpeg().ffprobe(selected), config)
+        selected_values = extract_relevant_attributes(config.ffmpeg.ffprobe(selected), config)
         for current_movie_str in movies:
             current_movie = Path(current_movie_str)
-            current_values = extract_relevant_attributes(FFMpeg().ffprobe(current_movie), config)
+            current_values = extract_relevant_attributes(config.ffmpeg.ffprobe(current_movie), config)
             if current_values[1] <= config.max_desired_resolutions or config.max_desired_resolutions == -1:
                 if greater_than(current_values, selected_values):
                     selected_values = current_values
@@ -317,7 +317,7 @@ def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iter
     """
     if dir_to_scan and dir_to_scan.is_dir() and dir_to_scan.exists():
         logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
-        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config, use_ffprobe=False), dir_to_scan.iterdir())
+        mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
 
@@ -362,7 +362,7 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     return file
 
 
-def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, use_ffprobe: bool = False, ignore_file_restrictions: bool = False) -> Optional[Command]:
+def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, ignore_file_restrictions: bool = False) -> Optional[Command]:
     """
     after finding target directory and target movie from input, returns file name descriptors.
     """

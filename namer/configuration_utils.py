@@ -78,8 +78,8 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
         return False
 
 
-def __verify_ffmpeg() -> bool:
-    versions = FFMpeg().ffmpeg_version()
+def __verify_ffmpeg(ffmpeg: FFMpeg) -> bool:
+    versions = ffmpeg.ffmpeg_version()
     for tool, version in versions.items():
         if not version:
             logger.error(f'No {tool} found, please install {tool}')
@@ -95,7 +95,7 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     """
     success = __verify_naming_config(config, formatter)
     success = __verify_watchdog_config(config, formatter) and success
-    success: bool = __verify_ffmpeg() and success
+    success: bool = __verify_ffmpeg(config.ffmpeg) and success
     return success
 
 # Read and write .ini files utils below

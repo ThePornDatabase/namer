@@ -12,6 +12,8 @@ from configupdater import ConfigUpdater
 
 from requests_cache import CachedSession
 
+from namer.ffmpeg import FFMpeg
+
 
 # noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -385,6 +387,8 @@ class NamerConfig:
     values in the stack trace, potentially including the porndb token, this setting should only be turned on
     if you are going to check an logs you share for your token.
     """
+
+    ffmpeg: FFMpeg = None
 
     def __init__(self):
         if sys.platform != "win32":

@@ -22,6 +22,7 @@ import namer.namer
 import namer.watchdog
 import namer.web
 from namer.configuration_utils import default_config
+from namer.ffmpeg import FFMpeg
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """
@@ -49,8 +50,9 @@ def main(arg_list: List[str]):
     """
     Call main method in namer.namer or namer.watchdog.
     """
-    config = default_config()
     logger.remove()
+    config = default_config()
+    config.ffmpeg = FFMpeg()
 
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == "watchdog":

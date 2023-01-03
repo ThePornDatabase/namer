@@ -116,7 +116,7 @@ class FFMpeg:
     __ffprobe_cmd: str = 'ffprobe'
 
     def __init__(self):
-        versions = self.__ffmpeg_version(None)
+        versions = self.__ffmpeg_version()
         if not versions['ffmpeg'] or not versions['ffprobe']:
             home_path: Path = Path(__file__).parent
             phash_path: Path = home_path / 'tools'
@@ -299,7 +299,8 @@ class FFMpeg:
     def ffmpeg_version(self) -> Dict:
         return self.__ffmpeg_version(self.__local_dir)
 
-    def __ffmpeg_version(self, local_dir: Optional[Path]) -> Dict:
+    @staticmethod
+    def __ffmpeg_version(local_dir: Optional[Path] = None) -> Dict:
         tools = ['ffmpeg', 'ffprobe']
         re_tools = '|'.join(tools)
         reg = re.compile(fr'({re_tools}) version (?P<version>[\d|.]*)')
@@ -307,9 +308,9 @@ class FFMpeg:
         versions = {}
 
         for tool in tools:
-            executable = str(local_dir / tool) if local_dir else tool
+            executable = local_dir / tool if local_dir else tool
             args = [
-                executable,
+                str(executable),
                 '-version'
             ]
 
