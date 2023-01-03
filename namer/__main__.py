@@ -22,7 +22,6 @@ import namer.namer
 import namer.watchdog
 import namer.web
 from namer.configuration_utils import default_config
-from namer.ffmpeg import FFMpeg
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """
