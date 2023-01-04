@@ -145,5 +145,5 @@ def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: Na
         with open(target, "wt", encoding="UTF-8") as nfo_file:
             towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background)
             nfo_file.write(towrite)
-        
+
         set_permissions(target, namer_config)
