@@ -229,6 +229,11 @@ class NamerConfig:
     Amount of minutes that http request would be in cache
     """
 
+    plex_hack: bool = False
+    """
+    Should plex movies have S##E## stripped out of movie names (to allow videos to be visible in plex)
+    """
+
     override_tpdb_address: str = "https://api.metadataapi.net"
     """
     Used only for testing, can override the location of the porn database - usually to point at a locally
@@ -433,6 +438,7 @@ class NamerConfig:
                 "enabled_requests_cache": self.enabled_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address,
+                "plex_hack": self.plex_hack,
             },
             "Phash": {
                 "search_phash": self.search_phash,

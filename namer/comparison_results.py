@@ -195,6 +195,9 @@ class LookedUpFileInfo:
             if path.parts:
                 name = str(path.parent / name)
 
+        if config.plex_hack:
+            name = re.sub(r'[sS]\d{1,3}:?[eE]\d{1,3}', '', name)
+
         return name
 
     def found_via_phash(self) -> bool:
