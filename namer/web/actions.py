@@ -58,6 +58,7 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
         'update_time': int(stat.st_mtime),
         'size': stat.st_size,
     }
+
     percentage = 0.0
     if config and config.add_max_percent_column and config.write_namer_failed_log and subpath:
         log_data = read_failed_log_file(subpath, config)

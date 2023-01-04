@@ -69,9 +69,11 @@ def name_cleaner(name: str) -> str:
     # truncating cruft
     for size in ["2160p", "1080p", "720p", "4k", "3840p"]:
         name = re.sub(r"[.\- ]" + size + r"[.\- ]?.*", "", name)
+
     # remove trailing ".XXX."
     name = re.sub(r"[.\- ]?XXX[.\- ]?.*$", "", name)
     name = re.sub(r"\.", " ", name)
+
     return name
 
 

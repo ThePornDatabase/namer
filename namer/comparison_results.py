@@ -272,4 +272,5 @@ class ComparisonResults:
                 # Now that matches are unique in the list, don't match if there are multiple
                 if match and match.name_match < potential.name_match or potential.is_match():
                     match = None
+
         return match

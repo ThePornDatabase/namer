@@ -72,7 +72,7 @@ class Command:
 
 def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
     if not target:
-        return None
+        return
 
     if target.target_directory and target.input_file == target.target_directory:
         working_dir = Path(new_target) / target.target_directory.name
