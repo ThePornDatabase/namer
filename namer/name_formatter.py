@@ -50,6 +50,7 @@ class PartialFormatter(string.Formatter):
     def format_field(self, value, format_spec: str):
         if not value:
             return self.missing
+
         try:
             if self.__regex['s'].match(format_spec):
                 value = value + format_spec[0] * int(format_spec[1:-1])

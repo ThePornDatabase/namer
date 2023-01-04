@@ -94,6 +94,7 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
             all_performers = list(map(lambda p: p.name.split(" ")[0], performers))
             if looked_up.name:
                 all_performers.insert(0, looked_up.name)
+
             result = __attempt_better_match(result, name_parts.name, all_performers, namer_config)
             if name_parts.name:
                 result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
@@ -115,11 +116,14 @@ def __update_results(results: List[ComparisonResult], name_parts: Optional[FileI
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
                 result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
                 results.append(result)
+
         for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, movie):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
                 result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
                 results.append(result)
+
         results = sorted(results, key=__match_percent, reverse=True)
+
     return results
 
 
@@ -139,6 +143,7 @@ def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash
     if name_parts.site:
         if name_parts.site.strip().lower() in namer_config.movie_data_preferred:
             movies: bool = True
+
     results: List[ComparisonResult] = []
     results: List[ComparisonResult] = __metadata_api_lookup_type(results, name_parts, namer_config, movies, phash)
     if not results or not results[0].is_match():
@@ -356,13 +361,18 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
             # Hense, the hack of lower casing the site.
             query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
+
         if release_date:
             query += release_date + "."
+
         if name:
             query += quote(name)
+
         if page and page > 1:
             query += f"&page={page}"
+
         query += "&limit=25"
+
     return f"{namer_config.override_tpdb_address}/{query}" if query else None
 
 
@@ -383,10 +393,12 @@ def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config:
         release_date = name_parts.date if name_parts and not skip_date else None
         name = name_parts.name if name_parts and not skip_name else None
         site = name_parts.site if name_parts else None
+
         url = __build_url(namer_config, site, release_date, name, movie=movie, phash=phash)
         if url:
             file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
             return file_infos
+
     return []
 
 
@@ -397,7 +409,7 @@ def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: 
         if file_infos:
             return file_infos[0]
 
-    return None
+    return
 
 
 def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> ComparisonResults:

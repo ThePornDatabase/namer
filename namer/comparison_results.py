@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass, field
 from pathlib import PurePath
 from typing import List, Optional
@@ -195,6 +196,9 @@ class LookedUpFileInfo:
             if path.parts:
                 name = str(path.parent / name)
 
+        if config.plex_hack:
+            name = re.sub(r'[sS]\d{1,3}:?[eE]\d{1,3}', '', name)
+
         return name
 
     def found_via_phash(self) -> bool:
@@ -268,4 +272,5 @@ class ComparisonResults:
                 # Now that matches are unique in the list, don't match if there are multiple
                 if match and match.name_match < potential.name_match or potential.is_match():
                     match = None
+
         return match

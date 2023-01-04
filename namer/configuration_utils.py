@@ -4,7 +4,6 @@ Namer Configuration readers/verifier
 
 import json
 import os
-import io
 import random
 import re
 import tempfile
@@ -32,7 +31,9 @@ def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> 
     if not config.enable_metadataapi_genres and not config.default_genre:
         logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
         success = False
+
     success = __verify_name_string(formatter, "inplace_name", config.inplace_name) and success
+
     return success
 
 
@@ -44,11 +45,13 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
     if not config.enable_metadataapi_genres and not config.default_genre:
         logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
         success = False
+
     success = __verify_dir(config, "watch_dir") and success
     success = __verify_dir(config, "work_dir") and success
     success = __verify_dir(config, "failed_dir") and success
     success = __verify_dir(config, "dest_dir") and success
     success = __verify_name_string(formatter, "new_relative_path_name", config.new_relative_path_name) and success
+
     return success
 
 
@@ -96,6 +99,7 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     success = __verify_naming_config(config, formatter)
     success = __verify_watchdog_config(config, formatter) and success
     success: bool = __verify_ffmpeg(config.ffmpeg) and success
+
     return success
 
 # Read and write .ini files utils below
@@ -109,8 +113,6 @@ def get_str(updater: ConfigUpdater, section: str, key: str) -> Optional[str]:
     if updater.has_option(section, key):
         output = updater.get(section, key)
         return str(output.value)
-    else:
-        return None
 
 # Ini file string converters, to and from NamerConfig type
 
@@ -160,18 +162,20 @@ def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str
     if site_abbreviations:
         data = json.loads(site_abbreviations)
         abbreviations_db.update(data)
+
     new_abbreviation: Dict[Pattern, str] = {}
     for abbreviation, full in abbreviations_db.items():
         key = re.compile(fr'^{abbreviation}[ .-]+', re.IGNORECASE)
         new_abbreviation[key] = f'{full} '
+
     return new_abbreviation
 
 
 def from_site_abbreviation(site_abbreviations: Optional[Dict[Pattern, str]]) -> str:
     out: Dict[str, str] = {x.pattern[1:-6]: y[0:-1] for (x, y) in site_abbreviations.items()} if site_abbreviations else {}
-    wrapper = io.StringIO("")
-    json.dump(out, wrapper)
-    return wrapper.getvalue()
+    res = json.dumps(out)
+
+    return res
 
 
 def to_pattern(value: Optional[str]) -> Optional[Pattern]:
@@ -226,6 +230,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "use_requests_cache": ("namer", to_bool, from_bool),
     "requests_cache_expire_minutes": ("namer", to_int, from_int),
     "override_tpdb_address": ("namer", None, None),
+    "plex_hack": ("namer", to_bool, from_bool),
     "search_phash": ("Phash", to_bool, from_bool),
     # "require_match_phash_top": ("Phash", to_int, from_int),
     # "send_phash_of_matches_to_tpdb": ("Phash", to_bool, from_bool),
@@ -277,6 +282,7 @@ def to_ini(config: NamerConfig) -> str:
                     updater.get(section, name).value = convert(value)
                 else:
                     updater.get(section, name).value = value
+
     return str(updater)
 
 
@@ -316,6 +322,7 @@ def resource_file_to_str(package: str, file_name: str) -> str:
         config_str = resources.files(package).joinpath(file_name).read_text()
     elif hasattr(resources, 'read_text'):
         config_str = resources.read_text(package, file_name)
+
     return config_str
 
 
@@ -328,6 +335,7 @@ def copy_resource_to_file(package: str, file_name: str, output: Path) -> bool:
         with resources.open_binary(package, file_name) as _bin, open(output, mode="+bw") as out:
             shutil.copyfileobj(_bin, out)
             return True
+
     return False
 
 
@@ -351,4 +359,5 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
         user_config.read(str(Path.home() / ".namer.cfg"))
     elif Path("./namer.cfg").exists():
         user_config.read(".namer.cfg")
+
     return from_config(user_config, namer_config)

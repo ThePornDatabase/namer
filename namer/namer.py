@@ -131,7 +131,6 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     nfo_file = video_file.parent / (video_file.stem + ".nfo")
     if nfo_file.is_file() and nfo_file.exists():
         return parse_movie_xml_file(nfo_file)
-    return None
 
 
 def process_file(command: Command) -> Optional[Command]:
@@ -178,12 +177,14 @@ def process_file(command: Command) -> Optional[Command]:
                 matched = search_results.get_match()
                 if matched:
                     new_metadata = matched.looked_up
+
             if not command.target_movie_file:
                 logger.error("""
                     Could not process file or directory: {}
                     Likely attempted to use the directory's name as the name to parse.
                     In general the dir or file's name should start with a site, a date and end with an extension
                     Target video file in dir was: {}""", command.input_file, command.target_movie_file)
+
         target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
@@ -199,7 +200,6 @@ def process_file(command: Command) -> Optional[Command]:
             failed = move_command_files(command, command.config.failed_dir)
             if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
                 write_log_file(failed.target_movie_file, search_results, failed.config)
-    return None
 
 
 def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: ComparisonResults, config: NamerConfig):
@@ -246,6 +246,7 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
         if not config_override.is_file() or not config_override.exists():
             logger.warning("Config override specified, but file does not exit: {}", config_override)
             error = True
+
     return error
 
 
@@ -268,9 +269,11 @@ def main(arg_list: List[str]):
     conf: Optional[Path] = args.configfile
     config: NamerConfig = default_config(conf)
     verify_configuration(config, PartialFormatter())
+
     target = args.file
     if args.dir is not None:
         target = args.dir
+
     if args.many:
         dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
     else:

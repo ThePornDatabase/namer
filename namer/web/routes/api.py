@@ -26,6 +26,7 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         if data:
             template: str = data.get('template')
             client_data = data.get('data')
+
             active_page: str = data.get('url')
             if config.web_root and config.web_root != "":
                 active_page = active_page.replace(config.web_root, '') if active_page.startswith(config.web_root) else active_page

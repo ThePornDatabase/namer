@@ -50,6 +50,7 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
             performer = Performer(name)
             performer.role = get_childnode_text(actor, 'role')
             info.performers.append(performer)
+
     phoenixadulturlid = get_childnode_text(movie, 'phoenixadulturlid')
     if phoenixadulturlid:
         info.look_up_site_id = phoenixadulturlid
@@ -72,9 +73,11 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
 def add_sub_element(doc: Document, parent: Element, name: str, text: Optional[str] = None) -> Element:
     sub_element = doc.createElement(name)
     parent.appendChild(sub_element)
+
     if text:
         txt_node = doc.createTextNode(text)
         sub_element.appendChild(txt_node)
+
     return sub_element
 
 
@@ -103,19 +106,23 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     add_sub_element(doc, root, "premiered", info.date)
     add_sub_element(doc, root, "releasedate", info.date)
     add_sub_element(doc, root, "mpaa", "XXX")
+
     art = add_sub_element(doc, root, "art")
     add_sub_element(doc, art, 'poster', str(poster) if poster else None)
     add_sub_element(doc, art, 'background', str(background) if background else None)
+
     if config.enable_metadataapi_genres:
         add_all_sub_element(doc, root, 'genre', info.tags)
     else:
         add_all_sub_element(doc, root, 'tag', info.tags)
         add_sub_element(doc, root, 'genre', config.default_genre)
+
     add_sub_element(doc, root, 'studio', info.site)
     add_sub_element(doc, root, 'theporndbid', str(info.uuid))
     add_sub_element(doc, root, 'phoenixadultid')
     add_sub_element(doc, root, 'phoenixadulturlid')
     add_sub_element(doc, root, 'sourceid', info.source_url)
+
     for performer in info.performers:
         actor = add_sub_element(doc, root, 'actor')
         add_sub_element(doc, actor, 'name', performer.name)
@@ -123,7 +130,9 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
         add_sub_element(doc, actor, 'image', str(performer.image) if performer.image else None)
         add_sub_element(doc, actor, 'type', "Actor")
         add_sub_element(doc, actor, 'thumb')
+
     add_sub_element(doc, root, 'fileinfo')
+
     return str(doc.toprettyxml(indent="  ", newl='\n', encoding="UTF-8"), encoding="utf8")
 
 
@@ -136,4 +145,5 @@ def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: Na
         with open(target, "wt", encoding="UTF-8") as nfo_file:
             towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background)
             nfo_file.write(towrite)
+
         set_permissions(target, namer_config)
