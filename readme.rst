@@ -188,7 +188,7 @@ Development
 
   # Install Python
   # Install poetry
-  # Install yarn
+  # Install pnpm
   # Install golang
 
   # Install poe the poet

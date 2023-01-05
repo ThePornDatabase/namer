@@ -57,13 +57,13 @@ pylint = ["+*", "-C0301", "-I1101"]
 max-line-length = 150
 
 [tool.poe.tasks]
-install_npm = {shell="yarn install"}
-build_yarn = {shell="yarn run build"}
+install_npm = {shell="pnpm install"}
+build_node = {shell="pnpm run build"}
 install_videohashes_src = {shell="command -v git >/dev/null && git submodule update || echo 'Skipping git sub module update'"}
 build_videohashes = {shell="make build -C ./videohashes"}
 move_videohashes = {"script" = "shutil:copytree('./videohashes/dist', './namer/tools', dirs_exist_ok=True)"}
 build_namer = {shell="poetry build"}
-build_deps = ["install_npm", "build_yarn", "install_videohashes_src", "build_videohashes", "move_videohashes"]
+build_deps = ["install_npm", "build_node", "install_videohashes_src", "build_videohashes", "move_videohashes"]
 test_format = {shell="poetry run flakeheaven lint"}
 test_namer = {shell="poetry run pytest --log-cli-level=info --capture=no"}
 test = ["test_format", "test_namer"]

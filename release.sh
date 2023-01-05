@@ -54,8 +54,8 @@ git add pyproject.toml
 poetry run pytest
 poetry run flakeheaven lint
 
-yarn install
-yarn run build
+pnpm install
+pnpm run build
 
 poetry build
 

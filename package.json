@@ -12,31 +12,31 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",
-    "bootstrap": "^5.3.0-alpha1",
-    "bootstrap-icons": "^1.10.2",
+    "bootstrap": "5.3.0-alpha1",
+    "bootstrap-icons": "^1.10.3",
     "datatables.net": "^1.13.1",
     "datatables.net-bs5": "^1.13.1",
-    "highlight.js": "^11.6.0",
-    "jquery": "^3.6.1",
+    "highlight.js": "^11.7.0",
+    "jquery": "^3.6.3",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.2",
+    "@babel/core": "^7.20.12",
     "@babel/preset-env": "^7.20.2",
-    "babel-loader": "^9.1.0",
+    "babel-loader": "^9.1.2",
     "copy-webpack-plugin": "^11.0.0",
-    "css-loader": "^6.7.2",
+    "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "file-loader": "^6.2.0",
     "html-minimizer-webpack-plugin": "^4.3.0",
-    "mini-css-extract-plugin": "^2.6.1",
-    "postcss": "^8.4.19",
-    "postcss-loader": "^7.0.1",
+    "mini-css-extract-plugin": "^2.7.2",
+    "postcss": "^8.4.20",
+    "postcss-loader": "^7.0.2",
     "postcss-preset-env": "^7.8.3",
-    "sass": "^1.56.1",
+    "sass": "^1.57.1",
     "sass-loader": "^13.2.0",
     "terser-webpack-plugin": "^5.3.6",
     "webpack": "^5.75.0",
-    "webpack-cli": "^4.10.0"
+    "webpack-cli": "^5.0.1"
   }
 }
