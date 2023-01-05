@@ -145,7 +145,7 @@ class NamerWebServer(GenericWebServer):
     def __init__(self, namer_config: NamerConfig, command_queue: Queue):
         self.__namer_config = namer_config
         self.__command_queue = command_queue
-        webroot = "/" if not self.__namer_config.web_root or self.__namer_config.web_root == "" else self.__namer_config.web_root
+        webroot = '/' if not self.__namer_config.web_root else self.__namer_config.web_root
         blueprints = [
             web.get_routes(self.__namer_config, self.__command_queue),
             api.get_routes(self.__namer_config, self.__command_queue),
