@@ -52,7 +52,7 @@ RUN apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
-RUN npm install --global yarn
+RUN npm install --global pnpm
 
 RUN mkdir /work/
 COPY . /work
