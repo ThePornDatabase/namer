@@ -21,10 +21,11 @@ from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import FileInfo
-from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match
+from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_phash, toggle_collected
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
+from namer.videophash import PerceptualHash
 from namer.videophash.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
 
 DESCRIPTION = """
@@ -152,6 +153,8 @@ def process_file(command: Command) -> Optional[Command]:
     """
     logger.info("Processing: {}", command.input_file)
     if command.target_movie_file is not None:
+        phash: Optional[PerceptualHash] = None
+        matched: Optional[ComparisonResult] = None
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: ComparisonResults = ComparisonResults([])
         # Match to nfo files, if enabled and found.
@@ -193,7 +196,11 @@ def process_file(command: Command) -> Optional[Command]:
                 new_metadata.resolution = ffprobe_results.get_resolution()
             target = move_to_final_location(command, new_metadata)
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
-            add_extra_artifacts(target.target_movie_file, new_metadata, search_results, command.config)
+            add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
+            if command.config.mark_collected and not new_metadata.is_collected:
+                toggle_collected(new_metadata, command.config)
+            if command.config.send_phash and phash and (not matched or not matched.phash_match):
+                share_phash(new_metadata, phash, command.config)
             logger.info("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
             return target
         elif command.inplace is False:
@@ -202,7 +209,7 @@ def process_file(command: Command) -> Optional[Command]:
                 write_log_file(failed.target_movie_file, search_results, failed.config)
 
 
-def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: ComparisonResults, config: NamerConfig):
+def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: ComparisonResults, phash: Optional[PerceptualHash], config: NamerConfig):
     """
     Once the file is in its final location we will grab other relevant output if requested.
     """
@@ -221,7 +228,7 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
             if poster is not None:
                 performer.image = str(poster)
 
-        write_nfo(video_file, new_metadata, config, trailer, poster, background)
+        write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
 
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_override: Path):

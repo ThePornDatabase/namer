@@ -131,6 +131,10 @@ override_tpdb_address =
 # Calculate and use phashes in search for matches
 search_phash = True
 
+# Should phashes be sent to tpdb if no phash match was found but a name match was.
+# Requires search_phash be true or is ignored.
+send_phash = False
+
 [metadata]
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
 # MP4 metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).
@@ -165,6 +169,9 @@ default_genre = Adult
 # to play correct in quicktime/apple tv.   If the language isn't found or is already the only default no action is
 # taken, no streams (audio/video) are re-encoded.  See: https://iso639-3.sil.org/code_tables/639/data/
 language = eng
+
+# Should tpdb be used to keep track of which videos you've collected?
+mark_collected = False
 
 [duplicates]
 
