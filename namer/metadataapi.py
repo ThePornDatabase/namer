@@ -195,7 +195,7 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
 
 
 @logger.catch
-def __post_json_object(url: str, config: NamerConfig, content: Optional[Any] = None) -> str:
+def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None) -> str:
     """
     returns json object with info
     """
@@ -205,7 +205,7 @@ def __post_json_object(url: str, config: NamerConfig, content: Optional[Any] = N
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=content)
+    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=data)
     response = ''
     if http.ok:
         response = http.text
