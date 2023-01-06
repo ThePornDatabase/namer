@@ -205,7 +205,9 @@ def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=data)
+    data_str = json.dumps(data)
+    logger.info(f"Sending: {data_str}")
+    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=data_str)
     response = ''
     if http.ok:
         response = http.text
@@ -482,7 +484,7 @@ def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
 def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
     data = {
         'type': 'PHASH',
-        'hash': phash.phash,
+        'hash': f"{phash.phash}",
         'duration': phash.duration,
     }
 
