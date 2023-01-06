@@ -198,13 +198,12 @@ def process_file(command: Command) -> Optional[Command]:
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
 
-            if new_metadata.type == 'Scene':
-                if command.config.mark_collected and not new_metadata.is_collected:
-                    toggle_collected(new_metadata, command.config)
+            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == 'Scene':
+                toggle_collected(new_metadata, command.config)
 
-                if command.config.send_phash and phash and (not matched or not matched.phash_match):
-                    share_phash(new_metadata, phash, command.config)
-                    share_oshash(new_metadata, phash, command.config)
+            if command.config.send_phash and phash and (not matched or not matched.phash_match):
+                share_phash(new_metadata, phash, command.config)
+                share_oshash(new_metadata, phash, command.config)
 
             logger.success("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
             return target
