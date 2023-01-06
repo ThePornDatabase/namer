@@ -9,7 +9,7 @@ import json
 import re
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from urllib.parse import quote
 
 import rapidfuzz
@@ -195,6 +195,37 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
 
 
 @logger.catch
+def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None) -> str:
+    """
+    returns json object with info
+    """
+    headers = {
+        "Authorization": f"Bearer {config.porndb_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "namer-1",
+    }
+    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=data)
+    response = ''
+    if http.ok:
+        response = http.text
+    else:
+        data = None
+        try:
+            data = http.json()
+        except JSONDecodeError:
+            pass
+
+        message = 'Unknown error'
+        if data and 'message' in data:
+            message = data['message']
+
+        logger.error(f'Server API error: "{message}"')
+
+    return response
+
+
+@logger.catch
 def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     headers = {
         "User-Agent": "namer-1",
@@ -224,7 +255,7 @@ def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config
                 set_permissions(file, config)
                 return file
             else:
-                return None
+                return
 
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
@@ -251,7 +282,7 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
                 set_permissions(trailer_file, namer_config)
                 return trailer_file
             else:
-                return None
+                return
 
         trailer = (video_file.parent / url).resolve()
         return trailer if trailer.exists() and trailer.is_file() else None
@@ -328,6 +359,9 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
             tags.append(tag.name)
 
         file_info.tags = tags
+
+    if hasattr(data, "is_collected"):
+        file_info.is_collected = data.is_collected
 
     return file_info
 
@@ -409,8 +443,6 @@ def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: 
         if file_infos:
             return file_infos[0]
 
-    return
-
 
 def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> ComparisonResults:
     """
@@ -439,6 +471,34 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
                     comparison_results[0].looked_up = file_infos
 
     return ComparisonResults(comparison_results)
+
+
+def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
+    if metadata.uuid:
+        scene_id = metadata.uuid.rsplit('/', 1)[-1]
+        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}", config=config)
+
+
+def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
+    data = {
+        'type': 'PHASH',
+        'hash': phash.phash,
+        'duration': phash.duration,
+    }
+
+    logger.info(f"Sending phash: {phash.phash} with duration {phash.duration}")
+    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
+
+
+def share_oshash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
+    data = {
+        'type': 'OSHASH',
+        'hash': phash.oshash,
+        'duration': phash.duration,
+    }
+
+    logger.info(f"Sending oshash: {phash.oshash} with duration {phash.duration}")
+    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
 
 
 def main(args_list: List[str]):

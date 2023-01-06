@@ -13,6 +13,7 @@ from configupdater import ConfigUpdater
 from requests_cache import CachedSession
 
 from namer.ffmpeg import FFMpeg
+from namer.videophash.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
 
 
 # noinspection PyDataclass
@@ -282,14 +283,19 @@ class NamerConfig:
     Calculate and use phashes in search for matches
     """
 
+    send_phash: bool = False
+    """
+    If match was made via name, or user selection and not phash, send the phash (only functions if search_phash is true)
+    """
+
+    mark_collected: bool = False
+    """
+    Mark any matched video as "collected" in tpdb, allowing tpdb to keep track of videos you have collected.
+    """
+
     require_match_phash_top: int = 3
     """
     If there is a phash match, require any name match be in the top N results
-    """
-
-    send_phash_of_matches_to_tpdb: bool = True
-    """
-    If true will push phash of matched videos by name back to tpdb.
     """
 
     ignored_dir_regex: Pattern = re.compile(r".*_UNPACK_.*", re.IGNORECASE)
@@ -389,6 +395,7 @@ class NamerConfig:
     """
 
     ffmpeg: FFMpeg = FFMpeg()
+    vph: VideoPerceptualHash = VideoPerceptualHash()
 
     def __init__(self):
         if sys.platform != "win32":
@@ -442,6 +449,7 @@ class NamerConfig:
             },
             "Phash": {
                 "search_phash": self.search_phash,
+                "send_phash": self.send_phash,
                 # "require_match_phash_top": self.require_match_phash_top,
                 # "send_phash_of_matches_to_tpdb": self.send_phash_of_matches_to_tpdb,
             },
@@ -457,6 +465,7 @@ class NamerConfig:
                 "enable_metadataapi_genres": self.enable_metadataapi_genres,
                 "default_genre": self.default_genre,
                 "language": self.language,
+                "mark_collected": self.mark_collected,
             },
             "Watchdog Config": {
                 "ignored_dir_regex": self.ignored_dir_regex.pattern,

@@ -16,7 +16,7 @@ To start off with windows you only really need to manually install one thing and
 
 **Step 1:** Install the latest version of python from [here.](https://www.python.org/downloads) When you do this install make sure you tick the **Add Python to path**. It makes your life a lot easier and you won't have to manually do it in the future.
 
-**Step 1:** With python now installed you can now download Namer through CMD. This is pretty easily done with a quick command. Open your CMD by typing CMD in your search bar and then type: **pip install namer**.  This is going to download and install all the packages that namer needs to run correctly.
+**Step 2:** With python now installed you can now download Namer through CMD. This is pretty easily done with a quick command. Open your CMD by typing CMD in your search bar and then type: **pip install namer**.  This is going to download and install all the packages that namer needs to run correctly.
 
 **Step 3:** Now that namer is installed you can setup your config. Go ahead and get a copy of a default config page from Github [here](https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default). You can copy it and paste it into your own document or download it straight from github, the option is yours. Once you have it copied or downloaded, go ahead and place it in your install location. The default location that namers uses is **C:/Users/YOURUSER**. With it placed in the correct folder go ahead and rename the file to **.namer.cfg**. Make sure that you add the period to the beginning of file or it will not be detected.
 
@@ -37,6 +37,7 @@ Namer uses 4 main directories:
 * **Dest:** This is where namer will place the final file after it has been scanned and renamed.
 
 These folders are important and all 4 need to be accessible for namer to work correctly.
+
 
 My recommendation for folder structure is as following. Make a new folder and call it whatever you want, for this example I will use **Namer** and place it on my  C: drive. Inside that folder make 3 new folders, naming one **work**, one **failed** and one **dest**. Now that you have all the folders, head back to the config and place the correct directory next to each setting.
 
