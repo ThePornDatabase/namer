@@ -131,6 +131,10 @@ class LookedUpFileInfo:
     """
     Should the source site provide it, the id for the site.
     """
+    is_collected: bool = False
+    """
+    Indicates if the current user has marked this video as part of their collection.
+    """
 
     def __init__(self):
         self.performers = []

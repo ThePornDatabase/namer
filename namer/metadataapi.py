@@ -195,6 +195,37 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
 
 
 @logger.catch
+def __post_json_object(url: str, content: Optional[str], config: NamerConfig) -> str:
+    """
+    returns json object with info
+    """
+    headers = {
+        "Authorization": f"Bearer {config.porndb_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "namer-1",
+    }
+    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=content)
+    response = ''
+    if http.ok:
+        response = http.text
+    else:
+        data = None
+        try:
+            data = http.json()
+        except JSONDecodeError:
+            pass
+
+        message = 'Unknown error'
+        if data and 'message' in data:
+            message = data['message']
+
+        logger.error(f'Server API error: "{message}"')
+
+    return response
+
+
+@logger.catch
 def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     headers = {
         "User-Agent": "namer-1",
@@ -329,6 +360,9 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
 
         file_info.tags = tags
 
+    if hasattr(data, "is_collected"):
+        file_info.is_collected = data.is_collected
+
     return file_info
 
 
@@ -439,6 +473,20 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
                     comparison_results[0].looked_up = file_infos
 
     return ComparisonResults(comparison_results)
+
+
+def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig) -> None:
+    if metadata.uuid:
+        content = metadata.uuid.split(sep="/")
+        if len(content) > 1:
+            id = content[1]
+            __post_json_object(f"{config.override_tpdb_address}/user/collection?{metadata.type}_id={id}", None, config)
+
+
+def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig) -> None:
+    message = ("{\"hash\": \"" + f"{phash.phash}" + "\", \"type\": \"PHASH\"}")
+    logger.info(f"Sending phash: {message}")
+    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", content=message, config=config)
 
 
 def main(args_list: List[str]):

@@ -10,6 +10,7 @@ from xml.dom.minidom import parseString, Document, Element
 from namer.configuration import NamerConfig
 from namer.command import set_permissions
 from namer.comparison_results import LookedUpFileInfo, Performer
+from namer.videophash import PerceptualHash
 
 
 def get_childnode(node: Element, name: str) -> Element:
@@ -90,7 +91,7 @@ def add_all_sub_element(doc: Document, parent: Element, name: str, text_list: Li
             sub_element.appendChild(txt_node)
 
 
-def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: Optional[Path] = None, poster: Optional[Path] = None, background: Optional[Path] = None) -> str:
+def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: Optional[Path] = None, poster: Optional[Path] = None, background: Optional[Path] = None, phash: Optional[PerceptualHash] = None) -> str:
     """
     Parse porndb info and create an Emby/Jellyfin xml file from the data.
     """
@@ -121,6 +122,8 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     add_sub_element(doc, root, 'theporndbid', str(info.uuid))
     add_sub_element(doc, root, 'phoenixadultid')
     add_sub_element(doc, root, 'phoenixadulturlid')
+
+    add_sub_element(doc, root, 'phash', str(phash.phash.hash) if phash else '')
     add_sub_element(doc, root, 'sourceid', info.source_url)
 
     for performer in info.performers:
@@ -136,14 +139,14 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     return str(doc.toprettyxml(indent="  ", newl='\n', encoding="UTF-8"), encoding="utf8")
 
 
-def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: NamerConfig, trailer: Optional[Path], poster: Optional[Path], background: Optional[Path]):
+def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: NamerConfig, trailer: Optional[Path], poster: Optional[Path], background: Optional[Path], phash: Optional[PerceptualHash]):
     """
     Writes an .nfo to the correct place for a video file.
     """
     if video_file and new_metadata and namer_config.write_nfo:
         target = video_file.parent / (video_file.stem + ".nfo")
         with open(target, "wt", encoding="UTF-8") as nfo_file:
-            towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background)
+            towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background, phash)
             nfo_file.write(towrite)
 
         set_permissions(target, namer_config)
