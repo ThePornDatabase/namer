@@ -62,6 +62,11 @@ class LookedUpFileInfo:
     porndb scene id, allowing lookup of more metadata, (tags)
     """
 
+    guid: Optional[str] = None
+    """
+    porndb guid/stashid
+    """
+
     site: Optional[str] = None
     """
     Site where this video originated, DorcelClub/Deeper/etc.....

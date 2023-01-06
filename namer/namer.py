@@ -231,9 +231,9 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
         poster = get_image(new_metadata.poster_url, "-poster", video_file, config)
         background = get_image(new_metadata.background_url, "-background", video_file, config)
         for performer in new_metadata.performers:
-            poster = get_image(performer.image, performer.name.replace(" ", "-") + "-image", video_file, config)
-            if poster is not None:
-                performer.image = str(poster)
+            performerimage = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config)
+            if performerimage is not None:
+                performer.image = str(performerimage)
 
         write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
 

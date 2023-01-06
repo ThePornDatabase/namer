@@ -298,6 +298,7 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     url_part = data.type.lower()
     file_info.uuid = f"{url_part}s/{data_id}"
 
+    file_info.guid = data.id
     file_info.name = data.title
     file_info.description = data.description
     file_info.date = data.date

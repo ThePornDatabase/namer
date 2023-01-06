@@ -3,7 +3,9 @@ Reads movie.xml (your.movie.name.nfo) of Emby/Jellyfin format in to a LookedUpFi
 allowing the metadata to be written in to video files (currently only mp4's),
 or used in renaming the video file.
 """
+import re
 from pathlib import Path
+
 from typing import Any, Optional, List
 from xml.dom.minidom import parseString, Document, Element
 
@@ -109,8 +111,8 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     add_sub_element(doc, root, "mpaa", "XXX")
 
     art = add_sub_element(doc, root, "art")
-    add_sub_element(doc, art, 'poster', str(poster) if poster else None)
-    add_sub_element(doc, art, 'background', str(background) if background else None)
+    add_sub_element(doc, art, 'poster', re.search(r'.*/(.*)', str(poster)).group(1) if poster else None)
+    add_sub_element(doc, art, 'background', re.search(r'.*/(.*)', str(background)).group(1) if background else None)
 
     if config.enable_metadataapi_genres:
         add_all_sub_element(doc, root, 'genre', info.tags)
@@ -120,6 +122,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
 
     add_sub_element(doc, root, 'studio', info.site)
     add_sub_element(doc, root, 'theporndbid', str(info.uuid))
+    add_sub_element(doc, root, 'theporndbguid', str(info.guid))
     add_sub_element(doc, root, 'phoenixadultid')
     add_sub_element(doc, root, 'phoenixadulturlid')
 
@@ -130,7 +133,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
         actor = add_sub_element(doc, root, 'actor')
         add_sub_element(doc, actor, 'name', performer.name)
         add_sub_element(doc, actor, 'role', performer.role)
-        add_sub_element(doc, actor, 'image', str(performer.image) if performer.image else None)
+        add_sub_element(doc, actor, 'image', re.search(r'.*/(.*)', str(performer.image)).group(1) if performer.image else None)
         add_sub_element(doc, actor, 'type', "Actor")
         add_sub_element(doc, actor, 'thumb')
 
