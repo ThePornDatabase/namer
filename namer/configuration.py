@@ -13,6 +13,7 @@ from configupdater import ConfigUpdater
 from requests_cache import CachedSession
 
 from namer.ffmpeg import FFMpeg
+from namer.videophash.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
 
 
 # noinspection PyDataclass
@@ -394,6 +395,7 @@ class NamerConfig:
     """
 
     ffmpeg: FFMpeg = FFMpeg()
+    vph: VideoPerceptualHash = VideoPerceptualHash()
 
     def __init__(self):
         if sys.platform != "win32":

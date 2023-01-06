@@ -9,7 +9,7 @@ import json
 import re
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from urllib.parse import quote
 
 import rapidfuzz
@@ -195,7 +195,7 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
 
 
 @logger.catch
-def __post_json_object(url: str, content: Optional[str], config: NamerConfig) -> str:
+def __post_json_object(url: str, config: NamerConfig, content: Optional[Any] = None) -> str:
     """
     returns json object with info
     """
@@ -255,7 +255,7 @@ def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config
                 set_permissions(file, config)
                 return file
             else:
-                return None
+                return
 
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
@@ -282,7 +282,7 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
                 set_permissions(trailer_file, namer_config)
                 return trailer_file
             else:
-                return None
+                return
 
         trailer = (video_file.parent / url).resolve()
         return trailer if trailer.exists() and trailer.is_file() else None
@@ -443,8 +443,6 @@ def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: 
         if file_infos:
             return file_infos[0]
 
-    return
-
 
 def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> ComparisonResults:
     """
@@ -475,18 +473,32 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
     return ComparisonResults(comparison_results)
 
 
-def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig) -> None:
+def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
-        content = metadata.uuid.split(sep="/")
-        if len(content) > 1:
-            id = content[1]
-            __post_json_object(f"{config.override_tpdb_address}/user/collection?{metadata.type}_id={id}", None, config)
+        scene_id = metadata.uuid.rsplit('/', 1)[-1]
+        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}", config=config)
 
 
-def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig) -> None:
-    message = ("{\"hash\": \"" + f"{phash.phash}" + "\", \"type\": \"PHASH\"}")
-    logger.info(f"Sending phash: {message}")
-    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", content=message, config=config)
+def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
+    data = {
+        'type': 'PHASH',
+        'hash': phash.phash,
+        'duration': phash.duration,
+    }
+
+    logger.info(f"Sending phash: {phash.phash} with duration {phash.duration}")
+    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
+
+
+def share_oshash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
+    data = {
+        'type': 'OSHASH',
+        'hash': phash.oshash,
+        'duration': phash.duration,
+    }
+
+    logger.info(f"Sending oshash: {phash.oshash} with duration {phash.duration}")
+    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
 
 
 def main(args_list: List[str]):
