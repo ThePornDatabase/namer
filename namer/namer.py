@@ -195,11 +195,10 @@ def process_file(command: Command) -> Optional[Command]:
                 new_metadata.resolution = ffprobe_results.get_resolution()
 
             if command.config.send_phash:
-                if not matched or not matched.phash_match:
-                    phash = command.config.vph.get_hashes(command.target_movie_file) if not phash else phash
-                    if phash:
-                        share_phash(new_metadata, phash, command.config)
-                        share_oshash(new_metadata, phash, command.config)
+                phash = command.config.vph.get_hashes(command.target_movie_file) if not phash else phash
+                if phash:
+                    share_phash(new_metadata, phash, command.config)
+                    share_oshash(new_metadata, phash, command.config)
 
             if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == SceneType.SCENE:
                 toggle_collected(new_metadata, command.config)
