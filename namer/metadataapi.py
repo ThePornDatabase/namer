@@ -205,7 +205,7 @@ def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=data)
+    http = Http.post(url, cache_session=config.cache_session, headers=headers, json=data)
     response = ''
     if http.ok:
         response = http.text
