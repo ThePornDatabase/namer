@@ -21,7 +21,7 @@ from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import FileInfo
-from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_phash, toggle_collected
+from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_oshash, share_phash, toggle_collected
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
@@ -194,14 +194,19 @@ def process_file(command: Command) -> Optional[Command]:
             ffprobe_results = command.config.ffmpeg.ffprobe(command.target_movie_file)
             if ffprobe_results:
                 new_metadata.resolution = ffprobe_results.get_resolution()
+
             target = move_to_final_location(command, new_metadata)
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
+
             if command.config.mark_collected and not new_metadata.is_collected:
                 toggle_collected(new_metadata, command.config)
+
             if command.config.send_phash and phash and (not matched or not matched.phash_match):
                 share_phash(new_metadata, phash, command.config)
-            logger.info("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
+                share_oshash(new_metadata, phash, command.config)
+
+            logger.success("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
             return target
         elif command.inplace is False:
             failed = move_command_files(command, command.config.failed_dir)
