@@ -482,7 +482,7 @@ def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
 def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
     data = {
         'type': 'PHASH',
-        'hash': phash.phash,
+        'hash': str(phash.phash),
         'duration': phash.duration,
     }
 
