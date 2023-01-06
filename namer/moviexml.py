@@ -123,7 +123,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     add_sub_element(doc, root, 'phoenixadultid')
     add_sub_element(doc, root, 'phoenixadulturlid')
 
-    add_sub_element(doc, root, 'phash', str(phash.phash.hash) if phash else '')
+    add_sub_element(doc, root, 'phash', str(phash.phash) if phash else '')
     add_sub_element(doc, root, 'sourceid', info.source_url)
 
     for performer in info.performers:
