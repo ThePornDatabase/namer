@@ -127,27 +127,8 @@ Running a service will occur automatically once you call ``docker-compose up``. 
 Pip/Python usage
 --------------------
 
-What if you don't want to use docker and/or containers?  Do you have python 3 and pip (sometimes pip3) and the command line tool ``ffmpeg`` installed locally?  If so,  ``pip install namer`` gets the job done.  If
-you don't have python (3), pip and ``ffmpeg`` installed Homebrew_ can help you on Mac, and Chocolatey_ can help you on windows.   Alternatively, namer can now install ffmpeg for you if you ffmpeg is not on the PATH at execution time, just make sure the user running it can write to the pip directory.
+A detailed install tutorial can be found at InstallInstructions_
 
-
-.. code-block:: sh
-
-  # install namer
-  pip3 install namer
-
-  #optionallly, set your configuration location, the below is the default:
-  export NAMER_CONFIG=${HOME}/.namer.cfg  
-
-  # Run the watchdog service:
-  python3 -m namer watchdog
-
-  # Or manually rename a file, dir, or all sub-dirs/sub-files of a dir:
-  # This calls the help method so that you can see the options.
-  python3 -m namer rename -h
-
-
-Configuration:
 ---------------------------
 
 There is a well documented template of namer.cfg in this git repo, which is broken up in to three sections.
@@ -243,3 +224,4 @@ Just be sure to pay attention to the tests and any failing pylint results.   If 
 .. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L72
 .. _Homebrew: https://docs.brew.sh/Installation
 .. _Chocolatey: https://chocolatey.org/install
+.. _InstallInstructions: https://github.com/ThePornDatabase/namer/blob/main/install%20instructions.md
