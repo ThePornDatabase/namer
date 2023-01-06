@@ -57,7 +57,7 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
         info.look_up_site_id = phoenixadulturlid
 
     theporndbid = get_childnode_text(movie, 'theporndbid')
-    if phoenixadulturlid:
+    if theporndbid:
         info.uuid = theporndbid
 
     info.tags = []
@@ -136,7 +136,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
 
     add_sub_element(doc, root, 'fileinfo')
 
-    return str(doc.toprettyxml(indent="  ", newl='\n', encoding="UTF-8"), encoding="utf8")
+    return str(doc.toprettyxml(indent="  ", newl='\n', encoding="UTF-8"), encoding="UTF-8")
 
 
 def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: NamerConfig, trailer: Optional[Path], poster: Optional[Path], background: Optional[Path], phash: Optional[PerceptualHash]):

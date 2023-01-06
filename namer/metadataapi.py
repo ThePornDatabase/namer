@@ -18,7 +18,7 @@ from PIL import Image
 from requests import JSONDecodeError
 from unidecode import unidecode
 
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions, Command
@@ -205,7 +205,7 @@ def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    http = Http.post(url, cache_session=config.cache_session, headers=headers, data=data)
+    http = Http.post(url, cache_session=config.cache_session, headers=headers, json=data)
     response = ''
     if http.ok:
         response = http.text
@@ -293,7 +293,7 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info = LookedUpFileInfo()
 
     data_id = data._id  # pylint: disable=protected-access
-    file_info.type = data.type
+    file_info.type = SceneType[data.type.upper()]
 
     url_part = data.type.lower()
     file_info.uuid = f"{url_part}s/{data_id}"
@@ -482,7 +482,7 @@ def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
 def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
     data = {
         'type': 'PHASH',
-        'hash': phash.phash,
+        'hash': str(phash.phash),
         'duration': phash.duration,
     }
 

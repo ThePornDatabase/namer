@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import PurePath
 from typing import List, Optional
 
@@ -40,6 +41,12 @@ class Performer:
 
     def __repr__(self):
         return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
+
+
+class SceneType(Enum):
+    SCENE = 'Scene'
+    MOVIE = 'Movie'
+    JAV = 'JAV'
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -115,7 +122,7 @@ class LookedUpFileInfo:
     """
     Tags associated with the video.   Noisy and long list.
     """
-    type: Optional[str] = None
+    type: Optional[SceneType] = None
     """
     movie or scene, a distinction without a difference.
     """
@@ -160,11 +167,11 @@ class LookedUpFileInfo:
             vr = "vr"
 
         if self.original_query and '/movies' in self.original_query and (self.site and self.site.lower().replace(" ", "") not in config.movie_data_preferred):
-            self.type = 'movie'
+            self.type = SceneType.MOVIE
         elif self.original_query and '/jav' in self.original_query:
-            self.type = 'jav'
+            self.type = SceneType.JAV
         else:
-            self.type = 'scene'
+            self.type = SceneType.SCENE
 
         return {
             "uuid": self.uuid,
@@ -179,7 +186,7 @@ class LookedUpFileInfo:
             "trans": self.original_parsed_filename.trans if self.original_parsed_filename else None,
             "vr": vr,
             "resolution": res_str,
-            "type": self.type,
+            "type": self.type.value,
             "external_id": self.external_id,
         }
 

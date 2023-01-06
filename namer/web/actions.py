@@ -95,7 +95,7 @@ def get_search_results(query: str, search_type: str, file: str, config: NamerCon
     for scene_data in file_infos:
         scene = {
             'id': scene_data.uuid,
-            'type': scene_data.type,
+            'type': scene_data.type.value,
             'title': scene_data.name,
             'date': scene_data.date,
             'poster': scene_data.poster_url,
