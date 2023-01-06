@@ -44,9 +44,9 @@ class Performer:
 
 
 class SceneType(Enum):
-    SCENE = 'scene'
-    MOVIE = 'movie'
-    JAV = 'jav'
+    SCENE = 'Scene'
+    MOVIE = 'Movie'
+    JAV = 'JAV'
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

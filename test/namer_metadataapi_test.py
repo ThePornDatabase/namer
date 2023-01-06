@@ -5,6 +5,7 @@ import io
 import unittest
 from unittest import mock
 
+from namer.comparison_results import SceneType
 from namer.fileinfo import parse_file_name
 from namer.command import make_command
 from namer.metadataapi import main, match
@@ -147,7 +148,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.date, "2022-01-03")
             self.assertEqual(info.site, "Evil Angel")
             self.assertEqual(info.external_id, "198543")
-            self.assertEqual(info.type, "Scene")
+            self.assertEqual(info.type, SceneType.SCENE)
             self.assertIsNotNone(info.description)
             if info.description is not None:
                 self.assertRegex(info.description, r"brunette Carmela Clutch positions her big, juicy")

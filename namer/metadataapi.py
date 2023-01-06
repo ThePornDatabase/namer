@@ -18,7 +18,7 @@ from PIL import Image
 from requests import JSONDecodeError
 from unidecode import unidecode
 
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions, Command
@@ -293,7 +293,7 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info = LookedUpFileInfo()
 
     data_id = data._id  # pylint: disable=protected-access
-    file_info.type = data.type
+    file_info.type = SceneType[data.type.upper()]
 
     url_part = data.type.lower()
     file_info.uuid = f"{url_part}s/{data_id}"
