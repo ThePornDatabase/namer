@@ -475,7 +475,7 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
 
 def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
-        content = metadata.uuid.rsplit('/', 1)[-1]
+        scene_id = metadata.uuid.rsplit('/', 1)[-1]
         __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}", config=config)
 
 
