@@ -15,7 +15,7 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
@@ -198,7 +198,7 @@ def process_file(command: Command) -> Optional[Command]:
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
 
-            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == 'scene':
+            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == SceneType.SCENE:
                 toggle_collected(new_metadata, command.config)
 
             if command.config.send_phash and phash and (not matched or not matched.phash_match):
