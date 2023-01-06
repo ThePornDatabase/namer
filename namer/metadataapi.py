@@ -477,7 +477,7 @@ def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
         content = metadata.uuid.rsplit('/', 1)[-1]
         scene_id = content[1]
-        __post_json_object(f"{config.override_tpdb_address}/user/collection?{metadata.type}_id={scene_id}", config=config)
+        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}", config=config)
 
 
 def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
