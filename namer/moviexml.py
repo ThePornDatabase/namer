@@ -3,7 +3,6 @@ Reads movie.xml (your.movie.name.nfo) of Emby/Jellyfin format in to a LookedUpFi
 allowing the metadata to be written in to video files (currently only mp4's),
 or used in renaming the video file.
 """
-import re
 from pathlib import Path
 
 from typing import Any, Optional, List
@@ -112,10 +111,8 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
 
     art = add_sub_element(doc, root, "art")
 
-    poster_match = re.search(r'.*/(.*)', str(poster)) if poster else None
-    add_sub_element(doc, art, 'poster', poster_match.group(1) if poster_match else None)
-    background_match = re.search(r'.*/(.*)', str(background)) if background else None
-    add_sub_element(doc, art, 'background', background_match.group(1) if background_match else None)
+    add_sub_element(doc, art, 'poster', poster.name if poster else None)
+    add_sub_element(doc, art, 'background', background.name if background else None)
 
     if config.enable_metadataapi_genres:
         add_all_sub_element(doc, root, 'genre', info.tags)
@@ -129,15 +126,14 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     add_sub_element(doc, root, 'phoenixadultid')
     add_sub_element(doc, root, 'phoenixadulturlid')
 
-    add_sub_element(doc, root, 'phash', str(phash.phash) if phash else '')
+    add_sub_element(doc, root, 'phash', str(phash.phash) if phash else None)
     add_sub_element(doc, root, 'sourceid', info.source_url)
 
     for performer in info.performers:
         actor = add_sub_element(doc, root, 'actor')
         add_sub_element(doc, actor, 'name', performer.name)
         add_sub_element(doc, actor, 'role', performer.role)
-        performer_match = re.search(r'.*/(.*)', str(performer.image)) if performer.image else None
-        add_sub_element(doc, actor, 'image', performer_match.group(1) if performer_match else None)
+        add_sub_element(doc, actor, 'image', Path(performer.image).name if performer.image else None)
         add_sub_element(doc, actor, 'type', "Actor")
         add_sub_element(doc, actor, 'thumb')
 
@@ -153,7 +149,7 @@ def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: Na
     if video_file and new_metadata and namer_config.write_nfo:
         target = video_file.parent / (video_file.stem + ".nfo")
         with open(target, "wt", encoding="UTF-8") as nfo_file:
-            towrite = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background, phash)
-            nfo_file.write(towrite)
+            data = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background, phash)
+            nfo_file.write(data)
 
         set_permissions(target, namer_config)

@@ -223,16 +223,16 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     if config.write_namer_log:
         write_log_file(video_file, search_results, config)
 
-    if config.trailer_location and config.trailer_location != '' and new_metadata is not None:
+    if config.trailer_location and new_metadata:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
-    if config.write_nfo and new_metadata is not None:
+    if config.write_nfo and new_metadata:
         poster = get_image(new_metadata.poster_url, "-poster", video_file, config)
         background = get_image(new_metadata.background_url, "-background", video_file, config)
         for performer in new_metadata.performers:
-            performerimage = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config)
-            if performerimage is not None:
-                performer.image = str(performerimage)
+            performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config)
+            if performer_image:
+                performer.image = str(performer_image)
 
         write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
 
