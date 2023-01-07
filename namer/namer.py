@@ -114,7 +114,7 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
         poster = None
         if config.enabled_tagging and video.suffix.lower() == ".mp4":
             random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-            poster = get_image(new_metadata.poster_url, random, video, config)
+            poster = get_image(new_metadata.poster_url, random, video, config) if new_metadata.poster_url else None
             logger.info("Updating file metadata (atoms): {}", video)
             update_mp4_file(video, new_metadata, poster, ffprobe_results, config)
 
@@ -227,10 +227,10 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
     if config.write_nfo and new_metadata:
-        poster = get_image(new_metadata.poster_url, "-poster", video_file, config)
-        background = get_image(new_metadata.background_url, "-background", video_file, config)
+        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url else None
+        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url else None
         for performer in new_metadata.performers:
-            performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config)
+            performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image else None
             if performer_image:
                 performer.image = str(performer_image)
 

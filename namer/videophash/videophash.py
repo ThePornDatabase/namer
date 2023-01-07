@@ -21,7 +21,7 @@ class VideoPerceptualHash:
     __columns: int = 5
     __rows: int = 5
 
-    __ffmpeg: FFMpeg = None
+    __ffmpeg: FFMpeg
 
     def __init__(self, ffmpeg: FFMpeg):
         self.__ffmpeg = ffmpeg
