@@ -132,6 +132,10 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
         target_name = config.failed_dir / Path(file_name_str).parts[0]
         shutil.rmtree(target_name)
     else:
+        log_file = config.failed_dir / (file_name.stem + '_namer.json.gz')
+        if log_file.is_file():
+            log_file.unlink()
+
         file_name.unlink()
 
     return not file_name.is_file()
