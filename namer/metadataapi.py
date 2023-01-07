@@ -241,7 +241,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
 
 
 @logger.catch
-def get_image(url: Optional[str], infix: str, video_file: Optional[Path], config: NamerConfig) -> Optional[Path]:
+def get_image(url: str, infix: str, video_file: Optional[Path], config: NamerConfig) -> Optional[Path]:
     """
     returns json object with info
     """

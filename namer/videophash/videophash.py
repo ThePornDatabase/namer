@@ -35,9 +35,10 @@ class VideoPerceptualHash:
 
         duration = probe.get_format().duration
         phash = self.get_phash(file, duration)
-        file_oshash = self.get_oshash(file)
+        if phash:
+            file_oshash = self.get_oshash(file)
 
-        data = return_perceptual_hash(duration, phash, file_oshash)
+            data = return_perceptual_hash(duration, phash, file_oshash)
 
         return data
 

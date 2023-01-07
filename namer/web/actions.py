@@ -5,6 +5,7 @@ import gzip
 import json
 import math
 import shutil
+from enum import Enum
 from functools import lru_cache
 from pathlib import Path
 from queue import Queue
@@ -18,6 +19,12 @@ from namer.comparison_results import ComparisonResults
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
+
+
+class SearchType(str, Enum):
+    ANY = 'Any'
+    SCENES = 'Scenes'
+    MOVIES = 'Movies'
 
 
 def has_no_empty_params(rule: Rule) -> bool:
@@ -68,18 +75,18 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     return res
 
 
-def get_search_results(query: str, search_type: str, file: str, config: NamerConfig, page: int = 1) -> Dict:
+def get_search_results(query: str, search_type: SearchType, file: str, config: NamerConfig, page: int = 1) -> Dict:
     """
     Search results for user selection.
     """
 
     responses = {}
-    if search_type == 'Any' or search_type == 'Scenes':
+    if search_type == SearchType.ANY or search_type == SearchType.SCENES:
         # scenes
         url = __build_url(config, name=query, page=page, movie=False)
         responses[url] = __get_response_json_object(url, config)
 
-    if search_type == 'Any' or search_type == 'Movies':
+    if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
         # movies
         url = __build_url(config, name=query, page=page, movie=True)
         responses[url] = __get_response_json_object(url, config)

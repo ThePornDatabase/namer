@@ -43,7 +43,7 @@ class Performer:
         return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
 
 
-class SceneType(Enum):
+class SceneType(str, Enum):
     SCENE = 'Scene'
     MOVIE = 'Movie'
     JAV = 'JAV'
