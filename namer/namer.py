@@ -203,6 +203,10 @@ def process_file(command: Command) -> Optional[Command]:
             if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == SceneType.SCENE:
                 toggle_collected(new_metadata, command.config)
 
+            log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')
+            if log_file.is_file():
+                log_file.unlink()
+
             target = move_to_final_location(command, new_metadata)
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
