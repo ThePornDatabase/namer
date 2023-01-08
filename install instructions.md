@@ -96,7 +96,7 @@ So, all of these are essentially translations between namer and unraid. When you
 
 So go ahead and hit **Apply** and let unraid do it's thing. Once you do that namer will be installed but it won't run as since your config isn't where it needs to be.
 
-**Step 2:** Go ahead and move your config into your **/config** folder. You can do that via windows SMB or something of that sort. You can also learn how to create your config above in the Windows section. The only main difference is going to be your paths and the fact that, in unraid, your **namer.cfg** doesn't need the period at the beginning. If you put your folders in side of /media then your config should look like this:
+**Step 2:** Go ahead and move your namer.cfg into your **/config** folder. You can do that via windows SMB or something of that sort. You can also learn how to create your config above in the Windows section. The only main difference is going to be your paths and the fact that, in unraid, your **namer.cfg** doesn't need the period at the beginning. If you put your folders in side of /media then your config should look like this:
 
 * watch_dir = /media/watch
 * work_dir = /media/work
