@@ -15,7 +15,7 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
@@ -114,7 +114,7 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
         poster = None
         if config.enabled_tagging and video.suffix.lower() == ".mp4":
             random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-            poster = get_image(new_metadata.poster_url, random, video, config)
+            poster = get_image(new_metadata.poster_url, random, video, config) if new_metadata.poster_url else None
             logger.info("Updating file metadata (atoms): {}", video)
             update_mp4_file(video, new_metadata, poster, ffprobe_results, config)
 
@@ -194,16 +194,22 @@ def process_file(command: Command) -> Optional[Command]:
             if ffprobe_results:
                 new_metadata.resolution = ffprobe_results.get_resolution()
 
+            if command.config.send_phash:
+                phash = command.config.vph.get_hashes(command.target_movie_file) if not phash else phash
+                if phash:
+                    share_phash(new_metadata, phash, command.config)
+                    share_oshash(new_metadata, phash, command.config)
+
+            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == SceneType.SCENE:
+                toggle_collected(new_metadata, command.config)
+
+            log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')
+            if log_file.is_file():
+                log_file.unlink()
+
             target = move_to_final_location(command, new_metadata)
             tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
             add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
-
-            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == 'Scene':
-                toggle_collected(new_metadata, command.config)
-
-            if command.config.send_phash and phash and (not matched or not matched.phash_match):
-                share_phash(new_metadata, phash, command.config)
-                share_oshash(new_metadata, phash, command.config)
 
             logger.success("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
             return target
@@ -221,16 +227,16 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     if config.write_namer_log:
         write_log_file(video_file, search_results, config)
 
-    if config.trailer_location and config.trailer_location != '' and new_metadata is not None:
+    if config.trailer_location and new_metadata:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
-    if config.write_nfo and new_metadata is not None:
-        poster = get_image(new_metadata.poster_url, "-poster", video_file, config)
-        background = get_image(new_metadata.background_url, "-background", video_file, config)
+    if config.write_nfo and new_metadata:
+        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url else None
+        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url else None
         for performer in new_metadata.performers:
-            poster = get_image(performer.image, performer.name.replace(" ", "-") + "-image", video_file, config)
-            if poster is not None:
-                performer.image = str(poster)
+            performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image else None
+            if performer_image:
+                performer.image = str(performer_image)
 
         write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
 

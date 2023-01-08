@@ -59,10 +59,16 @@ class StashVideoPerceptualHash:
         if not self.__phash_path:
             return output
 
-        args = [str(self.__phash_path / self.__phash_name), '-json', ]
+        args = [
+            str(self.__phash_path / self.__phash_name),
+            '-json',
+        ]
+
         if file:
-            args.append('--video')
-            args.append(str(file))
+            args.extend([
+                '--video', str(file)
+            ])
+
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
             stdout, stderr = process.communicate()
             stdout, stderr = stdout.strip(), stderr.strip()

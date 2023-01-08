@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Union
 
 import imagehash
 
@@ -14,11 +14,10 @@ class PerceptualHash:
     oshash: str
 
 
-def return_perceptual_hash(duration: Union[float, int], phash: Optional[Union[str, imagehash.ImageHash]], file_oshash: str) -> PerceptualHash:
+def return_perceptual_hash(duration: Union[float, int], phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
     output = PerceptualHash()
     output.duration = int(duration) if isinstance(duration, float) else duration
-    if phash:
-        output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
+    output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
     output.oshash = file_oshash
 
     return output
