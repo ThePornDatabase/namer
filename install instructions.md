@@ -1,4 +1,4 @@
-Install instructions
+Install Instructions
 =================
 
 To start off with namer there are 3 main ways to install it:
@@ -38,7 +38,6 @@ Namer uses 4 main directories:
 
 These folders are important and all 4 need to be accessible for namer to work correctly.
 
-
 My recommendation for folder structure is as following. Make a new folder and call it whatever you want, for this example I will use **Namer** and place it on my  C: drive. Inside that folder make 3 new folders, naming one **work**, one **failed** and one **dest**. Now that you have all the folders, head back to the config and place the correct directory next to each setting.
 
 * watch_dir = C:/Namer/watch
@@ -56,3 +55,54 @@ After these steps you are pretty much setup. There are a lot more settings you c
 Before you start going crazy and slapping files everywhere:
 
 Namer uses a **STUDIO-DATE-SCENE** format. Essentially this means your folders need to be named that way or namer will not match your files and you will need to do it manually all the time.
+
+Unraid
+----------------
+
+Linux systems are more complicated than windows systems but can be more stable and less problimatic as namer mostly runs passivly in the background. This isn't going to be an UNRAID tutorial and i'm going to take certain liberties hoping that you already know how it works.
+
+**Step 1:** Go to your docker tab then click add container down below. I'll put a example template below, the names can be somewhat interchangable but you have to remember them and use your names accordingly.
+
+* Name: namer
+* Repository: ghcr.io/theporndatabase/namer:latest
+
+After these are filled in you want to go ahead and add some paths for your media, config, and ports if you plan on using the web. Scroll down and click on **Add another Path, Port, Variable, Label or Device**. While in here make it as such.
+
+* Config Type: Path
+* Name: config
+* Container path: /config
+* Host Path: /mnt/user/appdata/namer (This is important as it's where your namer.cfg is going to get placed.)
+* Default value : /config
+
+Now we're going to do that again but create for where your media and namer working folders are going to live. You can make one for your work folders and then another to where your media lives but that's up to your personal preference.
+
+* Config Type: Path
+* Name: media
+* Container path: /media
+* Host Path : /mnt/user/media (This is the top folder that all my work folders are in and then another subfolder where my media lives. Essentially when namer looks in /media it can see all 4 folders that namer uses)
+* Default Value : /media
+
+After that we can go ahead and link in our port for the webUI. You can use whatever port you see fit just make sure to update it on your namer.cfg
+
+* Config Type: Port
+* Name: port
+* Container port: 6980 (or whatever you want it to be)
+* Host port: 6980
+* Connection Type: TCP
+
+We also need to make some PUID and PUIG ones for your perms. It's exactly the same as above but you use variable instead of path.
+
+So, all of these are essentially translations between namer and unraid. When you type **/config** into namer it will tell unraid and unraid will look in **/mnt/user/appdata/namer**. This also applies to all the other ones we made too.
+
+So go ahead and hit **Apply** and let unraid do it's thing. Once you do that namer will be installed but it won't run as since your config isn't where it needs to be.
+
+**Step 2:** Go ahead and move your namer.cfg into your **/config** folder. You can do that via windows SMB or something of that sort. You can also learn how to create your config above in the Windows section. The only main difference is going to be your paths and the fact that, in unraid, your **namer.cfg** doesn't need the period at the beginning. If you put your folders in side of /media then your config should look like this:
+
+* watch_dir = /media/watch
+* work_dir = /media/work
+* failed_dir = /media/failed
+* dest_dir = /media/DESTINATION
+
+You can go ahead and set your webui and webui port if you wanted acess to that as well.
+
+**Step 3:** You're essentally done, so you can go ahead and boot up namer. To acess the webui you can go ahead and use your `serverip:6980`. Now you can start putting files in your watch folder and let namer go to work.
