@@ -111,6 +111,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.performers[2].name, "Mark Wood")
             self.assertEqual(info.performers[2].role, "Male")
             self.assertEqual(info.new_file_name("{name}", config), "Carmela Clutch Fabulous Anal 3-Way!")
+            self.assertEqual(info.new_file_name("{year}", config), "2022")
 
     def test_call_metadataapi_net2(self):
         """

@@ -165,7 +165,7 @@ class LookedUpFileInfo:
         res = self.resolution
         res_str: Optional[str] = None
         if res:
-            res_str = "4k" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
+            res_str = "2160p" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
 
         vr = ""
         if (self.site and self.site.lower() in config.vr_studios) or any(tag.strip().lower() in config.vr_tags for tag in self.tags):
@@ -181,6 +181,7 @@ class LookedUpFileInfo:
         return {
             "uuid": self.uuid,
             "date": self.date,
+            "year": self.date[0:4] if self.date else None,
             "description": self.description,
             "name": self.name,
             "site": self.site.replace(" ", "") if self.site else None,
