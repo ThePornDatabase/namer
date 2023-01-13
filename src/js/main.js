@@ -25,6 +25,8 @@ const queueSize = $('#queueSize')
 const refreshFiles = $('#refreshFiles')
 const deleteButton = $('#deleteButton')
 
+let modalButton
+
 searchButton.on('click', function () {
     resultForm.html(Helpers.getProgressBar())
 
@@ -52,17 +54,18 @@ queryInput.on('keyup', function (e) {
 })
 
 filesResult.on('click', '.match', function () {
-    const query = $(this).data('query')
-    const file = $(this).data('file')
+    modalButton = $(this)
+    const query = modalButton.data('query')
+    const file = modalButton.data('file')
     queryInput.val(query)
     queryInput.data('file', file)
 })
 
 filesResult.on('click', '.log', function () {
     logForm.html(Helpers.getProgressBar())
-
+    modalButton = $(this)
     const data = {
-        'file': $(this).data('file'),
+        'file': modalButton.data('file'),
     }
 
     const title = escape(`[${data['file']}]`)
@@ -78,7 +81,8 @@ filesResult.on('click', '.log', function () {
 })
 
 filesResult.on('click', '.delete', function () {
-    const file = $(this).data('file')
+    modalButton = $(this)
+    const file = modalButton.data('file')
     deleteFile.val(file)
     deleteFile.data('file', file)
 })
@@ -101,7 +105,7 @@ deleteButton.on('click', function () {
     }
 
     Helpers.request('./api/v1/delete', data, function () {
-        Helpers.refreshFiles(filesResult)
+        Helpers.removeRow(modalButton)
     })
 })
 
@@ -112,7 +116,7 @@ function rename() {
     }
 
     Helpers.request('./api/v1/rename', data, function () {
-        Helpers.refreshFiles(filesResult)
+        Helpers.removeRow(modalButton)
     })
 }
 
