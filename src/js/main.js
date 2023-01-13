@@ -101,7 +101,8 @@ deleteButton.on('click', function () {
     }
 
     Helpers.request('./api/v1/delete', data, function () {
-        Helpers.refreshFiles(filesResult)
+        const selector = $(`.match[data-file="${data['file']}"]`)
+        Helpers.removeRow(selector)
     })
 })
 
@@ -112,7 +113,8 @@ function rename() {
     }
 
     Helpers.request('./api/v1/rename', data, function () {
-        Helpers.refreshFiles(filesResult)
+        const selector = $(`.match[data-file="${data['file']}"]`)
+        Helpers.removeRow(selector)
     })
 }
 
