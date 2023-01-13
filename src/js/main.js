@@ -55,18 +55,17 @@ queryInput.on('keyup', function (e) {
 
 filesResult.on('click', '.match', function () {
     modalButton = $(this)
-
-    const query = $(this).data('query')
-    const file = $(this).data('file')
+    const query = modalButton.data('query')
+    const file = modalButton.data('file')
     queryInput.val(query)
     queryInput.data('file', file)
 })
 
 filesResult.on('click', '.log', function () {
     logForm.html(Helpers.getProgressBar())
-
+    modalButton = $(this)
     const data = {
-        'file': $(this).data('file'),
+        'file': modalButton.data('file'),
     }
 
     const title = escape(`[${data['file']}]`)
@@ -83,8 +82,7 @@ filesResult.on('click', '.log', function () {
 
 filesResult.on('click', '.delete', function () {
     modalButton = $(this)
-    
-    const file = $(this).data('file')
+    const file = modalButton.data('file')
     deleteFile.val(file)
     deleteFile.data('file', file)
 })
