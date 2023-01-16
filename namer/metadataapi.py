@@ -110,14 +110,14 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
     )
 
 
-def __update_results(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, skip_date: bool = False, skip_name: bool = False, movie: bool = False, phash: Optional[PerceptualHash] = None):
+def __update_results(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, skip_date: bool = False, skip_name: bool = False, scene_type: SceneType = SceneType.SCENE, phash: Optional[PerceptualHash] = None):
     if not results or not results[0].is_match():
-        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, movie, phash=phash):
+        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, scene_type=scene_type, phash=phash):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
                 result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
                 results.append(result)
 
-        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, movie):
+        for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, scene_type=scene_type):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
                 result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
                 results.append(result)
@@ -127,27 +127,28 @@ def __update_results(results: List[ComparisonResult], name_parts: Optional[FileI
     return results
 
 
-def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, movies: bool, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
-    results = __update_results(results, name_parts, namer_config, movie=movies, phash=phash)
-    results = __update_results(results, name_parts, namer_config, skip_name=True, movie=movies, phash=phash)
+def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, scene_type: SceneType, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
+    results = __update_results(results, name_parts, namer_config, scene_type=scene_type, phash=phash)
+    results = __update_results(results, name_parts, namer_config, skip_name=True, scene_type=scene_type, phash=phash)
 
     if name_parts and name_parts.date:
-        results = __update_results(results, name_parts, namer_config, skip_date=True, movie=movies)
-        results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True, movie=movies)
+        results = __update_results(results, name_parts, namer_config, skip_date=True, scene_type=scene_type)
+        results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True, scene_type=scene_type)
 
     return results
 
 
 def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
-    movies: bool = False
+    scene_type: SceneType = SceneType.SCENE
     if name_parts.site:
         if name_parts.site.strip().lower() in namer_config.movie_data_preferred:
-            movies: bool = True
+            scene_type = SceneType.MOVIE
 
     results: List[ComparisonResult] = []
-    results: List[ComparisonResult] = __metadata_api_lookup_type(results, name_parts, namer_config, movies, phash)
+    results: List[ComparisonResult] = __metadata_api_lookup_type(results, name_parts, namer_config, scene_type, phash)
     if not results or not results[0].is_match():
-        results: List[ComparisonResult] = __metadata_api_lookup_type(results, name_parts, namer_config, not movies, phash)
+        scene_type = SceneType.MOVIE if scene_type == SceneType.SCENE else SceneType.SCENE
+        results: List[ComparisonResult] = __metadata_api_lookup_type(results, name_parts, namer_config, scene_type, phash)
 
     return results
 
@@ -289,14 +290,16 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
 
 
 def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[FileInfo]) -> LookedUpFileInfo:
-    movie = True if "/movie" in url else False
     file_info = LookedUpFileInfo()
 
     data_id = data._id  # pylint: disable=protected-access
     file_info.type = SceneType[data.type.upper()]
 
     url_part = data.type.lower()
-    file_info.uuid = f"{url_part}s/{data_id}"
+    if file_info.type == SceneType.JAV:
+        file_info.uuid = f"{url_part}/{data_id}"
+    else:
+        file_info.uuid = f"{url_part}s/{data_id}"
 
     file_info.guid = data.id
     file_info.name = data.title
@@ -322,7 +325,7 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info.site = data.site.name
 
     # clean up messy site metadata from adultdvdempire -> tpdb.
-    if movie:
+    if file_info.type == SceneType.MOVIE:
         file_info.site = re.sub(r'\(.*\)$', '', file_info.site.strip()).strip()
 
     # This is for backwards compatibility of sha hashes only.
@@ -381,32 +384,40 @@ def __metadataapi_response_to_data(json_object, url: str, json_response: str, na
     return file_infos
 
 
-def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, movie: Optional[bool] = None, phash: Optional[PerceptualHash] = None) -> Optional[str]:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, scene_type: Optional[SceneType] = None, phash: Optional[PerceptualHash] = None) -> Optional[str]:
     query = None
     if uuid:
         query = uuid
-    elif phash:
-        # Movie phashes are not supported by tpdb at this time.
-        query = None if movie else f"scenes/hash/{phash.phash}?type=PHASH"
-    elif site or release_date or name:
-        query = "movies?parse=" if movie else "scenes?parse="
-        if site:
-            # There is a known issue in tpdb, where site names are not matched due to casing.
-            # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
-            # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
-            # Hense, the hack of lower casing the site.
-            query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
+    else:
+        if scene_type == SceneType.SCENE:
+            query = 'scenes'
+        elif scene_type == SceneType.MOVIE:
+            query = 'movies'
+        elif scene_type == SceneType.JAV:
+            query = 'jav'
 
-        if release_date:
-            query += release_date + "."
+        if phash:
+            query += f"/hash/{phash.phash}?type=PHASH"
+        elif site or release_date or name:
+            query += "?parse="
 
-        if name:
-            query += quote(name)
+            if site:
+                # There is a known issue in tpdb, where site names are not matched due to casing.
+                # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
+                # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
+                # Hense, the hack of lower casing the site.
+                query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
 
-        if page and page > 1:
-            query += f"&page={page}"
+            if release_date:
+                query += release_date + "."
 
-        query += "&limit=25"
+            if name:
+                query += quote(name)
+
+            if page and page > 1:
+                query += f"&page={page}"
+
+            query += "&limit=25"
 
     return f"{namer_config.override_tpdb_address}/{query}" if query else None
 
@@ -423,13 +434,13 @@ def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_c
     return file_infos
 
 
-def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config: NamerConfig, skip_date: bool, skip_name: bool, movie: bool = False, phash: Optional[PerceptualHash] = None) -> List[LookedUpFileInfo]:
+def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config: NamerConfig, skip_date: bool, skip_name: bool, scene_type: SceneType = SceneType.SCENE, phash: Optional[PerceptualHash] = None) -> List[LookedUpFileInfo]:
     if namer_config or phash:
         release_date = name_parts.date if name_parts and not skip_date else None
         name = name_parts.name if name_parts and not skip_name else None
         site = name_parts.site if name_parts else None
 
-        url = __build_url(namer_config, site, release_date, name, movie=movie, phash=phash)
+        url = __build_url(namer_config, site, release_date, name, scene_type=scene_type, phash=phash)
         if url:
             file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
             return file_infos
@@ -454,7 +465,7 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
     if not file_name_parts:
         # Movies with phashes are not supported
         # results = __metadata_api_lookup_type(results, None, namer_config, True, phash)
-        results = __metadata_api_lookup_type(results, None, namer_config, False, phash)
+        results = __metadata_api_lookup_type(results, None, namer_config, SceneType.SCENE, phash)
     else:
         results: List[ComparisonResult] = __metadata_api_lookup(file_name_parts, namer_config, phash)
 
