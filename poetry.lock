@@ -1005,14 +1005,14 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "poethepoet"
-version = "0.18.0"
+version = "0.18.1"
 description = "A task runner that works well with poetry."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "poethepoet-0.18.0-py3-none-any.whl", hash = "sha256:62ba57982cc8303356e1535e047abb38e29b6fb8c8455c5920c4e678c24241bc"},
-    {file = "poethepoet-0.18.0.tar.gz", hash = "sha256:ee2c8a71ac07dea7e415ab9790308f3425ff4423385f159b0b0b4b8f7eba8b84"},
+    {file = "poethepoet-0.18.1-py3-none-any.whl", hash = "sha256:e85727bf6f4a10bf6c1a43026bdeb40df689bea3c4682d03cbe531cabc8f2ba6"},
+    {file = "poethepoet-0.18.1.tar.gz", hash = "sha256:5f3566b14c2f5dccdfbc3bb26f0096006b38dc0b9c74bd4f8dd1eba7b0e29f6a"},
 ]
 
 [package.dependencies]
@@ -1088,14 +1088,14 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "7.2.0"
+version = "7.2.1"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-7.2.0-py3-none-any.whl", hash = "sha256:892f933d339f068883b6fd5a459f03d85bfcb355e4981e146d2c7616c21fef71"},
-    {file = "pytest-7.2.0.tar.gz", hash = "sha256:c4014eb40e10f11f355ad4e3c2fb2c6c6d1919c73f3b5a433de4708202cade59"},
+    {file = "pytest-7.2.1-py3-none-any.whl", hash = "sha256:c7c6ca206e93355074ae32f7403e8ea12163b1163c976fee7d4d84027c162be5"},
+    {file = "pytest-7.2.1.tar.gz", hash = "sha256:d45e0952f3727241918b8fd0f376f5ff6b301cc0777c6f9a556935c92d8a7d42"},
 ]
 
 [package.dependencies]
@@ -1308,14 +1308,14 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "requests-cache"
-version = "0.9.7"
+version = "0.9.8"
 description = "A transparent persistent cache for the requests library"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "requests_cache-0.9.7-py3-none-any.whl", hash = "sha256:3f57badcd8406ecda7f8eaa8145afd0b180c5ae4ff05165a2c4d40f3dc88a6e5"},
-    {file = "requests_cache-0.9.7.tar.gz", hash = "sha256:b7c26ea98143bac7058fad6e773d56c3442eabc0da9ea7480af5edfc134ff515"},
+    {file = "requests_cache-0.9.8-py3-none-any.whl", hash = "sha256:3a16021a4b5014b5b32af9c34f07cb911e99a69074d664dfd4fddb62a2997c21"},
+    {file = "requests_cache-0.9.8.tar.gz", hash = "sha256:eaed4eb5fd5c392ba5e7cfa000d4ab96b1d32c1a1620f37aa558c43741ac362b"},
 ]
 
 [package.dependencies]
