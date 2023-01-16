@@ -385,32 +385,36 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
     query = None
     if uuid:
         query = uuid
-    elif phash:
+    else:
         if scene_type == SceneType.SCENE:
-            query = f"scenes/hash/{phash.phash}?type=PHASH"
-    elif site or release_date or name:
-        if scene_type == SceneType.SCENE:
-            query = "scenes?parse="
+            query = 'scenes'
         elif scene_type == SceneType.MOVIE:
-            query = "movies?parse="
+            query = 'movies'
+        elif scene_type == SceneType.JAV:
+            query = 'jav'
 
-        if site:
-            # There is a known issue in tpdb, where site names are not matched due to casing.
-            # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
-            # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
-            # Hense, the hack of lower casing the site.
-            query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
+        if phash:
+            query += f"/hash/{phash.phash}?type=PHASH"
+        elif site or release_date or name:
+            query += "?parse="
 
-        if release_date:
-            query += release_date + "."
+            if site:
+                # There is a known issue in tpdb, where site names are not matched due to casing.
+                # example Teens3Some fails, but Teens3some succeeds.  Turns out Teens3Some is treated as 'Teens 3 Some'
+                # and Teens3some is treated correctly as 'Teens 3some'.  Also, 'brazzersextra' still match 'Brazzers Extra'
+                # Hense, the hack of lower casing the site.
+                query += quote(re.sub(r"[^a-z0-9]", "", unidecode(site).lower())) + "."
 
-        if name:
-            query += quote(name)
+            if release_date:
+                query += release_date + "."
 
-        if page and page > 1:
-            query += f"&page={page}"
+            if name:
+                query += quote(name)
 
-        query += "&limit=25"
+            if page and page > 1:
+                query += f"&page={page}"
+
+            query += "&limit=25"
 
     return f"{namer_config.override_tpdb_address}/{query}" if query else None
 
