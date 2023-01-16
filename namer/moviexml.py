@@ -131,10 +131,14 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
 
     for performer in info.performers:
         actor = add_sub_element(doc, root, 'actor')
+        add_sub_element(doc, actor, 'type', 'Actor')
         add_sub_element(doc, actor, 'name', performer.name)
         add_sub_element(doc, actor, 'role', performer.role)
-        add_sub_element(doc, actor, 'image', Path(performer.image).name if performer.image else None)
-        add_sub_element(doc, actor, 'type', "Actor")
+
+        if performer.image:
+            image = performer.image.name if isinstance(performer.image, Path) else performer.image
+            add_sub_element(doc, actor, 'image', image)
+
         add_sub_element(doc, actor, 'thumb')
 
     add_sub_element(doc, root, 'fileinfo')

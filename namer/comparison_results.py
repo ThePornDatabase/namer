@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import PurePath
-from typing import List, Optional
+from pathlib import Path, PurePath
+from typing import List, Optional, Union
 
 from pathvalidate import Platform, sanitize_filename
 
@@ -19,7 +19,7 @@ class Performer:
 
     name: str
     role: Optional[str]
-    image: Optional[str]
+    image: Optional[Union[Path, str]]
     """
     if available the performers gender, stored as a role.  example: "Female", "Male"
     Useful as many nzbs often don't include the scene name, but instead female performers names,
