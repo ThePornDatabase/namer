@@ -15,7 +15,7 @@ from typing import Dict, List, Optional
 import jsonpickle
 from werkzeug.routing import Rule
 
-from namer.comparison_results import ComparisonResults
+from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
@@ -83,12 +83,12 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
     responses = {}
     if search_type == SearchType.ANY or search_type == SearchType.SCENES:
         # scenes
-        url = __build_url(config, name=query, page=page, movie=False)
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.SCENE)
         responses[url] = __get_response_json_object(url, config)
 
     if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
         # movies
-        url = __build_url(config, name=query, page=page, movie=True)
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.MOVIE)
         responses[url] = __get_response_json_object(url, config)
 
     file_infos = []
