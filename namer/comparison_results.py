@@ -287,7 +287,7 @@ class ComparisonResults:
             match: Optional[ComparisonResult] = self.results[0]
             for potential in self.results[1:]:
                 # Now that matches are unique in the list, don't match if there are multiple
-                if match and match.name_match < potential.name_match or potential.is_match():
+                if match and match.name_match < potential.name_match and potential.name_match > 84.9 or potential.is_match():
                     match = None
 
         return match
