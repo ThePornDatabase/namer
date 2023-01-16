@@ -391,7 +391,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
     elif site or release_date or name:
         if scene_type == SceneType.SCENE:
             query = "scenes?parse="
-        elif scene_type == scene_type.MOVIE:
+        elif scene_type == SceneType.MOVIE:
             query = "movies?parse="
 
         if site:
