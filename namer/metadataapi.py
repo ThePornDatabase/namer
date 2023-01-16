@@ -296,7 +296,10 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info.type = SceneType[data.type.upper()]
 
     url_part = data.type.lower()
-    file_info.uuid = f"{url_part}s/{data_id}"
+    if file_info.type == SceneType.JAV:
+        file_info.uuid = f"{url_part}/{data_id}"
+    else:
+        file_info.uuid = f"{url_part}s/{data_id}"
 
     file_info.guid = data.id
     file_info.name = data.title
