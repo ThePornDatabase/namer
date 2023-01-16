@@ -280,14 +280,14 @@ class ComparisonResults:
 
     def get_match(self) -> Optional[ComparisonResult]:
         match = None
-        if self.results and len(self.results) > 0 and self.results[0].is_match():
+        if self.results and self.results[0].is_match():
             # verify the match isn't covering over a better namer match, if it is, no match shall be made
             # implying that the site and date on the name of the file may be wrong.   leave it for the user
             # to sort it out.
             match: Optional[ComparisonResult] = self.results[0]
             for potential in self.results[1:]:
                 # Now that matches are unique in the list, don't match if there are multiple
-                if match and match.name_match < potential.name_match or potential.is_match():
+                if match and not match.phash_match and match.name_match < potential.name_match or potential.is_match():
                     match = None
 
         return match
