@@ -15,7 +15,7 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, SceneType
+from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
@@ -200,7 +200,7 @@ def process_file(command: Command) -> Optional[Command]:
                     share_phash(new_metadata, phash, command.config)
                     share_oshash(new_metadata, phash, command.config)
 
-            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == SceneType.SCENE:
+            if command.config.mark_collected and not new_metadata.is_collected:
                 toggle_collected(new_metadata, command.config)
 
             log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')

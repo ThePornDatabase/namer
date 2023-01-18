@@ -496,7 +496,7 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
 def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
         scene_id = metadata.uuid.rsplit('/', 1)[-1]
-        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}", config=config)
+        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={metadata.type.value}", config=config)
 
 
 def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
