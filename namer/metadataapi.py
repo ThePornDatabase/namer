@@ -122,7 +122,7 @@ def __update_results(results: List[ComparisonResult], name_parts: Optional[FileI
                 result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
                 results.append(result)
 
-        results = sorted(results, key=__match_percent, reverse=True)
+        results = sorted(results, key=__match_weight, reverse=True)
 
     return results
 
@@ -153,14 +153,22 @@ def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash
     return results
 
 
-def __match_percent(result: ComparisonResult) -> float:
-    add_value = 0.00
-    if result.is_match():
-        add_value = 1000.00
-
-    value = (result.name_match + add_value) if result and result.name_match else add_value
-    logger.debug("Name match was {:.2f} for {}", value, result.name)
-
+def __match_weight(result: ComparisonResult) -> float:
+    value = 0.00
+    if result.phash_match:
+        logger.debug("Phash match with '{} - {} = - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
+        value = 1000.00
+        if result.site_match:
+            value += 100
+        if result.date_match:
+            value += 100
+        if result.name_match:
+            value += result.name_match
+    if bool(result.site_match and result.date_match and result.name_match and result.name_match >= 94.9):
+        logger.debug("Name match of {:.2f} with '{} - {} - {}' for name: {}", value, result.looked_up.site, result.looked_up.date, result.looked_up.name, result.name)
+        value += 1000.00
+        value = (result.name_match + value) if result.name_match else value
+    logger.debug("Match was {:.2f} for {}")
     return value
 
 
@@ -385,7 +393,7 @@ def __metadataapi_response_to_data(json_object, url: str, json_response: str, na
 
 
 def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, scene_type: Optional[SceneType] = None, phash: Optional[PerceptualHash] = None) -> Optional[str]:
-    query = None
+    query = ''
     if uuid:
         query = uuid
     else:
@@ -419,7 +427,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
 
             query += "&limit=25"
 
-    return f"{namer_config.override_tpdb_address}/{query}" if query else None
+    return f"{namer_config.override_tpdb_address}/{query}" if query != '' else None
 
 
 def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_config: NamerConfig):
@@ -469,7 +477,7 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
     else:
         results: List[ComparisonResult] = __metadata_api_lookup(file_name_parts, namer_config, phash)
 
-    comparison_results = sorted(results, key=__match_percent, reverse=True)
+    comparison_results = sorted(results, key=__match_weight, reverse=True)
 
     # Works around the porndb not returning all info on search queries by looking up the full data
     # with the uuid of the best match.

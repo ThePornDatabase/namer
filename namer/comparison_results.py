@@ -265,13 +265,21 @@ class ComparisonResult:
     Was this matched found via a phash, and not the name.
     """
 
-    def is_match(self) -> bool:
+    def is_match(self, target: float = 94.9) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
-        actors and scene name).
+        actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 94.9) or self.phash_match
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or self.phash_match
+
+    def is_super_match(self, target: float = 94.9) -> bool:
+        """
+        Returns true if site and creation data match exactly, and if the name fuzzes against
+        the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
+        actors and scene name) and is a phash match.
+        """
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and self.phash_match
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -287,7 +295,9 @@ class ComparisonResults:
             match: Optional[ComparisonResult] = self.results[0]
             for potential in self.results[1:]:
                 # Now that matches are unique in the list, don't match if there are multiple
-                if match and match.name_match < potential.name_match and potential.name_match > 84.9 or potential.is_match():
-                    match = None
-
+                if match:
+                    if not match.is_super_match() and potential.is_match() or potential.is_super_match():
+                        match = None
+                    elif not match.is_super_match() and potential.name_match > match.name_match:
+                        match = None
         return match
