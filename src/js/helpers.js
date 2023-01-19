@@ -27,11 +27,11 @@ export class Helpers {
         })
     }
 
-    static removeRow(selector) {
+    static removeRow(selector, paging = false) {
         Helpers.#table
             .row(selector.parents('tr'))
             .remove()
-            .draw()
+            .draw(paging)
     }
 
     static setTableSort(selector) {
