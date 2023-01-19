@@ -120,18 +120,12 @@ function rename() {
     })
 }
 
-function updateQueueSize() {
-    Helpers.request('./api/v1/get_queue', null, function (data) {
-        queueSize.html(data)
-    })
-}
-
 Helpers.setTableSort(filesResult)
 hljs.highlightAll()
 
 if (queueSize) {
-    updateQueueSize()
+    Helpers.updateQueueSize(queueSize)
     setInterval(function () {
-        updateQueueSize()
+        Helpers.updateQueueSize(queueSize)
     }, 5000)
 }
