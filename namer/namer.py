@@ -231,7 +231,7 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     if config.trailer_location and new_metadata:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
-    if config.write_nfo and new_metadata:
+    if config.write_nfo and config.enabled_poster and new_metadata:
         poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url else None
         background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url else None
         for performer in new_metadata.performers:
