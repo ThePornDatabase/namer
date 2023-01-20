@@ -15,7 +15,7 @@ from typing import List, Optional
 
 import schedule
 from loguru import logger
-from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
+from watchdog.events import EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
 from namer.configuration import NamerConfig
