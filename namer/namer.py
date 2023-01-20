@@ -156,6 +156,7 @@ def process_file(command: Command) -> Optional[Command]:
         matched: Optional[ComparisonResult] = None
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: ComparisonResults = ComparisonResults([])
+        vph = command.config.vph_alt if command.config.use_alt_phash_tool else command.config.vph
         # Match to nfo files, if enabled and found.
         if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
@@ -173,7 +174,7 @@ def process_file(command: Command) -> Optional[Command]:
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and ((command.parsed_file is not None and command.parsed_file.name is not None) or command.config.search_phash):
-            phash = command.config.vph.get_hashes(command.target_movie_file) if command.config.search_phash else None
+            phash = vph.get_hashes(command.target_movie_file) if command.config.search_phash else None
             search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
                 matched = search_results.get_match()
@@ -195,7 +196,7 @@ def process_file(command: Command) -> Optional[Command]:
                 new_metadata.resolution = ffprobe_results.get_resolution()
 
             if command.config.send_phash:
-                phash = command.config.vph.get_hashes(command.target_movie_file) if not phash else phash
+                phash = vph.get_hashes(command.target_movie_file) if not phash else phash
                 if phash:
                     share_phash(new_metadata, phash, command.config)
                     share_oshash(new_metadata, phash, command.config)

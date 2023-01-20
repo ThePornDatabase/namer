@@ -13,7 +13,8 @@ from configupdater import ConfigUpdater
 from requests_cache import CachedSession
 
 from namer.ffmpeg import FFMpeg
-from namer.videophash.videophashstash import StashVideoPerceptualHash as VideoPerceptualHash
+from namer.videophash.videophash import VideoPerceptualHash
+from namer.videophash.videophashstash import StashVideoPerceptualHash
 
 
 # noinspection PyDataclass
@@ -288,6 +289,11 @@ class NamerConfig:
     If match was made via name, or user selection and not phash, send the phash (only functions if search_phash is true)
     """
 
+    use_alt_phash_tool: bool = False
+    """
+    Use alternative phash generator (might be faster, not 100% compatible)
+    """
+
     mark_collected: bool = False
     """
     Mark any matched video as "collected" in tpdb, allowing tpdb to keep track of videos you have collected.
@@ -395,7 +401,8 @@ class NamerConfig:
     """
 
     ffmpeg: FFMpeg = FFMpeg()
-    vph: VideoPerceptualHash = VideoPerceptualHash()
+    vph: VideoPerceptualHash = StashVideoPerceptualHash()
+    vph_alt: VideoPerceptualHash = VideoPerceptualHash(ffmpeg)
 
     def __init__(self):
         if sys.platform != "win32":
@@ -450,6 +457,7 @@ class NamerConfig:
             "Phash": {
                 "search_phash": self.search_phash,
                 "send_phash": self.send_phash,
+                "use_alt_phash_tool": self.use_alt_phash_tool,
                 # "require_match_phash_top": self.require_match_phash_top,
                 # "send_phash_of_matches_to_tpdb": self.send_phash_of_matches_to_tpdb,
             },
