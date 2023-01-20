@@ -103,16 +103,15 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     add_sub_element(doc, root, "outline")
     add_sub_element(doc, root, "title", info.name)
     add_sub_element(doc, root, "dateadded")
-    add_sub_element(doc, root, "trailer", str(trailer) if trailer else None)
+    add_sub_element(doc, root, "trailer", str(trailer) if trailer else info.trailer_url)
     add_sub_element(doc, root, "year", info.date[:4] if info.date else None)
     add_sub_element(doc, root, "premiered", info.date)
     add_sub_element(doc, root, "releasedate", info.date)
     add_sub_element(doc, root, "mpaa", "XXX")
 
     art = add_sub_element(doc, root, "art")
-
-    add_sub_element(doc, art, 'poster', poster.name if poster else None)
-    add_sub_element(doc, art, 'background', background.name if background else None)
+    add_sub_element(doc, art, 'poster', poster.name if poster else info.poster_url)
+    add_sub_element(doc, art, 'background', background.name if background else info.background_url)
 
     if config.enable_metadataapi_genres:
         add_all_sub_element(doc, root, 'genre', info.tags)

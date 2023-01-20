@@ -70,7 +70,6 @@ class VideoPerceptualHash:
 
         return thumbnail_image
 
-    @lru_cache(maxsize=1024)
     def get_oshash(self, file: Path) -> str:
         stat = file.stat()
         return self._get_oshash(file, stat.st_size, stat.st_mtime)

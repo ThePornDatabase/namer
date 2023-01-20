@@ -63,14 +63,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <outline/>
   <title>Carmela Clutch: Fabulous Anal 3-Way!</title>
   <dateadded/>
-  <trailer/>
+  <trailer>https://trailers-fame.gammacdn.com/6/7/6/5/c85676/trailers/85676_01/tr_85676_01_1080p.mp4</trailer>
   <year>2022</year>
   <premiered>2022-01-03</premiered>
   <releasedate>2022-01-03</releasedate>
   <mpaa>XXX</mpaa>
   <art>
-    <poster/>
-    <background/>
+    <poster>{fakeTPDB.get_url()}qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F3f%2F9f%2F51%2Fcf3828d65425bca2890d53ef242d8cf%2Flogo%2Fevil-angel_dark%5B1%5D.png,-10,-10,25,50)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</poster>
+    <background>{fakeTPDB.get_url()}gAu-1j1ZP4f6gNMPibgAyGKoa_c=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</background>
   </art>
   <genre>Anal</genre>
   <genre>Ass</genre>
@@ -146,14 +146,14 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <outline/>
   <title>Carmela Clutch: Fabulous Anal 3-Way!</title>
   <dateadded/>
-  <trailer/>
+  <trailer>https://trailers-fame.gammacdn.com/6/7/6/5/c85676/trailers/85676_01/tr_85676_01_1080p.mp4</trailer>
   <year>2022</year>
   <premiered>2022-01-03</premiered>
   <releasedate>2022-01-03</releasedate>
   <mpaa>XXX</mpaa>
   <art>
-    <poster/>
-    <background/>
+    <poster>{fakeTPDB.get_url()}qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F3f%2F9f%2F51%2Fcf3828d65425bca2890d53ef242d8cf%2Flogo%2Fevil-angel_dark%5B1%5D.png,-10,-10,25,50)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</poster>
+    <background>{fakeTPDB.get_url()}gAu-1j1ZP4f6gNMPibgAyGKoa_c=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</background>
   </art>
   <tag>Anal</tag>
   <tag>Ass</tag>
