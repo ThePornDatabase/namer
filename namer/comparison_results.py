@@ -219,7 +219,7 @@ class LookedUpFileInfo:
         return name
 
     def found_via_phash(self) -> bool:
-        return True if self.original_query and "/hash/" in self.original_query else False
+        return bool(self.original_query and '?hash=' in self.original_query)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
