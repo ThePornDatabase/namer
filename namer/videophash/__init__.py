@@ -13,6 +13,14 @@ class PerceptualHash:
     phash: imagehash.ImageHash
     oshash: str
 
+    @property
+    def __dict__(self):
+        return {
+            'duration': self.duration,
+            'phash': str(self.phash),
+            'oshash': self.oshash,
+        }
+
 
 def return_perceptual_hash(duration: Union[float, int], phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
     output = PerceptualHash()

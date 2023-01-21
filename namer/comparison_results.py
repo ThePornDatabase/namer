@@ -4,6 +4,7 @@ from enum import Enum
 from pathlib import Path, PurePath
 from typing import List, Optional, Union
 
+from imagehash import ImageHash
 from pathvalidate import Platform, sanitize_filename
 
 from namer.configuration import NamerConfig
@@ -126,6 +127,10 @@ class LookedUpFileInfo:
     tags: List[str] = field(default_factory=list)
     """
     Tags associated with the video.   Noisy and long list.
+    """
+    phash: List[ImageHash] = field(default_factory=list)
+    """
+    Phashes associated with the video.
     """
     type: Optional[SceneType] = None
     """
@@ -260,7 +265,7 @@ class ComparisonResult:
     performing a lookup by id (which is done only after a match is made.)
     """
 
-    phash_match: bool = False
+    phash_distance: int
     """
     Was this matched found via a phash, and not the name.
     """
@@ -271,7 +276,7 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or self.phash_match
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or (self.phash_distance and self.phash_distance <= 4)
 
     def is_super_match(self, target: float = 94.9) -> bool:
         """
@@ -279,7 +284,7 @@ class ComparisonResult:
         the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) and is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and self.phash_match
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and (self.phash_distance and self.phash_distance <= 4)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

@@ -12,6 +12,7 @@ from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
 from urllib.parse import quote
 
+import imagehash
 import rapidfuzz
 from loguru import logger
 from PIL import Image
@@ -56,7 +57,7 @@ def __attempt_better_match(existing: Tuple[str, float], query: Optional[str], ma
     return existing if existing[1] >= found[1] else found
 
 
-def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo, namer_config: NamerConfig) -> ComparisonResult:
+def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo, namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> ComparisonResult:
     site = False
     found_site = None
     release_date = False
@@ -99,6 +100,8 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
             if name_parts.name:
                 result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
+    phash_distance = min([phash.phash - item for item in looked_up.phash]) if phash and looked_up.phash and looked_up.found_via_phash() else None
+
     return ComparisonResult(
         name=result[0],
         name_match=result[1],
@@ -106,7 +109,7 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
         site_match=site,
         name_parts=name_parts,
         looked_up=looked_up,
-        phash_match=looked_up.found_via_phash()
+        phash_distance=phash_distance
     )
 
 
@@ -114,12 +117,12 @@ def __update_results(results: List[ComparisonResult], name_parts: Optional[FileI
     if not results or not results[0].is_match():
         for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, scene_type=scene_type, phash=phash):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
-                result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
+                result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config, phash)
                 results.append(result)
 
         for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, scene_type=scene_type):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
-                result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config)
+                result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config, phash)
                 results.append(result)
 
         results = sorted(results, key=__match_weight, reverse=True)
@@ -155,19 +158,21 @@ def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash
 
 def __match_weight(result: ComparisonResult) -> float:
     value = 0.00
-    if result.phash_match:
+    if result.phash_distance:
         logger.debug("Phash match with '{} - {} = - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
-        value = 1000.00
+        value = 1000.00 - result.phash_distance * 10
         if result.site_match:
             value += 100
         if result.date_match:
             value += 100
         if result.name_match:
             value += result.name_match
+
     if bool(result.site_match and result.date_match and result.name_match and result.name_match >= 94.9):
         logger.debug("Name match of {:.2f} with '{} - {} - {}' for name: {}", value, result.looked_up.site, result.looked_up.date, result.looked_up.name, result.name)
         value += 1000.00
         value = (result.name_match + value) if result.name_match else value
+
     logger.debug("Match was {:.2f} for {}")
     return value
 
@@ -367,7 +372,22 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
         for tag in data.tags:
             tags.append(tag.name)
 
-        file_info.tags = tags
+    file_info.tags = tags
+
+    hashes = []
+    if hasattr(data, 'hashes'):
+        for item in data.hashes:
+            data = None
+            if item.type == 'PHASH':
+                try:
+                    data = imagehash.hex_to_hash(item.hash)
+                except ValueError:
+                    logger.debug(f'Incorrect phash "{item.hash}"')
+
+            if data:
+                hashes.append(data)
+
+    file_info.phash = hashes
 
     if hasattr(data, "is_collected"):
         file_info.is_collected = data.is_collected
@@ -468,8 +488,6 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
     """
     results: List[ComparisonResult] = []
     if not file_name_parts:
-        # Movies with phashes are not supported
-        # results = __metadata_api_lookup_type(results, None, namer_config, True, phash)
         results = __metadata_api_lookup_type(results, None, namer_config, SceneType.SCENE, phash)
     else:
         results: List[ComparisonResult] = __metadata_api_lookup(file_name_parts, namer_config, phash)
