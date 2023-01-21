@@ -402,7 +402,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query = 'jav'
 
         if phash:
-            query += f"/hash/{phash.phash}?type=PHASH"
+            query += f"?hash={phash.phash}&hashType=PHASH"
         elif site or release_date or name:
             query += "?parse="
 
