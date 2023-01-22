@@ -1,5 +1,8 @@
 <div class="row row-cols-auto justify-content-center">
-    {% set results = (data['data']['results']|selectattr('phash_match', '==', True)|list) + (data['data']['results']|selectattr('name_match', '>=', 80)|list) %}
+    {% set phash_distance_list = data['data']['results']|rejectattr('phash_distance', 'none')|selectattr('phash_distance', '<=', 8)|list %}
+    {% set name_match_list = data['data']['results']|selectattr('name_match', '>=', 80)|list  %}
+
+    {% set results = (phash_distance_list + name_match_list)|list %}
     {% if results %}
         {% for file in results %}
             <div class="col m-1 mb-2">
