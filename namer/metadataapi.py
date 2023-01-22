@@ -378,8 +378,8 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info.original_response = json_response
     file_info.original_parsed_filename = name_parts
 
-    if hasattr(data, 'length'):
-        file_info.duration = data.length
+    if hasattr(data, 'duration'):
+        file_info.duration = data.duration
 
     tags = []
     if hasattr(data, "tags"):

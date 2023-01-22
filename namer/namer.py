@@ -201,7 +201,7 @@ def process_file(command: Command) -> Optional[Command]:
                     scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
                     share_hash(new_metadata, scene_hash, command.config)
 
-                    scene_hash = SceneHash(str(phash.oshash), HashType.OSHASH, phash.duration)
+                    scene_hash = SceneHash(phash.oshash, HashType.OSHASH, phash.duration)
                     share_hash(new_metadata, scene_hash, command.config)
 
             if command.config.mark_collected and not new_metadata.is_collected:
