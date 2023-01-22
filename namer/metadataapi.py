@@ -101,11 +101,11 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
                 result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
     phash_distance = None
-    if phash and looked_up.found_via_phash():
+    if phash:
         hashes_distances = []
 
         if not looked_up.hashes:
-            phash_distance = 8
+            phash_distance = 8 if looked_up.found_via_phash() else None
         else:
             for item in looked_up.hashes:
                 if item.type == HashType.PHASH:
