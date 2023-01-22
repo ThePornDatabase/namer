@@ -162,6 +162,13 @@ def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Opt
         data = gzip.decompress(file.read_bytes())
         decoded = jsonpickle.decode(data)
         if decoded and isinstance(decoded, ComparisonResults):
+            for item in decoded.results:
+                if not hasattr(item, 'phash_distance'):
+                    item.phash_distance = 0 if hasattr(item, 'phash_match') and getattr(item, 'phash_match') else None
+
+                if not hasattr(item.looked_up, 'hashes'):
+                    item.looked_up.hashes = []
+
             res = decoded
 
     return res

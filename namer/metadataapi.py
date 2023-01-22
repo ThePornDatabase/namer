@@ -103,18 +103,22 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
     phash_distance = None
     if phash and looked_up.found_via_phash():
         hashes_distances = []
-        for item in looked_up.hashes:
-            if item.type == HashType.PHASH:
-                try:
-                    scene_hash = imagehash.hex_to_hash(item.hash)
-                except ValueError:
-                    scene_hash = None
 
-                if scene_hash:
-                    distance = phash.phash - imagehash.hex_to_hash(item.hash)
-                    hashes_distances.append(distance)
+        if not looked_up.hashes:
+            phash_distance = 8
+        else:
+            for item in looked_up.hashes:
+                if item.type == HashType.PHASH:
+                    try:
+                        scene_hash = imagehash.hex_to_hash(item.hash)
+                    except ValueError:
+                        scene_hash = None
 
-        phash_distance = min(hashes_distances) if hashes_distances else None
+                    if scene_hash:
+                        distance = phash.phash - imagehash.hex_to_hash(item.hash)
+                        hashes_distances.append(distance)
+
+            phash_distance = min(hashes_distances) if hashes_distances else None
 
     return ComparisonResult(
         name=result[0],
@@ -174,7 +178,7 @@ def __match_weight(result: ComparisonResult) -> float:
     value = 0.00
     if result.phash_distance:
         logger.debug("Phash match with '{} - {} = - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
-        value = 1000.00 - result.phash_distance * 10
+        value = 1000.00 - result.phash_distance * 100
         if result.site_match:
             value += 100
         if result.date_match:

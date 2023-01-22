@@ -173,6 +173,7 @@ class LookedUpFileInfo:
     def __init__(self):
         self.performers = []
         self.tags = []
+        self.hashes = []
         self.resolution = None
         self.original_parsed_filename = FileInfo()
 
