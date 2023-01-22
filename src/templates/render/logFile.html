@@ -1,8 +1,11 @@
 <div class="row row-cols-auto justify-content-center">
-    {% set phash_distance_list = data['data']['results']|rejectattr('phash_distance', 'none')|selectattr('phash_distance', '<=', 8)|list %}
-    {% set name_match_list = data['data']['results']|selectattr('name_match', '>=', 80)|list  %}
+    {% set results = [] %}
+    {% for item in data['data']['results'] %}
+        {% if item['name_match'] >= 80 or item['phash_distance'] and item['phash_distance'] <= 8 %}
+            {% do results.append(item) %}
+        {% endif %}
+    {% endfor %}
 
-    {% set results = (phash_distance_list + name_match_list)|list %}
     {% if results %}
         {% for file in results %}
             <div class="col m-1 mb-2">
