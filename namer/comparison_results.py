@@ -285,7 +285,7 @@ class ComparisonResult:
 
     phash_distance: int
     """
-    Was this matched found via a phash, and not the name.
+    How close searched hash to database one.
     """
 
     def is_match(self, target: float = 94.9) -> bool:
