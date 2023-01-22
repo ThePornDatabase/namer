@@ -4,7 +4,6 @@ from enum import Enum
 from pathlib import Path, PurePath
 from typing import List, Optional, Union
 
-from imagehash import ImageHash
 from pathvalidate import Platform, sanitize_filename
 
 from namer.configuration import NamerConfig
@@ -48,6 +47,24 @@ class SceneType(str, Enum):
     SCENE = 'Scene'
     MOVIE = 'Movie'
     JAV = 'JAV'
+
+
+class HashType(str, Enum):
+    PHASH = 'PHASH'
+    OSHASH = 'OSHASH'
+    MD5 = 'MD5'
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class SceneHash:
+    hash: str
+    type: HashType
+    duration: Optional[int]
+
+    def __init__(self, scene_hash: str, hash_type: HashType, duration: Optional[int] = None):
+        self.hash = scene_hash
+        self.type = hash_type
+        self.duration = duration
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -128,9 +145,9 @@ class LookedUpFileInfo:
     """
     Tags associated with the video.   Noisy and long list.
     """
-    phash: List[ImageHash] = field(default_factory=list)
+    hashes: List[SceneHash] = field(default_factory=list)
     """
-    Phashes associated with the video.
+    Hashes associated with the video.
     """
     type: Optional[SceneType] = None
     """

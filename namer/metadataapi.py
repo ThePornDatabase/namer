@@ -19,7 +19,7 @@ from PIL import Image
 from requests import JSONDecodeError
 from unidecode import unidecode
 
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, Performer, SceneType
+from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, Performer, SceneHash, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions, Command
@@ -100,7 +100,21 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
             if name_parts.name:
                 result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
-    phash_distance = min([phash.phash - item for item in looked_up.phash]) if phash and looked_up.phash and looked_up.found_via_phash() else None
+    phash_distance = None
+    if phash and looked_up.found_via_phash():
+        hashes_distances = []
+        for item in looked_up.hashes:
+            if item.type == HashType.PHASH:
+                try:
+                    scene_hash = imagehash.hex_to_hash(item.hash)
+                except ValueError:
+                    scene_hash = None
+
+                if scene_hash:
+                    distance = phash.phash - imagehash.hex_to_hash(item.hash)
+                    hashes_distances.append(distance)
+
+        phash_distance = min(hashes_distances) if hashes_distances else None
 
     return ComparisonResult(
         name=result[0],
@@ -377,17 +391,10 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     hashes = []
     if hasattr(data, 'hashes'):
         for item in data.hashes:
-            data = None
-            if item.type == 'PHASH':
-                try:
-                    data = imagehash.hex_to_hash(item.hash)
-                except ValueError:
-                    logger.debug(f'Incorrect phash "{item.hash}"')
+            data = SceneHash(item.hash, item.type, item.duration)
+            hashes.append(data)
 
-            if data:
-                hashes.append(data)
-
-    file_info.phash = hashes
+    file_info.hashes = hashes
 
     if hasattr(data, "is_collected"):
         file_info.is_collected = data.is_collected
@@ -422,7 +429,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query = 'jav'
 
         if phash:
-            query += f"?hash={phash.phash}&hashType=PHASH"
+            query += f"?hash={phash.phash}&hashType={HashType.PHASH.value}"
         elif site or release_date or name:
             query += "?parse="
 
@@ -514,25 +521,14 @@ def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
         __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={metadata.type.value}", config=config)
 
 
-def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
+def share_hash(metadata: LookedUpFileInfo, scene_hash: SceneHash, config: NamerConfig):
     data = {
-        'type': 'PHASH',
-        'hash': str(phash.phash),
-        'duration': phash.duration,
+        'type': scene_hash.type.value,
+        'hash': scene_hash.hash,
+        'duration': scene_hash.duration,
     }
 
-    logger.info(f"Sending phash: {phash.phash} with duration {phash.duration}")
-    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
-
-
-def share_oshash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):
-    data = {
-        'type': 'OSHASH',
-        'hash': phash.oshash,
-        'duration': phash.duration,
-    }
-
-    logger.info(f"Sending oshash: {phash.oshash} with duration {phash.duration}")
+    logger.info(f"Sending {scene_hash.type.value}: {scene_hash.hash} with duration {scene_hash.duration}")
     __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
 
 
