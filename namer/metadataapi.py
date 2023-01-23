@@ -404,8 +404,9 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     if hasattr(data, "is_collected"):
         file_info.is_collected = data.is_collected
 
-    network_name = get_site_name(data.site.network_id, config)
-    file_info.network = network_name
+    if data.site.network_id:
+        network_name = get_site_name(data.site.network_id, config)
+        file_info.network = network_name
 
     return file_info
 
