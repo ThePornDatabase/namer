@@ -118,7 +118,7 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
                         distance = phash.phash - imagehash.hex_to_hash(item.hash)
                         hashes_distances.append(distance)
 
-            phash_distance = min(hashes_distances) if hashes_distances else None
+            phash_distance = abs(min(hashes_distances)) if hashes_distances else None
 
     return ComparisonResult(
         name=result[0],
@@ -176,7 +176,7 @@ def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash
 
 def __match_weight(result: ComparisonResult) -> float:
     value = 0.00
-    if result.phash_distance:
+    if result.phash_distance is not None:
         logger.debug("Phash match with '{} - {} - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
         value = 1000.00 - result.phash_distance * 100
         if result.site_match:
@@ -396,8 +396,8 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     hashes = []
     if hasattr(data, 'hashes'):
         for item in data.hashes:
-            data = SceneHash(item.hash, item.type, item.duration)
-            hashes.append(data)
+            scene_hash = SceneHash(item.hash, item.type, item.duration)
+            hashes.append(scene_hash)
 
     file_info.hashes = hashes
 
@@ -491,12 +491,14 @@ def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config:
 @logger.catch
 def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
     site = None
+
     url = f"{namer_config.override_tpdb_address}/sites/{site_id}"
     json_response = __get_response_json_object(url, namer_config)
 
     if json_response and json_response.strip() != "":
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         site = json_obj.data.name
+
     return site
 
 
