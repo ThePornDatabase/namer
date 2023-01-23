@@ -180,6 +180,20 @@ class FakeTPDB(ParrotWebServer):
         self.add_json_response("{}", "/movies?parse=goodangel.2022-01-03.&limit=25")
         self.add_json_response("{}", "/movies?parse=goodangel.&limit=25")
 
+        self.add_json_response("""{
+   "data" : {
+      "favicon" : null,
+      "id" : 1309,
+      "logo" : null,
+      "name" : "Gamma Enterprises",
+      "network_id" : null,
+      "parent_id" : null,
+      "poster" : null,
+      "short_name" : "gammaenterprises",
+      "url" : "N/A"
+   }
+}""", "/sites/1309?")
+
 
 @contextlib.contextmanager
 def environment(config: NamerConfig = sample_config()):

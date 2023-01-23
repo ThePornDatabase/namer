@@ -85,6 +85,10 @@ class LookedUpFileInfo:
     porndb guid/stashid
     """
 
+    network: Optional[str] = None
+    """
+    Top level studio, like Vixen for Deeper.
+    """
     site: Optional[str] = None
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
@@ -217,6 +221,7 @@ class LookedUpFileInfo:
             "resolution": res_str,
             "type": self.type.value,
             "external_id": self.external_id,
+            "network": self.network,
         }
 
     def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:
