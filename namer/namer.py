@@ -15,13 +15,13 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo
+from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, SceneHash
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import FileInfo
-from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_oshash, share_phash, toggle_collected
+from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash, toggle_collected
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
@@ -198,8 +198,11 @@ def process_file(command: Command) -> Optional[Command]:
             if command.config.send_phash:
                 phash = vph.get_hashes(command.target_movie_file) if not phash else phash
                 if phash:
-                    share_phash(new_metadata, phash, command.config)
-                    share_oshash(new_metadata, phash, command.config)
+                    scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
+                    share_hash(new_metadata, scene_hash, command.config)
+
+                    scene_hash = SceneHash(phash.oshash, HashType.OSHASH, phash.duration)
+                    share_hash(new_metadata, scene_hash, command.config)
 
             if command.config.mark_collected and not new_metadata.is_collected:
                 toggle_collected(new_metadata, command.config)

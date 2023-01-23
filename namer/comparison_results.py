@@ -49,6 +49,24 @@ class SceneType(str, Enum):
     JAV = 'JAV'
 
 
+class HashType(str, Enum):
+    PHASH = 'PHASH'
+    OSHASH = 'OSHASH'
+    MD5 = 'MD5'
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class SceneHash:
+    hash: str
+    type: HashType
+    duration: Optional[int]
+
+    def __init__(self, scene_hash: str, hash_type: HashType, duration: Optional[int] = None):
+        self.hash = scene_hash
+        self.type = hash_type
+        self.duration = duration
+
+
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo:
     """
@@ -131,6 +149,10 @@ class LookedUpFileInfo:
     """
     Tags associated with the video.   Noisy and long list.
     """
+    hashes: List[SceneHash] = field(default_factory=list)
+    """
+    Hashes associated with the video.
+    """
     type: Optional[SceneType] = None
     """
     movie or scene, a distinction without a difference.
@@ -155,6 +177,7 @@ class LookedUpFileInfo:
     def __init__(self):
         self.performers = []
         self.tags = []
+        self.hashes = []
         self.resolution = None
         self.original_parsed_filename = FileInfo()
 
@@ -224,7 +247,7 @@ class LookedUpFileInfo:
         return name
 
     def found_via_phash(self) -> bool:
-        return True if self.original_query and "/hash/" in self.original_query else False
+        return bool(self.original_query and '?hash=' in self.original_query)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -265,26 +288,26 @@ class ComparisonResult:
     performing a lookup by id (which is done only after a match is made.)
     """
 
-    phash_match: bool = False
+    phash_distance: int
     """
-    Was this matched found via a phash, and not the name.
+    How close searched hash to database one.
     """
 
-    def is_match(self, target: float = 94.9) -> bool:
+    def is_match(self, target: float = 94.9, target_distance: int = 2) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or self.phash_match
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or (self.phash_distance is not None and self.phash_distance <= target_distance)
 
-    def is_super_match(self, target: float = 94.9) -> bool:
+    def is_super_match(self, target: float = 94.9, target_distance: int = 2) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) and is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and self.phash_match
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and (self.phash_distance is not None and self.phash_distance <= target_distance)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

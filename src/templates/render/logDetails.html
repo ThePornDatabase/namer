@@ -1,8 +1,13 @@
-{% set name_match = True if file['name_match'] > 94.9 else False %}
+{% set name_match = file['name_match'] > 94.9 %}
+{% set phash_match = file['phash_distance'] is not none and file['phash_distance'] <= 8 %}
 
 <p>
-    <span><b>Phash Match:</b>{{ bool_to_icon(file['phash_match']) }}</span>
+    <span><b>Phash Match:</b> {{ bool_to_icon(phash_match) }}</span>
     <br>
+    {% if file['phash_distance'] is not none %}
+        <span><b>Phash distance:</b> {{ file['phash_distance'] }}</span>
+        <br>
+    {% endif %}
 </p>
 <p>
     <span><b>Site Match:</b> {{ bool_to_icon(file['site_match']) }}</span>
