@@ -156,7 +156,7 @@ def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash
 def __match_weight(result: ComparisonResult) -> float:
     value = 0.00
     if result.phash_match:
-        logger.debug("Phash match with '{} - {} = - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
+        logger.debug("Phash match with '{} - {} - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
         value = 1000.00
         if result.site_match:
             value += 100
@@ -168,7 +168,7 @@ def __match_weight(result: ComparisonResult) -> float:
         logger.debug("Name match of {:.2f} with '{} - {} - {}' for name: {}", value, result.looked_up.site, result.looked_up.date, result.looked_up.name, result.name)
         value += 1000.00
         value = (result.name_match + value) if result.name_match else value
-    logger.debug("Match was {:.2f} for {}")
+    logger.debug("Match was {:.2f} for {}", value, result.name)
     return value
 
 
@@ -294,7 +294,7 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
         return trailer if trailer.exists() and trailer.is_file() else None
 
 
-def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[FileInfo]) -> LookedUpFileInfo:
+def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()
 
     data_id = data._id  # pylint: disable=protected-access
@@ -372,18 +372,21 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     if hasattr(data, "is_collected"):
         file_info.is_collected = data.is_collected
 
+    network_name = get_site_name(data.site.network_id, config)
+    file_info.network = network_name
+
     return file_info
 
 
-def __metadataapi_response_to_data(json_object, url: str, json_response: str, name_parts: Optional[FileInfo]) -> List[LookedUpFileInfo]:
+def __metadataapi_response_to_data(json_object, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> List[LookedUpFileInfo]:
     file_infos: List[LookedUpFileInfo] = []
     if hasattr(json_object, "data"):
         if isinstance(json_object.data, list):
             for data in json_object.data:
-                found_file_info = __json_to_fileinfo(data, url, json_response, name_parts)
+                found_file_info = __json_to_fileinfo(data, url, json_response, name_parts, config)
                 file_infos.append(found_file_info)
         else:
-            found_file_info: LookedUpFileInfo = __json_to_fileinfo(json_object.data, url, json_response, name_parts)
+            found_file_info: LookedUpFileInfo = __json_to_fileinfo(json_object.data, url, json_response, name_parts, config)
             file_infos.append(found_file_info)
 
     return file_infos
@@ -434,7 +437,7 @@ def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_c
         # logger.debug("json_response: \n{}", json_response)
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
         formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
-        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts)
+        file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts, namer_config)
 
     return file_infos
 
@@ -451,6 +454,18 @@ def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config:
             return file_infos
 
     return []
+
+
+@logger.catch
+def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
+    site = None
+    url = f"{namer_config.override_tpdb_address}/sites/{site_id}"
+    json_response = __get_response_json_object(url, namer_config)
+
+    if json_response and json_response.strip() != "":
+        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
+        site = json_obj.data.name
+    return site
 
 
 def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
@@ -493,7 +508,8 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
 def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
         scene_id = metadata.uuid.rsplit('/', 1)[-1]
-        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={metadata.type.value}", config=config)
+        type = metadata.type.value if metadata.type else SceneType.SCENE.value
+        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={type}", config=config)
 
 
 def share_phash(metadata: LookedUpFileInfo, phash: PerceptualHash, config: NamerConfig):

@@ -99,7 +99,7 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
         if response and response.strip() != '':
             json_obj = json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
             formatted = json.dumps(json.loads(response), indent=4, sort_keys=True)
-            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
+            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None, config))
 
     files = []
     for scene_data in file_infos:

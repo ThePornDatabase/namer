@@ -24,6 +24,7 @@ class PartialFormatter(string.Formatter):
         "vr",
         "type",
         "year",
+        "network",
         "resolution",
         "external_id",
     ]
