@@ -541,8 +541,8 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
 def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
         scene_id = metadata.uuid.rsplit('/', 1)[-1]
-        type = metadata.type.value if metadata.type else SceneType.SCENE.value
-        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={type}", config=config)
+        scene_type = metadata.type if metadata.type else SceneType.SCENE
+        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={scene_type.value}", config=config)
 
 
 def share_hash(metadata: LookedUpFileInfo, scene_hash: SceneHash, config: NamerConfig):
