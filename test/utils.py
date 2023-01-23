@@ -328,3 +328,18 @@ def new_ea(target_dir: Optional[Path] = None, relative: str = "", use_dir: bool 
     if target_dir:
         processing_target.setup(target_dir)
     return processing_target
+
+
+def new_dorcel(target_dir: Optional[Path] = None, relative: str = "", use_dir: bool = True, post_stem: str = "", match: bool = True, mp4_file_name: str = "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4"):
+    """
+    Creates a test mp4 in a temp directory, with a name to match the returned contents of ./test/ea.json
+    optionally, names the dir and not the mp4 file to match.
+    optionally, inserts a string between the file stem and suffix.
+    optionally, will ensure a match doesn't occur.
+    """
+    name = relative + ("Dorcel" if match else "Ok") + "Club - 2021-12-23 - Aya Benetti Megane Lopez Bella Tina" + post_stem
+    full_relative = Path(name) / (relative + "qwerty.mp4") if use_dir else Path(name + ".mp4")
+    processing_target: ProcessingTarget = ProcessingTarget(full_relative, None, '', '', Path("/"), True, mp4_file_name)
+    if target_dir:
+        processing_target.setup(target_dir)
+    return processing_target

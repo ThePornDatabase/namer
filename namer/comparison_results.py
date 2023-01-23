@@ -198,7 +198,7 @@ class LookedUpFileInfo:
             "resolution": res_str,
             "type": self.type.value,
             "external_id": self.external_id,
-            "network": self.network,
+            "network": self.network.replace(" ", "") if self.network else None,
         }
 
     def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:
@@ -206,7 +206,7 @@ class LookedUpFileInfo:
         Constructs a new file name based on a template (describe in NamerConfig)
         """
         dictionary = self.as_dict(config)
-        clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) for k, v in dictionary.items()}
+        clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) if v else '' for k, v in dictionary.items()}
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
 
