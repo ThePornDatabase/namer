@@ -100,7 +100,7 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
             if name_parts.name:
                 result = __attempt_better_match(result, unidecode(name_parts.name), all_performers, namer_config)
 
-    phash_distance = None
+    phash_distance, phash_duration = None, None
     if phash:
         hashes_distances = []
 
@@ -116,9 +116,10 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
 
                     if scene_hash:
                         distance = phash.phash - imagehash.hex_to_hash(item.hash)
-                        hashes_distances.append(distance)
+                        duration = item.duration == phash.duration if item.duration else True
+                        hashes_distances.append((distance, duration))
 
-            phash_distance = abs(min(hashes_distances)) if hashes_distances else None
+            phash_distance, phash_duration = min(hashes_distances) if hashes_distances else (None, None)
 
     return ComparisonResult(
         name=result[0],
@@ -127,7 +128,8 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
         site_match=site,
         name_parts=name_parts,
         looked_up=looked_up,
-        phash_distance=phash_distance
+        phash_distance=phash_distance,
+        phash_duration=phash_duration,
     )
 
 

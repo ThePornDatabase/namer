@@ -157,7 +157,7 @@ class LookedUpFileInfo:
     """
     movie or scene, a distinction without a difference.
     """
-    duration: Optional[float] = None
+    duration: Optional[int] = None
     """
     Minute long run lenth of scene or movie.
     """
@@ -288,26 +288,31 @@ class ComparisonResult:
     performing a lookup by id (which is done only after a match is made.)
     """
 
-    phash_distance: int
+    phash_distance: Optional[int]
     """
     How close searched hash to database one.
     """
 
-    def is_match(self, target: float = 94.9, target_distance: int = 2) -> bool:
+    phash_duration: Optional[bool]
+    """
+    Duration diff with phash duration.
+    """
+
+    def is_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or (self.phash_distance is not None and self.phash_distance <= target_distance)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or (self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration)
 
-    def is_super_match(self, target: float = 94.9, target_distance: int = 2) -> bool:
+    def is_super_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) and is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and (self.phash_distance is not None and self.phash_distance <= target_distance)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and (self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
