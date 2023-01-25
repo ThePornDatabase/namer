@@ -1,4 +1,4 @@
-{% if file['phash_distance'] is not none %}
+{% if file['phash_distance'] is not none and file['phash_distance'] <= 8 %}
     {% set match = (100 - (file['phash_distance'] * 2.5)|float|round(2)) ~ '%' %}
 {% else %}
     {% set match = file['name_match']|float|round(2) ~ '%' %}

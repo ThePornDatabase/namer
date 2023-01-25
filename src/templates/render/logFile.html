@@ -1,7 +1,7 @@
 <div class="row row-cols-auto justify-content-center">
     {% set results = [] %}
     {% for item in data['data']['results'] %}
-        {% if item['name_match'] >= 80 or item['phash_distance'] is not none and item['phash_distance'] <= 8 %}
+        {% if item['name_match'] >= 80 or (item['phash_distance'] is not none and item['phash_distance'] <= 8) %}
             {% do results.append(item) %}
         {% endif %}
     {% endfor %}

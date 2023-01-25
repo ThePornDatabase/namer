@@ -8,6 +8,10 @@
         <span><b>Phash distance:</b> {{ file['phash_distance'] }}</span>
         <br>
     {% endif %}
+    {% if file['phash_duration'] is not none %}
+        <span><b>Duration Match:</b> {{ bool_to_icon(file['phash_duration']) }}</span>
+        <br>
+    {% endif %}
 </p>
 <p>
     <span><b>Site Match:</b> {{ bool_to_icon(file['site_match']) }}</span>
