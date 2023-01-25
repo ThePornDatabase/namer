@@ -87,7 +87,7 @@ def __verify_ffmpeg(ffmpeg: FFMpeg) -> bool:
         if not version:
             logger.error(f'No {tool} found, please install {tool}')
         else:
-            logger.info(f'{tool} version {version} found')
+            logger.info(f'{tool} version "{version}" found')
 
     return None not in versions.values()
 

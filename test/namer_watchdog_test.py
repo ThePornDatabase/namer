@@ -14,7 +14,7 @@ from mutagen.mp4 import MP4
 from namer.ffmpeg import FFMpeg
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed, MovieWatcher
-from test.utils import Wait, new_ea, validate_mp4_tags, validate_permissions, environment, sample_config, ProcessingTarget
+from test.utils import Wait, new_ea, new_dorcel, validate_mp4_tags, validate_permissions, environment, sample_config, ProcessingTarget
 
 
 def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
@@ -205,6 +205,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.min_file_size = 0
         config.set_dir_permissions = None
         config.set_file_permissions = None
+        config.new_relative_path_name = "./{network}/" + config.new_relative_path_name
         with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
             targets = [
                 new_ea(config.watch_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way", use_dir=True),
@@ -213,8 +214,34 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             watcher.stop()
-            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            output_file = config.dest_dir / "GammaEnterprises" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
             validate_mp4_tags(self, output_file)
+            validate_permissions(self, output_file, 600)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
+
+    def test_handler_deeply_nested_success_missing_network(self):
+        """
+        Test the handle function works for a directory.
+        """
+        config = sample_config()
+        config.prefer_dir_name_if_available = True
+        config.write_namer_log = True
+        config.del_other_files = False
+        config.min_file_size = 0
+        config.set_dir_permissions = None
+        config.set_file_permissions = None
+        config.new_relative_path_name = "./{network}/" + config.new_relative_path_name
+        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+            targets = [
+                new_dorcel(config.watch_dir, use_dir=True),
+            ]
+            wait_until_processed(watcher)
+            self.assertFalse(targets[0].get_file().exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            watcher.stop()
+            output_file = config.dest_dir / "DorcelClub - 2021-12-23 - Peeping Tom" / "DorcelClub - 2021-12-23 - Peeping Tom.mp4"
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)

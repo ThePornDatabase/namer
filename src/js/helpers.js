@@ -2,6 +2,9 @@ import $ from 'jquery'
 import {Tooltip} from 'bootstrap'
 
 export class Helpers {
+    static #table
+    static #queueSize = '0'
+
     static getProgressBar() {
         return '<div class="progress"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
     }
@@ -25,8 +28,15 @@ export class Helpers {
         })
     }
 
+    static removeRow(selector, paging = false) {
+        Helpers.#table
+            .row(selector.parents('tr'))
+            .remove()
+            .draw(paging)
+    }
+
     static setTableSort(selector) {
-        $(selector).children('table').DataTable({
+        Helpers.#table = $(selector).children('table').DataTable({
             stateSave: true,
             stateSaveCallback: function (settings, data) {
                 localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
@@ -82,6 +92,15 @@ export class Helpers {
             new Tooltip(element, {
                 boundary: selector[0],
             })
+        })
+    }
+
+    static updateQueueSize(selector) {
+        Helpers.request('./api/v1/get_queue', null, function (data) {
+            if (Helpers.#queueSize !== data) {
+                Helpers.#queueSize = data
+                selector.html(data)
+            }
         })
     }
 }

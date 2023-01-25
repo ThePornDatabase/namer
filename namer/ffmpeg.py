@@ -306,7 +306,7 @@ class FFMpeg:
     def __ffmpeg_version(local_dir: Optional[Path] = None) -> Dict:
         tools = ['ffmpeg', 'ffprobe']
         re_tools = '|'.join(tools)
-        reg = re.compile(fr'({re_tools}) version (?P<version>[\d|.]*)')
+        reg = re.compile(fr'({re_tools}) version (?P<version>.*) Copyright')
 
         versions = {}
 

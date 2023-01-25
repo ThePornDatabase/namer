@@ -15,7 +15,7 @@ from typing import List, Optional
 
 import schedule
 from loguru import logger
-from watchdog.events import EVENT_TYPE_DELETED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
+from watchdog.events import EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
 from namer.configuration import NamerConfig
@@ -95,7 +95,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         file_path = None
         if event.event_type == EVENT_TYPE_MOVED:
             file_path = event.dest_path  # type: ignore
-        elif event.event_type != EVENT_TYPE_DELETED:
+        elif event.event_type != EVENT_TYPE_MODIFIED:
             file_path = event.src_path
 
         if file_path:

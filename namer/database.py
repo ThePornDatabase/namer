@@ -45,8 +45,6 @@ abbreviations = {
     'cuf': 'CumFiesta',
     'cws': 'CzechWifeSwap',
     'da': 'DoctorAdventures',
-    'Daughter': 'DaughterSwap',
-    'Daughters': 'DaughterSwap',
     'dbm': 'DontBreakMe',
     'dc': 'DorcelVision',
     'ddfb': 'DDFBusty',

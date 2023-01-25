@@ -44,6 +44,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.performers[1].name, "Aya Benetti")
             self.assertEqual(info.performers[2].name, "Bella Tina")
             self.assertEqual(info.performers[3].name, "Megane Lopez")
+            self.assertEqual(info.new_file_name("{network}", config), "")
 
     def test_parse_response_metadataapi_net_dorcel_unicode_cruft(self):
         """
@@ -91,6 +92,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
             self.assertEqual(info.date, "2022-01-03")
             self.assertEqual(info.site, "Evil Angel")
+            self.assertEqual(info.network, "Gamma Enterprises")
             self.assertIsNotNone(info.description)
             if info.description is not None:
                 self.assertRegex(
@@ -111,6 +113,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(info.performers[2].name, "Mark Wood")
             self.assertEqual(info.performers[2].role, "Male")
             self.assertEqual(info.new_file_name("{name}", config), "Carmela Clutch Fabulous Anal 3-Way!")
+            self.assertEqual(info.new_file_name("{year}", config), "2022")
+            self.assertEqual(info.new_file_name("{network}", config), "GammaEnterprises")
 
     def test_call_metadataapi_net2(self):
         """

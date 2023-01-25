@@ -15,13 +15,13 @@ from typing import List, Optional
 from loguru import logger
 
 from namer.command import Command
-from namer.comparison_results import ComparisonResult, ComparisonResults, LookedUpFileInfo, SceneType
+from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, SceneHash
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import FileInfo
-from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_oshash, share_phash, toggle_collected
+from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash, toggle_collected
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
@@ -156,6 +156,7 @@ def process_file(command: Command) -> Optional[Command]:
         matched: Optional[ComparisonResult] = None
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: ComparisonResults = ComparisonResults([])
+        vph = command.config.vph_alt if command.config.use_alt_phash_tool else command.config.vph
         # Match to nfo files, if enabled and found.
         if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
@@ -173,7 +174,7 @@ def process_file(command: Command) -> Optional[Command]:
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and ((command.parsed_file is not None and command.parsed_file.name is not None) or command.config.search_phash):
-            phash = command.config.vph.get_hashes(command.target_movie_file) if command.config.search_phash else None
+            phash = vph.get_hashes(command.target_movie_file) if command.config.search_phash else None
             search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
                 matched = search_results.get_match()
@@ -195,12 +196,15 @@ def process_file(command: Command) -> Optional[Command]:
                 new_metadata.resolution = ffprobe_results.get_resolution()
 
             if command.config.send_phash:
-                phash = command.config.vph.get_hashes(command.target_movie_file) if not phash else phash
+                phash = vph.get_hashes(command.target_movie_file) if not phash else phash
                 if phash:
-                    share_phash(new_metadata, phash, command.config)
-                    share_oshash(new_metadata, phash, command.config)
+                    scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
+                    share_hash(new_metadata, scene_hash, command.config)
 
-            if command.config.mark_collected and not new_metadata.is_collected and new_metadata.type == SceneType.SCENE:
+                    scene_hash = SceneHash(phash.oshash, HashType.OSHASH, phash.duration)
+                    share_hash(new_metadata, scene_hash, command.config)
+
+            if command.config.mark_collected and not new_metadata.is_collected:
                 toggle_collected(new_metadata, command.config)
 
             log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')
@@ -230,13 +234,14 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     if config.trailer_location and new_metadata:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
-    if config.write_nfo and new_metadata:
+    if config.write_nfo and config.enabled_poster and new_metadata:
         poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url else None
         background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url else None
         for performer in new_metadata.performers:
-            performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image else None
-            if performer_image:
-                performer.image = str(performer_image)
+            if isinstance(performer.image, str):
+                performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image else None
+                if performer_image:
+                    performer.image = performer_image
 
         write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
 

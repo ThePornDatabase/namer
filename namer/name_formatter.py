@@ -23,6 +23,8 @@ class PartialFormatter(string.Formatter):
         "uuid",
         "vr",
         "type",
+        "year",
+        "network",
         "resolution",
         "external_id",
     ]

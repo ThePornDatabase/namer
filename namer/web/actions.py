@@ -15,7 +15,7 @@ from typing import Dict, List, Optional
 import jsonpickle
 from werkzeug.routing import Rule
 
-from namer.comparison_results import ComparisonResults
+from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
@@ -25,6 +25,7 @@ class SearchType(str, Enum):
     ANY = 'Any'
     SCENES = 'Scenes'
     MOVIES = 'Movies'
+    JAV = 'JAV'
 
 
 def has_no_empty_params(rule: Rule) -> bool:
@@ -69,7 +70,8 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     percentage = 0.0
     if config and config.add_max_percent_column and config.write_namer_failed_log and subpath:
         log_data = read_failed_log_file(subpath, config)
-        percentage = log_data.results[0].name_match if log_data and log_data.results and log_data.results[0] else 0.0
+        if log_data and log_data.results:
+            percentage = max([100 - item.phash_distance * 2.5 if item.phash_distance is not None else item.name_match for item in log_data.results])
     res['percentage'] = percentage
 
     return res
@@ -82,13 +84,15 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
 
     responses = {}
     if search_type == SearchType.ANY or search_type == SearchType.SCENES:
-        # scenes
-        url = __build_url(config, name=query, page=page, movie=False)
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.SCENE)
         responses[url] = __get_response_json_object(url, config)
 
     if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
-        # movies
-        url = __build_url(config, name=query, page=page, movie=True)
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.MOVIE)
+        responses[url] = __get_response_json_object(url, config)
+
+    if search_type == SearchType.ANY or search_type == SearchType.JAV:
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.JAV)
         responses[url] = __get_response_json_object(url, config)
 
     file_infos = []
@@ -96,7 +100,7 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
         if response and response.strip() != '':
             json_obj = json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
             formatted = json.dumps(json.loads(response), indent=4, sort_keys=True)
-            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None))
+            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None, config))
 
     files = []
     for scene_data in file_infos:
@@ -159,6 +163,13 @@ def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Opt
         data = gzip.decompress(file.read_bytes())
         decoded = jsonpickle.decode(data)
         if decoded and isinstance(decoded, ComparisonResults):
+            for item in decoded.results:
+                if not hasattr(item, 'phash_distance'):
+                    item.phash_distance = 0 if hasattr(item, 'phash_match') and getattr(item, 'phash_match') else None
+
+                if not hasattr(item.looked_up, 'hashes'):
+                    item.looked_up.hashes = []
+
             res = decoded
 
     return res

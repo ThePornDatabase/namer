@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import PurePath
-from typing import List, Optional
+from pathlib import Path, PurePath
+from typing import List, Optional, Union
 
 from pathvalidate import Platform, sanitize_filename
 
@@ -19,7 +19,7 @@ class Performer:
 
     name: str
     role: Optional[str]
-    image: Optional[str]
+    image: Optional[Union[Path, str]]
     """
     if available the performers gender, stored as a role.  example: "Female", "Male"
     Useful as many nzbs often don't include the scene name, but instead female performers names,
@@ -49,6 +49,24 @@ class SceneType(str, Enum):
     JAV = 'JAV'
 
 
+class HashType(str, Enum):
+    PHASH = 'PHASH'
+    OSHASH = 'OSHASH'
+    MD5 = 'MD5'
+
+
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+class SceneHash:
+    hash: str
+    type: HashType
+    duration: Optional[int]
+
+    def __init__(self, scene_hash: str, hash_type: HashType, duration: Optional[int] = None):
+        self.hash = scene_hash
+        self.type = hash_type
+        self.duration = duration
+
+
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class LookedUpFileInfo:
     """
@@ -67,6 +85,10 @@ class LookedUpFileInfo:
     porndb guid/stashid
     """
 
+    network: Optional[str] = None
+    """
+    Top level studio, like Vixen for Deeper.
+    """
     site: Optional[str] = None
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
@@ -127,11 +149,15 @@ class LookedUpFileInfo:
     """
     Tags associated with the video.   Noisy and long list.
     """
+    hashes: List[SceneHash] = field(default_factory=list)
+    """
+    Hashes associated with the video.
+    """
     type: Optional[SceneType] = None
     """
     movie or scene, a distinction without a difference.
     """
-    duration: Optional[float] = None
+    duration: Optional[int] = None
     """
     Minute long run lenth of scene or movie.
     """
@@ -151,6 +177,7 @@ class LookedUpFileInfo:
     def __init__(self):
         self.performers = []
         self.tags = []
+        self.hashes = []
         self.resolution = None
         self.original_parsed_filename = FileInfo()
 
@@ -165,7 +192,7 @@ class LookedUpFileInfo:
         res = self.resolution
         res_str: Optional[str] = None
         if res:
-            res_str = "4k" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
+            res_str = "2160p" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
 
         vr = ""
         if (self.site and self.site.lower() in config.vr_studios) or any(tag.strip().lower() in config.vr_tags for tag in self.tags):
@@ -181,6 +208,7 @@ class LookedUpFileInfo:
         return {
             "uuid": self.uuid,
             "date": self.date,
+            "year": self.date[0:4] if self.date else None,
             "description": self.description,
             "name": self.name,
             "site": self.site.replace(" ", "") if self.site else None,
@@ -193,6 +221,7 @@ class LookedUpFileInfo:
             "resolution": res_str,
             "type": self.type.value,
             "external_id": self.external_id,
+            "network": self.network.replace(" ", "") if self.network else None,
         }
 
     def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:
@@ -200,7 +229,7 @@ class LookedUpFileInfo:
         Constructs a new file name based on a template (describe in NamerConfig)
         """
         dictionary = self.as_dict(config)
-        clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) for k, v in dictionary.items()}
+        clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) if v else '' for k, v in dictionary.items()}
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
 
@@ -218,7 +247,7 @@ class LookedUpFileInfo:
         return name
 
     def found_via_phash(self) -> bool:
-        return True if self.original_query and "/hash/" in self.original_query else False
+        return bool(self.original_query and '?hash=' in self.original_query)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -259,18 +288,31 @@ class ComparisonResult:
     performing a lookup by id (which is done only after a match is made.)
     """
 
-    phash_match: bool = False
+    phash_distance: Optional[int]
     """
-    Was this matched found via a phash, and not the name.
+    How close searched hash to database one.
     """
 
-    def is_match(self) -> bool:
+    phash_duration: Optional[bool]
+    """
+    Duration diff with phash duration.
+    """
+
+    def is_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
-        actors and scene name).
+        actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= 94.9) or self.phash_match
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or (self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration)
+
+    def is_super_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
+        """
+        Returns true if site and creation data match exactly, and if the name fuzzes against
+        the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
+        actors and scene name) and is a phash match.
+        """
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and (self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -279,14 +321,16 @@ class ComparisonResults:
 
     def get_match(self) -> Optional[ComparisonResult]:
         match = None
-        if self.results and len(self.results) > 0 and self.results[0].is_match():
+        if self.results and self.results[0].is_match():
             # verify the match isn't covering over a better namer match, if it is, no match shall be made
             # implying that the site and date on the name of the file may be wrong.   leave it for the user
             # to sort it out.
             match: Optional[ComparisonResult] = self.results[0]
             for potential in self.results[1:]:
                 # Now that matches are unique in the list, don't match if there are multiple
-                if match and match.name_match < potential.name_match or potential.is_match():
-                    match = None
-
+                if match:
+                    if not match.is_super_match() and potential.is_match() or potential.is_super_match():
+                        match = None
+                    elif not match.is_super_match() and potential.name_match > match.name_match:
+                        match = None
         return match
