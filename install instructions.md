@@ -90,6 +90,27 @@ After that we can go ahead and link in our port for the webUI. You can use whate
 * Host port: 6980
 * Connection Type: TCP
 
+We're going to need to pass a UMASK of 000 which can be done like so:
+
+* Config Type: Variable
+* Name: UMASK
+* Key: 000
+* Value: 000
+
+Now we're going to go ahead and get our UID and GID passed for namer permissions as well. You are going to need 99 for ID and 100 for UD if using standard nobody:user permissions.
+
+* Config Type: Variable
+* Name: PUID
+* Key: 99
+* Value: 100
+
+and now PGID
+
+* Config Type: Variable
+* Name: PGID
+* Key: 100
+* Value: 100
+
 We also need to make some PUID and PUIG ones for your perms. It's exactly the same as above but you use variable instead of path.
 
 So, all of these are essentially translations between namer and unraid. When you type **/config** into namer it will tell unraid and unraid will look in **/mnt/user/appdata/namer**. This also applies to all the other ones we made too.
