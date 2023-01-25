@@ -393,6 +393,11 @@ class NamerConfig:
     Set logger level to debug
     """
 
+    manual_mode: bool = False
+    """
+    If True, successful matches will go to failed directory
+    """
+
     diagnose_errors: bool = False
     """
     Errors may be raised by the program, and when they are loguru may be used to help explain them, showing
@@ -493,6 +498,7 @@ class NamerConfig:
                 "allow_delete_files": self.allow_delete_files,
                 "add_max_percent_column": self.add_max_percent_column,
                 "debug": self.debug,
+                "manual_mode": self.manual_mode,
                 "diagnose_errors": self.diagnose_errors,
             }
         }

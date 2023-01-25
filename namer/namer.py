@@ -191,32 +191,37 @@ def process_file(command: Command) -> Optional[Command]:
         target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
-            ffprobe_results = command.config.ffmpeg.ffprobe(command.target_movie_file)
-            if ffprobe_results:
-                new_metadata.resolution = ffprobe_results.get_resolution()
+            if command.config.manual_mode:
+                failed = move_command_files(command, command.config.failed_dir)
+                if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
+                    write_log_file(failed.target_movie_file, search_results, failed.config)
+            else:
+                ffprobe_results = command.config.ffmpeg.ffprobe(command.target_movie_file)
+                if ffprobe_results:
+                    new_metadata.resolution = ffprobe_results.get_resolution()
 
-            if command.config.send_phash:
-                phash = vph.get_hashes(command.target_movie_file) if not phash else phash
-                if phash:
-                    scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
-                    share_hash(new_metadata, scene_hash, command.config)
+                if command.config.send_phash:
+                    phash = vph.get_hashes(command.target_movie_file) if not phash else phash
+                    if phash:
+                        scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
+                        share_hash(new_metadata, scene_hash, command.config)
 
-                    scene_hash = SceneHash(phash.oshash, HashType.OSHASH, phash.duration)
-                    share_hash(new_metadata, scene_hash, command.config)
+                        scene_hash = SceneHash(phash.oshash, HashType.OSHASH, phash.duration)
+                        share_hash(new_metadata, scene_hash, command.config)
 
-            if command.config.mark_collected and not new_metadata.is_collected:
-                toggle_collected(new_metadata, command.config)
+                if command.config.mark_collected and not new_metadata.is_collected:
+                    toggle_collected(new_metadata, command.config)
 
-            log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')
-            if log_file.is_file():
-                log_file.unlink()
+                log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')
+                if log_file.is_file():
+                    log_file.unlink()
 
-            target = move_to_final_location(command, new_metadata)
-            tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
-            add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
+                target = move_to_final_location(command, new_metadata)
+                tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
+                add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
 
-            logger.success("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
-            return target
+                logger.success("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
+                return target
         elif command.inplace is False:
             failed = move_command_files(command, command.config.failed_dir)
             if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
