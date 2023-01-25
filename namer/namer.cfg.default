@@ -247,6 +247,9 @@ add_max_percent_column = False
 # Set logger level to debug
 debug = False
 
+# Manual mode, successful matches will go to failed directory
+manual_mode = False
+
 # Errors may be raised by the program, and when they are loguru may be used to help explain them, showing 
 # values in the stack trace, potentially including the porndb token, this setting should only be turned on
 # if you are going to check an logs you share for your token.
