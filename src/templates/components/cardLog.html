@@ -9,7 +9,12 @@
     <div class="card-header text-center p-0">{{ file['looked_up']['type'] }}</div>
     <div class="card-body">
         <h5 class="card-title">{{ file['looked_up']['name'] }}</h5>
-        <p class="card-text">{{ file['looked_up']['site'] }}</p>
+        {% if file['looked_up']['network'] %}
+            <p class="card-text mb-1">{{ file['looked_up']['site'] }}</p>
+            <p class="card-text">{{ file['looked_up']['network'] }}</p>
+        {% else %}
+            <p class="card-text">{{ file['looked_up']['site'] }}</p>
+        {% endif %}
         <p class="card-text">
             <small class="text-muted">{{ file['looked_up']['date'] }}</small>
         </p>

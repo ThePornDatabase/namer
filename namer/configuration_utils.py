@@ -233,10 +233,12 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "plex_hack": ("namer", to_bool, from_bool),
     "search_phash": ("Phash", to_bool, from_bool),
     "send_phash": ("Phash", to_bool, from_bool),
+    "use_alt_phash_tool": ("Phash", to_bool, from_bool),
     "mark_collected": ("metadata", to_bool, from_bool),
     "write_nfo": ("metadata", to_bool, from_bool),
     "enabled_tagging": ("metadata", to_bool, from_bool),
     "enabled_poster": ("metadata", to_bool, from_bool),
+    "download_type": ("metadata", to_str_list_lower, from_str_list_lower),
     "enable_metadataapi_genres": ("metadata", to_bool, from_bool),
     "default_genre": ("metadata", None, None),
     "language": ("metadata", None, None),
@@ -259,6 +261,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "allow_delete_files": ("watchdog", to_bool, from_bool),
     "add_max_percent_column": ("watchdog", to_bool, from_bool),
     "debug": ("watchdog", to_bool, from_bool),
+    "manual_mode": ("watchdog", to_bool, from_bool),
     "diagnose_errors": ("watchdog", to_bool, from_bool),
 }
 """

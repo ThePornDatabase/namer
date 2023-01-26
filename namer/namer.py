@@ -16,7 +16,7 @@ from loguru import logger
 
 from namer.command import Command
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, SceneHash
-from namer.configuration import NamerConfig
+from namer.configuration import ImageDownloadType, NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults
@@ -191,7 +191,7 @@ def process_file(command: Command) -> Optional[Command]:
         target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
         set_permissions(target_dir, command.config)
         if new_metadata is not None:
-            if command.config.manual_mode:
+            if command.config.manual_mode and command.is_auto:
                 failed = move_command_files(command, command.config.failed_dir)
                 if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
                     write_log_file(failed.target_movie_file, search_results, failed.config)
@@ -232,19 +232,19 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     """
     Once the file is in its final location we will grab other relevant output if requested.
     """
-    trailer = None
     if config.write_namer_log:
         write_log_file(video_file, search_results, config)
 
+    trailer = None
     if config.trailer_location and new_metadata:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
-    if config.write_nfo and config.enabled_poster and new_metadata:
-        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url else None
-        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url else None
+    if config.write_nfo and new_metadata:
+        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url and config.enabled_poster and ImageDownloadType.POSTER in config.download_type else None
+        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url and config.enabled_poster and ImageDownloadType.BACKGROUND in config.download_type else None
         for performer in new_metadata.performers:
             if isinstance(performer.image, str):
-                performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image else None
+                performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image and config.enabled_poster and ImageDownloadType.PERFORMER in config.download_type else None
                 if performer_image:
                     performer.image = performer_image
 
