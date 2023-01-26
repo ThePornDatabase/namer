@@ -77,8 +77,8 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         if data:
             res = False
             movie = config.failed_dir / Path(data['file'])
-            command = make_command_relative_to(movie, config.failed_dir, config=config)
-            moved_command = move_command_files(command, config.work_dir)
+            command = make_command_relative_to(movie, config.failed_dir, config=config, is_auto=False)
+            moved_command = move_command_files(command, config.work_dir, is_auto=False)
             if moved_command:
                 moved_command.tpdb_id = data['scene_id']
                 command_queue.put(moved_command)  # Todo pass selection

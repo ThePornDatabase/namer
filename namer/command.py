@@ -64,13 +64,18 @@ class Command:
     The _id used to identify video in tpdb
     """
 
+    is_auto: bool = True
+    """
+    If False then it means command was from web ui
+    """
+
     config: NamerConfig
 
     def get_command_target(self):
         return str(self.target_movie_file.absolute())
 
 
-def move_command_files(target: Optional[Command], new_target: Path) -> Optional[Command]:
+def move_command_files(target: Optional[Command], new_target: Path, is_auto: bool = True) -> Optional[Command]:
     if not target:
         return
 
@@ -78,12 +83,12 @@ def move_command_files(target: Optional[Command], new_target: Path) -> Optional[
         working_dir = Path(new_target) / target.target_directory.name
         logger.info("Moving {} to {} for processing", target.target_directory, working_dir)
         shutil.move(target.target_directory, working_dir)
-        output = make_command(working_dir, target.config)
+        output = make_command(working_dir, target.config, is_auto=is_auto)
     else:
         working_file = Path(new_target) / target.target_movie_file.name
         shutil.move(target.target_movie_file, working_file)
         logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
-        output = make_command(working_file, target.config)
+        output = make_command(working_file, target.config, is_auto=is_auto)
 
     if output:
         output.tpdb_id = target.tpdb_id
@@ -368,7 +373,7 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     return file
 
 
-def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, ignore_file_restrictions: bool = False) -> Optional[Command]:
+def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, ignore_file_restrictions: bool = False, is_auto: bool = True) -> Optional[Command]:
     """
     after finding target directory and target movie from input, returns file name descriptors.
     """
@@ -382,13 +387,14 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_file.tpdb_id = uuid
     target_file.write_from_nfos = nfo
     target_file.inplace = inplace
+    target_file.is_auto = is_auto
 
     output = target_file if is_interesting_movie(target_file.target_movie_file, config) or ignore_file_restrictions else None
 
     return output
 
 
-def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None) -> Optional[Command]:
+def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerConfig, nfo: bool = False, inplace: bool = False, uuid: Optional[str] = None, is_auto: bool = True) -> Optional[Command]:
     """
     Ensure we are going to handle the directory relative to another directory, rather than just the file
     specified
@@ -397,7 +403,7 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
         relative_path = input_dir.absolute().relative_to(relative_to.absolute())
         if relative_path:
             target_file = relative_to / relative_path.parts[0]
-            return make_command(target_file, config, nfo, inplace, uuid)
+            return make_command(target_file, config, nfo, inplace, uuid, is_auto=is_auto)
 
 
 def main(arg_list: List[str]):
