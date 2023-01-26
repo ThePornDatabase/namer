@@ -238,6 +238,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "write_nfo": ("metadata", to_bool, from_bool),
     "enabled_tagging": ("metadata", to_bool, from_bool),
     "enabled_poster": ("metadata", to_bool, from_bool),
+    "download_type": ("metadata", to_str_list_lower, from_str_list_lower),
     "enable_metadataapi_genres": ("metadata", to_bool, from_bool),
     "default_genre": ("metadata", None, None),
     "language": ("metadata", None, None),

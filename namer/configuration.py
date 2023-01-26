@@ -6,6 +6,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Pattern, Sequence
 from configupdater import ConfigUpdater
@@ -15,6 +16,12 @@ from requests_cache import CachedSession
 from namer.ffmpeg import FFMpeg
 from namer.videophash.videophash import VideoPerceptualHash
 from namer.videophash.videophashstash import StashVideoPerceptualHash
+
+
+class ImageDownloadType(str, Enum):
+    POSTER = 'poster'
+    BACKGROUND = 'background'
+    PERFORMER = 'performer'
 
 
 # noinspection PyDataclass
@@ -260,6 +267,11 @@ class NamerConfig:
     Only applicable if enabled_tagging is True
     """
 
+    download_type: List[str]
+    """
+    List of which images would be downloaded
+    """
+
     enable_metadataapi_genres: bool = False
     """
     Should genres pulled from the porndb be added to the file?   These genres are noisy and
@@ -475,6 +487,7 @@ class NamerConfig:
                 "write_nfo": self.write_nfo,
                 "enabled_tagging": self.enabled_tagging,
                 "enabled_poster": self.enabled_poster,
+                "download_type": self.download_type,
                 "enable_metadataapi_genres": self.enable_metadataapi_genres,
                 "default_genre": self.default_genre,
                 "language": self.language,

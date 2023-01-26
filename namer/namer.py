@@ -16,7 +16,7 @@ from loguru import logger
 
 from namer.command import Command
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, SceneHash
-from namer.configuration import NamerConfig
+from namer.configuration import ImageDownloadType, NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.ffmpeg import FFProbeResults
@@ -240,11 +240,11 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
     if config.write_nfo and new_metadata:
-        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url and config.enabled_poster else None
-        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url and config.enabled_poster else None
+        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url and config.enabled_poster and ImageDownloadType.POSTER in config.download_type else None
+        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url and config.enabled_poster and ImageDownloadType.BACKGROUND in config.download_type else None
         for performer in new_metadata.performers:
             if isinstance(performer.image, str):
-                performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image and config.enabled_poster else None
+                performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image and config.enabled_poster and ImageDownloadType.PERFORMER in config.download_type else None
                 if performer_image:
                     performer.image = performer_image
 
