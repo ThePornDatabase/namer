@@ -112,6 +112,7 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
             'date': scene_data.date,
             'poster': scene_data.poster_url,
             'site': scene_data.site,
+            'network': scene_data.network,
             'tags_count': len(scene_data.tags),
             'performers': scene_data.performers,
         }

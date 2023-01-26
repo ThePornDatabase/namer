@@ -6,7 +6,12 @@
     <div class="card-header text-center p-0">{{ file['type'] }}</div>
     <div class="card-body">
         <h5 class="card-title">{{ file['title'] }}</h5>
-        <p class="card-text">{{ file['site'] }}</p>
+        {% if file['network'] %}
+            <p class="card-text mb-1">{{ file['site']  }}</p>
+            <p class="card-text">{{ file['network'] }}</p>
+        {% else %}
+            <p class="card-text">{{ file['site']  }}</p>
+        {% endif %}
         <p class="card-text">
             <small class="text-muted">{{ file['date'] }}</small>
         </p>
