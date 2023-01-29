@@ -88,7 +88,9 @@ filesResult.on('click', '.delete', function () {
 
 refreshFiles.on('click', function () {
     Helpers.refreshFiles(filesResult, $(this).data('target'))
-    updateQueueSize()
+    if (queueSize) {
+        Helpers.updateQueueSize(queueSize)
+    }
 })
 
 searchForm.on('shown.bs.modal', function () {
