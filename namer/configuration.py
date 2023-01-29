@@ -308,12 +308,12 @@ class NamerConfig:
 
     max_ffmpeg_workers: Optional[int] = None
     """
-    Max ffmpeg processes for alternative phash generation, None for auto select
+    Max ffmpeg processes for alternative phash generation, empty for auto select
     """
 
     use_gpu: Optional[bool] = False
     """
-    Max ffmpeg processes for alternative phash generation, None for auto select
+    Use gpu for alternative phash generation
     """
 
     mark_collected: bool = False
