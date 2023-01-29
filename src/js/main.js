@@ -4,7 +4,6 @@ import {Popover, Modal} from 'bootstrap'
 import $ from 'jquery'
 import 'datatables.net-bs5'
 import {escape} from 'lodash'
-import hljs from 'highlight.js'
 
 import {Helpers} from './helpers'
 import './themes'
@@ -121,7 +120,6 @@ function rename() {
 }
 
 Helpers.setTableSort(filesResult)
-hljs.highlightAll()
 
 if (queueSize) {
     Helpers.updateQueueSize(queueSize)

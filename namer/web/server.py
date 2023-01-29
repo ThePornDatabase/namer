@@ -6,7 +6,7 @@ import mimetypes
 from datetime import datetime
 from queue import Queue
 from threading import Thread
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from flask import Blueprint, Flask
 from flask_compress import Compress
@@ -15,6 +15,7 @@ from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
 
 from namer.configuration import NamerConfig
+from namer.configuration_utils import from_str_list_lower
 from namer.web.routes import api, web
 
 
@@ -81,6 +82,9 @@ class GenericWebServer:
         filters = {
             'timestamp_to_datetime': self.timestamp_to_datetime,
             'strftime': self.strftime,
+            'is_list': self.is_list,
+            'is_dict': self.is_dict,
+            'from_list': from_str_list_lower,
         }
         self.__app.jinja_env.filters.update(**filters)
 
@@ -128,6 +132,14 @@ class GenericWebServer:
             icon = 'check'
 
         return f'<i class="bi bi-{icon}"></i>'
+
+    @staticmethod
+    def is_list(item: Any) -> bool:
+        return isinstance(item, list)
+
+    @staticmethod
+    def is_dict(item: Any) -> bool:
+        return isinstance(item, dict)
 
     @staticmethod
     def timestamp_to_datetime(item: int) -> datetime:
