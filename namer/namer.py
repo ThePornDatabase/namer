@@ -174,7 +174,7 @@ def process_file(command: Command) -> Optional[Command]:
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and ((command.parsed_file is not None and command.parsed_file.name is not None) or command.config.search_phash):
-            phash = vph.get_hashes(command.target_movie_file) if command.config.search_phash else None
+            phash = vph.get_hashes(command.target_movie_file, max_workers=command.config.max_ffmpeg_workers, use_gpu=command.config.use_gpu) if command.config.search_phash else None
             search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
                 matched = search_results.get_match()
@@ -201,7 +201,7 @@ def process_file(command: Command) -> Optional[Command]:
                     new_metadata.resolution = ffprobe_results.get_resolution()
 
                 if command.config.send_phash:
-                    phash = vph.get_hashes(command.target_movie_file) if not phash else phash
+                    phash = vph.get_hashes(command.target_movie_file, max_workers=command.config.max_ffmpeg_workers, use_gpu=command.config.use_gpu) if not phash else phash
                     if phash:
                         scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
                         share_hash(new_metadata, scene_hash, command.config)

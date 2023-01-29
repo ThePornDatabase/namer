@@ -286,10 +286,14 @@ class FFMpeg:
 
         return success
 
-    def extract_screenshot(self, file: Path, time: float, screenshot_width: int = -1) -> Image.Image:
+    def extract_screenshot(self, file: Path, screenshot_time: float, screenshot_width: int = -1, use_gpu: bool = False) -> Image.Image:
+        input_args = {}
+        if use_gpu:
+            input_args['hwaccel'] = 'auto'
+
         out, _ = (
             ffmpeg
-            .input(file, ss=time)
+            .input(file, ss=screenshot_time, **input_args)
             .filter('scale', screenshot_width, -2)
             .output('pipe:', vframes=1, format='apng')
             .run(quiet=True, capture_stdout=True, cmd=self.__ffmpeg_cmd)

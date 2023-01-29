@@ -138,6 +138,12 @@ send_phash = False
 # Use alternative phash generator (might be faster, not 100% compatible)
 use_alt_phash_tool = False
 
+# Max ffmpeg processes for alternative phash generation, empty for auto select
+max_ffmpeg_workers =
+
+# Use gpu for alternative phash generation
+use_gpu = False
+
 [metadata]
 # Currently metadata pulled from the porndb can be added to mp4 files or .nfo files.
 # MP4 metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).

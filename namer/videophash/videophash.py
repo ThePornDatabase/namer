@@ -26,7 +26,7 @@ class VideoPerceptualHash:
     def __init__(self, ffmpeg: FFMpeg):
         self.__ffmpeg = ffmpeg
 
-    def get_hashes(self, file: Path) -> Optional[PerceptualHash]:
+    def get_hashes(self, file: Path, max_workers: Optional[int] = None, use_gpu: bool = False) -> Optional[PerceptualHash]:
         data = None
 
         probe = self.__ffmpeg.ffprobe(file)
@@ -34,7 +34,7 @@ class VideoPerceptualHash:
             return data
 
         duration = probe.get_format().duration
-        phash = self.get_phash(file, duration)
+        phash = self.get_phash(file, duration, max_workers, use_gpu)
         if phash:
             file_oshash = self.get_oshash(file)
 
@@ -42,29 +42,29 @@ class VideoPerceptualHash:
 
         return data
 
-    def get_phash(self, file: Path, duration: float) -> Optional[imagehash.ImageHash]:
+    def get_phash(self, file: Path, duration: float, max_workers: Optional[int], use_gpu: bool) -> Optional[imagehash.ImageHash]:
         stat = file.stat()
-        return self._get_phash(file, duration, stat.st_size, stat.st_mtime)
+        return self._get_phash(file, duration, max_workers, use_gpu, stat.st_size, stat.st_mtime)
 
     @lru_cache(maxsize=1024)
-    def _get_phash(self, file: Path, duration: float, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
+    def _get_phash(self, file: Path, duration: float, max_workers: Optional[int], use_gpu: bool, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
         logger.info(f'Calculating phash for file "{file}"')
-        phash = self.__calculate_phash(file, duration)
+        phash = self.__calculate_phash(file, duration, max_workers, use_gpu)
         return phash
 
-    def __calculate_phash(self, file: Path, duration: float) -> Optional[imagehash.ImageHash]:
+    def __calculate_phash(self, file: Path, duration: float, max_workers: Optional[int], use_gpu: bool) -> Optional[imagehash.ImageHash]:
         phash = None
 
-        thumbnail_image = self.__generate_image_thumbnail(file, duration)
+        thumbnail_image = self.__generate_image_thumbnail(file, duration, max_workers, use_gpu)
         if thumbnail_image:
             phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
 
         return phash
 
-    def __generate_image_thumbnail(self, file: Path, duration: float) -> Optional[Image.Image]:
+    def __generate_image_thumbnail(self, file: Path, duration: float, max_workers: Optional[int], use_gpu: bool) -> Optional[Image.Image]:
         thumbnail_image = None
 
-        thumbnail_list = self.__generate_thumbnails(file, duration)
+        thumbnail_list = self.__generate_thumbnails(file, duration, max_workers, use_gpu)
         if thumbnail_list:
             thumbnail_image = self.__concat_images(thumbnail_list)
 
@@ -80,7 +80,7 @@ class VideoPerceptualHash:
         file_hash = oshash.oshash(str(file))
         return file_hash
 
-    def __generate_thumbnails(self, file: Path, duration: float) -> List[Image.Image]:
+    def __generate_thumbnails(self, file: Path, duration: float, max_workers: Optional[int], use_gpu: bool) -> List[Image.Image]:
         duration = int(Decimal(duration * 100).quantize(0, ROUND_HALF_UP)) / 100
 
         chunk_count = self.__columns * self.__rows
@@ -91,10 +91,10 @@ class VideoPerceptualHash:
             return []
 
         queue = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             for idx in range(chunk_count):
                 time = offset + (idx * step_size)
-                future = executor.submit(self.__ffmpeg.extract_screenshot, file, time, self.__screenshot_width)
+                future = executor.submit(self.__ffmpeg.extract_screenshot, file, time, self.__screenshot_width, use_gpu)
                 queue.append(future)
 
         concurrent.futures.wait(queue)

@@ -45,7 +45,7 @@ class StashVideoPerceptualHash:
         # there's nothing to process.
         self.__execute_stash_phash(None)
 
-    def get_hashes(self, file: Path) -> Optional[PerceptualHash]:
+    def get_hashes(self, file: Path, **kwargs) -> Optional[PerceptualHash]:
         stat = file.stat()
         return self._get_stash_phash(file, stat.st_size, stat.st_mtime)
 
