@@ -4,7 +4,6 @@ import {Popover, Modal} from 'bootstrap'
 import $ from 'jquery'
 import 'datatables.net-bs5'
 import {escape} from 'lodash'
-import hljs from 'highlight.js'
 
 import {Helpers} from './helpers'
 import './themes'
@@ -89,7 +88,9 @@ filesResult.on('click', '.delete', function () {
 
 refreshFiles.on('click', function () {
     Helpers.refreshFiles(filesResult, $(this).data('target'))
-    updateQueueSize()
+    if (queueSize) {
+        Helpers.updateQueueSize(queueSize)
+    }
 })
 
 searchForm.on('shown.bs.modal', function () {
@@ -121,7 +122,6 @@ function rename() {
 }
 
 Helpers.setTableSort(filesResult)
-hljs.highlightAll()
 
 if (queueSize) {
     Helpers.updateQueueSize(queueSize)

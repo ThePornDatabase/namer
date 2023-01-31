@@ -1,18 +1,6 @@
-@use "sass:meta";
-
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap-icons/font/bootstrap-icons.css';
 @import '~datatables.net-bs5/css/dataTables.bootstrap5.css';
-
-html
-{
-  @include meta.load-css('highlight.js/styles/github');
-}
-
-html[data-bs-theme="dark"]
-{
-  @include meta.load-css('highlight.js/styles/github-dark');
-}
 
 $gender-colours: (
   'default': $gray-600,
@@ -25,8 +13,4 @@ $gender-colours: (
   .bg-#{$name} {
     background-color: $value;
   }
-}
-
-.hljs {
-  background-color: transparent !important;
 }
