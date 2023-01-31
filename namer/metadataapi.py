@@ -107,8 +107,12 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
         if not looked_up.hashes:
             phash_distance = 8 if looked_up.found_via_phash() else None
         else:
+            phash_len = len(str(phash.phash.hash))
             for item in looked_up.hashes:
                 if item.type == HashType.PHASH:
+                    if len(item.hash) != phash_len:
+                        continue
+
                     try:
                         scene_hash = imagehash.hex_to_hash(item.hash)
                     except ValueError:
