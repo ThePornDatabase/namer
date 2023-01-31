@@ -158,6 +158,10 @@ def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Opti
     results = __update_results(results, name_parts, namer_config, scene_type=scene_type, phash=phash)
     results = __update_results(results, name_parts, namer_config, skip_name=True, scene_type=scene_type, phash=phash)
 
+    if phash:
+        results = __update_results(results, name_parts, namer_config, scene_type=scene_type)
+        results = __update_results(results, name_parts, namer_config, skip_name=True, scene_type=scene_type)
+
     if name_parts and name_parts.date:
         results = __update_results(results, name_parts, namer_config, skip_date=True, scene_type=scene_type)
         results = __update_results(results, name_parts, namer_config, skip_date=True, skip_name=True, scene_type=scene_type)
