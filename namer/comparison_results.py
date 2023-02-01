@@ -303,7 +303,6 @@ class ComparisonResult:
         Returns true if match is a phash match.
         """
         return self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration
-
     
     def is_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
@@ -311,7 +310,7 @@ class ComparisonResult:
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or is_phash_match(self, target_distance)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or self.is_phash_match(target_distance)
 
     def is_super_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
@@ -319,7 +318,7 @@ class ComparisonResult:
         the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) and is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and is_phash_match(self, target_distance)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and self.is_phash_match(target_distance)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
