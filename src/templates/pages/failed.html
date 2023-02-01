@@ -41,18 +41,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="queryInput" class="form-label">Search query</label>
+                    <div class="form-floating mb-3">
                         <input id="queryInput" type="text" class="form-control">
+                        <label for="queryInput" class="form-label">Search query</label>
                     </div>
-                    <div>
-                        <label for="queryType" class="form-label">Search type</label>
+                    <div class="form-floating">
                         <select id="queryType" class="form-select" aria-label="Search type">
                             <option selected>Any</option>
                             <option>Scenes</option>
                             <option>Movies</option>
                             <option>JAV</option>
                         </select>
+                        <label for="queryType" class="form-label">Search type</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -91,8 +91,10 @@
                     </div>
                     <div class="modal-body">
                         <p>Are you sure you wanted to delete this file?</p>
-                        <label for="deleteFile" class="form-label">File</label>
-                        <input id="deleteFile" type="text" class="form-control" disabled>
+                        <div class="form-floating">
+                            <input id="deleteFile" type="text" class="form-control" disabled>
+                            <label for="deleteFile" class="form-label">File</label>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

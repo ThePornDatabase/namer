@@ -107,8 +107,12 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
         if not looked_up.hashes:
             phash_distance = 8 if looked_up.found_via_phash() else None
         else:
+            phash_len = len(str(phash.phash))
             for item in looked_up.hashes:
                 if item.type == HashType.PHASH:
+                    if len(item.hash) != phash_len:
+                        continue
+
                     try:
                         scene_hash = imagehash.hex_to_hash(item.hash)
                     except ValueError:
@@ -153,6 +157,10 @@ def __update_results(results: List[ComparisonResult], name_parts: Optional[FileI
 def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Optional[FileInfo], namer_config: NamerConfig, scene_type: SceneType, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
     results = __update_results(results, name_parts, namer_config, scene_type=scene_type, phash=phash)
     results = __update_results(results, name_parts, namer_config, skip_name=True, scene_type=scene_type, phash=phash)
+
+    if phash:
+        results = __update_results(results, name_parts, namer_config, scene_type=scene_type)
+        results = __update_results(results, name_parts, namer_config, skip_name=True, scene_type=scene_type)
 
     if name_parts and name_parts.date:
         results = __update_results(results, name_parts, namer_config, skip_date=True, scene_type=scene_type)

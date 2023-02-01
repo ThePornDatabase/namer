@@ -13,8 +13,7 @@ class PerceptualHash:
     phash: imagehash.ImageHash
     oshash: str
 
-    @property
-    def __dict__(self):
+    def to_dict(self):
         return {
             'duration': self.duration,
             'phash': str(self.phash),

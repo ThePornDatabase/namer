@@ -12,27 +12,27 @@
         <a class="nav-link{% if active_page == 'settings' %} active{% endif %}" href="./settings">Settings</a>
     </li>
     <li class="nav-item dropdown me-2">
-        <button id="theme-icon-active" class="btn-link nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+        <a id="theme-icon-active" class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-circle-half me-2"></i>
-        </button>
+        </a>
         <ul class="dropdown-menu">
             <li>
-                <button type="button" class="dropdown-item" data-bs-theme-value="light">
+                <a class="dropdown-item" href="#" data-bs-theme-value="light">
                     <i class="bi bi-brightness-high-fill me-2"></i>
                     Light
-                </button>
+                </a>
             </li>
             <li>
-                <button type="button" class="dropdown-item" data-bs-theme-value="dark">
+                <a class="dropdown-item" href="#" data-bs-theme-value="dark">
                     <i class="bi bi-moon-stars-fill me-2"></i>
                     Dark
-                </button>
+                </a>
             </li>
             <li>
-                <button type="button" class="dropdown-item" data-bs-theme-value="auto">
+                <a class="dropdown-item" href="#" data-bs-theme-value="auto">
                     <i class="bi bi-circle-half me-2"></i>
                     Auto
-                </button>
+                </a>
             </li>
         </ul>
     </li>
