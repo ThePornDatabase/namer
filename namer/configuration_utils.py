@@ -17,8 +17,8 @@ from pathlib import Path
 from loguru import logger
 from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
+from namer import database
 from namer.configuration import NamerConfig
-from namer.database import abbreviations
 from namer.ffmpeg import FFMpeg
 from namer.name_formatter import PartialFormatter
 
@@ -158,7 +158,7 @@ def from_regex_list(value: Optional[List[Pattern]]) -> str:
 
 
 def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
-    abbreviations_db = abbreviations.copy()
+    abbreviations_db = database.abbreviations.copy()
     if site_abbreviations:
         data = json.loads(site_abbreviations)
         abbreviations_db.update(data)
