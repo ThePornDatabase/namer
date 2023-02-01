@@ -17,6 +17,7 @@ const logForm = $('#logFile .modal-body')
 const logFormTitle = $('#modalLogsLabel span')
 const searchForm = $('#searchForm')
 const searchButton = $('#searchForm .modal-footer .search')
+const phashButton = $('#searchForm .modal-footer .phash')
 const queryInput = $('#queryInput')
 const queryType = $('#queryType')
 const deleteFile = $('#deleteFile')
@@ -40,6 +41,25 @@ searchButton.on('click', function () {
     resultFormTitle.attr('title', title)
 
     Helpers.request('./api/v1/get_search', data, function (data) {
+        Helpers.render('searchResults', data, resultForm, function (selector) {
+            Helpers.initTooltips(selector)
+        })
+    })
+})
+
+phashButton.on('click', function () {
+    resultForm.html(Helpers.getProgressBar())
+
+    const data = {
+        'file': queryInput.data('file'),
+        'type': queryType.val(),
+    }
+
+    let title = escape(`(${data['file']})`)
+    resultFormTitle.html(title)
+    resultFormTitle.attr('title', title)
+
+    Helpers.request('./api/v1/get_phash', data, function (data) {
         Helpers.render('searchResults', data, resultForm, function (selector) {
             Helpers.initTooltips(selector)
         })
