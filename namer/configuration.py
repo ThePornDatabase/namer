@@ -431,12 +431,14 @@ class NamerConfig:
     ffmpeg: FFMpeg = FFMpeg()
     vph: VideoPerceptualHash = StashVideoPerceptualHash()
     vph_alt: VideoPerceptualHash = VideoPerceptualHash(ffmpeg)
-    re_cleanup: List[Pattern] = [re.compile(regex, re.IGNORECASE) for regex in database.re_cleanup]
+    re_cleanup: List[Pattern]
 
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
             self.set_gid = os.getgid()
+
+        self.re_cleanup = [re.compile(regex, re.IGNORECASE) for regex in database.re_cleanup]
 
     def __str__(self):
         config = self.to_dict()

@@ -67,7 +67,7 @@ def name_cleaner(name: str, config: NamerConfig) -> str:
     extra information and discard useless information for matching with the porndb.
     """
     for regex in config.re_cleanup:
-        name = regex.sub(name, '')
+        name = regex.sub('', name)
 
     name = name.replace('.', ' ')
     name = ' '.join(name.split(' '))
