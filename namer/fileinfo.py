@@ -61,18 +61,16 @@ class FileInfo:
         """
 
 
-def name_cleaner(name: str) -> str:
+def name_cleaner(name: str, config: NamerConfig) -> str:
     """
     Given the name parts, following a date, but preceding the file extension, attempt to glean
     extra information and discard useless information for matching with the porndb.
     """
-    # truncating cruft
-    for size in ["2160p", "1080p", "720p", "4k", "3840p"]:
-        name = re.sub(r"[.\- ]" + size + r"[.\- ]?.*", "", name)
+    for regex in config.re_cleanup:
+        name = regex.sub(name, '')
 
-    # remove trailing ".XXX."
-    name = re.sub(r"[.\- ]?XXX[.\- ]?.*$", "", name)
-    name = re.sub(r"\.", " ", name)
+    name = name.replace('.', ' ')
+    name = ' '.join(name.split(' '))
 
     return name
 
@@ -134,7 +132,7 @@ def parse_file_name(filename: str, namer_config: NamerConfig) -> FileInfo:
             file_name_parts.date = prefix + match.group("year") + "-" + match.group("month") + "-" + match.group("day")
 
         if match.groupdict().get("name"):
-            file_name_parts.name = name_cleaner(match.group("name"))
+            file_name_parts.name = name_cleaner(match.group("name"), namer_config)
 
         if match.groupdict().get("site"):
             file_name_parts.site = match.group("site")
