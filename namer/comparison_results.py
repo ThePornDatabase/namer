@@ -298,13 +298,19 @@ class ComparisonResult:
     Duration diff with phash duration.
     """
 
+    def is_phash_match(self, target_distance: int = 0) -> bool:
+        """
+        Returns true if match is a phash match.
+        """
+        return self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration
+
     def is_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
         Returns true if site and creation data match exactly, and if the name fuzzes against
         the metadate to 90% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) or is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or (self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) or self.is_phash_match(target_distance)
 
     def is_super_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
@@ -312,7 +318,7 @@ class ComparisonResult:
         the metadate to 95% or more (via RapidFuzz, and various concatenations of metadata about
         actors and scene name) and is a phash match.
         """
-        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and (self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration)
+        return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and self.is_phash_match(target_distance)
 
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -331,6 +337,6 @@ class ComparisonResults:
                 if match:
                     if not match.is_super_match() and potential.is_match() or potential.is_super_match():
                         match = None
-                    elif not match.is_super_match() and potential.name_match > match.name_match:
+                    elif not match.is_super_match() and not match.is_phash_match() and potential.name_match > match.name_match:
                         match = None
         return match
