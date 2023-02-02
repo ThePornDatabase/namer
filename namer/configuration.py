@@ -438,7 +438,7 @@ class NamerConfig:
             self.set_uid = os.getuid()
             self.set_gid = os.getgid()
 
-        self.re_cleanup = [re.compile(regex, re.IGNORECASE) for regex in database.re_cleanup]
+        self.re_cleanup = [re.compile(fr'\b{regex}\b', re.IGNORECASE) for regex in database.re_cleanup]
 
     def __str__(self):
         config = self.to_dict()

@@ -70,7 +70,7 @@ def name_cleaner(name: str, config: NamerConfig) -> str:
         name = regex.sub('', name)
 
     name = name.replace('.', ' ')
-    name = ' '.join(name.split(' '))
+    name = ' '.join(name.split(' ')).strip().strip('-')
 
     return name
 

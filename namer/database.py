@@ -290,4 +290,4 @@ abbreviations = {
     'zb': 'ZoliBoy',
 }
 
-re_cleanup = [r'\b[0-9]{3,4}x\d{3,4}\b', r'\b[0-9]{2}fps\b', r'\b[0-9]{3,4}p\b', r'\b[0-9]k\b', r'[. -]?XXX[. -]?.*$']
+re_cleanup = [r'[0-9]{3,4}x\d{3,4}', r'[0-9]{2}fps', r'[0-9]{3,4}p', r'[0-9]k', r'XXX']
