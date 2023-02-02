@@ -355,14 +355,22 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     namer_config.config_updater = config
 
     user_config = ConfigUpdater()
-    config_loc = os.environ.get("NAMER_CONFIG")
-    if user_set and Path(user_set).is_file():
-        user_config.read(user_set)
-    elif config_loc and Path(config_loc).exists():
-        user_config.read(config_loc)
-    elif (Path.home() / ".namer.cfg").exists():
-        user_config.read(str(Path.home() / ".namer.cfg"))
-    elif Path("./namer.cfg").exists():
-        user_config.read(".namer.cfg")
+    cfg_paths = [
+        user_set,
+        os.environ.get("NAMER_CONFIG"),
+        Path.home() / '.namer.cfg',
+        '.namer.cfg',
+    ]
+
+    for file in cfg_paths:
+        if not file:
+            continue
+
+        if isinstance(file, str):
+            file = Path(file)
+
+        if file.is_file():
+            user_config.read(file)
+            break
 
     return from_config(user_config, namer_config)
