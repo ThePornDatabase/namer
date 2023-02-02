@@ -13,6 +13,7 @@ from configupdater import ConfigUpdater
 
 from requests_cache import CachedSession
 
+from namer import database
 from namer.ffmpeg import FFMpeg
 from namer.videophash.videophash import VideoPerceptualHash
 from namer.videophash.videophashstash import StashVideoPerceptualHash
@@ -430,11 +431,14 @@ class NamerConfig:
     ffmpeg: FFMpeg = FFMpeg()
     vph: VideoPerceptualHash = StashVideoPerceptualHash()
     vph_alt: VideoPerceptualHash = VideoPerceptualHash(ffmpeg)
+    re_cleanup: List[Pattern]
 
     def __init__(self):
         if sys.platform != "win32":
             self.set_uid = os.getuid()
             self.set_gid = os.getgid()
+
+        self.re_cleanup = [re.compile(fr'\b{regex}\b', re.IGNORECASE) for regex in database.re_cleanup]
 
     def __str__(self):
         config = self.to_dict()

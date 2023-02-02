@@ -17,8 +17,8 @@ from pathlib import Path
 from loguru import logger
 from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
+from namer import database
 from namer.configuration import NamerConfig
-from namer.database import abbreviations
 from namer.ffmpeg import FFMpeg
 from namer.name_formatter import PartialFormatter
 
@@ -158,7 +158,7 @@ def from_regex_list(value: Optional[List[Pattern]]) -> str:
 
 
 def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
-    abbreviations_db = abbreviations.copy()
+    abbreviations_db = database.abbreviations.copy()
     if site_abbreviations:
         data = json.loads(site_abbreviations)
         abbreviations_db.update(data)
@@ -355,14 +355,22 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     namer_config.config_updater = config
 
     user_config = ConfigUpdater()
-    config_loc = os.environ.get("NAMER_CONFIG")
-    if user_set and Path(user_set).is_file():
-        user_config.read(user_set)
-    elif config_loc and Path(config_loc).exists():
-        user_config.read(config_loc)
-    elif (Path.home() / ".namer.cfg").exists():
-        user_config.read(str(Path.home() / ".namer.cfg"))
-    elif Path("./namer.cfg").exists():
-        user_config.read(".namer.cfg")
+    cfg_paths = [
+        user_set,
+        os.environ.get("NAMER_CONFIG"),
+        Path.home() / '.namer.cfg',
+        '.namer.cfg',
+    ]
+
+    for file in cfg_paths:
+        if not file:
+            continue
+
+        if isinstance(file, str):
+            file = Path(file)
+
+        if file.is_file():
+            user_config.read(file)
+            break
 
     return from_config(user_config, namer_config)

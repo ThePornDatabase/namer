@@ -289,3 +289,5 @@ abbreviations = {
     'yt': 'YoungThroats',
     'zb': 'ZoliBoy',
 }
+
+re_cleanup = [r'[0-9]{3,4}x[0-9]{3,4}', r'[0-9]{2}fps', r'[0-9]{3,4}p', r'[0-9]k', r'XXX']

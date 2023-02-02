@@ -156,7 +156,6 @@ def process_file(command: Command) -> Optional[Command]:
         matched: Optional[ComparisonResult] = None
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: ComparisonResults = ComparisonResults([])
-        vph = command.config.vph_alt if command.config.use_alt_phash_tool else command.config.vph
         # Match to nfo files, if enabled and found.
         if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)
@@ -174,8 +173,10 @@ def process_file(command: Command) -> Optional[Command]:
             if file_infos is not None:
                 new_metadata = file_infos
         elif new_metadata is None and ((command.parsed_file is not None and command.parsed_file.name is not None) or command.config.search_phash):
-            phash = vph.get_hashes(command.target_movie_file, max_workers=command.config.max_ffmpeg_workers, use_gpu=command.config.use_gpu) if command.config.search_phash else None
-            logger.info(f'Calculated hashes: {phash.to_dict()}')
+            phash = calculate_phash(command.target_movie_file, command.config) if command.config.search_phash else None
+            if phash:
+                logger.info(f'Calculated hashes: {phash.to_dict()}')
+
             search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
                 matched = search_results.get_match()
@@ -202,7 +203,7 @@ def process_file(command: Command) -> Optional[Command]:
                     new_metadata.resolution = ffprobe_results.get_resolution()
 
                 if command.config.send_phash:
-                    phash = vph.get_hashes(command.target_movie_file, max_workers=command.config.max_ffmpeg_workers, use_gpu=command.config.use_gpu) if not phash else phash
+                    phash = calculate_phash(command.target_movie_file, command.config) if not phash else phash
                     if phash:
                         scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
                         share_hash(new_metadata, scene_hash, command.config)
@@ -276,6 +277,13 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
             error = True
 
     return error
+
+
+def calculate_phash(file: Path, config: NamerConfig) -> Optional[PerceptualHash]:
+    vph = config.vph_alt if config.use_alt_phash_tool else config.vph
+    phash = vph.get_hashes(file, max_workers=config.max_ffmpeg_workers, use_gpu=config.use_gpu)
+
+    return phash
 
 
 def main(arg_list: List[str]):

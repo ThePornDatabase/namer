@@ -19,6 +19,7 @@ from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
 from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
+from namer.namer import calculate_phash
 
 
 class SearchType(str, Enum):
@@ -78,24 +79,7 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     return res
 
 
-def get_search_results(query: str, search_type: SearchType, file: str, config: NamerConfig, page: int = 1) -> Dict:
-    """
-    Search results for user selection.
-    """
-
-    responses = {}
-    if search_type == SearchType.ANY or search_type == SearchType.SCENES:
-        url = __build_url(config, name=query, page=page, scene_type=SceneType.SCENE)
-        responses[url] = __get_response_json_object(url, config)
-
-    if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
-        url = __build_url(config, name=query, page=page, scene_type=SceneType.MOVIE)
-        responses[url] = __get_response_json_object(url, config)
-
-    if search_type == SearchType.ANY or search_type == SearchType.JAV:
-        url = __build_url(config, name=query, page=page, scene_type=SceneType.JAV)
-        responses[url] = __get_response_json_object(url, config)
-
+def metadataapi_responses_to_webui_response(responses: Dict, config: NamerConfig) -> List:
     file_infos = []
     for url, response in responses.items():
         if response and response.strip() != '':
@@ -117,6 +101,63 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
             'performers': scene_data.performers,
         }
         files.append(scene)
+
+    return files
+
+
+def get_search_results(query: str, search_type: SearchType, file: str, config: NamerConfig, page: int = 1) -> Dict:
+    """
+    Search results for user selection.
+    """
+
+    responses = {}
+    if search_type == SearchType.ANY or search_type == SearchType.SCENES:
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.SCENE)
+        responses[url] = __get_response_json_object(url, config)
+
+    if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.MOVIE)
+        responses[url] = __get_response_json_object(url, config)
+
+    if search_type == SearchType.ANY or search_type == SearchType.JAV:
+        url = __build_url(config, name=query, page=page, scene_type=SceneType.JAV)
+        responses[url] = __get_response_json_object(url, config)
+
+    files = metadataapi_responses_to_webui_response(responses, config)
+
+    res = {
+        'file': file,
+        'files': files,
+    }
+
+    return res
+
+
+def get_phash_results(file: str, search_type: SearchType, config: NamerConfig) -> Dict:
+    """
+    Search results by phash for user selection.
+    """
+
+    phash_file = config.failed_dir / file
+    if not phash_file.is_file():
+        return {}
+
+    phash = calculate_phash(phash_file, config)
+
+    responses = {}
+    if search_type == SearchType.ANY or search_type == SearchType.SCENES:
+        url = __build_url(config, phash=phash, scene_type=SceneType.SCENE)
+        responses[url] = __get_response_json_object(url, config)
+
+    if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
+        url = __build_url(config, phash=phash, scene_type=SceneType.MOVIE)
+        responses[url] = __get_response_json_object(url, config)
+
+    if search_type == SearchType.ANY or search_type == SearchType.JAV:
+        url = __build_url(config, phash=phash, scene_type=SceneType.JAV)
+        responses[url] = __get_response_json_object(url, config)
+
+    files = metadataapi_responses_to_webui_response(responses, config)
 
     res = {
         'file': file,
