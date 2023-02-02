@@ -4,7 +4,7 @@ Parse string in to FileNamePart define in namer_types.
 from dataclasses import dataclass
 import re
 from pathlib import PurePath
-from typing import Optional, Pattern
+from typing import List, Optional, Pattern
 
 from loguru import logger
 
@@ -61,12 +61,12 @@ class FileInfo:
         """
 
 
-def name_cleaner(name: str, config: NamerConfig) -> str:
+def name_cleaner(name: str, re_cleanup: List[Pattern]) -> str:
     """
     Given the name parts, following a date, but preceding the file extension, attempt to glean
     extra information and discard useless information for matching with the porndb.
     """
-    for regex in config.re_cleanup:
+    for regex in re_cleanup:
         name = regex.sub('', name)
 
     name = name.replace('.', ' ')
@@ -132,7 +132,7 @@ def parse_file_name(filename: str, namer_config: NamerConfig) -> FileInfo:
             file_name_parts.date = prefix + match.group("year") + "-" + match.group("month") + "-" + match.group("day")
 
         if match.groupdict().get("name"):
-            file_name_parts.name = name_cleaner(match.group("name"), namer_config)
+            file_name_parts.name = name_cleaner(match.group("name"), namer_config.re_cleanup)
 
         if match.groupdict().get("site"):
             file_name_parts.site = match.group("site")
