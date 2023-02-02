@@ -174,7 +174,9 @@ def process_file(command: Command) -> Optional[Command]:
                 new_metadata = file_infos
         elif new_metadata is None and ((command.parsed_file is not None and command.parsed_file.name is not None) or command.config.search_phash):
             phash = calculate_phash(command.target_movie_file, command.config) if command.config.search_phash else None
-            logger.info(f'Calculated hashes: {phash.to_dict()}')
+            if phash:
+                logger.info(f'Calculated hashes: {phash.to_dict()}')
+
             search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
                 matched = search_results.get_match()
