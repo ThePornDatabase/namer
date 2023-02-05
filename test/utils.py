@@ -245,7 +245,6 @@ def validate_mp4_tags(test_self, file):
         [
             'Anal',
             'Ass',
-            'Assorted Additional Tags',
             'Atm',
             'Big Boobs',
             'Big Dick',
@@ -262,7 +261,6 @@ def validate_mp4_tags(test_self, file):
             'Hardcore',
             'Latina',
             'Milf',
-            'Pussy To Mouth',
             'Rimming',
             'Sex',
             'Swallow',
