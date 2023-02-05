@@ -151,6 +151,7 @@ class FFMpeg:
         """
 
         logger.info(f'ffprobe file "{file}"')
+        ffprobe_out = None
         with suppress(Exception):
             ffprobe_out = ffmpeg.probe(file, self.__ffprobe_cmd)
 
@@ -319,6 +320,7 @@ class FFMpeg:
                 '-version'
             ]
 
+            process = None
             with suppress(Exception):
                 process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
 
