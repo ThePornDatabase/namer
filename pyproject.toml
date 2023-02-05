@@ -28,7 +28,7 @@ ConfigUpdater = "^3.1.1"
 imagehash = "^4.3.1"
 oshash = "^0.1.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.0.0"
 pytest-cov = "^4.0.0"
 coverage = "^7.0.0"
@@ -36,10 +36,10 @@ flakeheaven = "^3.0.0"
 selenium = "^4.2.0"
 webdriver-manager = "^3.7.0"
 assertpy = "^1.1"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
-poethepoet = ">=0.16.0"
+poethepoet = "^0.18.0"
+flake8-simplify = "^0.19.3"
+flake8-bugbear = "^23.1.20"
+flake8-pie = "^0.16.0"
 
 [tool.flakeheaven]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]
@@ -48,6 +48,9 @@ show_source = false
 max_line_length = 150
 
 [tool.flakeheaven.plugins]
+flake8-bugbear = ["+*"]
+flake8-pie = ["+*", "-PIE781", "-PIE803"]
+flake8-simplify = ["+*"]
 mccabe = ["+*"]
 pycodestyle = ["+*", "-E501", "-E722"]
 pyflakes = ["+*"]
