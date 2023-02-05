@@ -416,7 +416,12 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
         file_info.is_collected = data.is_collected
 
     if data.site.network_id and data.site.network_id != data.site.id:
-        file_info.network = data.site.network.name
+        if hasattr(data.site, 'network'):
+            network_name = data.site.network.name
+        else:
+            network_name = get_site_name(data.site.network_id, config)
+
+        file_info.network = network_name
 
     return file_info
 
@@ -497,6 +502,20 @@ def __get_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], namer_config:
             return file_infos
 
     return []
+
+
+@logger.catch
+def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
+    site = None
+
+    url = f"{namer_config.override_tpdb_address}/sites/{site_id}"
+    json_response = __get_response_json_object(url, namer_config)
+
+    if json_response and json_response.strip() != "":
+        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
+        site = json_obj.data.name
+
+    return site
 
 
 def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
