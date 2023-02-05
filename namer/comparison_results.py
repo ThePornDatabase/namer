@@ -85,13 +85,13 @@ class LookedUpFileInfo:
     porndb guid/stashid
     """
 
-    network: Optional[str] = None
-    """
-    Top level studio, like Vixen for Deeper.
-    """
     site: Optional[str] = None
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
+    """
+    network: Optional[str] = None
+    """
+    Top level studio, like Vixen for Deeper.
     """
     date: Optional[str] = None
     """
@@ -213,6 +213,8 @@ class LookedUpFileInfo:
             "name": self.name,
             "site": self.site.replace(" ", "") if self.site else None,
             "full_site": self.site,
+            "network": self.network.replace(" ", "") if self.network else None,
+            "full_network": self.network,
             "performers": ", ".join(map(lambda p: p.name, filter(lambda p: p.role == "Female", self.performers))) if self.performers else None,
             "all_performers": ", ".join(map(lambda p: p.name, self.performers)) if self.performers else None,
             "ext": self.original_parsed_filename.extension if self.original_parsed_filename else None,
@@ -221,7 +223,6 @@ class LookedUpFileInfo:
             "resolution": res_str,
             "type": self.type.value,
             "external_id": self.external_id,
-            "network": self.network.replace(" ", "") if self.network else None,
         }
 
     def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:

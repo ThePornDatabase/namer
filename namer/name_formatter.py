@@ -15,6 +15,8 @@ class PartialFormatter(string.Formatter):
         "name",
         "site",
         "full_site",
+        "network",
+        "full_network",
         "performers",
         "all_performers",
         "act",
@@ -24,7 +26,6 @@ class PartialFormatter(string.Formatter):
         "vr",
         "type",
         "year",
-        "network",
         "resolution",
         "external_id",
     ]

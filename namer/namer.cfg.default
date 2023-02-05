@@ -34,6 +34,8 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # * 'name' - the scene/movie name
 # * 'site' - the site or studio name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
 # * 'full_site' - the full site/studio name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
+# * 'network' - the network site or studio name, MindGeek, Vixen, etc with spaces removed.
+# * 'full_network' - the network full site/studio name from porndb, unmodified, i.e: Mind Geek, Vixen, etc.
 # * 'performers' - comma seperated list of female performers
 # * 'all_performers' - comma seperated list of all performers
 # * 'act' - an act, parsed from original file name, don't use.

@@ -43,7 +43,7 @@ class StashVideoPerceptualHash:
     def install_ffmpeg(self) -> None:
         # videohasher installs ffmpeg next to itself by default, even if
         # there's nothing to process.
-        self.__execute_stash_phash(None)
+        self.__execute_stash_phash()
 
     def get_hashes(self, file: Path, **kwargs) -> Optional[PerceptualHash]:
         stat = file.stat()
@@ -54,7 +54,7 @@ class StashVideoPerceptualHash:
         logger.info(f'Calculating phash for file "{file}"')
         return self.__execute_stash_phash(file)
 
-    def __execute_stash_phash(self, file: Optional[Path]) -> Optional[PerceptualHash]:
+    def __execute_stash_phash(self, file: Optional[Path] = None) -> Optional[PerceptualHash]:
         output = None
         if not self.__phash_path:
             return output
@@ -84,7 +84,7 @@ class StashVideoPerceptualHash:
 
                 if data:
                     output = return_perceptual_hash(data.duration, data.phash, data.oshash)
-            elif file:
+            else:
                 logger.error(stderr)
 
         return output
