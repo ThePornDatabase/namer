@@ -70,7 +70,7 @@ def name_cleaner(name: str, re_cleanup: List[Pattern]) -> str:
         name = regex.sub('', name)
 
     name = name.replace('.', ' ')
-    name = ' '.join(name.split(' ')).strip().strip('-')
+    name = ' '.join(name.split()).strip('-')
 
     return name
 
