@@ -336,7 +336,7 @@ class ComparisonResults:
             for potential in self.results[1:]:
                 # Now that matches are unique in the list, don't match if there are multiple
                 if match:
-                    if not match.is_super_match() and potential.is_match() or potential.is_super_match():
+                    if not match.is_super_match() and potential.is_match() or potential.is_super_match():  # noqa: SIM114
                         match = None
                     elif not match.is_super_match() and not match.is_phash_match() and potential.name_match > match.name_match:
                         match = None

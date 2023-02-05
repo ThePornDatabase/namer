@@ -49,7 +49,7 @@ class StashVideoPerceptualHash:
         stat = file.stat()
         return self._get_stash_phash(file, stat.st_size, stat.st_mtime)
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=1024)  # noqa: B019
     def _get_stash_phash(self, file: Path, file_size: int, file_update: float) -> Optional[PerceptualHash]:
         logger.info(f'Calculating phash for file "{file}"')
         return self.__execute_stash_phash(file)

@@ -6,7 +6,7 @@ from loguru import logger
 from requests_cache import CachedSession
 
 
-class Http:
+class Http:  # noqa: PIE789
     @staticmethod
     def request(method, url, **kwargs):
         logger.info(f'Requesting {method} "{url}"')

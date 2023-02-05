@@ -7,6 +7,7 @@ import argparse
 import itertools
 import json
 import re
+from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
@@ -171,7 +172,7 @@ def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Opti
 
 def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
     scene_type: SceneType = SceneType.SCENE
-    if name_parts.site:
+    if name_parts.site:  # noqa: SIM102
         if name_parts.site.strip().lower() in namer_config.movie_data_preferred:
             scene_type = SceneType.MOVIE
 
@@ -196,7 +197,7 @@ def __match_weight(result: ComparisonResult) -> float:
         if result.name_match:
             value += result.name_match
 
-    if bool(result.site_match and result.date_match and result.name_match and result.name_match >= 94.9):
+    if result.site_match and result.date_match and result.name_match and result.name_match >= 94.9:
         logger.debug("Name match of {:.2f} with '{} - {} - {}' for name: {}", value, result.looked_up.site, result.looked_up.date, result.looked_up.name, result.name)
         value += 1000.00
         value = (result.name_match + value) if result.name_match else value
@@ -222,11 +223,8 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
     if http.ok:
         response = http.text
     else:
-        data = None
-        try:
+        with suppress(JSONDecodeError):
             data = http.json()
-        except JSONDecodeError:
-            pass
 
         message = 'Unknown error'
         if data and 'message' in data:
@@ -253,11 +251,8 @@ def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None
     if http.ok:
         response = http.text
     else:
-        data = None
-        try:
+        with suppress(JSONDecodeError):
             data = http.json()
-        except JSONDecodeError:
-            pass
 
         message = 'Unknown error'
         if data and 'message' in data:

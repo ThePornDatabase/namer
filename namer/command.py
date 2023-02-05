@@ -193,7 +193,7 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
         for current_movie_str in movies:
             current_movie = Path(current_movie_str)
             current_values = extract_relevant_attributes(config.ffmpeg.ffprobe(current_movie), config)
-            if current_values[1] <= config.max_desired_resolutions or config.max_desired_resolutions == -1:
+            if current_values[1] <= config.max_desired_resolutions or config.max_desired_resolutions == -1:  # noqa: SIM102
                 if greater_than(current_values, selected_values):
                     selected_values = current_values
                     selected = current_movie

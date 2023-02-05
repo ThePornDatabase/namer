@@ -42,7 +42,7 @@ class GenericWebServer:
     def __init__(self, host: str, port: int, webroot: Optional[str], blueprints: List[Blueprint], static_path: Optional[str] = 'public', quiet=True):
         self.__host = host
         self.__port = port
-        self.__path = '/' if not webroot else webroot
+        self.__path = webroot if webroot else '/'
         self.__app = Flask(__name__, static_url_path=self.__path, static_folder=static_path, template_folder='templates')
         self.__blueprints = blueprints
 

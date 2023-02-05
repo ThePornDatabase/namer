@@ -196,27 +196,30 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = sample_config()):
-    with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-        with FakeTPDB() as fakeTpdb:
-            tempdir = Path(tmpdir)
-            config.override_tpdb_address = fakeTpdb.get_url()
-            config.watch_dir = tempdir / "watch"
-            config.watch_dir.mkdir(parents=True, exist_ok=True)
-            config.dest_dir = tempdir / "dest"
-            config.dest_dir.mkdir(parents=True, exist_ok=True)
-            config.work_dir = tempdir / "work"
-            config.work_dir.mkdir(parents=True, exist_ok=True)
-            config.failed_dir = tempdir / "failed"
-            config.failed_dir.mkdir(parents=True, exist_ok=True)
-            config.porndb_token = "notarealtoken"
-            cfgfile = tempdir / 'test_namer.cfg'
-            config.min_file_size = 0
-            with open(cfgfile, "w") as file:
-                content = to_ini(config)
-                file.write(content)
-            config.config_file = cfgfile
-            yield tempdir, fakeTpdb, config
+def environment(config: NamerConfig = None):
+    if config is None:
+        config = sample_config()
+
+    with tempfile.TemporaryDirectory(prefix="test") as tmpdir, FakeTPDB() as fakeTpdb:
+        tempdir = Path(tmpdir)
+
+        config.override_tpdb_address = fakeTpdb.get_url()
+        config.watch_dir = tempdir / "watch"
+        config.watch_dir.mkdir(parents=True, exist_ok=True)
+        config.dest_dir = tempdir / "dest"
+        config.dest_dir.mkdir(parents=True, exist_ok=True)
+        config.work_dir = tempdir / "work"
+        config.work_dir.mkdir(parents=True, exist_ok=True)
+        config.failed_dir = tempdir / "failed"
+        config.failed_dir.mkdir(parents=True, exist_ok=True)
+        config.porndb_token = "notarealtoken"
+        cfgfile = tempdir / 'test_namer.cfg'
+        config.min_file_size = 0
+        with open(cfgfile, "w") as file:
+            content = to_ini(config)
+            file.write(content)
+        config.config_file = cfgfile
+        yield tempdir, fakeTpdb, config
 
 
 def validate_permissions(test_self, file: Path, perm: int):
@@ -296,16 +299,11 @@ class ProcessingTarget:
         self.file = target_dir / self.relative
         os.makedirs(self.file.parent, exist_ok=True)
         self.file.parent.chmod(0o700)
-        try:
+        with contextlib.suppress(Exception):
             shutil.copy(test_mp4, self.file)
-        except:
-            # shutil isn't thread safe, it copies, then sets the mode if linux/mac
-            pass
-        try:
+
+        with contextlib.suppress(Exception):
             test_mp4.chmod(0o600)
-        except:
-            # if called while Watchdog is running will result in race (file could alredy be moved.)
-            pass
 
     def get_file(self) -> Path:
         if self.file is None:
