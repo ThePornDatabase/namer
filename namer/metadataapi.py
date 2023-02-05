@@ -399,7 +399,8 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     tags = []
     if hasattr(data, "tags"):
         for tag in data.tags:
-            tags.append(tag.name)
+            if tag.name not in tags:
+                tags.append(tag.name)
 
     file_info.tags = tags
 
