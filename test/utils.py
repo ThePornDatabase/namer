@@ -99,13 +99,13 @@ class FakeTPDB(ParrotWebServer):
 
     def add_json_response(self, response, target_url: str):
         return_value = response
-        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
+        modified_value = return_value.replace(r'https:\/\/thumb.metadataapi.net\/', super().get_url())
         super().set_response(target_url, modified_value)
 
     def add_json_response_file(self, jsonfile, target_url: str):
         test_dir = Path(__file__).resolve().parent
         return_value = (test_dir / jsonfile).read_text()
-        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
+        modified_value = return_value.replace(r'https:\/\/thumb.metadataapi.net\/', super().get_url())
         super().set_response(target_url, modified_value)
 
     def add_evil_angel(self, target_url: str):
