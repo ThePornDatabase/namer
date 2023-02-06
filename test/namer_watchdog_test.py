@@ -7,7 +7,6 @@ import time
 import os
 import unittest
 from pathlib import Path
-from typing import List
 
 from mutagen.mp4 import MP4
 
@@ -30,7 +29,10 @@ def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
 
 
 @contextlib.contextmanager
-def make_watchdog_context(config: NamerConfig, targets: List[ProcessingTarget] = []):
+def make_watchdog_context(config: NamerConfig, targets=None):
+    if targets is None:
+        targets = []
+
     with environment(config) as (tempdir, mock_tpdb, config):
         for target in targets:
             if target.file is None:

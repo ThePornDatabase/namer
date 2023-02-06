@@ -88,7 +88,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
     def test_file_ffmpeg(self):
         versions = FFMpeg().ffmpeg_version()
-        for tool, version in versions.items():
+        for _, version in versions.items():
             self.assertIsNotNone(version)
 
 

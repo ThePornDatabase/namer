@@ -7,6 +7,7 @@ See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
 import json
 import subprocess
+from contextlib import suppress
 from dataclasses import dataclass
 import shutil
 import string
@@ -15,7 +16,7 @@ from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
 from random import choices
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import ffmpeg
 from loguru import logger
@@ -143,18 +144,16 @@ class FFMpeg:
         stat = file.stat()
         return self._ffprobe(file, stat.st_size, stat.st_mtime)
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=1024)  # noqa: B019
     def _ffprobe(self, file: Path, file_size: int, file_update: float) -> Optional[FFProbeResults]:
         """
         Get the typed results of probing a video stream with ffprobe.
         """
 
         logger.info(f'ffprobe file "{file}"')
-        ffprobe_out: Optional[Any] = None
-        try:
+        ffprobe_out = None
+        with suppress(Exception):
             ffprobe_out = ffmpeg.probe(file, self.__ffprobe_cmd)
-        except:
-            pass
 
         if not ffprobe_out:
             return
@@ -322,10 +321,8 @@ class FFMpeg:
             ]
 
             process = None
-            try:
+            with suppress(Exception):
                 process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
-            except:
-                pass
 
             matches = None
             if process:

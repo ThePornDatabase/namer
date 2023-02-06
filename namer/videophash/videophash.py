@@ -46,7 +46,7 @@ class VideoPerceptualHash:
         stat = file.stat()
         return self._get_phash(file, duration, max_workers, use_gpu, stat.st_size, stat.st_mtime)
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=1024)  # noqa: B019
     def _get_phash(self, file: Path, duration: float, max_workers: Optional[int], use_gpu: bool, file_size: int, file_update: float) -> Optional[imagehash.ImageHash]:
         logger.info(f'Calculating phash for file "{file}"')
         phash = self.__calculate_phash(file, duration, max_workers, use_gpu)
@@ -74,7 +74,7 @@ class VideoPerceptualHash:
         stat = file.stat()
         return self._get_oshash(file, stat.st_size, stat.st_mtime)
 
-    @lru_cache(maxsize=1024)
+    @lru_cache(maxsize=1024)  # noqa: B019
     def _get_oshash(self, file: Path, file_size: int, file_update: float) -> str:
         logger.info(f'Calculating oshash for file "{file}"')
         file_hash = oshash.oshash(str(file))

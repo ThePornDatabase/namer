@@ -103,7 +103,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name("BrazzersExxtra - 2021-12-07 - Dr. Polla & The Chronic Discharge Conundrum.mp4", sample_config())
         self.assertEqual(name.site, "BrazzersExxtra")
         self.assertEqual(name.date, "2021-12-07")
-        self.assertEqual(name.name, "Dr  Polla & The Chronic Discharge Conundrum")
+        self.assertEqual(name.name, "Dr Polla & The Chronic Discharge Conundrum")
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
 
@@ -114,7 +114,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         name = parse_file_name("bex - 2021-12-07 - Dr. Polla & The Chronic Discharge Conundrum.mp4", sample_config())
         self.assertEqual(name.site, "BrazzersExxtra")
         self.assertEqual(name.date, "2021-12-07")
-        self.assertEqual(name.name, "Dr  Polla & The Chronic Discharge Conundrum")
+        self.assertEqual(name.name, "Dr Polla & The Chronic Discharge Conundrum")
         self.assertEqual(name.trans, False)
         self.assertEqual(name.extension, "mp4")
 

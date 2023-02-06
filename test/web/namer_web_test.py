@@ -79,12 +79,10 @@ def default_os_browser(debug: bool) -> WebDriver:
 
 @contextlib.contextmanager  # type: ignore
 def make_test_context(config: NamerConfig):
-    with environment(config) as (tempdir, mock_tpdb, config):
-        with create_watcher(config) as watcher:
-            url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
-            with default_os_browser(is_debugging()) as browser:
-                browser.get(url)
-                yield tempdir, watcher, browser, mock_tpdb
+    with environment(config) as (tempdir, mock_tpdb, config), create_watcher(config) as watcher, default_os_browser(is_debugging()) as browser:
+        url = f"http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed"
+        browser.get(url)
+        yield tempdir, watcher, browser, mock_tpdb
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):

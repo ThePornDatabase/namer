@@ -7,6 +7,7 @@ import argparse
 import itertools
 import json
 import re
+from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
@@ -24,7 +25,7 @@ from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions, Command
 from namer.fileinfo import FileInfo
-from namer.http import Http
+from namer.http import Http, RequestType
 from namer.videophash import PerceptualHash
 
 
@@ -113,10 +114,9 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
                     if len(item.hash) != phash_len:
                         continue
 
-                    try:
+                    scene_hash = None
+                    with suppress(ValueError):
                         scene_hash = imagehash.hex_to_hash(item.hash)
-                    except ValueError:
-                        scene_hash = None
 
                     if scene_hash:
                         distance = phash.phash - imagehash.hex_to_hash(item.hash)
@@ -171,7 +171,7 @@ def __metadata_api_lookup_type(results: List[ComparisonResult], name_parts: Opti
 
 def __metadata_api_lookup(name_parts: FileInfo, namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> List[ComparisonResult]:
     scene_type: SceneType = SceneType.SCENE
-    if name_parts.site:
+    if name_parts.site:  # noqa: SIM102
         if name_parts.site.strip().lower() in namer_config.movie_data_preferred:
             scene_type = SceneType.MOVIE
 
@@ -196,7 +196,7 @@ def __match_weight(result: ComparisonResult) -> float:
         if result.name_match:
             value += result.name_match
 
-    if bool(result.site_match and result.date_match and result.name_match and result.name_match >= 94.9):
+    if result.site_match and result.date_match and result.name_match and result.name_match >= 94.9:
         logger.debug("Name match of {:.2f} with '{} - {} - {}' for name: {}", value, result.looked_up.site, result.looked_up.date, result.looked_up.name, result.name)
         value += 1000.00
         value = (result.name_match + value) if result.name_match else value
@@ -207,7 +207,7 @@ def __match_weight(result: ComparisonResult) -> float:
 
 
 @logger.catch
-def __get_response_json_object(url: str, config: NamerConfig) -> str:
+def __request_response_json_object(url: str, config: NamerConfig, method: RequestType = RequestType.GET, data: Optional[Any] = None) -> str:
     """
     returns json object with info
     """
@@ -217,47 +217,14 @@ def __get_response_json_object(url: str, config: NamerConfig) -> str:
         "Accept": "application/json",
         "User-Agent": "namer-1",
     }
-    http = Http.get(url, cache_session=config.cache_session, headers=headers)
+    http = Http.request(method, url, cache_session=config.cache_session, headers=headers, json=data)
     response = ''
     if http.ok:
         response = http.text
     else:
         data = None
-        try:
+        with suppress(JSONDecodeError):
             data = http.json()
-        except JSONDecodeError:
-            pass
-
-        message = 'Unknown error'
-        if data and 'message' in data:
-            message = data['message']
-
-        logger.error(f'Server API error: "{message}"')
-
-    return response
-
-
-@logger.catch
-def __post_json_object(url: str, config: NamerConfig, data: Optional[Any] = None) -> str:
-    """
-    returns json object with info
-    """
-    headers = {
-        "Authorization": f"Bearer {config.porndb_token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "User-Agent": "namer-1",
-    }
-    http = Http.post(url, cache_session=config.cache_session, headers=headers, json=data)
-    response = ''
-    if http.ok:
-        response = http.text
-    else:
-        data = None
-        try:
-            data = http.json()
-        except JSONDecodeError:
-            pass
 
         message = 'Unknown error'
         if data and 'message' in data:
@@ -399,7 +366,8 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     tags = []
     if hasattr(data, "tags"):
         for tag in data.tags:
-            tags.append(tag.name)
+            if tag.name not in tags:
+                tags.append(tag.name)
 
     file_info.tags = tags
 
@@ -415,7 +383,11 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
         file_info.is_collected = data.is_collected
 
     if data.site.network_id and data.site.network_id != data.site.id:
-        network_name = get_site_name(data.site.network_id, config)
+        if hasattr(data.site, 'network'):
+            network_name = data.site.network.name
+        else:
+            network_name = get_site_name(data.site.network_id, config)
+
         file_info.network = network_name
 
     return file_info
@@ -474,7 +446,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
 
 
 def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_config: NamerConfig):
-    json_response = __get_response_json_object(url, namer_config)
+    json_response = __request_response_json_object(url, namer_config)
     file_infos = []
     if json_response and json_response.strip() != "":
         # logger.debug("json_response: \n{}", json_response)
@@ -504,7 +476,7 @@ def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
     site = None
 
     url = f"{namer_config.override_tpdb_address}/sites/{site_id}"
-    json_response = __get_response_json_object(url, namer_config)
+    json_response = __request_response_json_object(url, namer_config)
 
     if json_response and json_response.strip() != "":
         json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
@@ -552,7 +524,7 @@ def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):
     if metadata.uuid:
         scene_id = metadata.uuid.rsplit('/', 1)[-1]
         scene_type = metadata.type if metadata.type else SceneType.SCENE
-        __post_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={scene_type.value}", config=config)
+        __request_response_json_object(f"{config.override_tpdb_address}/user/collection?scene_id={scene_id}&type={scene_type.value}", config=config, method=RequestType.POST)
 
 
 def share_hash(metadata: LookedUpFileInfo, scene_hash: SceneHash, config: NamerConfig):
@@ -563,7 +535,7 @@ def share_hash(metadata: LookedUpFileInfo, scene_hash: SceneHash, config: NamerC
     }
 
     logger.info(f"Sending {scene_hash.type.value}: {scene_hash.hash} with duration {scene_hash.duration}")
-    __post_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, data=data)
+    __request_response_json_object(f"{config.override_tpdb_address}/{metadata.uuid}/hash", config=config, method=RequestType.POST, data=data)
 
 
 def main(args_list: List[str]):

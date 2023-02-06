@@ -308,7 +308,7 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
                     setattr(namer_config, name, new_value)
 
     if not hasattr(namer_config, "retry_time") or namer_config.retry_time is None:
-        setattr(namer_config, "retry_time", f"03:{random.randint(0, 59):0>2}")
+        setattr(namer_config, "retry_time", f"03:{random.randint(0, 59):0>2}")  # noqa: B010
 
     # create a CachedSession objects for request caching.
     if namer_config.enabled_requests_cache:

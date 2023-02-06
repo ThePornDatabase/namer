@@ -37,7 +37,7 @@ def done_copying(file: Optional[Path]) -> bool:
     while True:
         try:
             # pylint: disable=consider-using-with
-            buffered_reader = open(file, mode="rb")
+            buffered_reader = open(file, mode="rb")  # noqa: SIM115
             buffered_reader.close()
             break
         except PermissionError:

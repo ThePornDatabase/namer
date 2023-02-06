@@ -18,7 +18,7 @@ from werkzeug.routing import Rule
 from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
-from namer.metadataapi import __build_url, __get_response_json_object, __metadataapi_response_to_data  # type: ignore
+from namer.metadataapi import __build_url, __request_response_json_object, __metadataapi_response_to_data  # type: ignore
 from namer.namer import calculate_phash
 
 
@@ -113,15 +113,15 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
     responses = {}
     if search_type == SearchType.ANY or search_type == SearchType.SCENES:
         url = __build_url(config, name=query, page=page, scene_type=SceneType.SCENE)
-        responses[url] = __get_response_json_object(url, config)
+        responses[url] = __request_response_json_object(url, config)
 
     if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
         url = __build_url(config, name=query, page=page, scene_type=SceneType.MOVIE)
-        responses[url] = __get_response_json_object(url, config)
+        responses[url] = __request_response_json_object(url, config)
 
     if search_type == SearchType.ANY or search_type == SearchType.JAV:
         url = __build_url(config, name=query, page=page, scene_type=SceneType.JAV)
-        responses[url] = __get_response_json_object(url, config)
+        responses[url] = __request_response_json_object(url, config)
 
     files = metadataapi_responses_to_webui_response(responses, config)
 
@@ -147,15 +147,15 @@ def get_phash_results(file: str, search_type: SearchType, config: NamerConfig) -
     responses = {}
     if search_type == SearchType.ANY or search_type == SearchType.SCENES:
         url = __build_url(config, phash=phash, scene_type=SceneType.SCENE)
-        responses[url] = __get_response_json_object(url, config)
+        responses[url] = __request_response_json_object(url, config)
 
     if search_type == SearchType.ANY or search_type == SearchType.MOVIES:
         url = __build_url(config, phash=phash, scene_type=SceneType.MOVIE)
-        responses[url] = __get_response_json_object(url, config)
+        responses[url] = __request_response_json_object(url, config)
 
     if search_type == SearchType.ANY or search_type == SearchType.JAV:
         url = __build_url(config, phash=phash, scene_type=SceneType.JAV)
-        responses[url] = __get_response_json_object(url, config)
+        responses[url] = __request_response_json_object(url, config)
 
     files = metadataapi_responses_to_webui_response(responses, config)
 
@@ -208,7 +208,7 @@ def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Opt
         if decoded and isinstance(decoded, ComparisonResults):
             for item in decoded.results:
                 if not hasattr(item, 'phash_distance'):
-                    item.phash_distance = 0 if hasattr(item, 'phash_match') and getattr(item, 'phash_match') else None
+                    item.phash_distance = 0 if hasattr(item, 'phash_match') and getattr(item, 'phash_match') else None  # noqa: B009
 
                 if not hasattr(item, 'phash_duration'):
                     item.phash_duration = None

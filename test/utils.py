@@ -2,6 +2,7 @@
 Testing utils
 """
 import contextlib
+import json
 import os
 import platform
 import shutil
@@ -99,13 +100,15 @@ class FakeTPDB(ParrotWebServer):
 
     def add_json_response(self, response, target_url: str):
         return_value = response
-        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
+        return_value = json.dumps(json.loads(return_value), separators=(',', ':'))
+        modified_value = return_value.replace(r'https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
 
     def add_json_response_file(self, jsonfile, target_url: str):
         test_dir = Path(__file__).resolve().parent
         return_value = (test_dir / jsonfile).read_text()
-        modified_value = return_value.replace('https://thumb.metadataapi.net/', super().get_url())
+        return_value = json.dumps(json.loads(return_value), separators=(',', ':'))
+        modified_value = return_value.replace(r'https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
 
     def add_evil_angel(self, target_url: str):
@@ -149,7 +152,7 @@ class FakeTPDB(ParrotWebServer):
         self.add_evil_angel("/movies?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25")
         # Image for UI Test:
         self.add_evil_angel("/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25")
-        self.add_poster("/unsafe/1000x1500/smart/filters:sharpen():upscale()/https://cdn.metadataapi.net/scene/01/92/04/76e780fd19c4306bc744f79b5cb4bce/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.jpg?")
+        self.add_poster("/qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https://cdn.metadataapi.net/sites/3f/9f/51/cf3828d65425bca2890d53ef242d8cf/logo/evil-angel_dark[1].png,-10,-10,25,50)/https://cdn.metadataapi.net/scene/f4/ab/3e/a91d31d6dee223f4f30a57bfd83b151/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp?")
         # DorcelClub
         # Search Results
         self.add_dorcel_club("/scenes?parse=dorcelclub.2021-12-23.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25")
@@ -196,27 +199,30 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = sample_config()):
-    with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
-        with FakeTPDB() as fakeTpdb:
-            tempdir = Path(tmpdir)
-            config.override_tpdb_address = fakeTpdb.get_url()
-            config.watch_dir = tempdir / "watch"
-            config.watch_dir.mkdir(parents=True, exist_ok=True)
-            config.dest_dir = tempdir / "dest"
-            config.dest_dir.mkdir(parents=True, exist_ok=True)
-            config.work_dir = tempdir / "work"
-            config.work_dir.mkdir(parents=True, exist_ok=True)
-            config.failed_dir = tempdir / "failed"
-            config.failed_dir.mkdir(parents=True, exist_ok=True)
-            config.porndb_token = "notarealtoken"
-            cfgfile = tempdir / 'test_namer.cfg'
-            config.min_file_size = 0
-            with open(cfgfile, "w") as file:
-                content = to_ini(config)
-                file.write(content)
-            config.config_file = cfgfile
-            yield tempdir, fakeTpdb, config
+def environment(config: NamerConfig = None):
+    if config is None:
+        config = sample_config()
+
+    with tempfile.TemporaryDirectory(prefix="test") as tmpdir, FakeTPDB() as fakeTpdb:
+        tempdir = Path(tmpdir)
+
+        config.override_tpdb_address = fakeTpdb.get_url()
+        config.watch_dir = tempdir / "watch"
+        config.watch_dir.mkdir(parents=True, exist_ok=True)
+        config.dest_dir = tempdir / "dest"
+        config.dest_dir.mkdir(parents=True, exist_ok=True)
+        config.work_dir = tempdir / "work"
+        config.work_dir.mkdir(parents=True, exist_ok=True)
+        config.failed_dir = tempdir / "failed"
+        config.failed_dir.mkdir(parents=True, exist_ok=True)
+        config.porndb_token = "notarealtoken"
+        cfgfile = tempdir / 'test_namer.cfg'
+        config.min_file_size = 0
+        with open(cfgfile, "w") as file:
+            content = to_ini(config)
+            file.write(content)
+        config.config_file = cfgfile
+        yield tempdir, fakeTpdb, config
 
 
 def validate_permissions(test_self, file: Path, perm: int):
@@ -245,7 +251,6 @@ def validate_mp4_tags(test_self, file):
         [
             'Anal',
             'Ass',
-            'Assorted Additional Tags',
             'Atm',
             'Big Boobs',
             'Big Dick',
@@ -262,7 +267,6 @@ def validate_mp4_tags(test_self, file):
             'Hardcore',
             'Latina',
             'Milf',
-            'Pussy To Mouth',
             'Rimming',
             'Sex',
             'Swallow',
@@ -298,16 +302,11 @@ class ProcessingTarget:
         self.file = target_dir / self.relative
         os.makedirs(self.file.parent, exist_ok=True)
         self.file.parent.chmod(0o700)
-        try:
+        with contextlib.suppress(Exception):
             shutil.copy(test_mp4, self.file)
-        except:
-            # shutil isn't thread safe, it copies, then sets the mode if linux/mac
-            pass
-        try:
+
+        with contextlib.suppress(Exception):
             test_mp4.chmod(0o600)
-        except:
-            # if called while Watchdog is running will result in race (file could alredy be moved.)
-            pass
 
     def get_file(self) -> Path:
         if self.file is None:

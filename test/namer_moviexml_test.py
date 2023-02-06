@@ -74,7 +74,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   </art>
   <genre>Anal</genre>
   <genre>Ass</genre>
-  <genre>Assorted Additional Tags</genre>
   <genre>Atm</genre>
   <genre>Big Boobs</genre>
   <genre>Big Dick</genre>
@@ -91,7 +90,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <genre>Hardcore</genre>
   <genre>Latina</genre>
   <genre>Milf</genre>
-  <genre>Pussy To Mouth</genre>
   <genre>Rimming</genre>
   <genre>Sex</genre>
   <genre>Swallow</genre>
@@ -107,7 +105,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <type>Actor</type>
     <name>Carmela Clutch</name>
     <role>Female</role>
-    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F3e%2Fb6%2F0a%2F9a33557155b8a6f3e6c88bee8ed65a6%2Fposter%2F6a00376cbee2aa83c8c2514b89b332276df42c35</image>
+    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
     <thumb/>
   </actor>
   <actor>
@@ -121,7 +119,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <type>Actor</type>
     <name>Mark Wood</name>
     <role>Male</role>
-    <image>{fakeTPDB.get_url()}EIsvo6fVYUuLzp6bO8I0LYUdZmI=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F9d%2Fd5%2F61%2F11eb0285e2534a949839a1a5573be08%2Fposter%2F0955f0ee0c6500c8e17f8dd3cf1a019b6f4d3d3e</image>
+    <image>{fakeTPDB.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
     <thumb/>
   </actor>
   <fileinfo/>
@@ -157,7 +155,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   </art>
   <tag>Anal</tag>
   <tag>Ass</tag>
-  <tag>Assorted Additional Tags</tag>
   <tag>Atm</tag>
   <tag>Big Boobs</tag>
   <tag>Big Dick</tag>
@@ -174,7 +171,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <tag>Hardcore</tag>
   <tag>Latina</tag>
   <tag>Milf</tag>
-  <tag>Pussy To Mouth</tag>
   <tag>Rimming</tag>
   <tag>Sex</tag>
   <tag>Swallow</tag>
@@ -191,7 +187,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <type>Actor</type>
     <name>Carmela Clutch</name>
     <role>Female</role>
-    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F3e%2Fb6%2F0a%2F9a33557155b8a6f3e6c88bee8ed65a6%2Fposter%2F6a00376cbee2aa83c8c2514b89b332276df42c35</image>
+    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
     <thumb/>
   </actor>
   <actor>
@@ -205,7 +201,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <type>Actor</type>
     <name>Mark Wood</name>
     <role>Male</role>
-    <image>{fakeTPDB.get_url()}EIsvo6fVYUuLzp6bO8I0LYUdZmI=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F9d%2Fd5%2F61%2F11eb0285e2534a949839a1a5573be08%2Fposter%2F0955f0ee0c6500c8e17f8dd3cf1a019b6f4d3d3e</image>
+    <image>{fakeTPDB.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
     <thumb/>
   </actor>
   <fileinfo/>
