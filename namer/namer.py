@@ -280,7 +280,7 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
 
 def calculate_phash(file: Path, config: NamerConfig) -> Optional[PerceptualHash]:
     vph = config.vph_alt if config.use_alt_phash_tool else config.vph
-    phash = vph.get_hashes(file, max_workers=config.max_ffmpeg_workers, use_gpu=config.use_gpu)
+    phash = vph.get_hashes(file, max_workers=config.max_ffmpeg_workers, use_gpu=config.use_gpu if config.use_gpu else False)
 
     return phash
 

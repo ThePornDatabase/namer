@@ -303,7 +303,7 @@ class ComparisonResult:
         """
         Returns true if match is a phash match.
         """
-        return self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration
+        return self.phash_distance is not None and self.phash_distance <= target_distance and self.phash_duration is not None
 
     def is_match(self, target: float = 94.9, target_distance: int = 0) -> bool:
         """
