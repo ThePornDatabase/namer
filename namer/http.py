@@ -16,7 +16,7 @@ class RequestType(Enum):
 class Http:  # noqa: PIE798
     @staticmethod
     def request(method: RequestType, url, **kwargs):
-        logger.info(f'Requesting {method} "{url}"')
+        logger.info(f'Requesting {method.value} "{url}"')
         cache_session: Optional[CachedSession] = kwargs.get('cache_session')
         if 'cache_session' in kwargs:
             del kwargs['cache_session']
