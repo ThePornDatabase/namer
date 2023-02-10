@@ -188,7 +188,8 @@ def __match_weight(result: ComparisonResult) -> float:
     value = 0.00
     if result.phash_distance is not None:
         logger.debug("Phash match with '{} - {} - {}'", result.looked_up.site, result.looked_up.date, result.looked_up.name)
-        value = 1000.00 - result.phash_distance * 100
+        if result.phash_distance is not None:
+            value += 100 - result.phash_distance * 2.5
         if result.site_match:
             value += 100
         if result.date_match:
