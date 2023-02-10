@@ -74,7 +74,7 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
         if log_data and log_data.results:
             percentage = max([100 - item.phash_distance * 2.5 if item.phash_distance is not None and item.phash_distance <= 8 else item.name_match for item in log_data.results])
 
-    res['percentage'] = round(percentage, 2)
+    res['percentage'] = percentage
 
     return res
 
