@@ -33,7 +33,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         config = NamerConfig()
         self.assertEqual(config.del_other_files, False)
-        self.assertEqual(config.inplace_name, "{site} - {date} - {name}.{ext}")
+        self.assertEqual(config.inplace_name, "{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}")
         self.assertEqual(config.enabled_tagging, True)
         self.assertEqual(config.write_namer_log, False)
         self.assertEqual(config.enable_metadataapi_genres, False)

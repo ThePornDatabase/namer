@@ -73,7 +73,7 @@ class NamerConfig:
     dates will not be used in matching, possibly allowing false positives.
     """
 
-    inplace_name: str = "{site} - {date} - {name}.{ext}"
+    inplace_name: str = "{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}"
     """
     How to write output file name.  When namer.py is run this is applied in place
     (next to the file to be processed).
