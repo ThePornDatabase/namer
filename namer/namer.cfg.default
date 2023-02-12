@@ -164,7 +164,7 @@ enabled_tagging = True
 # Controls downloading of images for .nfo and mp4 tagging.
 enabled_poster = True
 
-# List of which images would be downloaded
+# List of which images would be downloaded options are: poster,background,performer
 download_type = poster,background,performer
 
 # These genres are noisey and not recommend for use.  If this is false a single default
@@ -217,7 +217,7 @@ extra_sleep_time = 30
 
 # Configured like inplace_name above, but with paths, and is relative to
 # dest_dir, which is where completed files will be moved to. 
-new_relative_path_name={site} - {date} - {name}/{site} - {date} - {name}.{ext}
+new_relative_path_name={full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}
 
 # director where new downloads go.
 watch_dir = ./test/watch
