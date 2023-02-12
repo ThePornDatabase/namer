@@ -208,7 +208,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             with open(tmp_file, 'w'):
                 pass
             main(["-f", str(tmp_file), "-c", str(config.config_file)])
-            self.assertIn("EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4", mock_stdout.getvalue())
+            self.assertIn("Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-].mp4", mock_stdout.getvalue())
 
 
 if __name__ == "__main__":

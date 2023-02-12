@@ -73,7 +73,7 @@ class NamerConfig:
     dates will not be used in matching, possibly allowing false positives.
     """
 
-    inplace_name: str = "{site} - {date} - {name}.{ext}"
+    inplace_name: str = "{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}"
     """
     How to write output file name.  When namer.py is run this is applied in place
     (next to the file to be processed).
@@ -334,7 +334,7 @@ class NamerConfig:
     If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
     """
 
-    new_relative_path_name: str = "{site} - {date} - {name}/{site} - {date} - {name}.{ext}"
+    new_relative_path_name: str = "{full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}"
     """
     like inplace_name above used for local call for renaming, this instead is used to move a file/dir to a location relative
     to the dest_dir below on successful matching/tagging.

@@ -44,7 +44,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (tempdir, _fakeTPDB, config):
             targets = [new_ea(tempdir, use_dir=False)]
             main(["-f", str(targets[0].file), "-c", str(config.config_file)])
-            output = MP4(targets[0].get_file().parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output = MP4(targets[0].get_file().parent / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     def test_writing_metadata_dir(self: unittest.TestCase):
@@ -54,7 +54,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (tempdir, _fakeTPDB, config):
             targets = [new_ea(tempdir, use_dir=True)]
             main(["-d", str(targets[0].get_file().parent), "-c", str(config.config_file)])
-            output = MP4(targets[0].get_file().parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output = MP4(targets[0].get_file().parent.parent / "Evil Angel" / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     def test_writing_metadata_all_dirs(self: unittest.TestCase):
@@ -68,9 +68,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             config: NamerConfig
             targets = [new_ea(tempdir, use_dir=True, post_stem="1"), new_ea(tempdir, use_dir=True, post_stem="2"), ]
             main(["-d", str(targets[0].get_file().parent.parent), "-m", "-c", str(config.config_file)])
-            output = MP4(targets[0].get_file().parent.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output = MP4(targets[0].get_file().parent.parent / "Evil Angel" / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
-            output = MP4(targets[1].get_file().parent.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
+            output = MP4(targets[1].get_file().parent.parent / "Evil Angel" / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240](1).mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     def test_writing_metadata_from_nfo(self):
@@ -99,7 +99,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 file.write(content)
 
             main(["-f", str(target_mp4_file), "-i", "-c", str(cfgfile)])
-            output = MP4(target_mp4_file.parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output = MP4(target_mp4_file.parent / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mp4")
             self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
 
     def test_writing_metadata_all_dirs_files(self):
@@ -111,9 +111,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment(config) as (tempdir, _fakeTPDB, config):
             targets = [new_ea(tempdir, use_dir=False, post_stem="1"), new_ea(tempdir, use_dir=False, post_stem="2")]
             main(["-d", str(targets[0].get_file().parent), "-m", "-c", str(config.config_file)])
-            output1 = (targets[0].get_file().parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4")
+            output1 = (targets[0].get_file().parent / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mp4")
             validate_mp4_tags(self, output1)
-            output2 = (targets[1].get_file().parent / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!(1).mp4")
+            output2 = (targets[1].get_file().parent / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240](1).mp4")
             validate_mp4_tags(self, output2)
 
     def test_set_permissions(self):
