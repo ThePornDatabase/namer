@@ -102,7 +102,7 @@ Now we're going to go ahead and get our UID and GID passed for namer permissions
 * Config Type: Variable
 * Name: PUID
 * Key: 99
-* Value: 100
+* Value: 99
 
 and now PGID
 
