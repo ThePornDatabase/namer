@@ -224,4 +224,4 @@ Just be sure to pay attention to the tests and any failing pylint results.   If 
 .. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L72
 .. _Homebrew: https://docs.brew.sh/Installation
 .. _Chocolatey: https://chocolatey.org/install
-.. _InstallInstructions: https://github.com/ThePornDatabase/namer/blob/main/install%20instructions.md
+.. _InstallInstructions: https://github.com/ThePornDatabase/namer/blob/main/install_instructions.md
