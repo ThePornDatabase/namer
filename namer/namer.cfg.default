@@ -8,7 +8,7 @@ porndb_token = ****************************************
 # Seriously don't edit it.
 name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 
-# How to write output file name.  When namer.py is run this is applied in place 
+# How to write output file name.  When namer.py is run this is applied in place
 # (next to the file to be processed).
 # If you are running watchdog see new_relative_path_name in the watchdog section.
 #
@@ -20,7 +20,7 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # * an infix:
 # {date:_2i} - in this case put two underscore before and after the 'date', so '__2020-01-01__'
 #
-# Examples: 
+# Examples:
 # * {site} - {date} - {scene}.{ext}
 # * {site}/{date}.{scene}.{ext}
 #
@@ -43,7 +43,7 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # * 'trans' - 'TS', or 'ts' if detected in original file name.
 # * 'type' - "movie" or "scene" depending on tpdb api used to find the metadata (/scenes or /movies)
 # * 'resolution' - 480p, 720p, 1080p, 4k, or any other integer
-# * 'vr', is the studio is a known vr studio, 'vr', else '', can be used for folder names, like ../adult{vr}/.. 
+# * 'vr', is the studio is a known vr studio, 'vr', else '', can be used for folder names, like ../adult{vr}/..
 #
 # This should not contain paths, as files will be processed in place when called on the command line from namer.
 #
@@ -67,7 +67,7 @@ write_namer_log = False
 write_namer_failed_log = True
 
 # Comma separated list of extensions for namer to process (in order of preference in case multiple types exist in a target directory)
-# Case insensitive, Only mp4 supports tagging.  
+# Case insensitive, Only mp4 supports tagging.
 target_extensions = mp4,mkv,avi,mov,flv
 
 # Should new and moved files have permissions and ownership set.
@@ -96,7 +96,7 @@ trailer_location =
 # values are set to the scrape time, not the video release date.
 sites_with_no_date_info =
 
-# Comma seperated list of sites/studios whose Sites/Studios where namer will prefer matching movies 
+# Comma seperated list of sites/studios whose Sites/Studios where namer will prefer matching movies
 # instead of scenes as default behavior
 # will also switch the type flag from 'movie' to 'scene'.
 movie_data_preferred = missax
@@ -127,7 +127,7 @@ use_requests_cache = True
 requests_cache_expire_minutes = 10
 
 # Leave this unset unless you are testing a new tpdb endpoint.
-override_tpdb_address = 
+override_tpdb_address =
 
 [Phash]
 # Calculate and use phashes in search for matches
@@ -171,8 +171,8 @@ download_type = poster,background,performer
 # genre will be used.  These are called Tags on the porndb json response objects, genre's
 # in plex/jellyfin - and could be added as Tags to jellyfin.  Unfortunately jellyfin doesn't
 # support searching tags, so tpdb jellyfin plugin writes tags to genres, this flag will
-# mirror that behavior for mp4s and .nfo files.   It does appear jellyfin will get tag filtering 
-# in the 10.8 release due to a few prs out there. 
+# mirror that behavior for mp4s and .nfo files.   It does appear jellyfin will get tag filtering
+# in the 10.8 release due to a few prs out there.
 enable_metadataapi_genres = False
 
 # If genre's are not copied this is the default genre added to files.
@@ -197,7 +197,7 @@ preserve_duplicates = True
 # to the desired resolution.   If a too large video is the only one available it will be retained.  Defautls to 4380
 max_desired_resolutions = -1
 
-# The codecs in order that you want to retain.   
+# The codecs in order that you want to retain.
 # by default hevc is preferred to h264, which is preferred vs everything else.
 desired_codec = hevc, h264
 
@@ -210,13 +210,13 @@ ignored_dir_regex = .*_UNPACK_.*
 # to keep other files this must be false and new_relative_path_name must contain a directory split, "/"
 del_other_files = False
 
-# After a video has appeared in the watch dir, an extra number of seconds to wait to allow the 
-# copying or unzipping of other files in to that directory.   Prevents leaving orphaned files in dirs with 
+# After a video has appeared in the watch dir, an extra number of seconds to wait to allow the
+# copying or unzipping of other files in to that directory.   Prevents leaving orphaned files in dirs with
 # with no movies of you have del_other_files set to True.
 extra_sleep_time = 30
 
 # Configured like inplace_name above, but with paths, and is relative to
-# dest_dir, which is where completed files will be moved to. 
+# dest_dir, which is where completed files will be moved to.
 new_relative_path_name={full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}
 
 # director where new downloads go.
@@ -261,7 +261,7 @@ debug = False
 # Manual mode, successful matches will go to failed directory
 manual_mode = False
 
-# Errors may be raised by the program, and when they are loguru may be used to help explain them, showing 
+# Errors may be raised by the program, and when they are loguru may be used to help explain them, showing
 # values in the stack trace, potentially including the porndb token, this setting should only be turned on
 # if you are going to check an logs you share for your token.
 diagnose_errors = False
