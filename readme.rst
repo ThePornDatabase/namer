@@ -15,7 +15,7 @@
 .. image:: https://img.shields.io/pypi/dm/namer?logo=pypi&logoColor=fff
   :target: https://pypi.org/project/namer
 .. image:: https://static.pepy.tech/personalized-badge/namer?period=total&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads
-  :target: https://pepy.tech/project/namer  
+  :target: https://pepy.tech/project/namer
 .. image:: https://static.pepy.tech/personalized-badge/namer?period=month&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads/Month
   :target: https://pepy.tech/project/namer
 
@@ -27,7 +27,7 @@ Namer is easily installed as a python pip and can:
 
 * can be run watching a directory for new files to name, tag and move to an output location, possible setting file permissions, writing .nfo files with downloaded images, attempting to grab trailers, and retrying failed files nightly.
 
-  ``python -m namer watchdog``  
+  ``python -m namer watchdog``
 
 * while running watchdog, will also have a webui that can be used to manually match and rename any files that could not be automatically matched.  You can set the webroot, port, bound ip, enable/disable in your namer.cfg file.
 
@@ -35,20 +35,20 @@ Namer is easily installed as a python pip and can:
 
 * can be used to name and embed tags in individual files with metadata from porndb:
 
-  ``python -m namer rename -f /path/to/file/Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4 [-v]`` 
+  ``python -m namer rename -f /path/to/file/Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4 [-v]``
 
 * can be used to name and tag files with metadata from a jellyfin/emby/kodi .nfo file (should be named the same as the file except for extension).
 
   ``python -m namer rename -f /path/to/file/Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4 -i [-v]``
 
-* can be used to rename a tag a file based on the directory name, so if you have a file like ``/Site.[YY]YY.MM.DD.MessOfText.XXX.2160/abc.mp4`` 
+* can be used to rename a tag a file based on the directory name, so if you have a file like ``/Site.[YY]YY.MM.DD.MessOfText.XXX.2160/abc.mp4``
 
   ``python -m namer rename -d /path/to/dir/Site.[YY]YY.MM.DD.MessOfText.XXX.2160/``
 
 * can be used to rename a tag a whole mess of dirs and files in a directory (using -m, meaning "many").
 
   ``python -m namer rename -m -d /path/to/dir/``
-  
+
 * can be used to just suggest a possible name.  The file doesn't need to exist but should have an extension.
 
   ``python -m namer suggest -f Site.[YY]YY.MM.DD.MessOfText.XXX.2160.mp4``
@@ -104,7 +104,7 @@ You have two choices.   Do you use docker?  Pull the docker image, here's docker
 .. code-block:: yaml
 
   version: "3"
-  services:  
+  services:
     namer:
       container_name: namer
       image: ghcr.io/theporndatabase/namer:latest
@@ -118,7 +118,7 @@ You have two choices.   Do you use docker?  Pull the docker image, here's docker
         - /media:/data <- this will have the four folders namer needs to work, referenced in the namer.cfg file you create.
       restart: always
 
-Copy namer.cfg to your config location (a path mapped to /config/namer.cfg above), and set values for your setup.   
+Copy namer.cfg to your config location (a path mapped to /config/namer.cfg above), and set values for your setup.
 The config is well commented and you should only need to add a token for the porndb and change file locations.
 
 Running a service will occur automatically once you call ``docker-compose up``.  Now check out the configuration section below.
@@ -132,11 +132,11 @@ A detailed install tutorial can be found at InstallInstructions_
 ---------------------------
 
 There is a well documented template of namer.cfg in this git repo, which is broken up in to three sections.
-One section is related to command line renaming, the `namer section`_, one related to tagging mp4s `metadata section`_, 
+One section is related to command line renaming, the `namer section`_, one related to tagging mp4s `metadata section`_,
 and finally one related to the watchdog process `watchdog section`_.
-Please note that the `namer section`_ section and the `watchdog section`_ 
-section both have a field to describe the new name of a file based on looked up metadata from the PornDB_.   
-They differ because when run from the command line namer will keep the file "in place".  
+Please note that the `namer section`_ section and the `watchdog section`_
+section both have a field to describe the new name of a file based on looked up metadata from the PornDB_.
+They differ because when run from the command line namer will keep the file "in place".
 If namer is passed a dir on the command line as input it can operate in one of two modes,
 the default mode is to look for the largest mp4 file, or other configured movie file extension if no mp4 exists,
 and rename and move that file to the root of the folder (if it's in a sub-folder).
@@ -149,7 +149,7 @@ Typical Watchdog Behavior:
 ----------------------------
 
 The watchdog process will watch a single folder, configured with watch_dir_ in the ``namer.cfg`` file.   Any new files and directories that appear in the watch_dir_
-will be processed once an mp4/mkv/avi/mov/flv file has been fully copied in to it.  
+will be processed once an mp4/mkv/avi/mov/flv file has been fully copied in to it.
 
 The first step in processing is to more the newly appearing directory or file in to the work_dir_.
 
