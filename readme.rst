@@ -91,9 +91,9 @@ The date may have a four digit or two digit year.  If two digit, "20" is assumed
 
 Finally the looked up scene name and all performers first and last names are combined in to what is called a powerset (every combo of including or not including each artist and/or scene name), and that is compared against the file's 'Scene.and.or.performer.name' section with a tool called rapidfuzz.   A name must be 95% similar to a member of the powerset to be considered a match, though all potential matches are evaluated and sorted before selecting the best match.   Information about all potential matches are stored in the local log file if it is enabled.
 
-At the same time name based matching is occuring, a perceptual hash is built and queried againt the PornDB_.
+At the same time name based matching is occurring, a perceptual hash is built and queried against the PornDB_.
 
-All matches, regardless of source are made unique with the PornDB_'s UUID (universally unique identifier).   If more than one unique match exist, or no match exists but partial name matches exist, all data is availble in the web ui for users to select the correct match.
+All matches, regardless of source are made unique with the PornDB_'s UUID (universally unique identifier).   If more than one unique match exist, or no match exists but partial name matches exist, all data is available in the web ui for users to select the correct match.
 
 I'm sold how do I install it!
 --------------------------------------------------

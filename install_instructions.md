@@ -14,7 +14,7 @@ Windows
 
 To start off with windows you only really need to manually install one thing and that's python. Everything else will be downloaded for you once you do you install in cmd prompt.
 
-**Step 1:** Install the latest version of python from [here.](https://www.python.org/downloads) When you do this install make sure you tick the **Add Python to path**. It makes your life a lot easier, and you won't have to manually do it in the future.
+**Step 1:** Install the latest version of python from [here.](https://www.python.org/downloads) When you do this install make sure you tick the `Add Python to path`. It makes your life a lot easier, and you won't have to manually do it in the future.
 
 **Step 2:** With python now installed you can now download Namer through CMD. This is pretty easily done with a quick command. Open your CMD by typing CMD in your search bar and then type: `pip install namer`.  This is going to download and install all the packages that namer needs to run correctly.
 
@@ -46,27 +46,27 @@ My recommendation for folder structure is as following. Make a new folder and ca
 
 Now your dest_dir directory can be whatever you want. Just **DON'T PLACE IT INSIDE ANOTHER NAMER FOLDER**. It can cause errors and problems that you won't like.
 
-Now that that is done the very basic functionally of namer is complete and you can run a command in CMD and let it go to work.  You can run `python -m namer watchdog` and that will activate watchdog and it will start automatically scanning and renaming files in your watch folder then move them to your destination folder.
+Now that that is done the very basic functionally of namer is complete, and you can run a command in CMD and let it go to work.  You can run `python -m namer watchdog` and that will activate watchdog, and it will start automatically scanning and renaming files in your watch folder then move them to your destination folder.
 
-**Step 5:** Most people, like I, don't like command line stuff so we have a webUI that can be used to make life a little easier for you. Firstly you have to active it in your config, search for the **web = False** in your config and set it to **true**. The default port is essentially your local host and port is 6980. You can change this if you need to and know what to do. Otherwise just go to your browser and type `localhost:6980`. This should bring up the webui where you can manually search and match your files. Namer will only show files that appear in your failed_dir. If you want to do everything manually in the UI, make sure your files are in the failed_dir. If you want namer to do most of the work, place them in watch_dir, let namer match, and then you can manually match anything that Namer can't find.
+**Step 5:** Most people, like I, don't like command line stuff, so we have a webUI that can be used to make life a little easier for you. Firstly you have to active it in your config, search for the `web = False` in your config and set it to `True`. The default port is essentially your local host and port is 6980. You can change this if you need to and know what to do. Otherwise, just go to your browser and type `localhost:6980`. This should bring up the webui where you can manually search and match your files. Namer will only show files that appear in your failed_dir. If you want to do everything manually in the UI, make sure your files are in the failed_dir. If you want namer to do most of the work, place them in watch_dir, let namer match, and then you can manually match anything that Namer can't find.
 
-After these steps you are pretty much setup. There are a lot more settings you can play with but, as I said earlier, they are marked and you can play with them if you need to.
+After these steps you are pretty much setup. There are a lot more settings you can play with but, as I said earlier, they are marked, and you can play with them if you need to.
 
 Before you start going crazy and slapping files everywhere:
 
-Namer uses a `STUDIO-DATE-SCENE` format. Essentially this means your folders need to be named that way or namer will not match your files and you will need to do it manually all the time.
+Namer uses a `STUDIO-DATE-SCENE` format. Essentially this means your folders need to be named that way or namer will not match your files, and you will need to do it manually all the time.
 
 Unraid
 ----------------
 
 Linux's systems are more complicated than Windows systems but can be more stable and less problematic as namer mostly runs passively in the background. This isn't going to be an Unraid tutorial, and I'm going to take certain liberties hoping that you already know how it works.
 
-**Step 1:** Go to your docker tab then click add container down below. I'll put a example template below, the names can be somewhat interchangeable, but you have to remember them and use your names accordingly.
+**Step 1:** Go to your docker tab then click add container down below. I'll put an example template below, the names can be somewhat interchangeable, but you have to remember them and use your names accordingly.
 
 * Name: `namer`
 * Repository: `ghcr.io/theporndatabase/namer:latest`
 
-After these are filled in you want to go ahead and add some paths for your media, config, and ports if you plan on using the web. Scroll down and click on **Add another Path, Port, Variable, Label or Device**. While in here make it as such.
+After these are filled in you want to go ahead and add some paths for your media, config, and ports if you plan on using the web. Scroll down and click on `Add another Path, Port, Variable, Label or Device`. While in here make it as such.
 
 * Config Type: `Path`
 * Name: `config`
@@ -113,11 +113,11 @@ and now PGID
 
 We also need to make some PUID and PUIG ones for your perms. It's exactly the same as above but you use variable instead of path.
 
-So, all of these are essentially translations between namer and Unraid. When you type **/config** into namer it will tell Unraid and Unraid will look in **/mnt/user/appdata/namer**. This also applies to all the other ones we made too.
+So, all of these are essentially translations between namer and Unraid. When you type `/config` into namer it will tell Unraid and Unraid will look in `/mnt/user/appdata/namer`. This also applies to all the other ones we made too.
 
-So go ahead and hit **Apply** and let Unraid do its thing. Once you do that namer will be installed but it won't run as since your config isn't where it needs to be.
+So go ahead and hit `Apply` and let Unraid do its thing. Once you do that namer will be installed, but it won't run as since your config isn't where it needs to be.
 
-**Step 2:** Go ahead and move your namer.cfg into your **/config** folder. You can do that via windows SMB or something of that sort. You can also learn how to create your config above in the Windows section. The only main difference is going to be your paths and the fact that, in Unraid, your **namer.cfg** doesn't need the period at the beginning. If you put your folders in side of /media then your config should look like this:
+**Step 2:** Go ahead and move your namer.cfg into your `/config` folder. You can do that via windows SMB or something of that sort. You can also learn how to create your config above in the Windows section. The only main difference is going to be your paths and the fact that, in Unraid, your `.namer.cfg` doesn't need the period at the beginning. If you put your folders in side of /media then your config should look like this:
 
 * watch_dir = `/media/watch`
 * work_dir = `/media/work`
