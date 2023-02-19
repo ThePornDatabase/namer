@@ -46,22 +46,23 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
         logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
         success = False
 
-    success = __verify_dir(config, "watch_dir") and success
-    success = __verify_dir(config, "work_dir") and success
-    success = __verify_dir(config, "failed_dir") and success
-    success = __verify_dir(config, "dest_dir") and success
+    watchdog_dirs = ['watch_dir', 'work_dir', 'failed_dir', 'dest_dir']
+    for dir_name in watchdog_dirs:
+        success = __verify_dir(config, dir_name, [name for name in watchdog_dirs if dir_name != name]) and success
+
     success = __verify_name_string(formatter, "new_relative_path_name", config.new_relative_path_name) and success
 
     return success
 
 
-def __verify_dir(config: NamerConfig, name: str) -> bool:
+def __verify_dir(config: NamerConfig, name: str, other_dirs: List[str]) -> bool:
     """
     verify a config directory exist. return false if verification fails
     """
-    file_name = getattr(config, name) if hasattr(config, name) else None
-    if file_name and not file_name.is_dir():
-        logger.error("Configured directory {}: {} is not a directory or not accessible", name, file_name)
+    path_list = tuple(str(getattr(config, name)) for name in other_dirs if hasattr(config, name))
+    dir_name: Path = getattr(config, name) if hasattr(config, name) else None
+    if dir_name and (not dir_name.is_dir() or not os.access(dir_name, os.W_OK) or str(dir_name).startswith(path_list)):
+        logger.error("Configured directory {}: {} is not a directory or not accessible or in other watchdog directory", name, dir_name)
         return False
 
     return True
