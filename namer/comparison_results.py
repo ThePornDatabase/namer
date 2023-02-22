@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pathvalidate import Platform, sanitize_filename
 
@@ -230,7 +230,7 @@ class LookedUpFileInfo:
         Constructs a new file name based on a template (describe in NamerConfig)
         """
         dictionary = self.as_dict(config)
-        clean_dic = {k: str(sanitize_filename(str(v), platform=str(Platform.UNIVERSAL))) if v else '' for k, v in dictionary.items()}
+        clean_dic = self.__cleanup_dictionary(dictionary)
         fmt = PartialFormatter(missing="", bad_fmt="---")
         name = fmt.format(template, **clean_dic)
 
@@ -246,6 +246,20 @@ class LookedUpFileInfo:
             name = re.sub(r'[sS]\d{1,3}:?[eE]\d{1,3}', '', name)
 
         return name
+
+    @staticmethod
+    def __cleanup_dictionary(dictionary: Dict[str, Optional[str]]) -> Dict[str, str]:
+        clean_dic = {}
+        for key, value in dictionary.items():
+            value = str(value) if value else ''
+
+            if key != 'uuid':
+                value = value.replace('/', ' ').replace('\\', ' ')
+
+            value = sanitize_filename(value, platform=Platform.UNIVERSAL.value)
+            clean_dic[key] = str(value)
+
+        return clean_dic
 
     def found_via_phash(self) -> bool:
         return bool(self.original_query and '?hash=' in self.original_query)
