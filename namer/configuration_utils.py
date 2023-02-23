@@ -61,9 +61,13 @@ def __verify_dir(config: NamerConfig, name: str, other_dirs: List[str]) -> bool:
     """
     path_list = tuple(str(getattr(config, name)) for name in other_dirs if hasattr(config, name))
     dir_name: Path = getattr(config, name) if hasattr(config, name) else None
-    if dir_name and (not dir_name.is_dir() or not os.access(dir_name, os.W_OK) or str(dir_name).startswith(path_list)):
-        logger.error("Configured directory {}: {} is not a directory or not accessible or in other watchdog directory", name, dir_name)
+    if dir_name and (not dir_name.is_dir() or str(dir_name).startswith(path_list)):
+        logger.error(f'Configured directory {name}: {dir_name} is not a directory or not exist or in other watchdog directory')
+
         return False
+
+    if dir_name and not os.access(dir_name, os.W_OK):
+        logger.warning(f'Configured directory {name}: {dir_name} might have write permission problem')
 
     return True
 

@@ -127,7 +127,7 @@ Running a service will occur automatically once you call ``docker-compose up``. 
 Pip/Python usage
 --------------------
 
-A detailed install tutorial can be found at InstallInstructions_
+A detailed install tutorial can be found at `Install Instructions`_
 
 ---------------------------
 
@@ -224,4 +224,4 @@ Just be sure to pay attention to the tests and any failing pylint results.   If 
 .. _enable_poster: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L72
 .. _Homebrew: https://docs.brew.sh/Installation
 .. _Chocolatey: https://chocolatey.org/install
-.. _InstallInstructions: https://github.com/ThePornDatabase/namer/blob/main/install_instructions.md
+.. _Install Instructions: https://github.com/ThePornDatabase/namer/blob/main/install_instructions.md
