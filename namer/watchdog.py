@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from queue import Queue
 from threading import Thread
-from typing import List, Optional
+from typing import Optional
 
 import schedule
 from loguru import logger
@@ -86,10 +86,10 @@ class MovieEventHandler(PatternMatchingEventHandler):
 
     __namer_config: NamerConfig
 
-    def __init__(self, namer_config: NamerConfig, enque_work_fn):
+    def __init__(self, namer_config: NamerConfig, enqueue_work_fn):
         super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.__namer_config = namer_config
-        self.__enque_work_fn = enque_work_fn
+        self.__enqueue_work_fn = enqueue_work_fn
 
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
@@ -115,7 +115,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
         command = make_command_relative_to(input_dir=path, relative_to=self.__namer_config.watch_dir, config=self.__namer_config)
         working_command = move_command_files(command, self.__namer_config.work_dir)
         if working_command is not None:
-            self.__enque_work_fn(working_command)
+            self.__enqueue_work_fn(working_command)
 
 
 class MovieWatcher:
@@ -128,7 +128,7 @@ class MovieWatcher:
     See NamerConfig
     """
 
-    def enque_work(self, command: Command):
+    def enqueue_work(self, command: Command):
         queue_items = list(self.__command_queue.queue)
         items = list(map(lambda x: x.get_command_target(), filter(lambda i: i is not None, queue_items)))
         if not self.__stopped and command.get_command_target() not in items or command is None:
@@ -143,11 +143,14 @@ class MovieWatcher:
                 logger.info("Marking None task as done")
                 self.__command_queue.task_done()
                 break
+
             handle(command)
             self.__command_queue.task_done()
+
         # Throw away any items after the None item is processed.
         with self.__command_queue.mutex:
             self.__command_queue.queue.clear()
+
         logger.info("exit processing_thread")
 
     def __init__(self, namer_config: NamerConfig):
@@ -159,7 +162,7 @@ class MovieWatcher:
         self.__webserver: Optional[NamerWebServer] = None
         self.__command_queue: Queue = Queue()
         self.__worker_thread: Thread = Thread(target=self.__processing_thread, daemon=True)
-        self.__event_handler = MovieEventHandler(namer_config, self.enque_work)
+        self.__event_handler = MovieEventHandler(namer_config, self.enqueue_work)
         self.__background_thread: Optional[Thread] = None
 
     def get_config(self) -> NamerConfig:
@@ -236,15 +239,11 @@ class MovieWatcher:
         self.__worker_thread.start()
 
         # touch all existing movie files.
-        files: List[Path] = []
         for file in self.__namer_config.watch_dir.rglob("**/*.*"):
             if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
-                files.append(file)
-
-        for file in files:
-            relative_path = str(file.relative_to(self.__namer_config.watch_dir))
-            if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
-                self.__event_handler.prepare_file_for_processing(file)
+                relative_path = str(file.relative_to(self.__namer_config.watch_dir))
+                if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
+                    self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
         """
@@ -254,18 +253,23 @@ class MovieWatcher:
         if not self.__stopped:
             self.__stopped = True
             logger.debug("Exiting watchdog")
+
             self.__event_observer.stop()
             logger.debug("Observer stop")
+
             self.__event_observer.join()
             logger.debug("Observer join")
+
             if self.__webserver:
                 logger.info("Webserver stop")
                 self.__webserver.stop()
+
             self.__command_queue.put(None)
 
             # let the thread processing work items complete.
             self.__worker_thread.join()
             logger.debug("Command queue None")
+
             test = os.environ.get('PYTEST_CURRENT_TEST', "")
             logger.debug(f"{test}: Command join")
 

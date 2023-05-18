@@ -8,13 +8,13 @@
             {% for key, value in settings.items() %}
                 <div class="{% if value is not boolean %}form-floating {% endif %}mb-3">
                     {% if value is string or value is none %}
-                        <input readonly class="form-control" type="text" id="{{ key }}" value="{{ value }}">
+                        <input readonly class="form-control" type="text" id="{{ key }}" value="{{ value }}" placeholder>
                     {% elif value|is_list %}
-                        <input readonly class="form-control" type="text" id="{{ key }}" value="{{ value|from_list }}">
+                        <input readonly class="form-control" type="text" id="{{ key }}" value="{{ value|from_list }}"  placeholder>
                     {% elif value|is_dict %}
-                        <input readonly class="form-control" type="text" id="{{ key }}" value="{{ value }}">
+                        <input readonly class="form-control" type="text" id="{{ key }}" value="{{ value }}" placeholder>
                     {% elif value is integer %}
-                        <input readonly class="form-control" type="number" id="{{ key }}" value="{{ value }}">
+                        <input readonly class="form-control" type="number" id="{{ key }}" value="{{ value }}" placeholder>
                     {% elif value is boolean %}
                         <input disabled class="form-check-input" type="checkbox" id="{{ key }}"{% if value %} checked{% endif %}>
                     {% endif %}
