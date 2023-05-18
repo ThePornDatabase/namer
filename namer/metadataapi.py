@@ -17,6 +17,7 @@ import imagehash
 import rapidfuzz
 from loguru import logger
 from PIL import Image
+from rapidfuzz import utils
 from requests import JSONDecodeError
 from unidecode import unidecode
 
@@ -40,7 +41,7 @@ def __find_best_match(query: Optional[str], match_terms: List[str], config: Name
         data = map(" ".join, itertools.combinations(match_terms, length))
         powerset_iter = itertools.chain(powerset_iter, data)
 
-    ratio = rapidfuzz.process.extractOne(query, choices=powerset_iter)
+    ratio = rapidfuzz.process.extractOne(query, choices=powerset_iter, processor=utils.default_process)
     return (ratio[0], ratio[1]) if ratio else ratio
 
 
