@@ -232,7 +232,10 @@ class LookedUpFileInfo:
         dictionary = self.as_dict(config)
         clean_dic = self.__cleanup_dictionary(dictionary)
         fmt = PartialFormatter(missing="", bad_fmt="---")
+
         name = fmt.format(template, **clean_dic)
+        if name.startswith("/"):
+            name = "." + name
 
         if infix != "(0)":
             # will apply the infix before the file extension if just a file name, if a path, with apply

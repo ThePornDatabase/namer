@@ -297,7 +297,7 @@ class FailedPage:
         assert_that(self.__noFailedFiles).is_not_none()
         return self
 
-    def search(self, search_term: Optional[str]) -> 'FailedPage':
+    def search(self, search_term: Optional[str]) -> 'FailedPage':  # type: ignore
         if not self.__search:
             fail("no search item on page, happens on purpose if there are no items")
         else:

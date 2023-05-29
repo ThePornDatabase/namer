@@ -14,7 +14,7 @@ from importlib import resources
 from pathlib import Path
 from sys import gettrace as sys_gettrace
 from time import sleep, time
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 from mutagen.mp4 import MP4
 
@@ -84,7 +84,7 @@ def sample_config() -> NamerConfig:
 
 class FakeTPDB(ParrotWebServer):
 
-    _scenes: dict[str, Any] = {}
+    _scenes: Dict[str, Any] = {}
 
     def __init__(self):
         super().__init__()
@@ -216,7 +216,7 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: Optional[NamerConfig] = None):
+def environment(config: NamerConfig = None):  # type: ignore
     if config is None:
         config = sample_config()
 

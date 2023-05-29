@@ -5,6 +5,7 @@ import contextlib
 import logging
 import time
 import os
+from typing import Any
 import unittest
 from pathlib import Path
 
@@ -333,6 +334,65 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
+
+    def remove_performer_genders(self, data: Any):
+        single_scene = data['data']
+        for json_performer in single_scene['performers']:
+            if not json_performer['extra']:
+                continue
+            json_performer['extra']['gender'] = None
+
+    def test_missing_performers_gender_success(self):
+        """
+        Test files aren't lost when fields are missing.
+        """
+        config = sample_config()
+        config.prefer_dir_name_if_available = True
+        config.min_file_size = 0
+        config.write_namer_log = True
+        config.min_file_size = 0
+        config.new_relative_path_name = "{performers}/{site} - {date} - {name}.{ext}"
+        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+            self.remove_performer_genders(fakeTPDB._scenes["ea.full.json"])
+            targets = [new_ea(config.watch_dir)]
+            wait_until_processed(watcher)
+            self.assertFalse(targets[0].get_file().exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "Carmela Clutch, Francesca Le" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            self.assertTrue(output_file.is_file())
+            output = MP4(output_file)
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
+
+    def remove_performers(self, data: Any):
+        single_scene = data['data']
+        single_scene['performers'] = []
+
+    def test_missing_performers_success(self):
+        """
+        Test files aren't lost when fields are missing.
+        """
+        config = sample_config()
+        config.prefer_dir_name_if_available = True
+        config.min_file_size = 0
+        config.write_namer_log = True
+        config.min_file_size = 0
+        config.new_relative_path_name = "{performers}/{site} - {date} - {name}.{ext}"
+        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+            self.remove_performers(fakeTPDB._scenes["ea.full.json"])
+            targets = [new_ea(config.watch_dir)]
+            wait_until_processed(watcher)
+            self.assertFalse(targets[0].get_file().exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!.mp4"
+            self.assertTrue(output_file.is_file())
+            output = MP4(output_file)
+            self.assertEqual(output.get("\xa9nam"), ["Carmela Clutch: Fabulous Anal 3-Way!"])
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_name_parser_failure_with_startup_processing(self):
