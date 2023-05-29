@@ -14,7 +14,7 @@ from importlib import resources
 from pathlib import Path
 from sys import gettrace as sys_gettrace
 from time import sleep, time
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from mutagen.mp4 import MP4
 
@@ -84,8 +84,16 @@ def sample_config() -> NamerConfig:
 
 class FakeTPDB(ParrotWebServer):
 
+    _scenes: dict[str, Any] = {}
+
     def __init__(self):
         super().__init__()
+        self._scenes: dict[str, Any] = {
+            "ea.full.json": self.get_localized_json_in_file("ea.full.json"),
+            "dc.json": self.get_localized_json_in_file("dc.json"),
+            "ssb2.json": self.get_localized_json_in_file("ssb2.json"),
+        }
+
         self.default_additions()
 
     def __enter__(self):
@@ -104,21 +112,29 @@ class FakeTPDB(ParrotWebServer):
         modified_value = return_value.replace(r'https://thumb.metadataapi.net/', super().get_url())
         super().set_response(target_url, modified_value)
 
-    def add_json_response_file(self, jsonfile, target_url: str):
+    def get_localized_json_in_file(self, jsonfile):
         test_dir = Path(__file__).resolve().parent
         return_value = (test_dir / jsonfile).read_text()
         return_value = json.dumps(json.loads(return_value), separators=(',', ':'))
         modified_value = return_value.replace(r'https://thumb.metadataapi.net/', super().get_url())
-        super().set_response(target_url, modified_value)
+        usable_json = json.loads(modified_value)
+        return usable_json
+
+    def add_json_response_file(self, jsonfile, target_url: str):
+        usable_json = self.get_localized_json_in_file(jsonfile)
+        super().set_response(target_url, json.dumps(usable_json, separators=(',', ':')))
+
+    def get_json(self, _json_reponses: str) -> str:
+        return json.dumps(self._scenes[_json_reponses], separators=(',', ':'))
 
     def add_evil_angel(self, target_url: str):
-        self.add_json_response_file("ea.full.json", target_url)
+        super().set_response(target_url, lambda: self.get_json("ea.full.json"))
 
     def add_dorcel_club(self, target_url: str):
-        self.add_json_response_file("dc.json", target_url)
+        super().set_response(target_url, lambda: self.get_json("dc.json"))
 
     def add_brazzers_extra(self, target_url: str):
-        self.add_json_response_file("ssb2.json", target_url)
+        super().set_response(target_url, lambda: self.get_json("ssb2.json"))
 
     def add_poster(self, target_url: str) -> None:
         test_dir = Path(__file__).resolve().parent
@@ -126,6 +142,7 @@ class FakeTPDB(ParrotWebServer):
         super().set_response(target_url, bytearray(return_value))
 
     def default_additions(self):
+
         # Evil Angel:
         # Search Results
         self.add_evil_angel("/scenes?parse=evilangel.2022-01-03.Carmela%20Clutch%20Fabulous%20Anal%203-Way&limit=25")
@@ -199,7 +216,7 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = None):
+def environment(config: Optional[NamerConfig] = None):
     if config is None:
         config = sample_config()
 

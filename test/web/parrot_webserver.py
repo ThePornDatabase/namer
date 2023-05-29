@@ -1,6 +1,7 @@
 import time
 from pathlib import Path
 from threading import Thread
+import types
 from typing import Dict, Optional
 
 from flask import Blueprint, make_response, request
@@ -63,6 +64,8 @@ class ParrotWebServer(GenericWebServer):
 
     def set_response(self, url: str, response):
         value: Optional[bytearray] = None
+        if isinstance(response, types.FunctionType):
+            response = response()
         if isinstance(response, bytearray):
             value = response
         if isinstance(response, Path):
