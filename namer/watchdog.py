@@ -234,16 +234,16 @@ class MovieWatcher:
             git_hash = os.environ.get("GIT_HASH")
             print(f"Git Hash: {git_hash}")
 
-        self.__schedule()
-        self.__event_observer.start()
-        self.__worker_thread.start()
-
         # touch all existing movie files.
         for file in self.__namer_config.watch_dir.rglob("**/*.*"):
             if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
                 relative_path = str(file.relative_to(self.__namer_config.watch_dir))
                 if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
                     self.__event_handler.prepare_file_for_processing(file)
+
+        self.__schedule()
+        self.__event_observer.start()
+        self.__worker_thread.start()
 
     def stop(self):
         """
