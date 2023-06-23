@@ -10,7 +10,7 @@ include = ["**/web/public/assets/**/*", "**/web/templates/**/*", "**/namer.cfg.d
 python = ">=3.8,<3.12"
 rapidfuzz = "^3.0.0"
 watchdog = "^3.0.0"
-pathvalidate = "^2.5.0"
+pathvalidate = "^3.0.0"
 requests = "^2.27.1"
 mutagen = "^1.45.1"
 schedule = "^1.1.0"
