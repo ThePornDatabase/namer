@@ -276,7 +276,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
-
     def test_handler_deeply_nested_success_bracked(self):
         """
         Test the handle function works for a directory.
@@ -302,7 +301,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
-
 
     def test_handler_ignore(self):
         """
