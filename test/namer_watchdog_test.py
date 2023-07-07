@@ -276,6 +276,34 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
+
+    def test_handler_deeply_nested_success_bracked(self):
+        """
+        Test the handle function works for a directory.
+        """
+        config = sample_config()
+        config.prefer_dir_name_if_available = True
+        config.write_namer_log = True
+        config.del_other_files = False
+        config.min_file_size = 0
+        config.set_dir_permissions = None
+        config.set_file_permissions = None
+        config.new_relative_path_name = "{site} - {date} - {name}/{site} - {date} - {name} - {uuid} - {external_id} - ({resolution}).{ext}"
+        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+            targets = [
+                new_ea(config.watch_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! XXX [XvX]", post_stem="XXX [XvX]"),
+            ]
+            wait_until_processed(watcher)
+            self.assertFalse(targets[0].get_file().exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!" / "EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! - scenes1678283 - 198543 - (240).mp4"
+            validate_mp4_tags(self, output_file)
+            validate_permissions(self, output_file, 600)
+            self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
+            self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
+
+
     def test_handler_ignore(self):
         """
         Test the handle function works for a directory.
