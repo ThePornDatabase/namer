@@ -234,6 +234,9 @@ failed_dir = ./test/failed
 # dir where finalized files get written.
 dest_dir = ./test/dest
 
+# use namer database.
+use_database = False
+
 # file where stores namer database.
 database_path = ./test/database.sqlite
 
