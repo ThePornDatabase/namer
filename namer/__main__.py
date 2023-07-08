@@ -12,10 +12,12 @@ file will be written with all the potential matches sorted, descending by how cl
 match the file.
 """
 import sys
+from datetime import timedelta
 from pathlib import Path
 from typing import List
 
 from loguru import logger
+from requests_cache import CachedSession
 
 import namer.metadataapi
 import namer.namer
@@ -53,15 +55,21 @@ def main(arg_list: List[str]):
     logger.remove()
     config = default_config()
 
+    # create a CachedSession objects for request caching.
+    if config.use_requests_cache:
+        cache_file = config.database_path / 'namer_cache'
+        expire_time = timedelta(minutes=config.requests_cache_expire_minutes)
+        config.cache_session = CachedSession(str(cache_file), backend='sqlite', expire_after=expire_time, ignored_parameters=['Authorization'])
+
+    if config.use_database:
+        db_file = config.database_path / 'namer_database.sqlite'
+        db.bind(provider='sqlite', filename=str(db_file), create_db=True)
+        db.generate_mapping(create_tables=True)
+
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == "watchdog":
         level = 'DEBUG' if config.debug else 'INFO'
         logger.add(sys.stdout, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}", level=level, diagnose=config.diagnose_errors)
-
-        if config.use_database:
-            db.bind(provider='sqlite', filename=str(config.database_path), create_db=True)
-            db.generate_mapping(create_tables=True)
-
         namer.watchdog.create_watcher(config).run()
     elif arg1 == "rename":
         namer.namer.main(arg_list[1:])

@@ -120,6 +120,12 @@ max_performer_names = 6
 # When plex hack is set to True, any matches of e##s## are removed from the Scene name.
 plex_hack = False
 
+# file where stores namer database.
+database_path = ./database
+
+# use namer database.
+use_database = False
+
 # Cache http requests
 use_requests_cache = True
 
@@ -128,12 +134,6 @@ requests_cache_expire_minutes = 10
 
 # Leave this unset unless you are testing a new tpdb endpoint.
 override_tpdb_address =
-
-# use namer database.
-use_database = False
-
-# file where stores namer database.
-database_path = database.sqlite
 
 [Phash]
 # Calculate and use phashes in search for matches
