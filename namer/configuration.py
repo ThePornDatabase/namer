@@ -368,6 +368,16 @@ class NamerConfig:
     If running in watchdog mode, dir where finalized files get written.
     """
 
+    use_database: bool = False
+    """
+    Use namer database.
+    """
+
+    database_path: Path
+    """
+    File where stores namer database.
+    """
+
     retry_time: str
     """
     Time to retry failed items every day.
@@ -520,6 +530,8 @@ class NamerConfig:
                 "work_dir": str(self.work_dir),
                 "failed_dir": str(self.failed_dir),
                 "dest_dir": str(self.dest_dir),
+                "use_database": self.use_database,
+                "database_path": str(self.database_path),
                 "retry_time": self.retry_time,
                 "extra_sleep_time": self.extra_sleep_time,
                 "web": self.web,

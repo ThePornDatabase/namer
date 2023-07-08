@@ -260,6 +260,8 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "work_dir": ("watchdog", to_path, from_path),
     "failed_dir": ("watchdog", to_path, from_path),
     "dest_dir": ("watchdog", to_path, from_path),
+    "use_database": ("watchdog", to_bool, from_bool),
+    "database_path": ("watchdog", to_path, from_path),
     "retry_time": ("watchdog", None, None),
     "web": ("watchdog", to_bool, from_bool),
     "port": ("watchdog", to_int, from_int),

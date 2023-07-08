@@ -22,6 +22,7 @@ import namer.namer
 import namer.watchdog
 import namer.web
 from namer.configuration_utils import default_config
+from namer.models import db
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION + """
@@ -56,6 +57,11 @@ def main(arg_list: List[str]):
     if arg1 == "watchdog":
         level = 'DEBUG' if config.debug else 'INFO'
         logger.add(sys.stdout, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}", level=level, diagnose=config.diagnose_errors)
+
+        if config.use_database:
+            db.bind(provider='sqlite', filename=str(config.database_path), create_db=True)
+            db.generate_mapping(create_tables=True)
+
         namer.watchdog.create_watcher(config).run()
     elif arg1 == "rename":
         namer.namer.main(arg_list[1:])

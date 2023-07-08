@@ -234,6 +234,9 @@ failed_dir = ./test/failed
 # dir where finalized files get written.
 dest_dir = ./test/dest
 
+# file where stores namer database.
+database_path = ./test/database.sqlite
+
 # When to retry failed items, default is a random minute during the 3 am hour in your timezone.
 retry_time =
 
