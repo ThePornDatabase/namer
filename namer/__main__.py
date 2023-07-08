@@ -78,6 +78,9 @@ def main(arg_list: List[str]):
     elif arg1 in ["-h", "help", None]:
         print(DESCRIPTION)
 
+    if config.use_requests_cache:
+        config.cache_session.cache.delete(expired=True)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
