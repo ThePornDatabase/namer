@@ -14,7 +14,7 @@ from typing import List, Optional
 
 from loguru import logger
 
-from namer.command import Command, is_relative_to
+from namer.command import Command
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, SceneHash
 from namer.configuration import ImageDownloadType, NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
@@ -280,14 +280,8 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
 
 
 def calculate_phash(file: Path, config: NamerConfig) -> Optional[PerceptualHash]:
-    relative_file = file
     if config.use_database:
-        if is_relative_to(relative_file, config.failed_dir):
-            relative_file = file.relative_to(config.failed_dir)
-        elif is_relative_to(relative_file, config.work_dir):
-            relative_file = file.relative_to(config.work_dir)
-
-        search_result = search_file_in_database(file, relative_file)
+        search_result = search_file_in_database(file)
         if search_result:
             logger.info(f'Getting phash from db for file "{file}"')
             return return_perceptual_hash(search_result.duration, search_result.phash, search_result.oshash)
@@ -296,7 +290,7 @@ def calculate_phash(file: Path, config: NamerConfig) -> Optional[PerceptualHash]
     phash = vph.get_hashes(file, max_workers=config.max_ffmpeg_workers, use_gpu=config.use_gpu if config.use_gpu else False)
 
     if phash and config.use_database:
-        write_file_to_database(file, relative_file, phash)
+        write_file_to_database(file, phash)
 
     return phash
 
