@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -231,6 +232,16 @@ class NamerConfig:
     a set of tags that indicates an individual video is vr.
     """
 
+    database_path: Path = Path(tempfile.gettempdir()) / 'namer'
+    """
+    Path where stores namer system data.
+    """
+
+    use_database: bool = False
+    """
+    Use namer database.
+    """
+
     use_requests_cache: bool = True
     """
     Cache http requests
@@ -366,16 +377,6 @@ class NamerConfig:
     dest_dir: Path
     """
     If running in watchdog mode, dir where finalized files get written.
-    """
-
-    use_database: bool = False
-    """
-    Use namer database.
-    """
-
-    database_path: Path
-    """
-    File where stores namer database.
     """
 
     retry_time: str
