@@ -129,6 +129,12 @@ requests_cache_expire_minutes = 10
 # Leave this unset unless you are testing a new tpdb endpoint.
 override_tpdb_address =
 
+# use namer database.
+use_database = False
+
+# file where stores namer database.
+database_path = database.sqlite
+
 [Phash]
 # Calculate and use phashes in search for matches
 search_phash = True
@@ -233,12 +239,6 @@ failed_dir = ./test/failed
 
 # dir where finalized files get written.
 dest_dir = ./test/dest
-
-# use namer database.
-use_database = False
-
-# file where stores namer database.
-database_path = ./test/database.sqlite
 
 # When to retry failed items, default is a random minute during the 3 am hour in your timezone.
 retry_time =

@@ -236,6 +236,8 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "requests_cache_expire_minutes": ("namer", to_int, from_int),
     "override_tpdb_address": ("namer", None, None),
     "plex_hack": ("namer", to_bool, from_bool),
+    "use_database": ("namer", to_bool, from_bool),
+    "database_path": ("namer", to_path, from_path),
     "search_phash": ("Phash", to_bool, from_bool),
     "send_phash": ("Phash", to_bool, from_bool),
     "use_alt_phash_tool": ("Phash", to_bool, from_bool),
@@ -260,8 +262,6 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "work_dir": ("watchdog", to_path, from_path),
     "failed_dir": ("watchdog", to_path, from_path),
     "dest_dir": ("watchdog", to_path, from_path),
-    "use_database": ("watchdog", to_bool, from_bool),
-    "database_path": ("watchdog", to_path, from_path),
     "retry_time": ("watchdog", None, None),
     "web": ("watchdog", to_bool, from_bool),
     "port": ("watchdog", to_int, from_int),
@@ -318,7 +318,7 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
         setattr(namer_config, "retry_time", f"03:{random.randint(0, 59):0>2}")  # noqa: B010
 
     # create a CachedSession objects for request caching.
-    if namer_config.enabled_requests_cache:
+    if namer_config.use_requests_cache:
         cache_file = Path(tempfile.gettempdir()) / "namer_cache"
         sqlite_supported = issubclass(BACKEND_CLASSES['sqlite'], BaseCache)
         backend = 'sqlite' if sqlite_supported else 'filesystem'

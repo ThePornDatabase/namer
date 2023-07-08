@@ -11,8 +11,8 @@ porndb for a match to be considered.  If the log file flag is enabled then a <or
 file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
 match the file.
 """
-import pathlib
 import sys
+from pathlib import Path
 from typing import List
 
 from loguru import logger
@@ -41,7 +41,7 @@ def create_default_config_if_missing():
     """
     Find or create config.
     """
-    config_file = pathlib.Path(".namer.conf")
+    config_file = Path(".namer.conf")
     print("Creating default config file here: {}", config_file)
     print("please edit the token or any other settings whose defaults you want changed.")
 

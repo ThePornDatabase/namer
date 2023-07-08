@@ -231,7 +231,7 @@ class NamerConfig:
     a set of tags that indicates an individual video is vr.
     """
 
-    enabled_requests_cache: bool = True
+    use_requests_cache: bool = True
     """
     Cache http requests
     """
@@ -420,7 +420,7 @@ class NamerConfig:
 
     cache_session: Optional[CachedSession]
     """
-    If enabled_requests_cache is true this http.session will be constructed and used for requests to tpdb.
+    If use_requests_cache is true this http.session will be constructed and used for requests to tpdb.
     """
 
     debug: bool = False
@@ -492,10 +492,12 @@ class NamerConfig:
                 "set_uid": self.set_uid,
                 "set_gid": self.set_gid,
                 "max_performer_names": self.max_performer_names,
-                "enabled_requests_cache": self.enabled_requests_cache,
+                "use_requests_cache": self.use_requests_cache,
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address,
                 "plex_hack": self.plex_hack,
+                "use_database": self.use_database,
+                "database_path": str(self.database_path),
             },
             "Phash": {
                 "search_phash": self.search_phash,
@@ -530,8 +532,6 @@ class NamerConfig:
                 "work_dir": str(self.work_dir),
                 "failed_dir": str(self.failed_dir),
                 "dest_dir": str(self.dest_dir),
-                "use_database": self.use_database,
-                "database_path": str(self.database_path),
                 "retry_time": self.retry_time,
                 "extra_sleep_time": self.extra_sleep_time,
                 "web": self.web,
