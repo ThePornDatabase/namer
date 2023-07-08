@@ -418,7 +418,7 @@ class NamerConfig:
     Add maximal percent from failed log to table in web interface
     """
 
-    cache_session: Optional[CachedSession]
+    cache_session: Optional[CachedSession] = None
     """
     If use_requests_cache is true this http.session will be constructed and used for requests to tpdb.
     """
