@@ -6,16 +6,13 @@ import json
 import os
 import random
 import re
-import tempfile
 import shutil
 from importlib import resources
 from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
 from configupdater import ConfigUpdater
-from datetime import timedelta
 from pathlib import Path
 
 from loguru import logger
-from requests_cache import BACKEND_CLASSES, BaseCache, CachedSession
 
 from namer import database
 from namer.configuration import NamerConfig
@@ -232,6 +229,8 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "vr_tags": ("namer", to_str_list_lower, from_str_list_lower),
     "site_abbreviations": ("namer", to_site_abbreviation, from_site_abbreviation),
     "max_performer_names": ("namer", to_int, from_int),
+    "use_database": ("namer", to_bool, from_bool),
+    "database_path": ("namer", to_path, from_path),
     "use_requests_cache": ("namer", to_bool, from_bool),
     "requests_cache_expire_minutes": ("namer", to_int, from_int),
     "override_tpdb_address": ("namer", None, None),
@@ -314,14 +313,6 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
 
     if not hasattr(namer_config, "retry_time") or namer_config.retry_time is None:
         setattr(namer_config, "retry_time", f"03:{random.randint(0, 59):0>2}")  # noqa: B010
-
-    # create a CachedSession objects for request caching.
-    if namer_config.enabled_requests_cache:
-        cache_file = Path(tempfile.gettempdir()) / "namer_cache"
-        sqlite_supported = issubclass(BACKEND_CLASSES['sqlite'], BaseCache)
-        backend = 'sqlite' if sqlite_supported else 'filesystem'
-        expire_time = timedelta(minutes=namer_config.requests_cache_expire_minutes)
-        namer_config.cache_session = CachedSession(str(cache_file), backend=backend, expire_after=expire_time, ignored_parameters=["Authorization"])
 
     return namer_config
 

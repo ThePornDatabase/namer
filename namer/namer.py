@@ -19,13 +19,14 @@ from namer.comparison_results import ComparisonResult, ComparisonResults, HashTy
 from namer.configuration import ImageDownloadType, NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
+from namer.database import search_file_in_database, write_file_to_database
 from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import FileInfo
 from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash, toggle_collected
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
-from namer.videophash import PerceptualHash
+from namer.videophash import PerceptualHash, return_perceptual_hash
 
 DESCRIPTION = """
     Namer, the porndb local file renamer. It can be a command line tool to rename mp4/mkv/avi/mov/flv files and to embed tags in mp4s,
@@ -279,8 +280,17 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
 
 
 def calculate_phash(file: Path, config: NamerConfig) -> Optional[PerceptualHash]:
+    if config.use_database:
+        search_result = search_file_in_database(file)
+        if search_result:
+            logger.info(f'Getting phash from db for file "{file}"')
+            return return_perceptual_hash(search_result.duration, search_result.phash, search_result.oshash)
+
     vph = config.vph_alt if config.use_alt_phash_tool else config.vph
     phash = vph.get_hashes(file, max_workers=config.max_ffmpeg_workers, use_gpu=config.use_gpu if config.use_gpu else False)
+
+    if phash and config.use_database:
+        write_file_to_database(file, phash)
 
     return phash
 

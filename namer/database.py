@@ -1,3 +1,11 @@
+from pathlib import Path
+from typing import Optional
+
+from pony.orm import commit, db_session
+
+from namer.models import File
+from namer.videophash import PerceptualHash
+
 abbreviations = {
     'wgp': 'WhenGirlsPlay',
     '18og': '18OnlyGirls',
@@ -291,3 +299,26 @@ abbreviations = {
 }
 
 re_cleanup = [r'[0-9]{3,4}x[0-9]{3,4}', r'[0-9]{2}fps', r'[0-9]{3,4}p', r'[0-9]k', r'XXX.*', r'\[WEBDL-.*']
+
+
+def safe_write_file_to_database(working_item: Path, phash: PerceptualHash):
+    if not search_file_in_database(working_item):
+        write_file_to_database(working_item, phash)
+
+
+@db_session
+def write_file_to_database(working_item: Path, phash: PerceptualHash):
+    item_stats = working_item.stat()
+    item_phash = str(phash.phash) if phash else None
+    item_oshash = phash.oshash if phash else None
+
+    File(file_name=working_item.name, file_size=item_stats.st_size, file_time=item_stats.st_mtime, duration=phash.duration, phash=item_phash, oshash=item_oshash)
+    commit()
+
+
+@db_session
+def search_file_in_database(working_item: Path) -> Optional[File]:
+    item_stats = working_item.stat()
+
+    search_result = File.get(file_name=working_item.name, file_size=item_stats.st_size, file_time=item_stats.st_mtime)
+    return search_result
