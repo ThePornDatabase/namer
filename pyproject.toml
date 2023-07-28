@@ -77,7 +77,7 @@ build_all = ["build_deps", "test", "build_namer"]
 generate-setup-file = true
 
 [tool.poetry.scripts]
-namer = 'namer.__main__:main'
+namer = "namer.__main__:main"
 
 [build-system]
 requires = ["poetry-core>=1.6.0"]
