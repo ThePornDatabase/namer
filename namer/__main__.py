@@ -14,7 +14,6 @@ match the file.
 import sys
 from datetime import timedelta
 from pathlib import Path
-from typing import List
 
 from loguru import logger
 from requests_cache import CachedSession
@@ -48,12 +47,14 @@ def create_default_config_if_missing():
     print("please edit the token or any other settings whose defaults you want changed.")
 
 
-def main(arg_list: List[str]):
+def main():
     """
     Call main method in namer.namer or namer.watchdog.
     """
     logger.remove()
     config = default_config()
+
+    arg_list = sys.argv[1:]
 
     # create a CachedSession objects for request caching.
     if config.use_requests_cache:
@@ -83,4 +84,4 @@ def main(arg_list: List[str]):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
