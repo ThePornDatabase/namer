@@ -2,17 +2,12 @@ import contextlib
 import os
 import unittest
 import warnings
-from pathlib import Path
 from platform import system
 
 import requests
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.edge.service import Service as EdgeService
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.safari.service import Service as SafariService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher
@@ -30,15 +25,7 @@ def chrome_factory(debug: bool) -> WebDriver:
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument('--no-sandbox')
 
-    webdriver_path = os.getenv('CHROMEWEBDRIVER', default=None)
-    if webdriver_path:
-        webdriver_path = Path(webdriver_path) / 'chromedriver'
-    else:
-        webdriver_path = ChromeDriverManager().install()
-
-    service = ChromeService(executable_path=str(webdriver_path), log_path=os.devnull)  # type: ignore
-
-    return Chrome(service=service, options=options)
+    return Chrome(options=options)
 
 
 def edge_factory(debug: bool) -> WebDriver:
@@ -48,14 +35,7 @@ def edge_factory(debug: bool) -> WebDriver:
     if system() != 'Windows' and os.geteuid() == 0:
         options.add_argument('--no-sandbox')
 
-    webdriver_path = os.getenv('EDGEWEBDRIVER', default=None)
-    if webdriver_path:
-        webdriver_path = Path(webdriver_path) / 'msedgedriver'
-    else:
-        webdriver_path = EdgeChromiumDriverManager().install()
-
-    service = EdgeService(executable_path=str(webdriver_path), log_path=os.devnull)  # type: ignore
-    webdriver = Edge(service=service, options=options)
+    webdriver = Edge(options=options)
 
     return webdriver
 
