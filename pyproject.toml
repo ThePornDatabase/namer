@@ -34,8 +34,7 @@ pytest = "^7.0.0"
 pytest-cov = "^4.0.0"
 coverage = "^7.0.0"
 flakeheaven = "^3.0.0"
-selenium = "^4.2.0"
-webdriver-manager = "^3.7.0"
+selenium = "^4.6.0"
 assertpy = "^1.1"
 poethepoet = "^0.18.0"
 flake8-simplify = "^0.19.3"
@@ -73,6 +72,12 @@ test_namer = {shell="poetry run pytest --log-cli-level=info --capture=no"}
 test = ["test_format", "test_namer"]
 build_all = ["build_deps", "test", "build_namer"]
 
+[tool.poetry.build]
+generate-setup-file = true
+
+[tool.poetry.scripts]
+namer = "namer.__main__:main"
+
 [build-system]
-requires = ["poetry-core>=1.2.0"]
+requires = ["poetry-core>=1.6.0"]
 build-backend = "poetry.core.masonry.api"
