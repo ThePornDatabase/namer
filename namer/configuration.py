@@ -101,6 +101,8 @@ class NamerConfig:
     * 'name' - the scene name
     * 'site' - the site name, BrazzersExxtra, AllHerLuv, Deeper, etc with spaces removed.
     * 'full_site' - the site name from porndb, unmodified, i.e: Brazzers Exxtra, All Her Luv, etc.
+    * 'parent' - the parent site/studio name from porndb, unmodified, i.e: Brazzers, etc.
+    * 'full_parent' - the parent full site/studio name from porndb, unmodified, i.e: Brazzers, Vixen, etc.
     * 'network' - the network site or studio name, MindGeek, Vixen, etc with spaces removed.
     * 'full_network' - the network full site/studio name from porndb, unmodified, i.e: Mind Geek, Vixen, etc.
     * 'performers' - comma seperated list of female performers
