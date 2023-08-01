@@ -217,7 +217,7 @@ class LookedUpFileInfo:
             "name": self.name,
             "site": self.site.replace(" ", "") if self.site else None,
             "full_site": self.site,
-            "parent": self.parent.replace(" ", "") if self.network else None,
+            "parent": self.parent.replace(" ", "") if self.parent else None,
             "full_parent": self.parent,
             "network": self.network.replace(" ", "") if self.network else None,
             "full_network": self.network,
