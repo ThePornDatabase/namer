@@ -89,6 +89,10 @@ class LookedUpFileInfo:
     """
     Site where this video originated, DorcelClub/Deeper/etc.....
     """
+    parent: Optional[str] = None
+    """
+    Middle level studio, like Vixen for Deeper
+    """
     network: Optional[str] = None
     """
     Top level studio, like Vixen for Deeper.
@@ -213,6 +217,8 @@ class LookedUpFileInfo:
             "name": self.name,
             "site": self.site.replace(" ", "") if self.site else None,
             "full_site": self.site,
+            "parent": self.parent.replace(" ", "") if self.parent else None,
+            "full_parent": self.parent,
             "network": self.network.replace(" ", "") if self.network else None,
             "full_network": self.network,
             "performers": ", ".join(map(lambda p: p.name, filter(lambda p: p.role == "Female", self.performers))) if self.performers else None,

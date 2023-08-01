@@ -383,6 +383,14 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     if hasattr(data, "is_collected"):
         file_info.is_collected = data.is_collected
 
+    if data.site.parent_id and data.site.parent_id != data.site.id:
+        if hasattr(data.site, 'parent'):
+            parent_name = data.site.parent.name
+        else:
+            parent_name = get_site_name(data.site.parent_id, config)
+
+        file_info.parent = parent_name
+
     if data.site.network_id and data.site.network_id != data.site.id:
         if hasattr(data.site, 'network'):
             network_name = data.site.network.name

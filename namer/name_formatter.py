@@ -15,6 +15,8 @@ class PartialFormatter(string.Formatter):
         "name",
         "site",
         "full_site",
+        "parent",
+        "full_parent",
         "network",
         "full_network",
         "performers",
