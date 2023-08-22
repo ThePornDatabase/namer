@@ -141,6 +141,9 @@ override_tpdb_address =
 # Calculate and use phashes in search for matches
 search_phash = True
 
+# Used distant matching for phash search
+use_distant_matching = True
+
 # Should phashes be sent to tpdb if no phash match was found but a name match was.
 # Requires search_phash be true or is ignored.
 send_phash = False
