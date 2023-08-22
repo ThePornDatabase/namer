@@ -142,6 +142,11 @@ def __update_results(results: List[ComparisonResult], name_parts: Optional[FileI
     if not results or not results[0].is_match():
         for match_attempt in __get_metadataapi_net_fileinfo(name_parts, namer_config, skip_date, skip_name, scene_type=scene_type, phash=phash):
             if match_attempt.uuid not in [res.looked_up.uuid for res in results]:
+                if phash and match_attempt.uuid:
+                    logger.debug(f"Performing complete lookup after phash match for uuid: {match_attempt.uuid}")
+                    match_attempt_complete: Optional[LookedUpFileInfo] = get_complete_metadataapi_net_fileinfo(name_parts, match_attempt.uuid, namer_config)
+                    if match_attempt_complete:
+                        match_attempt = match_attempt_complete
                 result: ComparisonResult = __evaluate_match(name_parts, match_attempt, namer_config, phash)
                 results.append(result)
 
