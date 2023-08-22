@@ -312,6 +312,11 @@ class NamerConfig:
     Calculate and use phashes in search for matches
     """
 
+    use_distant_matching: bool = True
+    """
+    Used distant matching for phash search
+    """
+
     send_phash: bool = False
     """
     If match was made via name, or user selection and not phash, send the phash (only functions if search_phash is true)
@@ -504,6 +509,7 @@ class NamerConfig:
             },
             "Phash": {
                 "search_phash": self.search_phash,
+                "use_distant_matching": self.use_distant_matching,
                 "send_phash": self.send_phash,
                 "use_alt_phash_tool": self.use_alt_phash_tool,
                 "max_ffmpeg_workers": self.max_ffmpeg_workers,
