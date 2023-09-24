@@ -57,7 +57,7 @@ def __verify_dir(config: NamerConfig, name: str, other_dirs: List[str]) -> bool:
     verify a config directory exist. return false if verification fails
     """
     path_list = tuple(str(getattr(config, name)) for name in other_dirs if hasattr(config, name))
-    dir_name: Path = getattr(config, name) if hasattr(config, name) else None
+    dir_name: Optional[Path] = getattr(config, name) if hasattr(config, name) else None
     if dir_name and (not dir_name.is_dir() or str(dir_name).startswith(path_list)):
         logger.error(f'Configured directory {name}: {dir_name} is not a directory or not exist or in other watchdog directory')
 

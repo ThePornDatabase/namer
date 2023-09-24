@@ -3,6 +3,7 @@ A file watching service to rename movie files and move them
 to relevant locations after match the file against the porndb.
 """
 
+from contextlib import suppress
 import os
 import shutil
 import sys
@@ -239,11 +240,12 @@ class MovieWatcher:
         self.__worker_thread.start()
 
         # touch all existing movie files.
-        for file in self.__namer_config.watch_dir.rglob("**/*.*"):
-            if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
-                relative_path = str(file.relative_to(self.__namer_config.watch_dir))
-                if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
-                    self.__event_handler.prepare_file_for_processing(file)
+        with suppress(FileNotFoundError):
+            for file in self.__namer_config.watch_dir.rglob("**/*.*"):
+                if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
+                    relative_path = str(file.relative_to(self.__namer_config.watch_dir))
+                    if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
+                        self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
         """

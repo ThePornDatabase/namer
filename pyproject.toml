@@ -40,6 +40,7 @@ poethepoet = "^0.18.0"
 flake8-simplify = "^0.19.3"
 flake8-bugbear = "^23.1.20"
 flake8-pie = "^0.16.0"
+pony-stubs = "^0.5.2"
 
 [tool.flakeheaven]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]

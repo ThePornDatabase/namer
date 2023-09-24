@@ -449,7 +449,7 @@ class NamerConfig:
     """
 
     ffmpeg: FFMpeg = FFMpeg()
-    vph: VideoPerceptualHash = StashVideoPerceptualHash()
+    vph: VideoPerceptualHash = StashVideoPerceptualHash()  # type: ignore
     vph_alt: VideoPerceptualHash = VideoPerceptualHash(ffmpeg)
     re_cleanup: List[Pattern]
 

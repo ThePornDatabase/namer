@@ -104,7 +104,7 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
 
     phash_distance, phash_duration = None, None
     if phash:
-        hashes_distances = []
+        hashes_distances: List[Tuple[int, bool]] = []
 
         if not looked_up.hashes:
             phash_distance = 8 if looked_up.found_via_phash() else None
