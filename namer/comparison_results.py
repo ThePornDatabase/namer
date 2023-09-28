@@ -254,6 +254,12 @@ class LookedUpFileInfo:
         if config.plex_hack:
             name = re.sub(r'[sS]\d{1,3}:?[eE]\d{1,3}', '', name)
 
+        if config.path_cleanup:
+            path = PurePath(name)
+            name = re.sub(r'[- ]+$', '', path.stem) + path.suffix
+            if path.parts:
+                name = str(path.parent / name)
+
         return name
 
     @staticmethod
