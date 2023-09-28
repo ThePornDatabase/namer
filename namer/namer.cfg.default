@@ -123,7 +123,7 @@ max_performer_names = 6
 plex_hack = False
 
 # Cleanup final filename
-path_cleanup: bool = False
+path_cleanup = False
 
 # Path where stores namer system data.
 database_path = ./database
