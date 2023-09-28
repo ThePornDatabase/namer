@@ -43,7 +43,7 @@ flake8-pie = "^0.16.0"
 pony-stubs = "^0.5.2"
 
 [tool.flakeheaven]
-exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init"]
+exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init", "node_modules"]
 format = "colored"
 show_source = false
 max_line_length = 150
