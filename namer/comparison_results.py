@@ -256,7 +256,10 @@ class LookedUpFileInfo:
 
         if config.path_cleanup:
             path = PurePath(name)
-            name = re.sub(r'[- ]+$', '', path.stem) + path.suffix
+            name = path.stem
+            name = re.sub(r'[- ]+$', '', name)
+            name = re.sub(r'-\s+-', '-', name)
+            name = name + path.suffix
             if path.parts:
                 name = str(path.parent / name)
 
