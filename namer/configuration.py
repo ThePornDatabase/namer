@@ -259,6 +259,11 @@ class NamerConfig:
     Should plex movies have S##E## stripped out of movie names (to allow videos to be visible in plex)
     """
 
+    path_cleanup: bool = False
+    """
+    Cleanup final filename
+    """
+
     override_tpdb_address: str = "https://api.metadataapi.net"
     """
     Used only for testing, can override the location of the porn database - usually to point at a locally
@@ -506,6 +511,7 @@ class NamerConfig:
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address,
                 "plex_hack": self.plex_hack,
+                "path_cleanup": self.path_cleanup,
             },
             "Phash": {
                 "search_phash": self.search_phash,
