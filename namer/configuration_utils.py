@@ -223,6 +223,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "set_uid": ("namer", to_int, from_int),
     "set_gid": ("namer", to_int, from_int),
     "trailer_location": ("namer", None, None),
+    "convert_container_to": ("namer", None, None),
     "sites_with_no_date_info": ("namer", to_str_list_lower, from_str_list_lower),
     "movie_data_preferred": ("namer", to_str_list_lower, from_str_list_lower),
     "vr_studios": ("namer", to_str_list_lower, from_str_list_lower),
