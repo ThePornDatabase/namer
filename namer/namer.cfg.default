@@ -122,6 +122,9 @@ max_performer_names = 6
 # When plex hack is set to True, any matches of e##s## are removed from the Scene name.
 plex_hack = False
 
+# Cleanup final filename
+path_cleanup = False
+
 # Path where stores namer system data.
 database_path = ./database
 
