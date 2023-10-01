@@ -118,6 +118,13 @@ class NamerConfig:
     minimum file size to process in MB, ignored if a file is to be processed
     """
 
+    convert_container_to: Optional[str] = None
+    """
+    Without modify the enconding where possible covert container (aka file types) to this
+    desired container type ("mp4", "mkv", "avi", ect), plugged in to the command:
+    "ffmpeg -i input.mkv -c copy output.<type>"
+    """
+
     preserve_duplicates: bool = True
     """
     should duplicate videos be preserved.
@@ -511,6 +518,7 @@ class NamerConfig:
                 "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
                 "override_tpdb_address": self.override_tpdb_address,
                 "plex_hack": self.plex_hack,
+                "convert_container_to": self.convert_container_to,
                 "path_cleanup": self.path_cleanup,
             },
             "Phash": {

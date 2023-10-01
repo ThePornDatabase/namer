@@ -20,7 +20,7 @@ from namer.configuration import ImageDownloadType, NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.database import search_file_in_database, write_file_to_database
-from namer.ffmpeg import FFProbeResults
+from namer.ffmpeg import FFProbeResults, FFMpeg
 from namer.fileinfo import FileInfo
 from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash, toggle_collected
 from namer.moviexml import parse_movie_xml_file, write_nfo
@@ -156,6 +156,13 @@ def process_file(command: Command) -> Optional[Command]:
         phash: Optional[PerceptualHash] = None
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: ComparisonResults = ComparisonResults([])
+        # convert container type if requested.
+        if command.config.convert_container_to and command.target_movie_file.suffix != command.config.convert_container_to:
+            new_loc = command.target_movie_file.parent.joinpath(Path(command.target_movie_file.stem + "." + command.config.convert_container_to))
+            if FFMpeg().convert(command.target_movie_file, new_loc):
+                command.target_movie_file = new_loc
+                if (command.parsed_file):
+                    command.parsed_file.extension = command.config.convert_container_to
         # Match to nfo files, if enabled and found.
         if command.write_from_nfos:
             new_metadata = get_local_metadata_if_requested(command.target_movie_file)

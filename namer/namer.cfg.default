@@ -140,6 +140,11 @@ requests_cache_expire_minutes = 10
 # Leave this unset unless you are testing a new tpdb endpoint.
 override_tpdb_address =
 
+# Without modify the enconding where possible covert container (aka file types) to this
+# desired container type ("mp4", "mkv", "avi", ect), plugged in to the command:
+# "ffmpeg -i input.mkv -c copy output.<type>"
+convert_container_to = 
+
 [Phash]
 # Calculate and use phashes in search for matches
 search_phash = True

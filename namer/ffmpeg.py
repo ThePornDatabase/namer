@@ -256,33 +256,34 @@ class FFMpeg:
         return True
 
     def attempt_fix_corrupt(self, mp4_file: Path) -> bool:
+        random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        temp_filename = f'{input.stem}_{random}' + input.suffix
+        work_file = input.parent / temp_filename
+        success = self.convert(mp4_file, work_file)
+        if success:
+            shutil.move(work_file, mp4_file)
+        return success
+
+    def convert(self, input: Path, output: Path) -> bool:
         """
         Attempt to fix corrupt mp4 files.
         """
-        random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-        temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
-        work_file = mp4_file.parent / temp_filename
-
-        logger.info("Attempt to fix damaged mp4 file: {}", mp4_file)
+        logger.info("Attempt to fix damaged mp4 file: {}", input)
         process = (
             ffmpeg
-            .input(mp4_file)
-            .output(str(work_file), c='copy')
+            .input(input)
+            .output(str(output), c='copy')
             .run_async(quiet=True, cmd=self.__ffmpeg_cmd)
         )
-
         stdout, stderr = process.communicate()
         stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
         success = process.returncode == 0
         if not success:
-            logger.warning("Could not fix mp4 files {}", mp4_file)
+            logger.warning("Could not convert/clean {} to {}", input, output)
             if stderr:
                 logger.error(stderr)
         else:
-            logger.warning("Return code: {}", process.returncode)
-            mp4_file.unlink()
-            shutil.move(work_file, mp4_file)
-
+            input.unlink()
         return success
 
     def extract_screenshot(self, file: Path, screenshot_time: float, screenshot_width: int = -1, use_gpu: bool = False) -> Image.Image:

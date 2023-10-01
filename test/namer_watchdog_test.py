@@ -140,6 +140,25 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
         logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
+    def test_event_listener_success_conversion(self):
+        """
+        Test the handle function works for a directory.
+        """
+        config = sample_config()
+        config.prefer_dir_name_if_available = True
+        config.min_file_size = 0
+        config.write_namer_log = True
+        config.min_file_size = 0
+        config.convert_container_to = "mkv"
+        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+            targets = [new_ea(config.watch_dir)]
+            wait_until_processed(watcher)
+            self.assertFalse(targets[0].get_file().exists())
+            self.assertEqual(len(list(config.work_dir.iterdir())), 0)
+            output_file = config.dest_dir / "Evil Angel" / "Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mkv"
+            self.assertTrue(output_file.exists())
+        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
+
     def test_handler_deeply_nested_success_no_dirname(self):
         """
         Test the handle function works for a directory.
