@@ -176,12 +176,12 @@ use_gpu = False
 write_nfo = False
 
 # Should metadata fetched from the porn db be written in to the metadata of the mp4.
-enabled_tagging = True
+enabled_tagging = False
 
 # Should the poster fetched from the porn db be written in to the metadata of the mp4.
 # This poster will be displayed in Plex, Jellyfin and Apple TV app.
 # Controls downloading of images for .nfo and mp4 tagging.
-enabled_poster = True
+enabled_poster = False
 
 # List of which images would be downloaded options are: poster,background,performer
 download_type = poster,background,performer
