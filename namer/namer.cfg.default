@@ -143,7 +143,7 @@ override_tpdb_address =
 # Without modify the enconding where possible covert container (aka file types) to this
 # desired container type ("mp4", "mkv", "avi", ect), plugged in to the command:
 # "ffmpeg -i input.mkv -c copy output.<type>"
-convert_container_to = 
+convert_container_to =
 
 [Phash]
 # Calculate and use phashes in search for matches
@@ -176,12 +176,12 @@ use_gpu = False
 write_nfo = False
 
 # Should metadata fetched from the porn db be written in to the metadata of the mp4.
-enabled_tagging = True
+enabled_tagging = False
 
 # Should the poster fetched from the porn db be written in to the metadata of the mp4.
 # This poster will be displayed in Plex, Jellyfin and Apple TV app.
 # Controls downloading of images for .nfo and mp4 tagging.
-enabled_poster = True
+enabled_poster = False
 
 # List of which images would be downloaded options are: poster,background,performer
 download_type = poster,background,performer
