@@ -78,6 +78,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test renaming and writing a movie's metadata from a nfo file.
         """
         config = sample_config()
+        config.enabled_tagging = True
+        config.enabled_poster = True
         config.write_nfo = False
         config.min_file_size = 0
         with tempfile.TemporaryDirectory(prefix="test") as tmpdir:

@@ -277,7 +277,7 @@ class NamerConfig:
     running server that responds like tpdb to predefined queries.
     """
 
-    enabled_tagging: bool = True
+    enabled_tagging: bool = False
     """
     Currently metadata pulled from the porndb can be added to mp4 files.
     This metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).
@@ -288,7 +288,7 @@ class NamerConfig:
     No flags in this section will be used if this is not set to true.
     """
 
-    enabled_poster: bool = True
+    enabled_poster: bool = False
     """
     Should the poster fetched from the porn db be written in to the metadata of the mp4.
     This poster will be displayed in Plex, Jellyfin and Apple TV app.

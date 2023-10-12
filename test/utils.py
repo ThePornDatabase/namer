@@ -223,6 +223,8 @@ def environment(config: NamerConfig = None):  # type: ignore
     with tempfile.TemporaryDirectory(prefix="test") as tmpdir, FakeTPDB() as fakeTpdb:
         tempdir = Path(tmpdir)
 
+        config.enabled_tagging = True
+        config.enabled_poster = True
         config.override_tpdb_address = fakeTpdb.get_url()
         config.watch_dir = tempdir / "watch"
         config.watch_dir.mkdir(parents=True, exist_ok=True)
