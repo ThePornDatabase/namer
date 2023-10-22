@@ -238,7 +238,6 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "plex_hack": ("namer", to_bool, from_bool),
     "path_cleanup": ("namer", to_bool, from_bool),
     "search_phash": ("Phash", to_bool, from_bool),
-    "use_distant_matching": ("Phash", to_bool, from_bool),
     "send_phash": ("Phash", to_bool, from_bool),
     "use_alt_phash_tool": ("Phash", to_bool, from_bool),
     "max_ffmpeg_workers": ("Phash", to_int, from_int),

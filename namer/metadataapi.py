@@ -429,9 +429,7 @@ def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_d
             query = 'jav'
 
         if phash:
-            query += f'?hash={phash.phash}'
-            if namer_config.use_distant_matching:
-                query += f'&hashType={HashType.PHASH.value}'
+            query += f'?hash={phash.phash}&hashType={HashType.PHASH.value}'
         elif site or release_date or name:
             query += "?parse="
 
