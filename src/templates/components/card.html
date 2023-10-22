@@ -1,8 +1,8 @@
 <div class="card h-100" style="width:11.5rem">
     {% if file['tags_count'] %}
-        <span class="position-absolute start-100 translate-middle badge rounded-pill bg-secondary">{{ file['tags_count'] }}</span>
+        <span class="position-absolute start-100 translate-middle badge rounded-pill text-bg-secondary">Tags: {{ file['tags_count'] }}</span>
     {% endif %}
-    <img class="card-img-top" src="{{ file['poster'] }}" alt="{{ file['title'] }}">
+    <img class="card-img-top" style="height: calc(11.5rem / 2 * 3)" src="{{ file['poster'] }}" alt="{{ file['title'] }}">
     <div class="card-header text-center p-0">{{ file['type'] }}</div>
     <div class="card-body">
         <h5 class="card-title">{{ file['title'] }}</h5>

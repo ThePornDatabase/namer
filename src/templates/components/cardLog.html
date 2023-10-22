@@ -4,8 +4,18 @@
     {% set match = file['name_match']|float|round(2) ~ '%' %}
 {% endif %}
 <div class="card h-100" style="width:11.5rem">
-    <span class="position-absolute start-100 translate-middle badge rounded-pill bg-secondary">{{ match }}</span>
-    <img class="card-img-top" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
+    {% if file['phash_distance'] is not none %}
+        {% if file['phash_distance'] <= 2 %}
+            {% set phash_color = 'text-bg-success' %}
+        {% elif file['phash_distance'] <= 8 %}
+            {% set phash_color = 'text-bg-warning' %}
+        {% else %}
+            {% set phash_color = 'text-bg-danger' %}
+        {% endif %}
+        <span class="position-absolute start-50 translate-middle badge rounded-pill {{ phash_color }}">Phash distance: {{ file['phash_distance'] }}</span>
+    {% endif %}
+    <span class="position-absolute start-100 translate-middle badge rounded-pill text-bg-secondary">{{ match }}</span>
+    <img class="card-img-top" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" style="height: calc(11.5rem / 2 * 3)" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
     <div class="card-header text-center p-0">{{ file['looked_up']['type'] }}</div>
     <div class="card-body">
         <h5 class="card-title">{{ file['looked_up']['name'] }}</h5>
