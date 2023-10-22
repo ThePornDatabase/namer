@@ -248,7 +248,7 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
     if config.trailer_location and new_metadata:
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
-    if config.write_nfo and new_metadata:
+    if new_metadata:
         poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url and config.enabled_poster and ImageDownloadType.POSTER in config.download_type else None
         background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url and config.enabled_poster and ImageDownloadType.BACKGROUND in config.download_type else None
         for performer in new_metadata.performers:
@@ -257,7 +257,8 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
                 if performer_image:
                     performer.image = performer_image
 
-        write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
+        if config.write_nfo:
+            write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
 
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_override: Path):
