@@ -6,8 +6,8 @@
 {% set card_width = '11.5rem' %}
 {% set card_img_height = card_width + ' / 2 * 3' %}
 <div class="card h-100" style="width:{{ card_width }}">
-    <div class="position-absolute start-100">
-        <span class="translate-middle badge rounded-pill text-bg-secondary">{{ match }}</span>
+    <div class="position-absolute top-0 start-100 translate-middle-x">
+        <span class="translate-middle-y badge rounded-pill text-bg-secondary">{{ match }}</span>
         {% if file['phash_distance'] is not none %}
             {% if file['phash_distance'] <= 2 %}
                 {% set phash_color = 'text-bg-success' %}
@@ -16,7 +16,7 @@
             {% else %}
                 {% set phash_color = 'text-bg-danger' %}
             {% endif %}
-            <span class="translate-middle badge rounded-pill {{ phash_color }}">Phash: {{ file['phash_distance'] }}</span>
+            <span class="translate-middle-y badge rounded-pill {{ phash_color }}">Phash: {{ file['phash_distance'] }}</span>
         {% endif %}
     </div>
     <img class="card-img-top" style="height: calc({{ card_img_height }})" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
