@@ -10,6 +10,7 @@
 } %}
 {% set performers_limit = 5 %}
 
+{% set file=file['looked_up'] %}
 {% if file['performers'] %}
     {% set scene_performers = file['performers'][:performers_limit] %}
     {% set other_performer = file['performers'][performers_limit:] %}

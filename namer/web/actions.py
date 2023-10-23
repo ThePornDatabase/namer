@@ -18,8 +18,10 @@ from werkzeug.routing import Rule
 from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
-from namer.metadataapi import __build_url, __request_response_json_object, __metadataapi_response_to_data  # type: ignore
+from namer.fileinfo import parse_file_name
+from namer.metadataapi import __build_url, __evaluate_match, __request_response_json_object, __metadataapi_response_to_data
 from namer.namer import calculate_phash
+from namer.videophash import PerceptualHash
 
 
 class SearchType(str, Enum):
@@ -79,27 +81,36 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     return res
 
 
-def metadataapi_responses_to_webui_response(responses: Dict, config: NamerConfig) -> List:
+def metadataapi_responses_to_webui_response(responses: Dict, config: NamerConfig, file: str, phash: Optional[PerceptualHash] = None) -> List:
+    file = Path(file)
+    file_name = file.stem
+    if not file.suffix and config.target_extensions:
+        file_name += '.' + config.target_extensions[0]
+
     file_infos = []
     for url, response in responses.items():
         if response and response.strip() != '':
             json_obj = json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
             formatted = json.dumps(json.loads(response), indent=4, sort_keys=True)
-            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, None, config))
+            name_parts = parse_file_name(file_name, config)
+            file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, name_parts, config))
 
     files = []
     for scene_data in file_infos:
-        scene = {
-            'id': scene_data.uuid,
-            'type': scene_data.type.value,
-            'title': scene_data.name,
-            'date': scene_data.date,
-            'poster': scene_data.poster_url,
-            'site': scene_data.site,
-            'network': scene_data.network,
-            'tags_count': len(scene_data.tags),
-            'performers': scene_data.performers,
-        }
+        scene = __evaluate_match(scene_data.original_parsed_filename, scene_data, config, phash).as_dict()
+        scene.update({
+            'name_parts': scene_data.original_parsed_filename,
+            'looked_up': {
+                'uuid': scene_data.uuid,
+                'type': scene_data.type.value,
+                'name': scene_data.name,
+                'date': scene_data.date,
+                'poster_url': scene_data.poster_url,
+                'site': scene_data.site,
+                'network': scene_data.network,
+                'performers': scene_data.performers,
+            },
+        })
         files.append(scene)
 
     return files
@@ -123,7 +134,7 @@ def get_search_results(query: str, search_type: SearchType, file: str, config: N
         url = __build_url(config, name=query, page=page, scene_type=SceneType.JAV)
         responses[url] = __request_response_json_object(url, config)
 
-    files = metadataapi_responses_to_webui_response(responses, config)
+    files = metadataapi_responses_to_webui_response(responses, config, query)
 
     res = {
         'file': file,
@@ -157,7 +168,7 @@ def get_phash_results(file: str, search_type: SearchType, config: NamerConfig) -
         url = __build_url(config, phash=phash, scene_type=SceneType.JAV)
         responses[url] = __request_response_json_object(url, config)
 
-    files = metadataapi_responses_to_webui_response(responses, config)
+    files = metadataapi_responses_to_webui_response(responses, config, file, phash)
 
     res = {
         'file': file,
