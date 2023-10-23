@@ -353,6 +353,16 @@ class ComparisonResult:
         """
         return bool(self.site_match and self.date_match and self.name_match and self.name_match >= target) and self.is_phash_match(target_distance)
 
+    def as_dict(self) -> dict:
+        return {
+            'name': self.name,
+            'name_match': self.name_match,
+            'site_match': self.site_match,
+            'date_match': self.date_match,
+            'phash_distance': self.phash_distance,
+            'phash_duration': self.phash_duration,
+        }
+
 
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ComparisonResults:

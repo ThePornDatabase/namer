@@ -1,25 +1,42 @@
-<div class="card h-100" style="width:11.5rem">
-    {% if file['tags_count'] %}
-        <span class="position-absolute start-100 translate-middle badge rounded-pill text-bg-secondary">Tags: {{ file['tags_count'] }}</span>
-    {% endif %}
-    <img class="card-img-top" style="height: calc(11.5rem / 2 * 3)" src="{{ file['poster'] }}" alt="{{ file['title'] }}">
-    <div class="card-header text-center p-0">{{ file['type'] }}</div>
+{% if file['phash_distance'] is not none and file['phash_distance'] <= 8 %}
+    {% set match = (100 - (file['phash_distance'] * 2.5)|float|round(2)) ~ '%' %}
+{% else %}
+    {% set match = file['name_match']|float|round(2) ~ '%' %}
+{% endif %}
+{% set card_width = '11.5rem' %}
+{% set card_img_height = card_width + ' / 2 * 3' %}
+<div class="card h-100" style="width:{{ card_width }}">
+    <div class="position-absolute top-0 start-100 translate-middle-x">
+        <span class="translate-middle-y badge rounded-pill text-bg-secondary">{{ match }}</span>
+        {% if file['phash_distance'] is not none %}
+            {% if file['phash_distance'] <= 2 %}
+                {% set phash_color = 'text-bg-success' %}
+            {% elif file['phash_distance'] <= 8 %}
+                {% set phash_color = 'text-bg-warning' %}
+            {% else %}
+                {% set phash_color = 'text-bg-danger' %}
+            {% endif %}
+            <span class="translate-middle-y badge rounded-pill {{ phash_color }}">Phash: {{ file['phash_distance'] }}</span>
+        {% endif %}
+    </div>
+    <img class="card-img-top" style="height: calc({{ card_img_height }})" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
+    <div class="card-header text-center p-0">{{ file['looked_up']['type'] }}</div>
     <div class="card-body">
-        <h5 class="card-title">{{ file['title'] }}</h5>
-        {% if file['network'] %}
-            <p class="card-text mb-1">{{ file['site']  }}</p>
-            <p class="card-text">{{ file['network'] }}</p>
+        <h5 class="card-title">{{ file['looked_up']['name'] }}</h5>
+        {% if file['looked_up']['network'] %}
+            <p class="card-text mb-1">{{ file['looked_up']['site'] }}</p>
+            <p class="card-text">{{ file['looked_up']['network'] }}</p>
         {% else %}
-            <p class="card-text">{{ file['site']  }}</p>
+            <p class="card-text">{{ file['looked_up']['site'] }}</p>
         {% endif %}
         <p class="card-text">
-            <small class="text-muted">{{ file['date'] }}</small>
+            <small class="text-muted">{{ file['looked_up']['date'] }}</small>
         </p>
         {% include 'components/performersBadges.html' %}
     </div>
     <div class="card-footer">
-        <a href="https://metadataapi.net/{{ file['id'] }}" class="btn btn-secondary" target="_blank">Show</a>
-        <button class="btn btn-primary float-end rename" data-bs-dismiss="modal" data-scene-id="{{ file['id'] }}" data-file="{{ data['file'] }}">
+        <a href="https://metadataapi.net/{{ file['looked_up']['uuid'] }}" class="btn btn-secondary" target="_blank">Show</a>
+        <button class="btn btn-primary float-end rename" data-bs-dismiss="modal" data-scene-id="{{ file['looked_up']['uuid'] }}" data-file="{{ data['file'] }}">
             Select
         </button>
     </div>
