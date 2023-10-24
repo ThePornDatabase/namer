@@ -19,7 +19,7 @@
             <span class="translate-middle-y badge rounded-pill {{ phash_color }}">Phash: {{ file['phash_distance'] }}</span>
         {% endif %}
     </div>
-    <img class="card-img-top" style="height: calc({{ card_img_height }})" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
+    <img class="card-img-top" style="height:calc({{ card_img_height }})" src="{{ file['looked_up']['poster_url'] }}" alt="{{ file['looked_up']['name'] }}" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="{% include 'render/logDetails.html' %}">
     <div class="card-header text-center p-0">{{ file['looked_up']['type'] }}</div>
     <div class="card-body">
         <h5 class="card-title">{{ file['looked_up']['name'] }}</h5>
