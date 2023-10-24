@@ -186,7 +186,7 @@ def delete_file(file_name_str: str, config: NamerConfig) -> bool:
     if not is_acceptable_file(file_name, config) or not config.allow_delete_files:
         return False
 
-    if config.del_other_files:
+    if config.del_other_files and file_name.is_dir():
         target_name = config.failed_dir / Path(file_name_str).parts[0]
         shutil.rmtree(target_name)
     else:
