@@ -1,6 +1,8 @@
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap-icons/font/bootstrap-icons.css';
 @import '~datatables.net-bs5/css/dataTables.bootstrap5.css';
+@import '~datatables.net-colreorder-bs5/css/colReorder.bootstrap5.css';
+@import '~datatables.net-buttons-bs5/css/buttons.bootstrap5.css';
 
 $gender-colours: (
   'default': $gray-600,

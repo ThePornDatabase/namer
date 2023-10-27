@@ -433,6 +433,11 @@ class NamerConfig:
     Add maximal percent from failed log to table in web interface
     """
 
+    add_complete_column: bool = False
+    """
+    Add creation date from failed log to table in web interface
+    """
+
     cache_session: Optional[CachedSession] = None
     """
     If use_requests_cache is true this http.session will be constructed and used for requests to tpdb.
@@ -557,6 +562,7 @@ class NamerConfig:
                 "web_root": self.web_root,
                 "allow_delete_files": self.allow_delete_files,
                 "add_max_percent_column": self.add_max_percent_column,
+                "add_complete_column": self.add_complete_column,
                 "debug": self.debug,
                 "manual_mode": self.manual_mode,
                 "diagnose_errors": self.diagnose_errors,

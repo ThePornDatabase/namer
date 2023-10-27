@@ -271,6 +271,9 @@ allow_delete_files = False
 # Add maximal percent from failed log to table in web interface
 add_max_percent_column = False
 
+# Add creation date from failed log to table in web interface
+add_complete_column = False
+
 # Set logger level to debug
 debug = False
 

@@ -2,12 +2,15 @@
 {% block title %}Failed files{% endblock %}
 {% set active_page = "failed" %}
 {% block content %}
-    <h5 class="card-title d-flex justify-content-between align-items-center">
-        Unmatched Files
-        <button id="refreshFiles" type="button" class="btn btn-secondary ms-1" data-target="files" title="Refresh">
-            <i class="bi bi-arrow-clockwise"></i>
-        </button>
-    </h5>
+    <div class="row mb-1">
+        <h5 class="card-title col">Unmatched Files</h5>
+        <div class="col">
+            <button id="refreshFiles" type="button" class="btn btn-secondary float-end ms-1" data-target="files" title="Refresh">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <div id="tableButtons" class="float-end ms-1"></div>
+        </div>
+    </div>
     <div class="card-text">
         <div id="filesResult">
             {% include 'render/failedFiles.html' %}

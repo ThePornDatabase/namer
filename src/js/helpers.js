@@ -9,7 +9,7 @@ export class Helpers {
     return '<div class="progress"><div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>'
   }
 
-  static refreshFiles (selector, target = 'files') {
+  static refreshFiles (selector, tableButtons, target = 'files') {
     selector.html(Helpers.getProgressBar())
 
     let url
@@ -23,7 +23,7 @@ export class Helpers {
 
     Helpers.request(`./api/v1/${url}`, null, function (data) {
       Helpers.render('failedFiles', data, selector, function (selector) {
-        Helpers.setTableSort(selector)
+        Helpers.setTableSort(selector, tableButtons)
       })
     })
   }
@@ -35,7 +35,7 @@ export class Helpers {
       .draw(paging)
   }
 
-  static setTableSort (selector) {
+  static setTableSort (selector, tableButtons) {
     Helpers.#table = $(selector).children('table').DataTable({
       stateSave: true,
       stateSaveCallback: function (settings, data) {
@@ -43,8 +43,22 @@ export class Helpers {
       },
       stateLoadCallback: function (settings) {
         return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
-      }
+      },
+      colReorder: {
+        fixedColumnsRight: 1
+      },
+      buttons: [
+        {
+          extend: 'colvis',
+          columns: ':not(.noVis)',
+          text: '<i class="bi bi-table"></i>',
+          titleAttr: 'Column Visibility'
+        }
+      ]
     })
+
+    tableButtons.empty()
+    Helpers.#table.buttons().container().appendTo(tableButtons)
   }
 
   static render (template, res, selector, afterRender = null) {

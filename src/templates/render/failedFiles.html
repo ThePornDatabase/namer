@@ -5,11 +5,14 @@
             <th scope="col">File Name</th>
             <th scope="col">Extension</th>
             <th scope="col">Date</th>
+            {% if config.add_complete_column and active_page == 'failed' %}
+                <th scope="col">Completed</th>
+            {% endif %}
             <th scope="col">Size</th>
             {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
                 <th scope="col">Percentage</th>
             {% endif %}
-            <th scope="col" data-orderable="false"></th>
+            <th scope="col" data-orderable="false" class="noVis"></th>
         </tr>
         </thead>
         <tbody>
@@ -17,7 +20,10 @@
             <tr>
                 <td class="col">{{ file['name'] }}</td>
                 <td class="col-1">{{ file['ext'] }}</td>
-                <td class="col-2" data-order="{{ file['update_time'] }}">{{ file['update_time']|timestamp_to_datetime|strftime('%d-%m-%Y %H:%M') }}</td>
+                <td class="col-2" data-order="{{ file['update_time'] }}">{{ file['update_time']|timestamp_to_datetime|strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                {% if config.add_complete_column and active_page == 'failed' %}
+                    <td class="col-2" data-order="{{ file['log_time'] }}">{{ file['log_time']|timestamp_to_datetime|strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                {% endif %}
                 <td class="col-1" data-order="{{ file['size'] }}">{{ file['size']|filesizeformat(binary=True) }}</td>
                 {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
                     <td class="col-1" data-order="{{ file['percentage'] }}">{{ '%.1f'|format(file['percentage']) }}%</td>
