@@ -53,14 +53,11 @@ export class Helpers {
       buttons: [
         {
           extend: 'colvis',
-          columns: ':not(.noVis)'
+          columns: ':not(.noVis)',
+          text: '<i class="bi bi-table"></i>',
+          titleAttr: 'Column Visibility'
         }
-      ],
-      language: {
-        buttons: {
-          colvis: '<i class="bi bi-table"></i>'
-        }
-      }
+      ]
     })
 
     Helpers.#table.buttons().container().appendTo(buttons)
