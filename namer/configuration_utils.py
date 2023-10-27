@@ -274,6 +274,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     "web_root": ("watchdog", None, None),
     "allow_delete_files": ("watchdog", to_bool, from_bool),
     "add_max_percent_column": ("watchdog", to_bool, from_bool),
+    "add_complete_column": ("watchdog", to_bool, from_bool),
     "debug": ("watchdog", to_bool, from_bool),
     "manual_mode": ("watchdog", to_bool, from_bool),
     "diagnose_errors": ("watchdog", to_bool, from_bool),
