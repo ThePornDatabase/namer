@@ -47,7 +47,9 @@ export class Helpers {
       stateLoadCallback: function (settings) {
         return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
       },
-      colReorder: true,
+      colReorder: {
+        fixedColumnsRight: 1
+      },
       buttons: [
         {
           extend: 'colvis',
