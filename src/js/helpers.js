@@ -36,6 +36,9 @@ export class Helpers {
   }
 
   static setTableSort (selector) {
+    const buttons = $('#table_buttons')
+    buttons.empty()
+
     Helpers.#table = $(selector).children('table').DataTable({
       stateSave: true,
       stateSaveCallback: function (settings, data) {
@@ -43,8 +46,22 @@ export class Helpers {
       },
       stateLoadCallback: function (settings) {
         return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+      },
+      colReorder: true,
+      buttons: [
+        {
+          extend: 'colvis',
+          columns: ':not(.noVis)'
+        }
+      ],
+      language: {
+        buttons: {
+          colvis: '<i class="bi bi-table"></i>'
+        }
       }
     })
+
+    Helpers.#table.buttons().container().appendTo(buttons)
   }
 
   static render (template, res, selector, afterRender = null) {

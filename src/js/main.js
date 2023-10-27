@@ -4,6 +4,9 @@ import { Popover, Modal } from 'bootstrap'
 
 import $ from 'jquery'
 import 'datatables.net-bs5'
+import 'datatables.net-colreorder-bs5'
+import 'datatables.net-buttons/js/buttons.colVis'
+import 'datatables.net-buttons-bs5'
 import { escape } from 'lodash'
 
 import { Helpers } from './helpers'
