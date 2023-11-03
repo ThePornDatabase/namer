@@ -2,7 +2,7 @@
     <table id="{{ active_page }}" class="table table-sm text-start align-middle w-100">
         <thead>
         <tr>
-            <th scope="col">File Name</th>
+            <th scope="col" data-priority="-1">File Name</th>
             <th scope="col">Extension</th>
             <th scope="col">Date</th>
             {% if config.add_complete_column and active_page == 'failed' %}
@@ -12,7 +12,7 @@
             {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
                 <th scope="col">Percentage</th>
             {% endif %}
-            <th scope="col" data-orderable="false" class="noVis"></th>
+            <th scope="col" data-orderable="false" data-priority="-2" class="noVis"></th>
         </tr>
         </thead>
         <tbody>

@@ -44,6 +44,8 @@ export class Helpers {
       stateLoadCallback: function (settings) {
         return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
       },
+      responsive: true,
+      fixedHeader: true,
       colReorder: {
         fixedColumnsRight: 1
       },
