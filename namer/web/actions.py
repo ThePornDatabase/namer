@@ -108,19 +108,21 @@ def metadataapi_responses_to_webui_response(responses: Dict, config: NamerConfig
     files = []
     for scene_data in file_infos:
         scene = __evaluate_match(scene_data.original_parsed_filename, scene_data, config, phash).as_dict()
-        scene.update({
-            'name_parts': scene_data.original_parsed_filename,
-            'looked_up': {
-                'uuid': scene_data.uuid,
-                'type': scene_data.type.value,
-                'name': scene_data.name,
-                'date': scene_data.date,
-                'poster_url': scene_data.poster_url,
-                'site': scene_data.site,
-                'network': scene_data.network,
-                'performers': scene_data.performers,
-            },
-        })
+        scene.update(
+            {
+                'name_parts': scene_data.original_parsed_filename,
+                'looked_up': {
+                    'uuid': scene_data.uuid,
+                    'type': scene_data.type.value,
+                    'name': scene_data.name,
+                    'date': scene_data.date,
+                    'poster_url': scene_data.poster_url,
+                    'site': scene_data.site,
+                    'network': scene_data.network,
+                    'performers': scene_data.performers,
+                },
+            }
+        )
         files.append(scene)
 
     return files

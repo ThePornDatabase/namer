@@ -29,7 +29,7 @@ def get_routes(responses: Dict[str, Any]) -> Blueprint:
             file: Path = output
             value = bytearray(file.read_bytes())
         if isinstance(output, str):
-            value = bytearray(output, "utf-8")
+            value = bytearray(output, 'utf-8')
 
         if value:
             response = make_response(value, 200)
@@ -47,7 +47,7 @@ class ParrotWebServer(GenericWebServer):
 
     def __init__(self):
         self.__responses = {}
-        super().__init__("127.0.0.1", port=0, webroot="/", blueprints=[get_routes(self.__responses)], static_path=None)
+        super().__init__('127.0.0.1', port=0, webroot='/', blueprints=[get_routes(self.__responses)], static_path=None)
 
     def __enter__(self):
         self.__background_thread = Thread(target=self.start)
@@ -59,7 +59,7 @@ class ParrotWebServer(GenericWebServer):
             tries += 1
 
         if super().get_effective_port is None:
-            raise RuntimeError("application did not get assigned a port within 4 seconds.")
+            raise RuntimeError('application did not get assigned a port within 4 seconds.')
 
         return self
 

@@ -29,7 +29,6 @@ class ImageDownloadType(str, Enum):
 # noinspection PyDataclass
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class NamerConfig:
-
     # pylint: disable=too-many-instance-attributes
 
     config_file: Path
@@ -48,7 +47,7 @@ class NamerConfig:
     sign up here: https://metadataapi.net/
     """
 
-    name_parser: str = "{_site}{_optional_date}{_sep}{_ts}{_name}{_dot}{_ext}"
+    name_parser: str = '{_site}{_optional_date}{_sep}{_ts}{_name}{_dot}{_ext}'
     """
     This config may be a regex you provide, or a set of token used to build a regex.
 
@@ -74,7 +73,7 @@ class NamerConfig:
     dates will not be used in matching, possibly allowing false positives.
     """
 
-    inplace_name: str = "{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}"
+    inplace_name: str = '{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}'
     """
     How to write output file name.  When namer.py is run this is applied in place
     (next to the file to be processed).
@@ -271,7 +270,7 @@ class NamerConfig:
     Cleanup final filename
     """
 
-    override_tpdb_address: str = "https://api.metadataapi.net"
+    override_tpdb_address: str = 'https://api.metadataapi.net'
     """
     Used only for testing, can override the location of the porn database - usually to point at a locally
     running server that responds like tpdb to predefined queries.
@@ -306,7 +305,7 @@ class NamerConfig:
     not recommend for use.  If this is false a single default genre will be used.
     """
 
-    default_genre: str = "Adult"
+    default_genre: str = 'Adult'
     """
     If genre's are not copied this is the default genre added to files.
     Default value is adult.
@@ -354,12 +353,12 @@ class NamerConfig:
     If there is a phash match, require any name match be in the top N results
     """
 
-    ignored_dir_regex: Pattern = re.compile(r".*_UNPACK_.*", re.IGNORECASE)
+    ignored_dir_regex: Pattern = re.compile(r'.*_UNPACK_.*', re.IGNORECASE)
     """
     If a file found in the watch dir matches this regex it will be ignored, useful for some file processes.
     """
 
-    new_relative_path_name: str = "{full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}"
+    new_relative_path_name: str = '{full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}'
     """
     like inplace_name above used for local call for renaming, this instead is used to move a file/dir to a location relative
     to the dest_dir below on successful matching/tagging.
@@ -413,12 +412,12 @@ class NamerConfig:
     Web server port
     """
 
-    host: str = "0.0.0.0"
+    host: str = '0.0.0.0'
     """
     Web server host
     """
 
-    web_root: Optional[str] = ""
+    web_root: Optional[str] = ''
     """
     webroot (root url to place pages), useful for reverse proxies
     """
@@ -466,20 +465,20 @@ class NamerConfig:
     re_cleanup: List[Pattern]
 
     def __init__(self):
-        if sys.platform != "win32":
+        if sys.platform != 'win32':
             self.set_uid = os.getuid()
             self.set_gid = os.getgid()
 
-        self.re_cleanup = [re.compile(fr'\b{regex}\b', re.IGNORECASE) for regex in database.re_cleanup]
+        self.re_cleanup = [re.compile(rf'\b{regex}\b', re.IGNORECASE) for regex in database.re_cleanup]
 
     def __str__(self):
         config = self.to_dict()
 
         output = []
         for key in config:
-            output.append(f"{key}:")
+            output.append(f'{key}:')
             for value in config[key]:
-                output.append(f"  {value}: {config[key][value]}")
+                output.append(f'  {value}: {config[key][value]}')
 
         return '\n'.join(output)
 
@@ -488,85 +487,85 @@ class NamerConfig:
         return json.dumps(config, indent=2)
 
     def to_dict(self) -> dict:
-        porndb_token = "None is Set, Go to https://metadatapi.net/ to get one!"
+        porndb_token = 'None is Set, Go to https://metadatapi.net/ to get one!'
         if self.porndb_token:
-            porndb_token = "*" * len(self.porndb_token)
+            porndb_token = '*' * len(self.porndb_token)
 
         config = {
-            "Namer Config": {
-                "porndb_token": porndb_token,
-                "inplace_name": self.inplace_name,
-                "prefer_dir_name_if_available": self.prefer_dir_name_if_available,
-                "target_extensions": self.target_extensions,
-                "write_namer_log": self.write_namer_log,
-                "write_namer_failed_log": self.write_namer_failed_log,
-                "trailer_location": self.trailer_location,
-                "sites_with_no_date_info": self.sites_with_no_date_info,
-                "movie_data_preferred": self.movie_data_preferred,
-                "vr_studios": self.vr_studios,
-                "vr_tags": self.vr_tags,
-                "site_abbreviations": {key.pattern: value for key, value in self.site_abbreviations.items()},
-                "update_permissions_ownership": self.update_permissions_ownership,
-                "set_dir_permissions": self.set_dir_permissions,
-                "set_file_permissions": self.set_file_permissions,
-                "set_uid": self.set_uid,
-                "set_gid": self.set_gid,
-                "max_performer_names": self.max_performer_names,
-                "use_database": self.use_database,
-                "database_path": str(self.database_path),
-                "use_requests_cache": self.use_requests_cache,
-                "requests_cache_expire_minutes": self.requests_cache_expire_minutes,
-                "override_tpdb_address": self.override_tpdb_address,
-                "plex_hack": self.plex_hack,
-                "convert_container_to": self.convert_container_to,
-                "path_cleanup": self.path_cleanup,
+            'Namer Config': {
+                'porndb_token': porndb_token,
+                'inplace_name': self.inplace_name,
+                'prefer_dir_name_if_available': self.prefer_dir_name_if_available,
+                'target_extensions': self.target_extensions,
+                'write_namer_log': self.write_namer_log,
+                'write_namer_failed_log': self.write_namer_failed_log,
+                'trailer_location': self.trailer_location,
+                'sites_with_no_date_info': self.sites_with_no_date_info,
+                'movie_data_preferred': self.movie_data_preferred,
+                'vr_studios': self.vr_studios,
+                'vr_tags': self.vr_tags,
+                'site_abbreviations': {key.pattern: value for key, value in self.site_abbreviations.items()},
+                'update_permissions_ownership': self.update_permissions_ownership,
+                'set_dir_permissions': self.set_dir_permissions,
+                'set_file_permissions': self.set_file_permissions,
+                'set_uid': self.set_uid,
+                'set_gid': self.set_gid,
+                'max_performer_names': self.max_performer_names,
+                'use_database': self.use_database,
+                'database_path': str(self.database_path),
+                'use_requests_cache': self.use_requests_cache,
+                'requests_cache_expire_minutes': self.requests_cache_expire_minutes,
+                'override_tpdb_address': self.override_tpdb_address,
+                'plex_hack': self.plex_hack,
+                'convert_container_to': self.convert_container_to,
+                'path_cleanup': self.path_cleanup,
             },
-            "Phash": {
-                "search_phash": self.search_phash,
-                "send_phash": self.send_phash,
-                "use_alt_phash_tool": self.use_alt_phash_tool,
-                "max_ffmpeg_workers": self.max_ffmpeg_workers,
-                "use_gpu": self.use_gpu,
+            'Phash': {
+                'search_phash': self.search_phash,
+                'send_phash': self.send_phash,
+                'use_alt_phash_tool': self.use_alt_phash_tool,
+                'max_ffmpeg_workers': self.max_ffmpeg_workers,
+                'use_gpu': self.use_gpu,
                 # "require_match_phash_top": self.require_match_phash_top,
                 # "send_phash_of_matches_to_tpdb": self.send_phash_of_matches_to_tpdb,
             },
-            "Duplicate Config": {
-                "preserve_duplicates": self.preserve_duplicates,
-                "max_desired_resolutions": self.max_desired_resolutions,
-                "desired_codec": self.desired_codec,
+            'Duplicate Config': {
+                'preserve_duplicates': self.preserve_duplicates,
+                'max_desired_resolutions': self.max_desired_resolutions,
+                'desired_codec': self.desired_codec,
             },
-            "Tagging Config": {
-                "write_nfo": self.write_nfo,
-                "enabled_tagging": self.enabled_tagging,
-                "enabled_poster": self.enabled_poster,
-                "download_type": self.download_type,
-                "enable_metadataapi_genres": self.enable_metadataapi_genres,
-                "default_genre": self.default_genre,
-                "language": self.language,
-                "mark_collected": self.mark_collected,
+            'Tagging Config': {
+                'write_nfo': self.write_nfo,
+                'enabled_tagging': self.enabled_tagging,
+                'enabled_poster': self.enabled_poster,
+                'download_type': self.download_type,
+                'enable_metadataapi_genres': self.enable_metadataapi_genres,
+                'default_genre': self.default_genre,
+                'language': self.language,
+                'mark_collected': self.mark_collected,
             },
-            "Watchdog Config": {
-                "ignored_dir_regex": self.ignored_dir_regex.pattern,
-                "min_file_size": self.min_file_size,
-                "del_other_files": self.del_other_files,
-                "new_relative_path_name": self.new_relative_path_name,
-                "watch_dir": str(self.watch_dir),
-                "work_dir": str(self.work_dir),
-                "failed_dir": str(self.failed_dir),
-                "dest_dir": str(self.dest_dir),
-                "retry_time": self.retry_time,
-                "extra_sleep_time": self.extra_sleep_time,
-                "web": self.web,
-                "port": self.port,
-                "host": self.host,
-                "web_root": self.web_root,
-                "allow_delete_files": self.allow_delete_files,
-                "add_max_percent_column": self.add_max_percent_column,
-                "add_complete_column": self.add_complete_column,
-                "debug": self.debug,
-                "manual_mode": self.manual_mode,
-                "diagnose_errors": self.diagnose_errors,
-            }
+            'Watchdog Config': {
+                'ignored_dir_regex': self.ignored_dir_regex.pattern,
+                'min_file_size': self.min_file_size,
+                'del_other_files': self.del_other_files,
+                'new_relative_path_name': self.new_relative_path_name,
+                'watch_dir': str(self.watch_dir),
+                'work_dir': str(self.work_dir),
+                'failed_dir': str(self.failed_dir),
+                'dest_dir': str(self.dest_dir),
+                'retry_time': self.retry_time,
+                'extra_sleep_time': self.extra_sleep_time,
+                'web': self.web,
+                'port': self.port,
+                'host': self.host,
+                'web_root': self.web_root,
+                'allow_delete_files': self.allow_delete_files,
+                'add_max_percent_column': self.add_max_percent_column,
+                'add_complete_column': self.add_complete_column,
+                'debug': self.debug,
+                'manual_mode': self.manual_mode,
+                'diagnose_errors': self.diagnose_errors,
+            },
         }
 
         return config

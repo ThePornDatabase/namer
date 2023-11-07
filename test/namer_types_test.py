@@ -22,10 +22,10 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test performer __str__
         """
-        self.assertEqual(str(Performer(None, None)), "Unknown")
-        self.assertEqual(str(Performer("Name", None)), "Name")
-        self.assertEqual(str(Performer(None, "Role")), "Unknown (Role)")
-        self.assertEqual(str(Performer("Name", "Role")), "Name (Role)")
+        self.assertEqual(str(Performer(None, None)), 'Unknown')
+        self.assertEqual(str(Performer('Name', None)), 'Name')
+        self.assertEqual(str(Performer(None, 'Role')), 'Unknown (Role)')
+        self.assertEqual(str(Performer('Name', 'Role')), 'Name (Role)')
 
     def test_default_no_config(self):
         """
@@ -33,16 +33,16 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         config = NamerConfig()
         self.assertEqual(config.del_other_files, False)
-        self.assertEqual(config.inplace_name, "{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}")
+        self.assertEqual(config.inplace_name, '{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}')
         self.assertEqual(config.enabled_tagging, False)
         self.assertEqual(config.write_namer_log, False)
         self.assertEqual(config.enable_metadataapi_genres, False)
-        self.assertEqual(config.default_genre, "Adult")
-        self.assertFalse(hasattr(config, "dest_dir"))
-        self.assertFalse(hasattr(config, "failed_dir"))
+        self.assertEqual(config.default_genre, 'Adult')
+        self.assertFalse(hasattr(config, 'dest_dir'))
+        self.assertFalse(hasattr(config, 'failed_dir'))
         self.assertEqual(config.min_file_size, 300)
         self.assertEqual(config.language, None)
-        if sys.platform != "win32":
+        if sys.platform != 'win32':
             self.assertEqual(config.set_uid, os.getuid())
             self.assertEqual(config.set_gid, os.getgid())
             self.assertEqual(config.set_dir_permissions, 775)
@@ -53,44 +53,44 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Verify that partial formatter can handle missing fields gracefully,
         and it's prefix, postfix, and infix capabilities work.
         """
-        bad_fmt = "---"
-        fmt = PartialFormatter(missing="", bad_fmt=bad_fmt)
-        name = fmt.format("{name}{act: 1p}", name="scene1", act="act1")
-        self.assertEqual(name, "scene1 act1")
-        name = fmt.format("{name}{act: 1p}", name="scene1", act=None)
-        self.assertEqual(name, "scene1")
+        bad_fmt = '---'
+        fmt = PartialFormatter(missing='', bad_fmt=bad_fmt)
+        name = fmt.format('{name}{act: 1p}', name='scene1', act='act1')
+        self.assertEqual(name, 'scene1 act1')
+        name = fmt.format('{name}{act: 1p}', name='scene1', act=None)
+        self.assertEqual(name, 'scene1')
 
-        name = fmt.format("{name}{act: 1s}", name="scene1", act="act1")
-        self.assertEqual(name, "scene1act1 ")
-        name = fmt.format("{name}{act: 1s}", name="scene1", act=None)
-        self.assertEqual(name, "scene1")
+        name = fmt.format('{name}{act: 1s}', name='scene1', act='act1')
+        self.assertEqual(name, 'scene1act1 ')
+        name = fmt.format('{name}{act: 1s}', name='scene1', act=None)
+        self.assertEqual(name, 'scene1')
 
-        name = fmt.format("{name}{act: 1i}", name="scene1", act="act1")
-        self.assertEqual(name, "scene1 act1 ")
-        name = fmt.format("{name}{act: 1i}", name="scene1", act=None)
-        self.assertEqual(name, "scene1")
+        name = fmt.format('{name}{act: 1i}', name='scene1', act='act1')
+        self.assertEqual(name, 'scene1 act1 ')
+        name = fmt.format('{name}{act: 1i}', name='scene1', act=None)
+        self.assertEqual(name, 'scene1')
 
-        name = fmt.format("{name}{act:_1i}", name="scene1", act="act1")
-        self.assertEqual(name, "scene1_act1_")
+        name = fmt.format('{name}{act:_1i}', name='scene1', act='act1')
+        self.assertEqual(name, 'scene1_act1_')
 
-        name = fmt.format("{name}{act: >10}", name="scene1", act="act1")
-        self.assertEqual(name, "scene1      act1")
+        name = fmt.format('{name}{act: >10}', name='scene1', act='act1')
+        self.assertEqual(name, 'scene1      act1')
 
-        name = fmt.format("{name:|title}{act:|upper}", name="scene1", act="act1")
-        self.assertEqual(name, "Scene1ACT1")
+        name = fmt.format('{name:|title}{act:|upper}', name='scene1', act='act1')
+        self.assertEqual(name, 'Scene1ACT1')
 
         with self.assertRaises(Exception) as error1:
-            name = fmt.format("{name1}{act: >10}", name="scene1", act="act1")
-            self.assertEqual(name, "scene1      act1")
-        self.assertTrue("name1" in str(error1.exception))
-        self.assertTrue("all_performers" in str(error1.exception))
+            name = fmt.format('{name1}{act: >10}', name='scene1', act='act1')
+            self.assertEqual(name, 'scene1      act1')
+        self.assertTrue('name1' in str(error1.exception))
+        self.assertTrue('all_performers' in str(error1.exception))
 
-        self.assertEqual(fmt.format_field(format_spec="adsfadsf", value="fmt"), bad_fmt)
+        self.assertEqual(fmt.format_field(format_spec='adsfadsf', value='fmt'), bad_fmt)
 
         with self.assertRaises(Exception) as error2:
-            fmt1 = PartialFormatter(missing="", bad_fmt=None)   # type: ignore
-            fmt1.format_field(format_spec="adsfadsf", value="fmt")
-        self.assertTrue("Invalid format specifier" in str(error2.exception))
+            fmt1 = PartialFormatter(missing='', bad_fmt=None)  # type: ignore
+            fmt1.format_field(format_spec='adsfadsf', value='fmt')
+        self.assertTrue('Invalid format specifier' in str(error2.exception))
 
     def test_config_verification(self):
         """
@@ -102,30 +102,30 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(success, True)
 
         config = NamerConfig()
-        config.watch_dir = Path("/not/a/real/path")
+        config.watch_dir = Path('/not/a/real/path')
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
-        config.work_dir = Path("/not/a/real/path")
+        config.work_dir = Path('/not/a/real/path')
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
-        config.failed_dir = Path("/not/a/real/path")
+        config.failed_dir = Path('/not/a/real/path')
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config = NamerConfig()
-        config.inplace_name = "{sitesadf} - {date}"
+        config.inplace_name = '{sitesadf} - {date}'
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
         config1 = NamerConfig()
-        config1.new_relative_path_name = "{whahha}/{site} - {date}"
+        config1.new_relative_path_name = '{whahha}/{site} - {date}'
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

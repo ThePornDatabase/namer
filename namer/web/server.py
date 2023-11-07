@@ -23,6 +23,7 @@ class GenericWebServer:
     """
     A wrapper allowing shutdown of a Flask server.
     """
+
     __app: Flask
     __compress = Compress()
 
@@ -105,7 +106,7 @@ class GenericWebServer:
             try:
                 self.__server.run()
             except OSError:
-                logger.error("Stopping server")
+                logger.error('Stopping server')
             finally:
                 self.stop()
 
@@ -117,13 +118,13 @@ class GenericWebServer:
             self.__server.close()
 
     def get_effective_port(self) -> Optional[int]:
-        return getattr(self.__server, "effective_port", None)
+        return getattr(self.__server, 'effective_port', None)
 
     def get_url(self) -> str:
         """
         Returns the full url to access this server, usually http://127.0.0.1:<os assigned port>/
         """
-        return f"http://{self.__host}:{self.get_effective_port()}{self.__path}"
+        return f'http://{self.__host}:{self.get_effective_port()}{self.__path}'
 
     @staticmethod
     def bool_to_icon(item: bool) -> str:

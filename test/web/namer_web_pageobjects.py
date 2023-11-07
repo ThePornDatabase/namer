@@ -9,7 +9,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 class Assertion(Generic[T], AssertionBuilder):
@@ -111,7 +111,7 @@ class SearchSelection:
         self.__driver = driver
         self.__cancel = self.__driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Close"]')
         self.__close = self.__driver.find_element(By.CSS_SELECTOR, 'div[class="modal-footer"] button[class="btn btn-secondary"]')
-        find_and_wait_until_stale(driver, By.ID, "progressBar")
+        find_and_wait_until_stale(driver, By.ID, 'progressBar')
         self.__items = wait_for_and_find_all(driver, By.CSS_SELECTOR, 'div[class="card h-100"]')
 
     def cancel(self) -> 'FailedPage':
@@ -251,17 +251,13 @@ def find_and_wait_until_stale(driver, by: str, value: str):
     wait = WebDriverWait(driver, 30)
     element = find_if_present(driver, by, value)
     if element:
-        wait.until(expected_conditions.any_of(
-            expected_conditions.invisibility_of_element(element),
-            expected_conditions.staleness_of(element)))
+        wait.until(expected_conditions.any_of(expected_conditions.invisibility_of_element(element), expected_conditions.staleness_of(element)))
 
 
 def wait_until_invisible(element: WebElement):
     if element:
         wait = WebDriverWait(element.parent, 30)
-        wait.until(expected_conditions.any_of(
-            expected_conditions.invisibility_of_element(element),
-            expected_conditions.staleness_of(element)))
+        wait.until(expected_conditions.any_of(expected_conditions.invisibility_of_element(element), expected_conditions.staleness_of(element)))
 
 
 class FailedPage:
@@ -274,7 +270,7 @@ class FailedPage:
 
     def __init__(self, driver: WebDriver):
         self.__driver = driver
-        find_and_wait_until_stale(driver, By.ID, "progressBar")
+        find_and_wait_until_stale(driver, By.ID, 'progressBar')
         self.__refresh = wait_for_and_find(driver, By.ID, 'refreshFiles')
         self.__noFailedFiles = find_if_present(driver, By.CSS_SELECTOR, '#filesResult div[class="col m-1 text-center"] span')
         if self.__noFailedFiles is None:
@@ -299,7 +295,7 @@ class FailedPage:
 
     def search(self, search_term: Optional[str]) -> 'FailedPage':  # type: ignore
         if not self.__search:
-            fail("no search item on page, happens on purpose if there are no items")
+            fail('no search item on page, happens on purpose if there are no items')
         else:
             if search_term:
                 self.__search.send_keys(search_term)

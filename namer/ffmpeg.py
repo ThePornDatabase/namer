@@ -28,18 +28,18 @@ from namer.videophash.videophashstash import StashVideoPerceptualHash
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class FFProbeStream:
-    index: int                      # stream number
-    codec_name: str                 # "mp3", "h264", "hvec", "png"
-    codec_type: str                 # "audio" or "video"
-    disposition_default: bool       # default stream of this type
+    index: int  # stream number
+    codec_name: str  # "mp3", "h264", "hvec", "png"
+    codec_type: str  # "audio" or "video"
+    disposition_default: bool  # default stream of this type
     disposition_attached_pic: bool  # is the "video" stream an attached picture.
-    duration: float                 # seconds
-    bit_rate: int                   # bitrate of the track
+    duration: float  # seconds
+    bit_rate: int  # bitrate of the track
     # audio
-    tags_language: Optional[str]            # 3 letters representing language of track (only matters for audio)
+    tags_language: Optional[str]  # 3 letters representing language of track (only matters for audio)
     # video only
     width: Optional[int] = None
-    height: Optional[int] = None            # 720 1080 2160
+    height: Optional[int] = None  # 720 1080 2160
     avg_frame_rate: Optional[float] = None  # average frames per second
 
     def __str__(self) -> str:
@@ -61,10 +61,10 @@ class FFProbeStream:
         return data
 
     def is_audio(self) -> bool:
-        return self.codec_type == "audio"
+        return self.codec_type == 'audio'
 
     def is_video(self) -> bool:
-        return self.codec_type == "video" and (not self.disposition_attached_pic or self.disposition_attached_pic is False)
+        return self.codec_type == 'video' and (not self.disposition_attached_pic or self.disposition_attached_pic is False)
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
@@ -131,7 +131,7 @@ class FFMpeg:
 
             versions = self.__ffmpeg_version(phash_path)
             if not versions['ffmpeg'] and not versions['ffprobe']:
-                raise ValidationError(f"could not find ffmpeg/ffprobe on path, or in tools dir: {self.__local_dir}")
+                raise ValidationError(f'could not find ffmpeg/ffprobe on path, or in tools dir: {self.__local_dir}')
 
             self.__ffmpeg_cmd = str(phash_path / 'ffmpeg')
             self.__ffprobe_cmd = str(phash_path / 'ffprobe')
@@ -221,12 +221,13 @@ class FFMpeg:
         Copies, and potentially updates the default audio stream of a video file.
         """
 
-        random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
         temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
         work_file = mp4_file.parent / temp_filename
 
         stream = self.get_audio_stream_for_lang(mp4_file, language) if language else None
         if stream and stream >= 0:
+            # fmt: off
             process = (
                 ffmpeg
                 .input(mp4_file)
@@ -256,22 +257,23 @@ class FFMpeg:
         return True
 
     def attempt_fix_corrupt(self, mp4_file: Path) -> bool:
-        random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
-        temp_filename = f'{input.stem}_{random}' + input.suffix
-        work_file = input.parent / temp_filename
+        random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        temp_filename = f'{mp4_file.stem}_{random}' + mp4_file.suffix
+        work_file = mp4_file.parent / temp_filename
         success = self.convert(mp4_file, work_file)
         if success:
             shutil.move(work_file, mp4_file)
         return success
 
-    def convert(self, input: Path, output: Path) -> bool:
+    def convert(self, mp4_file: Path, output: Path) -> bool:
         """
         Attempt to fix corrupt mp4 files.
         """
-        logger.info("Attempt to fix damaged mp4 file: {}", input)
+        logger.info('Attempt to fix damaged mp4 file: {}', mp4_file)
+        # fmt: off
         process = (
             ffmpeg
-            .input(input)
+            .input(mp4_file)
             .output(str(output), c='copy')
             .run_async(quiet=True, cmd=self.__ffmpeg_cmd)
         )
@@ -279,11 +281,11 @@ class FFMpeg:
         stdout, stderr = (stdout.decode('UTF-8') if isinstance(stdout, bytes) else stdout), (stderr.decode('UTF-8') if isinstance(stderr, bytes) else stderr)
         success = process.returncode == 0
         if not success:
-            logger.warning("Could not convert/clean {} to {}", input, output)
+            logger.warning("Could not convert/clean {} to {}", mp4_file, output)
             if stderr:
                 logger.error(stderr)
         else:
-            input.unlink()
+            mp4_file.unlink()
         return success
 
     def extract_screenshot(self, file: Path, screenshot_time: float, screenshot_width: int = -1, use_gpu: bool = False) -> Image.Image:
@@ -291,6 +293,7 @@ class FFMpeg:
         if use_gpu:
             input_args['hwaccel'] = 'auto'
 
+        # fmt: off
         out, _ = (
             ffmpeg
             .input(file, ss=screenshot_time, **input_args)
@@ -310,12 +313,13 @@ class FFMpeg:
     def __ffmpeg_version(local_dir: Optional[Path] = None) -> Dict:
         tools = ['ffmpeg', 'ffprobe']
         re_tools = '|'.join(tools)
-        reg = re.compile(fr'({re_tools}) version (?P<version>.*) Copyright')
+        reg = re.compile(rf'({re_tools}) version (?P<version>.*) Copyright')
 
         versions = {}
 
         for tool in tools:
             executable = local_dir / tool if local_dir else tool
+            # fmt: off
             args = [
                 str(executable),
                 '-version'

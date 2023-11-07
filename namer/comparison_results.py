@@ -33,14 +33,14 @@ class Performer:
         self.image = image
 
     def __str__(self):
-        name = "Unknown" if self.name is None else self.name
+        name = 'Unknown' if self.name is None else self.name
         if self.role:
-            return name + " (" + self.role + ")"
+            return name + ' (' + self.role + ')'
 
         return name
 
     def __repr__(self):
-        return f"Performer[name={self.name}, role={self.role}, image={self.image}]"
+        return f'Performer[name={self.name}, role={self.role}, image={self.image}]'
 
 
 class SceneType(str, Enum):
@@ -196,13 +196,13 @@ class LookedUpFileInfo:
         res = self.resolution
         res_str: Optional[str] = None
         if res:
-            res_str = "2160p" if res == 2160 else f"{res}p" if res in [1080, 720, 480] else f"{res}"
+            res_str = '2160p' if res == 2160 else f'{res}p' if res in [1080, 720, 480] else f'{res}'
 
-        vr = ""
+        vr = ''
         if (self.site and self.site.lower() in config.vr_studios) or any(tag.strip().lower() in config.vr_tags for tag in self.tags):
-            vr = "vr"
+            vr = 'vr'
 
-        if self.original_query and '/movies' in self.original_query and (self.site and self.site.lower().replace(" ", "") not in config.movie_data_preferred):
+        if self.original_query and '/movies' in self.original_query and (self.site and self.site.lower().replace(' ', '') not in config.movie_data_preferred):
             self.type = SceneType.MOVIE
         elif self.original_query and '/jav' in self.original_query:
             self.type = SceneType.JAV
@@ -210,40 +210,40 @@ class LookedUpFileInfo:
             self.type = SceneType.SCENE
 
         return {
-            "uuid": self.uuid,
-            "date": self.date,
-            "year": self.date[0:4] if self.date else None,
-            "description": self.description,
-            "name": self.name,
-            "site": self.site.replace(" ", "") if self.site else None,
-            "full_site": self.site,
-            "parent": self.parent.replace(" ", "") if self.parent else None,
-            "full_parent": self.parent,
-            "network": self.network.replace(" ", "") if self.network else None,
-            "full_network": self.network,
-            "performers": ", ".join(map(lambda p: p.name, filter(lambda p: p.role == "Female", self.performers))) if self.performers else None,
-            "all_performers": ", ".join(map(lambda p: p.name, self.performers)) if self.performers else None,
-            "ext": self.original_parsed_filename.extension if self.original_parsed_filename else None,
-            "trans": self.original_parsed_filename.trans if self.original_parsed_filename else None,
-            "vr": vr,
-            "resolution": res_str,
-            "type": self.type.value,
-            "external_id": self.external_id,
+            'uuid': self.uuid,
+            'date': self.date,
+            'year': self.date[0:4] if self.date else None,
+            'description': self.description,
+            'name': self.name,
+            'site': self.site.replace(' ', '') if self.site else None,
+            'full_site': self.site,
+            'parent': self.parent.replace(' ', '') if self.parent else None,
+            'full_parent': self.parent,
+            'network': self.network.replace(' ', '') if self.network else None,
+            'full_network': self.network,
+            'performers': ', '.join(map(lambda p: p.name, filter(lambda p: p.role == 'Female', self.performers))) if self.performers else None,
+            'all_performers': ', '.join(map(lambda p: p.name, self.performers)) if self.performers else None,
+            'ext': self.original_parsed_filename.extension if self.original_parsed_filename else None,
+            'trans': self.original_parsed_filename.trans if self.original_parsed_filename else None,
+            'vr': vr,
+            'resolution': res_str,
+            'type': self.type.value,
+            'external_id': self.external_id,
         }
 
-    def new_file_name(self, template: str, config: NamerConfig, infix: str = "(0)") -> str:
+    def new_file_name(self, template: str, config: NamerConfig, infix: str = '(0)') -> str:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
         dictionary = self.as_dict(config)
         clean_dic = self.__cleanup_dictionary(dictionary)
-        fmt = PartialFormatter(missing="", bad_fmt="---")
+        fmt = PartialFormatter(missing='', bad_fmt='---')
 
         name = fmt.format(template, **clean_dic)
-        if name.startswith("/"):
-            name = "." + name
+        if name.startswith('/'):
+            name = '.' + name
 
-        if infix != "(0)":
+        if infix != '(0)':
             # will apply the infix before the file extension if just a file name, if a path, with apply
             # the infix after the fist part (first directory name) of the (sub)path
             path = PurePath(name)

@@ -42,6 +42,8 @@ pony-stubs = "^0.5.2"
 [tool.ruff]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init", "node_modules"]
 line-length = 320
+indent-width = 4
+target-version = "py39"
 
 [tool.ruff.format]
 quote-style = "single"

@@ -119,7 +119,7 @@ class VideoPerceptualHash:
     @staticmethod
     def __phash(image: Image.Image, hash_size=8, high_freq_factor=4, resample: Literal[0, 1, 2, 3, 4, 5] = Image.Resampling.LANCZOS) -> Optional[imagehash.ImageHash]:  # type: ignore
         if hash_size < 2:
-            raise ValueError("Hash size must be greater than or equal to 2")
+            raise ValueError('Hash size must be greater than or equal to 2')
 
         img_size = hash_size * high_freq_factor
         image = image.resize((img_size, img_size), resample).convert('L')

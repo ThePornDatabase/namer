@@ -11,7 +11,7 @@ from namer.fileinfo import parse_file_name
 from namer.command import make_command
 from test.utils import environment, sample_config
 
-REGEX_TOKEN = "{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}"
+REGEX_TOKEN = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -23,12 +23,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test standard name parsing.
         """
-        name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
-        self.assertEqual(name.site, "EvilAngel")
-        self.assertEqual(name.date, "2022-01-03")
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', sample_config())
+        self.assertEqual(name.site, 'EvilAngel')
+        self.assertEqual(name.date, '2022-01-03')
+        self.assertEqual(name.name, 'Carmela Clutch Fabulous Anal 3-Way')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_interesting_site(self):
         """
@@ -36,89 +36,89 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         name = parse_file_name("Mommy's Girl - 15.04.20 - BTS-Mommy Takes a Squirt.mp4", sample_config())
         self.assertEqual(name.site, "Mommy's Girl")
-        self.assertEqual(name.date, "2015-04-20")
-        self.assertEqual(name.name, "BTS-Mommy Takes a Squirt")
+        self.assertEqual(name.date, '2015-04-20')
+        self.assertEqual(name.name, 'BTS-Mommy Takes a Squirt')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_no_date(self):
         """
         Test standard name parsing.
         """
-        name = parse_file_name("EvilAngel.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
-        self.assertEqual(name.site, "EvilAngel")
+        name = parse_file_name('EvilAngel.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', sample_config())
+        self.assertEqual(name.site, 'EvilAngel')
         self.assertEqual(name.date, None)
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        self.assertEqual(name.name, 'Carmela Clutch Fabulous Anal 3-Way')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_no_date_ts_stamp(self):
         """
         Test standard name parsing.
         """
-        name = parse_file_name("EvilAngel.TS.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", sample_config())
-        self.assertEqual(name.site, "EvilAngel")
+        name = parse_file_name('EvilAngel.TS.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', sample_config())
+        self.assertEqual(name.site, 'EvilAngel')
         self.assertEqual(name.date, None)
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        self.assertEqual(name.name, 'Carmela Clutch Fabulous Anal 3-Way')
         self.assertEqual(name.trans, True)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_clean_file_name(self):
         """
         Test standard name parsing.
         """
-        name = parse_file_name("Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.XXX.mp4", sample_config())
-        self.assertEqual(name.site, "Evil Angel")
-        self.assertEqual(name.date, "2022-01-03")
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way")
+        name = parse_file_name('Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way.XXX.mp4', sample_config())
+        self.assertEqual(name.site, 'Evil Angel')
+        self.assertEqual(name.date, '2022-01-03')
+        self.assertEqual(name.name, 'Carmela Clutch Fabulous Anal 3-Way')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_with_trans(self):
         """
         Test parsing a name with a TS tag after the date, uncommon, but not unheard of.
         """
-        name = parse_file_name("EvilAngel.22.01.03.TS.Carmela.Clutch.Fabulous.Anal.3-Way.part-1-XXX.mp4", sample_config())
-        self.assertEqual(name.site, "EvilAngel")
-        self.assertEqual(name.date, "2022-01-03")
-        self.assertEqual(name.name, "Carmela Clutch Fabulous Anal 3-Way part-1")
+        name = parse_file_name('EvilAngel.22.01.03.TS.Carmela.Clutch.Fabulous.Anal.3-Way.part-1-XXX.mp4', sample_config())
+        self.assertEqual(name.site, 'EvilAngel')
+        self.assertEqual(name.date, '2022-01-03')
+        self.assertEqual(name.name, 'Carmela Clutch Fabulous Anal 3-Way part-1')
         self.assertEqual(name.trans, True)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_complex_site(self):
         """
         Test parsing a name with a TS tag after the date, uncommon, but not unheard of.
         """
-        name = parse_file_name("Twistys Feature Film.16.04.07.aidra.fox.the.getaway.part.1.mp4", sample_config())
-        self.assertEqual(name.site, "Twistys Feature Film")
-        self.assertEqual(name.date, "2016-04-07")
-        self.assertEqual(name.name, "aidra fox the getaway part 1")
+        name = parse_file_name('Twistys Feature Film.16.04.07.aidra.fox.the.getaway.part.1.mp4', sample_config())
+        self.assertEqual(name.site, 'Twistys Feature Film')
+        self.assertEqual(name.date, '2016-04-07')
+        self.assertEqual(name.name, 'aidra fox the getaway part 1')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_c_site(self):
         """
         Test parsing a name with a TS tag after the date, uncommon, but not unheard of.
         """
-        name = parse_file_name("BrazzersExxtra - 2021-12-07 - Dr. Polla & The Chronic Discharge Conundrum.mp4", sample_config())
-        self.assertEqual(name.site, "BrazzersExxtra")
-        self.assertEqual(name.date, "2021-12-07")
-        self.assertEqual(name.name, "Dr Polla & The Chronic Discharge Conundrum")
+        name = parse_file_name('BrazzersExxtra - 2021-12-07 - Dr. Polla & The Chronic Discharge Conundrum.mp4', sample_config())
+        self.assertEqual(name.site, 'BrazzersExxtra')
+        self.assertEqual(name.date, '2021-12-07')
+        self.assertEqual(name.name, 'Dr Polla & The Chronic Discharge Conundrum')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
     def test_parse_file_name_site_abbreviations(self):
         """
         Test parsing a name with a TS tag after the date, uncommon, but not unheard of.
         """
-        name = parse_file_name("bex - 2021-12-07 - Dr. Polla & The Chronic Discharge Conundrum.mp4", sample_config())
-        self.assertEqual(name.site, "BrazzersExxtra")
-        self.assertEqual(name.date, "2021-12-07")
-        self.assertEqual(name.name, "Dr Polla & The Chronic Discharge Conundrum")
+        name = parse_file_name('bex - 2021-12-07 - Dr. Polla & The Chronic Discharge Conundrum.mp4', sample_config())
+        self.assertEqual(name.site, 'BrazzersExxtra')
+        self.assertEqual(name.date, '2021-12-07')
+        self.assertEqual(name.name, 'Dr Polla & The Chronic Discharge Conundrum')
         self.assertEqual(name.trans, False)
-        self.assertEqual(name.extension, "mp4")
+        self.assertEqual(name.extension, 'mp4')
 
-    @patch("sys.stdout", new_callable=io.StringIO)
+    @patch('sys.stdout', new_callable=io.StringIO)
     def test_parse_file(self, mock_stdout):
         """
         Test the main method.
@@ -126,21 +126,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (tmpdir, _parrot, config):
             tempdir = Path(tmpdir)
             test_dir = Path(__file__).resolve().parent
-            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
-            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
+            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
             config.min_file_size = 0
             command = make_command(target_file, config)
             self.assertIsNotNone(command)
             if command is not None:
                 self.assertIsNotNone(command.parsed_file)
                 if command.parsed_file is not None:
-                    self.assertEqual(command.parsed_file.site, "EvilAngel")
-                    self.assertEqual(command.parsed_file.date, "2022-01-03")
-                    self.assertEqual(command.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
+                    self.assertEqual(command.parsed_file.site, 'EvilAngel')
+                    self.assertEqual(command.parsed_file.date, '2022-01-03')
+                    self.assertEqual(command.parsed_file.name, 'Carmela Clutch Fabulous Anal 3-Way')
                     self.assertEqual(command.parsed_file.trans, False)
-                    self.assertEqual(command.parsed_file.extension, "mp4")
+                    self.assertEqual(command.parsed_file.extension, 'mp4')
 
-    @patch("sys.stdout", new_callable=io.StringIO)
+    @patch('sys.stdout', new_callable=io.StringIO)
     def test_parse_dir_name(self, mock_stdout):
         """
         Test the main method.
@@ -148,9 +148,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         with environment() as (tmpdir, _parrot, config):
             tempdir = Path(tmpdir)
             test_dir = Path(__file__).resolve().parent
-            target_file = (tempdir / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.1080p.HEVC.x265.PRT[XvX]-xpost" / "EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4")
+            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.1080p.HEVC.x265.PRT[XvX]-xpost' / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             target_file.parent.mkdir()
-            shutil.copy(test_dir / "Site.22.01.01.painful.pun.XXX.720p.xpost.mp4", target_file)
+            shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
             config.min_file_size = 0
             config.prefer_dir_name_if_available = True
             command = make_command(target_file.parent, config)
@@ -158,12 +158,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             if command is not None:
                 self.assertIsNotNone(command.parsed_file)
                 if command.parsed_file is not None:
-                    self.assertEqual(command.parsed_file.site, "EvilAngel")
-                    self.assertEqual(command.parsed_file.date, "2022-01-03")
-                    self.assertEqual(command.parsed_file.name, "Carmela Clutch Fabulous Anal 3-Way")
+                    self.assertEqual(command.parsed_file.site, 'EvilAngel')
+                    self.assertEqual(command.parsed_file.date, '2022-01-03')
+                    self.assertEqual(command.parsed_file.name, 'Carmela Clutch Fabulous Anal 3-Way')
                     self.assertEqual(command.parsed_file.trans, False)
-                    self.assertEqual(command.parsed_file.extension, "mp4")
+                    self.assertEqual(command.parsed_file.extension, 'mp4')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
