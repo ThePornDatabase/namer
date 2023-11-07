@@ -13,7 +13,6 @@ from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
 from urllib.parse import quote
 
-import imagehash
 import rapidfuzz
 from loguru import logger
 from PIL import Image
@@ -27,7 +26,7 @@ from namer.configuration_utils import default_config
 from namer.command import make_command, set_permissions, Command
 from namer.fileinfo import FileInfo
 from namer.http import Http, RequestType
-from namer.videophash import PerceptualHash
+from namer.videophash import imagehash, PerceptualHash
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:

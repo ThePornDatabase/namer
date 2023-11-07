@@ -7,8 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import imagehash
-
+from namer.videophash import imagehash
 from namer.videophash.videophashstash import StashVideoPerceptualHash
 from namer.videophash.videophash import VideoPerceptualHash
 from test.utils import sample_config
