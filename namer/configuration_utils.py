@@ -26,10 +26,10 @@ def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> 
     """
     success = True
     if not config.enable_metadataapi_genres and not config.default_genre:
-        logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
+        logger.error('Since enable_metadataapi_genres is not True, you must specify a default_genre')
         success = False
 
-    success = __verify_name_string(formatter, "inplace_name", config.inplace_name) and success
+    success = __verify_name_string(formatter, 'inplace_name', config.inplace_name) and success
 
     return success
 
@@ -40,14 +40,14 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
     """
     success = True
     if not config.enable_metadataapi_genres and not config.default_genre:
-        logger.error("Since enable_metadataapi_genres is not True, you must specify a default_genre")
+        logger.error('Since enable_metadataapi_genres is not True, you must specify a default_genre')
         success = False
 
     watchdog_dirs = ['watch_dir', 'work_dir', 'failed_dir', 'dest_dir']
     for dir_name in watchdog_dirs:
         success = __verify_dir(config, dir_name, [name for name in watchdog_dirs if dir_name != name]) and success
 
-    success = __verify_name_string(formatter, "new_relative_path_name", config.new_relative_path_name) and success
+    success = __verify_name_string(formatter, 'new_relative_path_name', config.new_relative_path_name) and success
 
     return success
 
@@ -84,8 +84,8 @@ def __verify_name_string(formatter: PartialFormatter, name: str, name_string: st
         formatter.format(name_string, values)
         return True
     except KeyError as key_error:
-        logger.error("Configuration {} is not a valid file name format, please check {}", name, name_string)
-        logger.error("Error message: {}", key_error)
+        logger.error('Configuration {} is not a valid file name format, please check {}', name, name_string)
+        logger.error('Error message: {}', key_error)
         return False
 
 
@@ -110,6 +110,7 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
 
     return success
 
+
 # Read and write .ini files utils below
 
 
@@ -122,15 +123,16 @@ def get_str(updater: ConfigUpdater, section: str, key: str) -> Optional[str]:
         output = updater.get(section, key)
         return str(output.value)
 
+
 # Ini file string converters, to and from NamerConfig type
 
 
 def to_bool(value: Optional[str]) -> Optional[bool]:
-    return value.lower() == "true" if value else None
+    return value.lower() == 'true' if value else None
 
 
 def from_bool(value: Optional[bool]) -> str:
-    return str(value) if value is not None else ""
+    return str(value) if value is not None else ''
 
 
 def to_str_list_lower(value: Optional[str]) -> List[str]:
@@ -138,7 +140,7 @@ def to_str_list_lower(value: Optional[str]) -> List[str]:
 
 
 def from_str_list_lower(value: Optional[List[str]]) -> str:
-    return ", ".join(value) if value else ""
+    return ', '.join(value) if value else ''
 
 
 def to_int(value: Optional[str]) -> Optional[int]:
@@ -146,7 +148,7 @@ def to_int(value: Optional[str]) -> Optional[int]:
 
 
 def from_int(value: Optional[int]) -> str:
-    return str(value) if value is not None else ""
+    return str(value) if value is not None else ''
 
 
 def to_path(value: Optional[str]) -> Optional[Path]:
@@ -154,7 +156,7 @@ def to_path(value: Optional[str]) -> Optional[Path]:
 
 
 def from_path(value: Optional[Path]) -> str:
-    return str(value) if value else ""
+    return str(value) if value else ''
 
 
 def to_regex_list(value: Optional[str]) -> List[Pattern]:
@@ -162,7 +164,7 @@ def to_regex_list(value: Optional[str]) -> List[Pattern]:
 
 
 def from_regex_list(value: Optional[List[Pattern]]) -> str:
-    return ", ".join([x.pattern for x in value]) if value else ""
+    return ', '.join([x.pattern for x in value]) if value else ''
 
 
 def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
@@ -173,7 +175,7 @@ def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str
 
     new_abbreviation: Dict[Pattern, str] = {}
     for abbreviation, full in abbreviations_db.items():
-        key = re.compile(fr'^{abbreviation}[ .-]+', re.IGNORECASE)
+        key = re.compile(rf'^{abbreviation}[ .-]+', re.IGNORECASE)
         new_abbreviation[key] = f'{full} '
 
     return new_abbreviation
@@ -191,11 +193,11 @@ def to_pattern(value: Optional[str]) -> Optional[Pattern]:
 
 
 def from_pattern(value: Optional[Pattern]) -> str:
-    return value.pattern if value else ""
+    return value.pattern if value else ''
 
 
 def to_site_list(value: Optional[str]) -> List[str]:
-    return [re.sub(r"[^a-z0-9]", "", x.strip().lower()) for x in value.split(",")] if value else []
+    return [re.sub(r'[^a-z0-9]', '', x.strip().lower()) for x in value.split(',')] if value else []
 
 
 def set_str(updater: ConfigUpdater, section: str, key: str, value: str) -> None:
@@ -203,7 +205,7 @@ def set_str(updater: ConfigUpdater, section: str, key: str, value: str) -> None:
 
 
 def set_comma_list(updater: ConfigUpdater, section: str, key: str, value: List[str]) -> None:
-    updater[section][key].value = ", ".join(value)
+    updater[section][key].value = ', '.join(value)
 
 
 def set_int(updater: ConfigUpdater, section: str, key: str, value: int) -> None:
@@ -215,69 +217,69 @@ def set_boolean(updater: ConfigUpdater, section: str, key: str, value: bool) -> 
 
 
 field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optional[Callable[[Any], str]]]] = {
-    "porndb_token": ("namer", None, None),
-    "name_parser": ("namer", None, None),
-    "inplace_name": ("namer", None, None),
-    "prefer_dir_name_if_available": ("namer", to_bool, from_bool),
-    "min_file_size": ("namer", to_int, from_int),
-    "write_namer_log": ("namer", to_bool, from_bool),
-    "write_namer_failed_log": ("namer", to_bool, from_bool),
-    "target_extensions": ("namer", to_str_list_lower, from_str_list_lower),
-    "update_permissions_ownership": ("namer", to_bool, from_bool),
-    "set_dir_permissions": ("namer", to_int, from_int),
-    "set_file_permissions": ("namer", to_int, from_int),
-    "set_uid": ("namer", to_int, from_int),
-    "set_gid": ("namer", to_int, from_int),
-    "trailer_location": ("namer", None, None),
-    "convert_container_to": ("namer", None, None),
-    "sites_with_no_date_info": ("namer", to_str_list_lower, from_str_list_lower),
-    "movie_data_preferred": ("namer", to_str_list_lower, from_str_list_lower),
-    "vr_studios": ("namer", to_str_list_lower, from_str_list_lower),
-    "vr_tags": ("namer", to_str_list_lower, from_str_list_lower),
-    "site_abbreviations": ("namer", to_site_abbreviation, from_site_abbreviation),
-    "max_performer_names": ("namer", to_int, from_int),
-    "use_database": ("namer", to_bool, from_bool),
-    "database_path": ("namer", to_path, from_path),
-    "use_requests_cache": ("namer", to_bool, from_bool),
-    "requests_cache_expire_minutes": ("namer", to_int, from_int),
-    "override_tpdb_address": ("namer", None, None),
-    "plex_hack": ("namer", to_bool, from_bool),
-    "path_cleanup": ("namer", to_bool, from_bool),
-    "search_phash": ("Phash", to_bool, from_bool),
-    "send_phash": ("Phash", to_bool, from_bool),
-    "use_alt_phash_tool": ("Phash", to_bool, from_bool),
-    "max_ffmpeg_workers": ("Phash", to_int, from_int),
-    "use_gpu": ("Phash", to_bool, from_bool),
-    "mark_collected": ("metadata", to_bool, from_bool),
-    "write_nfo": ("metadata", to_bool, from_bool),
-    "enabled_tagging": ("metadata", to_bool, from_bool),
-    "enabled_poster": ("metadata", to_bool, from_bool),
-    "download_type": ("metadata", to_str_list_lower, from_str_list_lower),
-    "enable_metadataapi_genres": ("metadata", to_bool, from_bool),
-    "default_genre": ("metadata", None, None),
-    "language": ("metadata", None, None),
-    "preserve_duplicates": ("duplicates", to_bool, from_bool),
-    "max_desired_resolutions": ("duplicates", to_int, from_int),
-    "desired_codec": ("duplicates", to_str_list_lower, from_str_list_lower),
-    "ignored_dir_regex": ("watchdog", to_pattern, from_pattern),
-    "del_other_files": ("watchdog", to_bool, from_bool),
-    "extra_sleep_time": ("watchdog", to_int, from_int),
-    "new_relative_path_name": ("watchdog", None, None),
-    "watch_dir": ("watchdog", to_path, from_path),
-    "work_dir": ("watchdog", to_path, from_path),
-    "failed_dir": ("watchdog", to_path, from_path),
-    "dest_dir": ("watchdog", to_path, from_path),
-    "retry_time": ("watchdog", None, None),
-    "web": ("watchdog", to_bool, from_bool),
-    "port": ("watchdog", to_int, from_int),
-    "host": ("watchdog", None, None),
-    "web_root": ("watchdog", None, None),
-    "allow_delete_files": ("watchdog", to_bool, from_bool),
-    "add_max_percent_column": ("watchdog", to_bool, from_bool),
-    "add_complete_column": ("watchdog", to_bool, from_bool),
-    "debug": ("watchdog", to_bool, from_bool),
-    "manual_mode": ("watchdog", to_bool, from_bool),
-    "diagnose_errors": ("watchdog", to_bool, from_bool),
+    'porndb_token': ('namer', None, None),
+    'name_parser': ('namer', None, None),
+    'inplace_name': ('namer', None, None),
+    'prefer_dir_name_if_available': ('namer', to_bool, from_bool),
+    'min_file_size': ('namer', to_int, from_int),
+    'write_namer_log': ('namer', to_bool, from_bool),
+    'write_namer_failed_log': ('namer', to_bool, from_bool),
+    'target_extensions': ('namer', to_str_list_lower, from_str_list_lower),
+    'update_permissions_ownership': ('namer', to_bool, from_bool),
+    'set_dir_permissions': ('namer', to_int, from_int),
+    'set_file_permissions': ('namer', to_int, from_int),
+    'set_uid': ('namer', to_int, from_int),
+    'set_gid': ('namer', to_int, from_int),
+    'trailer_location': ('namer', None, None),
+    'convert_container_to': ('namer', None, None),
+    'sites_with_no_date_info': ('namer', to_str_list_lower, from_str_list_lower),
+    'movie_data_preferred': ('namer', to_str_list_lower, from_str_list_lower),
+    'vr_studios': ('namer', to_str_list_lower, from_str_list_lower),
+    'vr_tags': ('namer', to_str_list_lower, from_str_list_lower),
+    'site_abbreviations': ('namer', to_site_abbreviation, from_site_abbreviation),
+    'max_performer_names': ('namer', to_int, from_int),
+    'use_database': ('namer', to_bool, from_bool),
+    'database_path': ('namer', to_path, from_path),
+    'use_requests_cache': ('namer', to_bool, from_bool),
+    'requests_cache_expire_minutes': ('namer', to_int, from_int),
+    'override_tpdb_address': ('namer', None, None),
+    'plex_hack': ('namer', to_bool, from_bool),
+    'path_cleanup': ('namer', to_bool, from_bool),
+    'search_phash': ('Phash', to_bool, from_bool),
+    'send_phash': ('Phash', to_bool, from_bool),
+    'use_alt_phash_tool': ('Phash', to_bool, from_bool),
+    'max_ffmpeg_workers': ('Phash', to_int, from_int),
+    'use_gpu': ('Phash', to_bool, from_bool),
+    'mark_collected': ('metadata', to_bool, from_bool),
+    'write_nfo': ('metadata', to_bool, from_bool),
+    'enabled_tagging': ('metadata', to_bool, from_bool),
+    'enabled_poster': ('metadata', to_bool, from_bool),
+    'download_type': ('metadata', to_str_list_lower, from_str_list_lower),
+    'enable_metadataapi_genres': ('metadata', to_bool, from_bool),
+    'default_genre': ('metadata', None, None),
+    'language': ('metadata', None, None),
+    'preserve_duplicates': ('duplicates', to_bool, from_bool),
+    'max_desired_resolutions': ('duplicates', to_int, from_int),
+    'desired_codec': ('duplicates', to_str_list_lower, from_str_list_lower),
+    'ignored_dir_regex': ('watchdog', to_pattern, from_pattern),
+    'del_other_files': ('watchdog', to_bool, from_bool),
+    'extra_sleep_time': ('watchdog', to_int, from_int),
+    'new_relative_path_name': ('watchdog', None, None),
+    'watch_dir': ('watchdog', to_path, from_path),
+    'work_dir': ('watchdog', to_path, from_path),
+    'failed_dir': ('watchdog', to_path, from_path),
+    'dest_dir': ('watchdog', to_path, from_path),
+    'retry_time': ('watchdog', None, None),
+    'web': ('watchdog', to_bool, from_bool),
+    'port': ('watchdog', to_int, from_int),
+    'host': ('watchdog', None, None),
+    'web_root': ('watchdog', None, None),
+    'allow_delete_files': ('watchdog', to_bool, from_bool),
+    'add_max_percent_column': ('watchdog', to_bool, from_bool),
+    'add_complete_column': ('watchdog', to_bool, from_bool),
+    'debug': ('watchdog', to_bool, from_bool),
+    'manual_mode': ('watchdog', to_bool, from_bool),
+    'diagnose_errors': ('watchdog', to_bool, from_bool),
 }
 """
 A mapping from NamerConfig field to ini file section - the ini property name and the field name
@@ -320,14 +322,14 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
                 else:
                     setattr(namer_config, name, new_value)
 
-    if not hasattr(namer_config, "retry_time") or namer_config.retry_time is None:
-        setattr(namer_config, "retry_time", f"03:{random.randint(0, 59):0>2}")  # noqa: B010
+    if not hasattr(namer_config, 'retry_time') or namer_config.retry_time is None:
+        setattr(namer_config, 'retry_time', f'03:{random.randint(0, 59):0>2}')  # noqa: B010
 
     return namer_config
 
 
 def resource_file_to_str(package: str, file_name: str) -> str:
-    config_str = ""
+    config_str = ''
     if hasattr(resources, 'files'):
         config_str = resources.files(package).joinpath(file_name).read_text()
     elif hasattr(resources, 'read_text'):
@@ -338,11 +340,11 @@ def resource_file_to_str(package: str, file_name: str) -> str:
 
 def copy_resource_to_file(package: str, file_name: str, output: Path) -> bool:
     if hasattr(resources, 'files'):
-        with resources.files(package).joinpath(file_name).open("rb") as _bin, open(output, mode="+bw") as out:
+        with resources.files(package).joinpath(file_name).open('rb') as _bin, open(output, mode='+bw') as out:
             shutil.copyfileobj(_bin, out)
             return True
     elif hasattr(resources, 'read_text'):
-        with resources.open_binary(package, file_name) as _bin, open(output, mode="+bw") as out:
+        with resources.open_binary(package, file_name) as _bin, open(output, mode='+bw') as out:
             shutil.copyfileobj(_bin, out)
             return True
 
@@ -354,7 +356,7 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     Attempts reading various locations to fine a namer.cfg file.
     """
     config = ConfigUpdater()
-    config_str = resource_file_to_str("namer", "namer.cfg.default")
+    config_str = resource_file_to_str('namer', 'namer.cfg.default')
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.config_updater = config
@@ -362,7 +364,7 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     user_config = ConfigUpdater()
     cfg_paths = [
         user_set,
-        os.environ.get("NAMER_CONFIG"),
+        os.environ.get('NAMER_CONFIG'),
         Path.home() / '.namer.cfg',
         '.namer.cfg',
     ]

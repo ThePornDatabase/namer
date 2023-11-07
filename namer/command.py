@@ -81,13 +81,13 @@ def move_command_files(target: Optional[Command], new_target: Path, is_auto: boo
 
     if target.target_directory and target.input_file == target.target_directory:
         working_dir = Path(new_target) / target.target_directory.name
-        logger.info("Moving {} to {} for processing", target.target_directory, working_dir)
+        logger.info('Moving {} to {} for processing', target.target_directory, working_dir)
         shutil.move(target.target_directory, working_dir)
         output = make_command(working_dir, target.config, is_auto=is_auto)
     else:
         working_file = Path(new_target) / target.target_movie_file.name
         shutil.move(target.target_movie_file, working_file)
-        logger.info("Moving {} to {} for processing", target.target_movie_file, working_file)
+        logger.info('Moving {} to {} for processing', target.target_movie_file, working_file)
         output = make_command(working_file, target.config, is_auto=is_auto)
 
     if output:
@@ -105,9 +105,9 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
     """
     log_name = None
     if movie_file:
-        log_name = movie_file.with_name(movie_file.stem + "_namer.json.gz")
-        logger.info("Writing log to {}", log_name)
-        with open(log_name, "wb") as log_file:
+        log_name = movie_file.with_name(movie_file.stem + '_namer.json.gz')
+        logger.info('Writing log to {}', log_name)
+        with open(log_name, 'wb') as log_file:
             if match_attempts:
                 for result in match_attempts.results:
                     del result.looked_up.original_query
@@ -125,8 +125,8 @@ def write_log_file(movie_file: Optional[Path], match_attempts: Optional[Comparis
 
 
 def _set_perms(target: Path, config: NamerConfig):
-    file_perm: Optional[int] = (int(str(config.set_file_permissions), 8) if config.set_file_permissions else None)
-    dir_perm: Optional[int] = (int(str(config.set_dir_permissions), 8) if config.set_dir_permissions else None)
+    file_perm: Optional[int] = int(str(config.set_file_permissions), 8) if config.set_file_permissions else None
+    dir_perm: Optional[int] = int(str(config.set_dir_permissions), 8) if config.set_dir_permissions else None
 
     if config.set_gid:
         os.lchown(target, uid=-1, gid=config.set_gid)
@@ -145,10 +145,10 @@ def set_permissions(file: Optional[Path], config: NamerConfig):
     Given a file or dir, set permissions from NamerConfig.set_file_permissions,
     NamerConfig.set_dir_permissions, and uid/gid if set for the current process recursively.
     """
-    if system() != "Windows" and file and file.exists() and config.update_permissions_ownership:
+    if system() != 'Windows' and file and file.exists() and config.update_permissions_ownership:
         _set_perms(file, config)
         if file.is_dir():
-            for target in file.rglob("**/*"):
+            for target in file.rglob('**/*'):
                 _set_perms(target, config)
 
 
@@ -225,7 +225,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     # Find non-conflicting movie name.
     movies: List[str] = []
     while True:
-        relative_path = Path(new_metadata.new_file_name(name_template, command.config, f"({infix})"))
+        relative_path = Path(new_metadata.new_file_name(name_template, command.config, f'({infix})'))
         movie_name = target_dir / relative_path
         movie_name = movie_name.resolve()
         infix += 1
@@ -245,7 +245,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     if not command.config.preserve_duplicates and movies:
         # Now set to the final name location since -- will grab the metadata requested
         # incase it has been updated.
-        relative_path = Path(new_metadata.new_file_name(name_template, command.config, "(0)"))
+        relative_path = Path(new_metadata.new_file_name(name_template, command.config, '(0)'))
 
         # no move best match to primary movie location.
         final_location = (target_dir / relative_path).resolve()
@@ -268,9 +268,9 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     # we want to retain files if asked and if a directory will exist.
     if command.target_directory and not command.config.del_other_files and containing_dir:
         containing_dir.mkdir(parents=True, exist_ok=True)
-        logger.info(f"moving other files to new dir: {containing_dir} from {command.target_directory}")
+        logger.info(f'moving other files to new dir: {containing_dir} from {command.target_directory}')
         # first remove namer log if exists
-        possible_log = command.target_movie_file.parent / (command.target_movie_file.stem + "_namer.json.gz")
+        possible_log = command.target_movie_file.parent / (command.target_movie_file.stem + '_namer.json.gz')
         if possible_log.exists():
             possible_log.unlink()
 
@@ -327,7 +327,7 @@ def gather_target_files_from_dir(dir_to_scan: Path, config: NamerConfig) -> Iter
     Find files to process in a target directory.
     """
     if dir_to_scan and dir_to_scan.is_dir() and dir_to_scan.exists():
-        logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
+        logger.info('Scanning dir {} for sub-dirs/files to process', dir_to_scan)
         mapped: Iterable = map(lambda file: make_command((dir_to_scan / file), config), dir_to_scan.iterdir())
         filtered: Iterable[Command] = filter(lambda file: file is not None, mapped)  # type: ignore
         return filtered
@@ -362,7 +362,7 @@ def find_target_file(root_dir: Path, config: NamerConfig) -> Optional[Path]:
     """
     returns largest matching file
     """
-    list_of_files = list(root_dir.rglob("**/*.*"))
+    list_of_files = list(root_dir.rglob('**/*.*'))
     file = None
     if list_of_files:
         for target_ext in config.target_extensions:
@@ -410,10 +410,10 @@ def main(arg_list: List[str]):
     """
     Attempt to parse a name.
     """
-    description = "You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileInfo, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileInfo.\n"
+    description = 'You are using the file name parser of the Namer project. Expects a single input, and will output the contents of FileInfo, which is the internal input to the namer_metadatapi.py script. Output will be the representation of that FileInfo.\n'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-f", "--file", help="String to parse for name parts", required=True)
-    parser.add_argument("-c", "--configfile", help="override location for a configuration file.", type=Path)
+    parser.add_argument('-f', '--file', help='String to parse for name parts', required=True)
+    parser.add_argument('-c', '--configfile', help='override location for a configuration file.', type=Path)
     args = parser.parse_args(arg_list)
     target = Path(args.file).absolute()
     config_file = Path(args.configfile).absolute()
@@ -422,5 +422,5 @@ def main(arg_list: List[str]):
         print(target_file.parsed_file)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(arg_list=sys.argv[1:])

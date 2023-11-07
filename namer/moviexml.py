@@ -34,9 +34,9 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
     """
     Parse an Emby/Jellyfin xml file and creates a LookedUpFileInfo from the data.
     """
-    content = xml_file.read_text(encoding="UTF-8")
+    content = xml_file.read_text(encoding='UTF-8')
 
-    movie: Any = parseString(bytes(content, encoding="UTF-8"))
+    movie: Any = parseString(bytes(content, encoding='UTF-8'))
     info = LookedUpFileInfo()
     info.name = get_childnode_text(movie, 'title')
     info.site = get_all_childnode_text(movie, 'studio')[0]
@@ -46,7 +46,7 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
     info.poster_url = get_childnode_text(art, 'poster')
 
     info.performers = []
-    for actor in get_all_childnode(movie, "actor"):
+    for actor in get_all_childnode(movie, 'actor'):
         name = get_childnode_text(actor, 'name')
         if actor and name:
             performer = Performer(name)
@@ -62,7 +62,7 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
         info.uuid = theporndbid
 
     info.tags = []
-    for genre in get_all_childnode_text(movie, "genre"):
+    for genre in get_all_childnode_text(movie, 'genre'):
         info.tags.append(str(genre))
 
     info.original_parsed_filename = None
@@ -99,17 +99,17 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     doc = Document()
     root: Element = doc.createElement('movie')
     doc.appendChild(root)
-    add_sub_element(doc, root, "plot", info.description)
-    add_sub_element(doc, root, "outline")
-    add_sub_element(doc, root, "title", info.name)
-    add_sub_element(doc, root, "dateadded")
-    add_sub_element(doc, root, "trailer", str(trailer) if trailer else info.trailer_url)
-    add_sub_element(doc, root, "year", info.date[:4] if info.date else None)
-    add_sub_element(doc, root, "premiered", info.date)
-    add_sub_element(doc, root, "releasedate", info.date)
-    add_sub_element(doc, root, "mpaa", "XXX")
+    add_sub_element(doc, root, 'plot', info.description)
+    add_sub_element(doc, root, 'outline')
+    add_sub_element(doc, root, 'title', info.name)
+    add_sub_element(doc, root, 'dateadded')
+    add_sub_element(doc, root, 'trailer', str(trailer) if trailer else info.trailer_url)
+    add_sub_element(doc, root, 'year', info.date[:4] if info.date else None)
+    add_sub_element(doc, root, 'premiered', info.date)
+    add_sub_element(doc, root, 'releasedate', info.date)
+    add_sub_element(doc, root, 'mpaa', 'XXX')
 
-    art = add_sub_element(doc, root, "art")
+    art = add_sub_element(doc, root, 'art')
     add_sub_element(doc, art, 'poster', poster.name if poster else info.poster_url)
     add_sub_element(doc, art, 'background', background.name if background else info.background_url)
 
@@ -142,7 +142,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
 
     add_sub_element(doc, root, 'fileinfo')
 
-    return str(doc.toprettyxml(indent="  ", newl='\n', encoding="UTF-8"), encoding="UTF-8")
+    return str(doc.toprettyxml(indent='  ', newl='\n', encoding='UTF-8'), encoding='UTF-8')
 
 
 def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: NamerConfig, trailer: Optional[Path], poster: Optional[Path], background: Optional[Path], phash: Optional[PerceptualHash]):
@@ -150,8 +150,8 @@ def write_nfo(video_file: Path, new_metadata: LookedUpFileInfo, namer_config: Na
     Writes an .nfo to the correct place for a video file.
     """
     if video_file and new_metadata and namer_config.write_nfo:
-        target = video_file.parent / (video_file.stem + ".nfo")
-        with open(target, "wt", encoding="UTF-8") as nfo_file:
+        target = video_file.parent / (video_file.stem + '.nfo')
+        with open(target, 'wt', encoding='UTF-8') as nfo_file:
             data = write_movie_xml_file(new_metadata, namer_config, trailer, poster, background, phash)
             nfo_file.write(data)
 

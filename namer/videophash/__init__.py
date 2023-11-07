@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Union
 
-import imagehash
-
+from namer.videophash.imagehash import hex_to_hash, ImageHash
 
 __all__ = ['PerceptualHash', 'return_perceptual_hash']
 
@@ -10,7 +9,7 @@ __all__ = ['PerceptualHash', 'return_perceptual_hash']
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class PerceptualHash:
     duration: int
-    phash: imagehash.ImageHash
+    phash: ImageHash
     oshash: str
 
     def to_dict(self):
@@ -21,10 +20,10 @@ class PerceptualHash:
         }
 
 
-def return_perceptual_hash(duration: Union[float, int], phash: Union[str, imagehash.ImageHash], file_oshash: str) -> PerceptualHash:
+def return_perceptual_hash(duration: Union[float, int], phash: Union[str, ImageHash], file_oshash: str) -> PerceptualHash:
     output = PerceptualHash()
     output.duration = int(duration) if isinstance(duration, float) else duration
-    output.phash = imagehash.hex_to_hash(phash) if isinstance(phash, str) else phash
+    output.phash = hex_to_hash(phash) if isinstance(phash, str) else phash
     output.oshash = file_oshash
 
     return output

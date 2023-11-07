@@ -21,7 +21,7 @@ class Http:  # noqa: PIE798
         if 'cache_session' in kwargs:
             del kwargs['cache_session']
 
-        if kwargs.get("stream", False) or not isinstance(cache_session, CachedSession):
+        if kwargs.get('stream', False) or not isinstance(cache_session, CachedSession):
             return requests.request(method.value, url, **kwargs)
         else:
             return cache_session.request(method.value, url, **kwargs)

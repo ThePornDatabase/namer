@@ -2,18 +2,15 @@ import concurrent.futures
 from decimal import Decimal, ROUND_HALF_UP
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Literal, Optional
+from typing import List, Optional
 
-import imagehash
-import numpy
 import oshash
-import scipy.fft
-import scipy.fftpack
 from loguru import logger
 from PIL import Image
 
 from namer.ffmpeg import FFMpeg
 from namer.videophash import PerceptualHash, return_perceptual_hash
+from namer.videophash import imagehash
 
 
 class VideoPerceptualHash:
@@ -57,7 +54,7 @@ class VideoPerceptualHash:
 
         thumbnail_image = self.__generate_image_thumbnail(file, duration, max_workers, use_gpu)
         if thumbnail_image:
-            phash = self.__phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
+            phash = imagehash.phash(thumbnail_image, hash_size=8, high_freq_factor=8, resample=Image.Resampling.BILINEAR)  # type: ignore
 
         return phash
 
@@ -115,19 +112,3 @@ class VideoPerceptualHash:
                 image.paste(images[idx], offset)
 
         return image
-
-    @staticmethod
-    def __phash(image: Image.Image, hash_size=8, high_freq_factor=4, resample: Literal[0, 1, 2, 3, 4, 5] = Image.Resampling.LANCZOS) -> Optional[imagehash.ImageHash]:  # type: ignore
-        if hash_size < 2:
-            raise ValueError("Hash size must be greater than or equal to 2")
-
-        img_size = hash_size * high_freq_factor
-        image = image.resize((img_size, img_size), resample).convert('L')
-        pixels = numpy.asarray(image)
-
-        dct = scipy.fft.dct(scipy.fft.dct(pixels, axis=0), axis=1)
-        dct_low_freq = dct[:hash_size, :hash_size]  # type: ignore
-        med = numpy.median(dct_low_freq)
-        diff = dct_low_freq > med
-
-        return imagehash.ImageHash(diff)

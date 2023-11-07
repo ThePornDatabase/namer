@@ -94,7 +94,7 @@ def dir_with_sub_dirs_to_process(dir_to_scan: Path, config: NamerConfig, infos: 
     based on config settings.
     """
     if dir_to_scan is not None and dir_to_scan.is_dir() and dir_to_scan.exists():
-        logger.info("Scanning dir {} for sub-dirs/files to process", dir_to_scan)
+        logger.info('Scanning dir {} for sub-dirs/files to process', dir_to_scan)
         files = list(dir_to_scan.iterdir())
         files.sort()
         for file in files:
@@ -113,14 +113,14 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
     """
     if new_metadata and video:
         poster = None
-        if config.enabled_tagging and video.suffix.lower() == ".mp4":
-            random = "".join(choices(population=string.ascii_uppercase + string.digits, k=10))
+        if config.enabled_tagging and video.suffix.lower() == '.mp4':
+            random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
             poster = get_image(new_metadata.poster_url, random, video, config) if new_metadata.poster_url else None
-            logger.info("Updating file metadata (atoms): {}", video)
+            logger.info('Updating file metadata (atoms): {}', video)
             update_mp4_file(video, new_metadata, poster, ffprobe_results, config)
 
-        logger.info("Done tagging file: {}", video)
-        if poster is not None and new_metadata.poster_url is not None and new_metadata.poster_url.startswith("http"):
+        logger.info('Done tagging file: {}', video)
+        if poster is not None and new_metadata.poster_url is not None and new_metadata.poster_url.startswith('http'):
             poster.unlink()
 
 
@@ -129,7 +129,7 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     If there is an .nfo file next to the video_file, attempt to read it as
     an Emby/Jellyfin style movie xml file.
     """
-    nfo_file = video_file.parent / (video_file.stem + ".nfo")
+    nfo_file = video_file.parent / (video_file.stem + '.nfo')
     if nfo_file.is_file() and nfo_file.exists():
         return parse_movie_xml_file(nfo_file)
 
@@ -151,17 +151,17 @@ def process_file(command: Command) -> Optional[Command]:
 
     The file is then update based on the metadata from the porndb if a mp4.
     """
-    logger.info("Processing: {}", command.input_file)
+    logger.info('Processing: {}', command.input_file)
     if command.target_movie_file is not None:
         phash: Optional[PerceptualHash] = None
         new_metadata: Optional[LookedUpFileInfo] = None
         search_results: ComparisonResults = ComparisonResults([])
         # convert container type if requested.
         if command.config.convert_container_to and command.target_movie_file.suffix != command.config.convert_container_to:
-            new_loc = command.target_movie_file.parent.joinpath(Path(command.target_movie_file.stem + "." + command.config.convert_container_to))
+            new_loc = command.target_movie_file.parent.joinpath(Path(command.target_movie_file.stem + '.' + command.config.convert_container_to))
             if FFMpeg().convert(command.target_movie_file, new_loc):
                 command.target_movie_file = new_loc
-                if (command.parsed_file):
+                if command.parsed_file:
                     command.parsed_file.extension = command.config.convert_container_to
         # Match to nfo files, if enabled and found.
         if command.write_from_nfos:
@@ -169,9 +169,12 @@ def process_file(command: Command) -> Optional[Command]:
             if new_metadata is not None:
                 new_metadata.original_parsed_filename = command.parsed_file
             else:
-                logger.error("""
+                logger.error(
+                    """
                         Could not process files: {}
-                        In the file's name should start with a site, a date and end with an extension""", command.input_file)
+                        In the file's name should start with a site, a date and end with an extension""",
+                    command.input_file,
+                )
         # elif new_metadata is None and command.stashdb_id is not None and command.ff_probe_results is not None:
         #    phash = VideoPerceptualHash().get_phash(command.target_movie_file)
         #    todo use phash
@@ -191,11 +194,15 @@ def process_file(command: Command) -> Optional[Command]:
                     new_metadata = matched.looked_up
 
             if not command.target_movie_file:
-                logger.error("""
+                logger.error(
+                    """
                     Could not process file or directory: {}
                     Likely attempted to use the directory's name as the name to parse.
                     In general the dir or file's name should start with a site, a date and end with an extension
-                    Target video file in dir was: {}""", command.input_file, command.target_movie_file)
+                    Target video file in dir was: {}""",
+                    command.input_file,
+                    command.target_movie_file,
+                )
 
         target_dir = command.target_directory if command.target_directory is not None else command.target_movie_file.parent
         set_permissions(target_dir, command.config)
@@ -229,7 +236,7 @@ def process_file(command: Command) -> Optional[Command]:
                 tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
                 add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
 
-                logger.success("Done processing file: {}, moved to {}", command.target_movie_file, target.target_movie_file)
+                logger.success('Done processing file: {}, moved to {}', command.target_movie_file, target.target_movie_file)
                 return target
         elif command.inplace is False:
             failed = move_command_files(command, command.config.failed_dir)
@@ -249,11 +256,11 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
         trailer = get_trailer(new_metadata.trailer_url, video_file, config)
 
     if new_metadata:
-        poster = get_image(new_metadata.poster_url, "-poster", video_file, config) if new_metadata.poster_url and config.enabled_poster and ImageDownloadType.POSTER in config.download_type else None
-        background = get_image(new_metadata.background_url, "-background", video_file, config) if new_metadata.background_url and config.enabled_poster and ImageDownloadType.BACKGROUND in config.download_type else None
+        poster = get_image(new_metadata.poster_url, '-poster', video_file, config) if new_metadata.poster_url and config.enabled_poster and ImageDownloadType.POSTER in config.download_type else None
+        background = get_image(new_metadata.background_url, '-background', video_file, config) if new_metadata.background_url and config.enabled_poster and ImageDownloadType.BACKGROUND in config.download_type else None
         for performer in new_metadata.performers:
             if isinstance(performer.image, str):
-                performer_image = get_image(performer.image, "-Performer-" + performer.name.replace(" ", "-") + "-image", video_file, config) if performer.image and config.enabled_poster and ImageDownloadType.PERFORMER in config.download_type else None
+                performer_image = get_image(performer.image, '-Performer-' + performer.name.replace(' ', '-') + '-image', video_file, config) if performer.image and config.enabled_poster and ImageDownloadType.PERFORMER in config.download_type else None
                 if performer_image:
                     performer.image = performer_image
 
@@ -267,21 +274,21 @@ def check_arguments(file_to_process: Path, dir_to_process: Path, config_override
     """
     error = False
     if file_to_process is not None:
-        logger.info("File to process: {}", file_to_process)
+        logger.info('File to process: {}', file_to_process)
         if not file_to_process.is_file() or not file_to_process.exists():
-            logger.error("Error not a file! {}", file_to_process)
+            logger.error('Error not a file! {}', file_to_process)
             error = True
 
     if dir_to_process is not None:
-        logger.info("Directory to process: {}", dir_to_process)
+        logger.info('Directory to process: {}', dir_to_process)
         if not dir_to_process.is_dir() or not dir_to_process.exists():
-            logger.error("Error not a directory! {}", dir_to_process)
+            logger.error('Error not a directory! {}', dir_to_process)
             error = True
 
     if config_override is not None:
-        logger.info("Config override specified: {}", config_override)
+        logger.info('Config override specified: {}', config_override)
         if not config_override.is_file() or not config_override.exists():
-            logger.warning("Config override specified, but file does not exit: {}", config_override)
+            logger.warning('Config override specified, but file does not exit: {}', config_override)
             error = True
 
     return error
@@ -309,13 +316,18 @@ def main(arg_list: List[str]):
     See usage function above.
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
-    parser.add_argument("-c", "--configfile", type=pathlib.Path, help="config file, defaults first to env var NAMER_CONFIG, then local path namer.cfg, and finally ~/.namer.cfg.")
+    parser.add_argument('-c', '--configfile', type=pathlib.Path, help='config file, defaults first to env var NAMER_CONFIG, then local path namer.cfg, and finally ~/.namer.cfg.')
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-f", "--file", type=Path, help="a single file to process, and rename.")
-    group.add_argument("-d", "--dir", type=Path, help="a directory to process.")
-    parser.add_argument("-m", "--many", action="store_true", help="if set, a directory have all it's sub directories processed. Files move only within sub dirs, or are renamed in place, if in the root dir to scan")
-    parser.add_argument("-i", "--infos", action="store_true", help="if set, .nfo files will attempt to be accessed next to movie files, if info files are found and parsed successfully, that metadata will be used rather than porndb matching. If using jellyfin .nfo files, please bump your release date by one day until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="verbose, print logs")
+    group.add_argument('-f', '--file', type=Path, help='a single file to process, and rename.')
+    group.add_argument('-d', '--dir', type=Path, help='a directory to process.')
+    parser.add_argument('-m', '--many', action='store_true', help="if set, a directory have all it's sub directories processed. Files move only within sub dirs, or are renamed in place, if in the root dir to scan")
+    parser.add_argument(
+        '-i',
+        '--infos',
+        action='store_true',
+        help='if set, .nfo files will attempt to be accessed next to movie files, if info files are found and parsed successfully, that metadata will be used rather than porndb matching. If using jellyfin .nfo files, please bump your release date by one day until they fix this issue: https://github.com/jellyfin/jellyfin/issues/7271.',
+    )
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose, print logs')
     args = parser.parse_args(arg_list)
     check_arguments(args.file, args.dir, args.configfile)
 

@@ -38,7 +38,7 @@ def done_copying(file: Optional[Path]) -> bool:
     while True:
         try:
             # pylint: disable=consider-using-with
-            buffered_reader = open(file, mode="rb")  # noqa: SIM115
+            buffered_reader = open(file, mode='rb')  # noqa: SIM115
             buffered_reader.close()
             break
         except PermissionError:
@@ -59,10 +59,10 @@ def retry_failed(namer_config: NamerConfig):
     """
     Moves the contents from the failed dir to the watch dir to attempt reprocessing.
     """
-    logger.info("Retry failed items:")
+    logger.info('Retry failed items:')
 
     # remove all old namer log files
-    for log_file in namer_config.failed_dir.rglob("**/*_namer.json.gz"):
+    for log_file in namer_config.failed_dir.rglob('**/*_namer.json.gz'):
         log_file.unlink()
 
     # move all files back to watch dir.
@@ -75,7 +75,7 @@ def is_fs_case_sensitive():
     """
     Create a temporary file to determine if a filesystem is case-sensitive, or not.
     """
-    with tempfile.NamedTemporaryFile(prefix="TmP") as tmp_file:
+    with tempfile.NamedTemporaryFile(prefix='TmP') as tmp_file:
         return not Path(tmp_file.name.lower()).is_file()
 
 
@@ -88,7 +88,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
     __namer_config: NamerConfig
 
     def __init__(self, namer_config: NamerConfig, enqueue_work_fn):
-        super().__init__(patterns=["*.*"], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
+        super().__init__(patterns=['*.*'], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.__namer_config = namer_config
         self.__enqueue_work_fn = enqueue_work_fn
 
@@ -103,7 +103,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
             path = Path(file_path)
             relative_path = str(path.relative_to(self.__namer_config.watch_dir))
             if not self.__namer_config.ignored_dir_regex.search(relative_path) and done_copying(path) and is_interesting_movie(path, self.__namer_config):
-                logger.info("watchdog process called for {}", relative_path)
+                logger.info('watchdog process called for {}', relative_path)
 
                 # Extra wait time in case other files are copies in as well.
                 if self.__namer_config.del_other_files:
@@ -135,13 +135,13 @@ class MovieWatcher:
         if not self.__stopped and command.get_command_target() not in items or command is None:
             self.__command_queue.put(command)
         else:
-            raise RuntimeError("Command not added to work queue, server is stopping")
+            raise RuntimeError('Command not added to work queue, server is stopping')
 
     def __processing_thread(self):
         while True:
             command = self.__command_queue.get()
             if command is None:
-                logger.info("Marking None task as done")
+                logger.info('Marking None task as done')
                 self.__command_queue.task_done()
                 break
 
@@ -152,7 +152,7 @@ class MovieWatcher:
         with self.__command_queue.mutex:
             self.__command_queue.queue.clear()
 
-        logger.info("exit processing_thread")
+        logger.info('exit processing_thread')
 
     def __init__(self, namer_config: NamerConfig):
         self.__started = False
@@ -201,16 +201,16 @@ class MovieWatcher:
             tries += 1
 
         if not self.get_web_port:
-            raise RuntimeError("application did not get assigned a port within 4 seconds.")
+            raise RuntimeError('application did not get assigned a port within 4 seconds.')
 
         return self
 
     def __simple_exit__(self):
         self.stop()
         if self.__background_thread:
-            logger.info("Background thread join")
+            logger.info('Background thread join')
             self.__background_thread.join()
-            logger.info("Background thread joined")
+            logger.info('Background thread joined')
             self.__background_thread = None
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -221,19 +221,19 @@ class MovieWatcher:
         starts a background thread to check for files.
         """
         config = self.__namer_config
-        logger.info("Start porndb scene watcher.... watching: {}", config.watch_dir)
+        logger.info('Start porndb scene watcher.... watching: {}', config.watch_dir)
 
-        if os.environ.get("PROJECT_VERSION"):
-            project_version = os.environ.get("PROJECT_VERSION")
-            print(f"Namer version: {project_version}")
+        if os.environ.get('PROJECT_VERSION'):
+            project_version = os.environ.get('PROJECT_VERSION')
+            print(f'Namer version: {project_version}')
 
-        if os.environ.get("BUILD_DATE"):
-            build_date = os.environ.get("BUILD_DATE")
-            print(f"Built on: {build_date}")
+        if os.environ.get('BUILD_DATE'):
+            build_date = os.environ.get('BUILD_DATE')
+            print(f'Built on: {build_date}')
 
-        if os.environ.get("GIT_HASH"):
-            git_hash = os.environ.get("GIT_HASH")
-            print(f"Git Hash: {git_hash}")
+        if os.environ.get('GIT_HASH'):
+            git_hash = os.environ.get('GIT_HASH')
+            print(f'Git Hash: {git_hash}')
 
         self.__schedule()
         self.__event_observer.start()
@@ -241,7 +241,7 @@ class MovieWatcher:
 
         # touch all existing movie files.
         with suppress(FileNotFoundError):
-            for file in self.__namer_config.watch_dir.rglob("**/*.*"):
+            for file in self.__namer_config.watch_dir.rglob('**/*.*'):
                 if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
                     relative_path = str(file.relative_to(self.__namer_config.watch_dir))
                     if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
@@ -254,32 +254,32 @@ class MovieWatcher:
         """
         if not self.__stopped:
             self.__stopped = True
-            logger.debug("Exiting watchdog")
+            logger.debug('Exiting watchdog')
 
             self.__event_observer.stop()
-            logger.debug("Observer stop")
+            logger.debug('Observer stop')
 
             self.__event_observer.join()
-            logger.debug("Observer join")
+            logger.debug('Observer join')
 
             if self.__webserver:
-                logger.info("Webserver stop")
+                logger.info('Webserver stop')
                 self.__webserver.stop()
 
             self.__command_queue.put(None)
 
             # let the thread processing work items complete.
             self.__worker_thread.join()
-            logger.debug("Command queue None")
+            logger.debug('Command queue None')
 
-            test = os.environ.get('PYTEST_CURRENT_TEST', "")
-            logger.debug(f"{test}: Command join")
+            test = os.environ.get('PYTEST_CURRENT_TEST', '')
+            logger.debug(f'{test}: Command join')
 
             items = list(map(lambda x: x.get_command_target() if x else None, self.__command_queue.queue))
-            logger.info(f"Waiting for items to process {items}")
+            logger.info(f'Waiting for items to process {items}')
             # we already wait for the worker thread.
             # self.__command_queue.join()
-            logger.debug("Command joined")
+            logger.debug('Command joined')
 
     def get_web_port(self) -> Optional[int]:
         if self.__webserver is not None:

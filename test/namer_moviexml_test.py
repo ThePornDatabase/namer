@@ -24,25 +24,21 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         verify tag in place functions.
         """
 
-        with tempfile.TemporaryDirectory(prefix="test") as tmpdir:
+        with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
             tempdir = Path(tmpdir)
-            copytree(Path(__file__).resolve().parent, tempdir / "test")
-            xmlfile = tempdir / "test" / "ea.nfo"
+            copytree(Path(__file__).resolve().parent, tempdir / 'test')
+            xmlfile = tempdir / 'test' / 'ea.nfo'
             info = parse_movie_xml_file(xmlfile)
-            self.assertEqual(info.site, "Evil Angel")
-            self.assertEqual(info.date, "2022-01-03")
+            self.assertEqual(info.site, 'Evil Angel')
+            self.assertEqual(info.date, '2022-01-03')
             self.assertIsNotNone(info.description)
             if info.description is not None:
-                self.assertIn("Cute brunette Carmela Clutch positions her", info.description)
-            self.assertEqual(info.look_up_site_id, "https://www.evilangel.com/en/video/0/198543/")
-            self.assertEqual(info.uuid, "1678283")
-            self.assertEqual(info.name, "Carmela Clutch: Fabulous Anal 3-Way!")
-            self.assertIn("Deep Throat", info.tags)
-            expected_performers = [
-                Performer("Carmela Clutch", "Female"),
-                Performer("Francesca Le", "Female"),
-                Performer("Mark Wood", "Male")
-            ]
+                self.assertIn('Cute brunette Carmela Clutch positions her', info.description)
+            self.assertEqual(info.look_up_site_id, 'https://www.evilangel.com/en/video/0/198543/')
+            self.assertEqual(info.uuid, '1678283')
+            self.assertEqual(info.name, 'Carmela Clutch: Fabulous Anal 3-Way!')
+            self.assertIn('Deep Throat', info.tags)
+            expected_performers = [Performer('Carmela Clutch', 'Female'), Performer('Francesca Le', 'Female'), Performer('Mark Wood', 'Male')]
             self.assertListEqual(info.performers, expected_performers)
 
     def test_writing_xml_metadata_genre_flag(self):
@@ -51,7 +47,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
 
         with environment() as (_path, fakeTPDB, config):
-            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", config)
+            name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', config)
             config.enable_metadataapi_genres = True
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
@@ -132,7 +128,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test parsing a stored response as a LookedUpFileInfo
         """
         with environment() as (_path, fakeTPDB, config):
-            name = parse_file_name("EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4", config)
+            name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', config)
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
             result = results.results[0]
@@ -210,5 +206,5 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         self.assertEqual(output, expected)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

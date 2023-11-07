@@ -36,7 +36,7 @@ class StashVideoPerceptualHash:
         system = platform.system().lower()
         arch = platform.machine().lower()
         if arch not in self.__supported_arch.keys():
-            raise SystemError(f"Unsupported architecture error {arch}")
+            raise SystemError(f'Unsupported architecture error {arch}')
 
         self.__phash_name += '-' + self.__supported_arch[arch] + self.__phash_suffixes[system]
 
@@ -65,6 +65,7 @@ class StashVideoPerceptualHash:
         ]
 
         if file:
+            # fmt: off
             args.extend([
                 '--video', str(file)
             ])

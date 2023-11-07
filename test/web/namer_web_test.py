@@ -90,35 +90,57 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.extra_sleep_time = 1
         with make_test_context(config) as (_tempdir, _watcher, browser, _mock_tpdb):
             new_ea(config.failed_dir, use_dir=False)
-            (FailedPage(browser).refresh_items()
-                .navigate_to().queue_page()
-                .navigate_to().failed_page()
+            (
+                FailedPage(browser)
+                .refresh_items()
+                .navigate_to()
+                .queue_page()
+                .navigate_to()
+                .failed_page()
                 .items()[0]
-                .file_name().is_equal_to('EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!').on_success()
-                .file_extension().is_equal_to('MP4').on_success()
-                .show_log_modal().log_text().is_equal_to('No results found').on_success().close()
+                .file_name()
+                .is_equal_to('EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way!')
+                .on_success()
+                .file_extension()
+                .is_equal_to('MP4')
+                .on_success()
+                .show_log_modal()
+                .log_text()
+                .is_equal_to('No results found')
+                .on_success()
+                .close()
                 .items()[0]
                 .show_search_modal()
                 .search()
-                .results()[0].title_text().is_equal_to('Carmela Clutch: Fabulous Anal 3-Way!').on_success()
-                .site_text().is_equal_to('Evil Angel').on_success()
-                .date_text().is_equal_to('2022-01-03').on_success()
-                .performers()[0].is_equal_to('Carmela Clutch').on_success()
+                .results()[0]
+                .title_text()
+                .is_equal_to('Carmela Clutch: Fabulous Anal 3-Way!')
+                .on_success()
+                .site_text()
+                .is_equal_to('Evil Angel')
+                .on_success()
+                .date_text()
+                .is_equal_to('2022-01-03')
+                .on_success()
+                .performers()[0]
+                .is_equal_to('Carmela Clutch')
+                .on_success()
                 .select()  # returns to failed page
-                .assert_has_no_files())
-        print("done")
+                .assert_has_no_files()
+            )
+        print('done')
 
     def test_parrot(self):
         with ParrotWebServer() as parrot:
-            parrot.set_response("/test?", bytearray("response", 'utf-8'))
+            parrot.set_response('/test?', bytearray('response', 'utf-8'))
             url = parrot.get_url()
 
             headers = {
-                "Authorization": "Bearer token",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "User-Agent": "namer-1",
+                'Authorization': 'Bearer token',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'User-Agent': 'namer-1',
             }
-            with requests.request("GET", f"{url}test", headers=headers) as response:
+            with requests.request('GET', f'{url}test', headers=headers) as response:
                 response.raise_for_status()
-                self.assertEqual(response.text, "response")
+                self.assertEqual(response.text, 'response')
