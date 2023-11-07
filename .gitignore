@@ -17,3 +17,4 @@ namer/web/public/assets
 namer/web/templates
 namer/tools
 .flakeheaven_cache
+.ruff_cache
