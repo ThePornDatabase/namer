@@ -12,7 +12,9 @@
             {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
                 <th scope="col">Percentage</th>
             {% endif %}
-            <th scope="col" data-orderable="false" data-priority="-2" class="noVis"></th>
+            {% if active_page == 'failed' %}
+                <th scope="col" data-orderable="false" data-priority="-2" class="noVis"></th>
+            {% endif %}
         </tr>
         </thead>
         <tbody>
@@ -28,9 +30,11 @@
                 {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
                     <td class="col-1" data-order="{{ file['percentage'] }}">{{ '%.1f'|format(file['percentage']) }}%</td>
                 {% endif %}
-                <td class="col-2 text-end">
-                    {% include 'render/fileActions.html' %}
-                </td>
+                {% if active_page == 'failed' %}
+                    <td class="col-2 text-end">
+                        {% include 'render/fileActions.html' %}
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>
