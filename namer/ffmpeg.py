@@ -275,6 +275,7 @@ class FFMpeg:
             ffmpeg
             .input(mp4_file)
             .output(str(output), c='copy')
+            .overwrite_output()
             .run_async(quiet=True, cmd=self.__ffmpeg_cmd)
         )
         stdout, stderr = process.communicate()
