@@ -7,6 +7,7 @@ import argparse
 import itertools
 import json
 import re
+import sys
 from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,10 +23,11 @@ from unidecode import unidecode
 
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, Performer, SceneHash, SceneType
 from namer.configuration import NamerConfig
-from namer.configuration_utils import default_config
+from namer.configuration_utils import default_config, verify_configuration
 from namer.command import make_command, set_permissions, Command
 from namer.fileinfo import FileInfo
 from namer.http import Http, RequestType
+from namer.name_formatter import PartialFormatter
 from namer.videophash import imagehash, PerceptualHash
 
 
@@ -562,6 +564,13 @@ def main(args_list: List[str]):
     args = parser.parse_args(args=args_list)
 
     config = default_config(args.configfile.absolute() if args.configfile else None)
+
+    if args.verbose is not None:
+        level = 'DEBUG' if config.debug else 'INFO'
+        logger.add(sys.stdout, format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}', level=level, diagnose=config.diagnose_errors)
+
+    verify_configuration(config, PartialFormatter())
+
     file_name: Optional[Command] = make_command(args.file.absolute(), config, ignore_file_restrictions=True)
 
     results: Optional[ComparisonResults] = None

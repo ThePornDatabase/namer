@@ -70,8 +70,6 @@ def main():
 
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == 'watchdog':
-        level = 'DEBUG' if config.debug else 'INFO'
-        logger.add(sys.stdout, format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}', level=level, diagnose=config.diagnose_errors)
         namer.watchdog.create_watcher(config).run()
     elif arg1 == 'rename':
         namer.namer.main(arg_list[1:])
