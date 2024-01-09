@@ -5,6 +5,7 @@ the porndb, and used for renaming (in place), and updating a mp4
 file's metadata (poster, artists, etc.)
 """
 import argparse
+import sys
 from dataclasses import dataclass
 import pathlib
 import string
@@ -333,6 +334,11 @@ def main(arg_list: List[str]):
 
     conf: Optional[Path] = args.configfile
     config: NamerConfig = default_config(conf)
+
+    if args.verbose is not None:
+        level = 'DEBUG' if config.debug else 'INFO'
+        logger.add(sys.stdout, format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}', level=level, diagnose=config.diagnose_errors)
+
     verify_configuration(config, PartialFormatter())
 
     target = args.file
