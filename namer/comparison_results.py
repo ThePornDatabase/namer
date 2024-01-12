@@ -367,6 +367,7 @@ class ComparisonResult:
 @dataclass(init=True, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
 class ComparisonResults:
     results: List[ComparisonResult]
+    fileinfo: Optional[FileInfo]
 
     def get_match(self) -> Optional[ComparisonResult]:
         match = None

@@ -527,7 +527,7 @@ def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash:
                     file_infos.original_query = comparison_results[0].looked_up.original_query
                     comparison_results[0].looked_up = file_infos
 
-    return ComparisonResults(comparison_results)
+    return ComparisonResults(comparison_results, file_name_parts)
 
 
 def toggle_collected(metadata: LookedUpFileInfo, config: NamerConfig):

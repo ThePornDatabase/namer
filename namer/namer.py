@@ -156,7 +156,7 @@ def process_file(command: Command) -> Optional[Command]:
     if command.target_movie_file is not None:
         phash: Optional[PerceptualHash] = None
         new_metadata: Optional[LookedUpFileInfo] = None
-        search_results: ComparisonResults = ComparisonResults([])
+        search_results: ComparisonResults = ComparisonResults([], None)
         # convert container type if requested.
         if command.config.convert_container_to and command.target_movie_file.suffix != command.config.convert_container_to:
             new_loc = command.target_movie_file.parent.joinpath(Path(command.target_movie_file.stem + '.' + command.config.convert_container_to))
