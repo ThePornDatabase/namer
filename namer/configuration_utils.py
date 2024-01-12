@@ -275,7 +275,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'host': ('watchdog', None, None),
     'web_root': ('watchdog', None, None),
     'allow_delete_files': ('watchdog', to_bool, from_bool),
-    'add_max_percent_column': ('watchdog', to_bool, from_bool),
+    'add_columns_from_log': ('watchdog', to_bool, from_bool),
     'add_complete_column': ('watchdog', to_bool, from_bool),
     'debug': ('watchdog', to_bool, from_bool),
     'manual_mode': ('watchdog', to_bool, from_bool),

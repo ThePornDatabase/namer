@@ -427,9 +427,9 @@ class NamerConfig:
     Allow to delete files in web interface
     """
 
-    add_max_percent_column: bool = False
+    add_columns_from_log: bool = False
     """
-    Add maximal percent from failed log to table in web interface
+    Add columns from failed log to table in web interface
     """
 
     add_complete_column: bool = False
@@ -560,7 +560,7 @@ class NamerConfig:
                 'host': self.host,
                 'web_root': self.web_root,
                 'allow_delete_files': self.allow_delete_files,
-                'add_max_percent_column': self.add_max_percent_column,
+                'add_columns_from_log': self.add_columns_from_log,
                 'add_complete_column': self.add_complete_column,
                 'debug': self.debug,
                 'manual_mode': self.manual_mode,
