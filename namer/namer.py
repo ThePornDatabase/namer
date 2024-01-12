@@ -187,6 +187,7 @@ def process_file(command: Command) -> Optional[Command]:
             phash = calculate_phash(command.target_movie_file, command.config) if command.config.search_phash else None
             if phash:
                 logger.info(f'Calculated hashes: {phash.to_dict()}')
+                command.parsed_file.hashes = phash
 
             search_results = match(command.parsed_file, command.config, phash=phash)
             if search_results:
@@ -220,6 +221,8 @@ def process_file(command: Command) -> Optional[Command]:
                 if command.config.send_phash:
                     phash = phash if phash else calculate_phash(command.target_movie_file, command.config)
                     if phash:
+                        command.parsed_file.hashes = phash
+
                         scene_hash = SceneHash(str(phash.phash), HashType.PHASH, phash.duration)
                         share_hash(new_metadata, scene_hash, command.config)
 
