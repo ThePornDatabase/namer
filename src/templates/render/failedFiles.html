@@ -9,8 +9,10 @@
                 <th scope="col">Completed</th>
             {% endif %}
             <th scope="col">Size</th>
-            {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
+            {% if config.add_columns_from_log and config.write_namer_failed_log and active_page == 'failed' %}
                 <th scope="col">Percentage</th>
+                <th scope="col">PHash</th>
+                <th scope="col">OSHash</th>
             {% endif %}
             {% if active_page == 'failed' %}
                 <th scope="col" data-orderable="false" data-priority="-2" class="noVis"></th>
@@ -27,8 +29,10 @@
                     <td class="col-2" data-order="{{ file['log_time'] }}">{{ file['log_time']|timestamp_to_datetime|strftime('%d-%m-%Y %H:%M:%S') }}</td>
                 {% endif %}
                 <td class="col-1" data-order="{{ file['size'] }}">{{ file['size']|filesizeformat(binary=True) }}</td>
-                {% if config.add_max_percent_column and config.write_namer_failed_log and active_page == 'failed' %}
+                {% if config.add_columns_from_log and config.write_namer_failed_log and active_page == 'failed' %}
                     <td class="col-1" data-order="{{ file['percentage'] }}">{{ '%.1f'|format(file['percentage']) }}%</td>
+                    <td class="col-1" data-order="{{ file['phash'] }}">{{ file['phash'] }}</td>
+                    <td class="col-1" data-order="{{ file['oshash'] }}">{{ file['oshash'] }}</td>
                 {% endif %}
                 {% if active_page == 'failed' %}
                     <td class="col-2 text-end">

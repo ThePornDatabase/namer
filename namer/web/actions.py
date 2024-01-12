@@ -71,13 +71,17 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
         'size': stat.st_size,
     }
 
-    percentage = 0.0
-    if config and config.add_max_percent_column and config.write_namer_failed_log and sub_path:
+    percentage, phash, oshash = 0.0, '', ''
+    if config and config.write_namer_failed_log and config.add_columns_from_log and sub_path:
         log_data = read_failed_log_file(sub_path, config)
         if log_data and log_data.results:
             percentage = max([100 - item.phash_distance * 2.5 if item.phash_distance is not None and item.phash_distance <= 8 else item.name_match for item in log_data.results])
+            phash = str(log_data.fileinfo.hashes.phash)
+            oshash = log_data.fileinfo.hashes.oshash
 
     res['percentage'] = percentage
+    res['phash'] = phash
+    res['oshash'] = oshash
 
     log_time = 0
     if config and config.add_complete_column and config.write_namer_failed_log and sub_path:
