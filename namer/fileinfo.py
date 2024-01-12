@@ -63,7 +63,7 @@ class FileInfo:
         name: {self.name}
         extension: {self.extension}
         original full name: {self.source_file_name}
-        hashes: {self.hashes.to_dict()}
+        hashes: {self.hashes.to_dict() if self.hashes else None}
         """
 
 
