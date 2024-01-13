@@ -9,6 +9,7 @@ from typing import List, Optional, Pattern
 from loguru import logger
 
 from namer.configuration import NamerConfig
+from namer.videophash import PerceptualHash
 
 DEFAULT_REGEX_TOKENS = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
 
@@ -50,6 +51,10 @@ class FileInfo:
     """
     What was originally parsed.
     """
+    hashes: Optional[PerceptualHash] = None
+    """
+    File hashes.
+    """
 
     def __str__(self) -> str:
         return f"""site: {self.site}
@@ -58,6 +63,7 @@ class FileInfo:
         name: {self.name}
         extension: {self.extension}
         original full name: {self.source_file_name}
+        hashes: {self.hashes.to_dict() if self.hashes else None}
         """
 
 
