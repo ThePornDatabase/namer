@@ -18,7 +18,7 @@ from werkzeug.routing import Rule
 from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
 from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
-from namer.fileinfo import parse_file_name
+from namer.fileinfo import FileInfo, parse_file_name
 from namer.metadataapi import __build_url, __evaluate_match, __request_response_json_object, __metadataapi_response_to_data
 from namer.namer import calculate_phash
 from namer.videophash import PerceptualHash
@@ -74,10 +74,13 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     percentage, phash, oshash = 0.0, '', ''
     if config and config.write_namer_failed_log and config.add_columns_from_log and sub_path:
         log_data = read_failed_log_file(sub_path, config)
-        if log_data and log_data.results:
-            percentage = max([100 - item.phash_distance * 2.5 if item.phash_distance is not None and item.phash_distance <= 8 else item.name_match for item in log_data.results])
-            phash = str(log_data.fileinfo.hashes.phash)
-            oshash = log_data.fileinfo.hashes.oshash
+        if log_data:
+            if log_data.results:
+                percentage = max([100 - item.phash_distance * 2.5 if item.phash_distance is not None and item.phash_distance <= 8 else item.name_match for item in log_data.results])
+
+            if log_data.fileinfo.hashes:
+                phash = str(log_data.fileinfo.hashes.phash)
+                oshash = log_data.fileinfo.hashes.oshash
 
     res['percentage'] = percentage
     res['phash'] = phash
@@ -242,6 +245,9 @@ def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Opt
 
                 if not hasattr(item.looked_up, 'hashes'):
                     item.looked_up.hashes = []
+
+            if not hasattr(decoded, 'fileinfo'):
+                decoded.fileinfo = FileInfo()
 
             res = decoded
 
