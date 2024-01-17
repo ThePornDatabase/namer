@@ -3,7 +3,7 @@ from typing import Union
 
 from namer.videophash.imagehash import hex_to_hash, ImageHash
 
-__all__ = ['PerceptualHash', 'return_perceptual_hash']
+__all__ = ['PerceptualHash', 'return_perceptual_hash', 'ImageHash']
 
 
 @dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)

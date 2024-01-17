@@ -1,14 +1,17 @@
 """
 A wrapper allowing shutdown of a Flask server.
 """
+import json
 import logging
 import mimetypes
 from datetime import datetime
+from json import JSONEncoder
 from queue import Queue
 from threading import Thread
 from typing import Any, List, Optional, Union
 
 from flask import Blueprint, Flask
+from flask.json.provider import _default, JSONProvider
 from flask_compress import Compress
 from loguru import logger
 from waitress import create_server
@@ -16,6 +19,7 @@ from waitress.server import BaseWSGIServer, MultiSocketServer
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import from_str_list_lower
+from namer.videophash import ImageHash
 from namer.web.routes import api, web
 
 
@@ -94,6 +98,8 @@ class GenericWebServer:
         self.__app.jinja_env.trim_blocks = True
         self.__app.jinja_env.lstrip_blocks = True
 
+        self.__app.json = CustomJSONProvider(self.__app)
+
     def start(self):
         logger.info(f'Starting server: {self.get_url()}')
         self.__thread.start()
@@ -144,7 +150,7 @@ class GenericWebServer:
 
     @staticmethod
     def timestamp_to_datetime(item: int) -> datetime:
-        return datetime.utcfromtimestamp(item)
+        return datetime.fromtimestamp(item)
 
     @staticmethod
     def strftime(item: datetime, datetime_format: str) -> str:
@@ -165,3 +171,19 @@ class NamerWebServer(GenericWebServer):
         ]
 
         super().__init__(self.__namer_config.host, self.__namer_config.port, webroot, blueprints)
+
+
+class CustomJSONProvider(JSONProvider):
+    def dumps(self, obj, **kwargs):
+        return json.dumps(obj, **kwargs, cls=CustomJSONEncoder)
+
+    def loads(self, s: Union[str, bytes], **kwargs):
+        return json.loads(s, **kwargs)
+
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ImageHash):
+            return str(obj)
+
+        return _default(obj)
