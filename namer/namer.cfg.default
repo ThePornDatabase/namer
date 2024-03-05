@@ -1,7 +1,7 @@
 [namer]
 
 # token to access porndb.
-# sign up here: https://metadataapi.net/register
+# sign up here: https://theporndb.net/register
 porndb_token = ****************************************
 
 # You should likely never edit this, unless you know regex really well and wont ask for help when you mess up.

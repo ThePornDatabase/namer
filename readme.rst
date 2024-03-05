@@ -210,7 +210,7 @@ Pull Requests Are Welcome!
 
 Just be sure to pay attention to the tests and any failing pylint results.   If you want to vet a pr will be accepted before building code, file an new feature request issue, and 4c0d3r will comment on it and set you up for success.   Tests are must.
 
-.. _PornDB: http://metadataapi.net/
+.. _PornDB: http://theporndb.net/
 .. _namer section: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L1
 .. _metadata section: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L59
 .. _watchdog section: https://github.com/ThePornDatabase/namer/blob/main/namer/namer.cfg.default#L89

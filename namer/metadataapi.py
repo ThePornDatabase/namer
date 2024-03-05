@@ -242,7 +242,7 @@ def download_file(url: str, file: Path, config: NamerConfig) -> bool:
     headers = {
         'User-Agent': 'namer-1',
     }
-    if 'metadataapi.net' in url:
+    if 'theporndb.net' in url:
         headers['Authorization'] = f'Bearer {config.porndb_token}'
 
     http_file = Http.download_file(url, headers=headers)
@@ -554,7 +554,7 @@ def share_hash(metadata: LookedUpFileInfo, scene_hash: SceneHash, config: NamerC
 
 def main(args_list: List[str]):
     """
-    Looks up metadata from metadataapi.net base on file name.
+    Looks up metadata from theporndb.net base on file name.
     """
     description = """
     Command line interface to look up a suggested name for an adult movie file based on an input string

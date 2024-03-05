@@ -44,7 +44,7 @@ class NamerConfig:
     porndb_token: str
     """
     token to access porndb.
-    sign up here: https://metadataapi.net/
+    sign up here: https://theporndb.net/
     """
 
     name_parser: str = '{_site}{_optional_date}{_sep}{_ts}{_name}{_dot}{_ext}'
@@ -270,7 +270,7 @@ class NamerConfig:
     Cleanup final filename
     """
 
-    override_tpdb_address: str = 'https://api.metadataapi.net'
+    override_tpdb_address: str = 'https://api.theporndb.net'
     """
     Used only for testing, can override the location of the porn database - usually to point at a locally
     running server that responds like tpdb to predefined queries.

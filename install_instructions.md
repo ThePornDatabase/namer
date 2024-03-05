@@ -22,7 +22,7 @@ To start off with windows you only really need to manually install one thing and
 
 **Step 4:** Now that you have the default config, you have to set it up correctly. I'm not going to go into detail about every setting as they are mostly labeled, I'll just do the ones to get you running. You are going to need to get an API key for namer to talk to TPDB.
 
-To do that go [here](https://metadataapi.net) and make an account if you haven't already. Once you do go into your profile and create an API key. Call it whatever you want and then copy that key into the config in the `porndb_token` section.
+To do that go [here](https://theporndb.net) and make an account if you haven't already. Once you do go into your profile and create an API key. Call it whatever you want and then copy that key into the config in the `porndb_token` section.
 
 Scroll down until you see the `Watchdog` section. This is where we are going to setup your directories for your folders that namer will look for. It's super important that these are named correctly and **NOT INSIDE ONE ANOTHER**. Putting folders inside each other could result in unexpected errors and outputs.
 
