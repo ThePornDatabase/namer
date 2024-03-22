@@ -119,4 +119,13 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
 
         return jsonify(res)
 
+    @blueprint.route('/healthcheck', methods=['GET'])
+    def healthcheck() -> Response:
+        # fmt: off
+        res = {
+            'status': 'OK',
+        }
+
+        return jsonify(res)
+
     return blueprint
