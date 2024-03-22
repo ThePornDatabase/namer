@@ -29,6 +29,8 @@ class PartialFormatter(string.Formatter):
         'type',
         'year',
         'resolution',
+        'video_codec',
+        'audio_codec',
         'external_id',
     ]
 

@@ -218,6 +218,12 @@ def process_file(command: Command) -> Optional[Command]:
                 if ffprobe_results:
                     new_metadata.resolution = ffprobe_results.get_resolution()
 
+                    video = ffprobe_results.get_default_video_stream()
+                    new_metadata.video_codec = video.codec_name if video else None
+
+                    audio = ffprobe_results.get_default_audio_stream()
+                    new_metadata.audio_codec = audio.codec_name if audio else None
+
                 if command.config.send_phash:
                     phash = phash if phash else calculate_phash(command.target_movie_file, command.config)
                     if phash:

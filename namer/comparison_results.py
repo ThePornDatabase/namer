@@ -169,6 +169,14 @@ class LookedUpFileInfo:
     """
     the width of video in pixels.
     """
+    video_codec: Optional[str] = None
+    """
+    the codec of video.
+    """
+    audio_codec: Optional[str] = None
+    """
+    the codec of audio.
+    """
     external_id: Optional[str] = None
     """
     Should the source site provide it, the id for the site.
@@ -182,7 +190,6 @@ class LookedUpFileInfo:
         self.performers = []
         self.tags = []
         self.hashes = []
-        self.resolution = None
         self.original_parsed_filename = FileInfo()
 
     def as_dict(self, config: NamerConfig):
@@ -227,6 +234,8 @@ class LookedUpFileInfo:
             'trans': self.original_parsed_filename.trans if self.original_parsed_filename else None,
             'vr': vr,
             'resolution': res_str,
+            'video_codec': self.video_codec,
+            'audio_codec': self.audio_codec,
             'type': self.type.value,
             'external_id': self.external_id,
         }
