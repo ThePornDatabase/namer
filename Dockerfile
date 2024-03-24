@@ -79,5 +79,5 @@ ENV BUILD_DATE=$BUILD_DATE
 ENV GIT_HASH=$GIT_HASH
 ENV PROJECT_VERSION=$PROJECT_VERSION
 EXPOSE 6980
-HEALTHCHECK --interval=1m --timeout=30s CMD curl -f http://localhost:6980/api/healthcheck || exit 1
+HEALTHCHECK --interval=1m --timeout=30s CMD curl -s $(python3 -m namer url)api/healthcheck >/dev/null || exit 1
 ENTRYPOINT ["python3", "-m", "namer", "watchdog"]
