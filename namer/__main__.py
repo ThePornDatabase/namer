@@ -14,7 +14,6 @@ match the file.
 import sys
 from datetime import timedelta
 from pathlib import Path
-from queue import Queue
 
 from loguru import logger
 from requests_cache import CachedSession
@@ -25,7 +24,6 @@ import namer.watchdog
 import namer.web
 from namer.configuration_utils import default_config
 from namer.models import db
-from namer.web.server import NamerWebServer
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION
@@ -78,8 +76,7 @@ def main():
     elif arg1 == 'suggest':
         namer.metadataapi.main(arg_list[1:])
     elif arg1 == 'url':
-        webserver = NamerWebServer(config, Queue())
-        print(webserver.get_url())
+        print(f'http://{config.host}:{config.port}{config.web_root}')
     elif arg1 in ['-h', 'help', None]:
         print(DESCRIPTION)
 
