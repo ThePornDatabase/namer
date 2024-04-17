@@ -80,7 +80,7 @@ def __evaluate_match(name_parts: Optional[FileInfo], looked_up: LookedUpFileInfo
             release_date = bool(name_parts.date and (name_parts.date == looked_up.date or unidecode(name_parts.date) == looked_up.date))
 
         # Full Name
-        # Deal with some movies having 50+ performers by throwing performer info away for essamble casts :D
+        # Deal with some movies having 50+ performers by throwing performer info away for assemble casts :D
         performers = looked_up.performers
         if len(looked_up.performers) > 6:
             performers = []

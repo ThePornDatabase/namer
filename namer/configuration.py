@@ -402,6 +402,16 @@ class NamerConfig:
     Extra time to sleep in seconds to allow all information to be copied in dir
     """
 
+    queue_limit: int = 0
+    """
+    Maximum amount of items in queue
+    """
+
+    queue_sleep_time: int = 5
+    """
+    Sleep time between queue size check
+    """
+
     web: bool = True
     """
     Run webserver while running watchdog
@@ -555,6 +565,8 @@ class NamerConfig:
                 'dest_dir': str(self.dest_dir),
                 'retry_time': self.retry_time,
                 'extra_sleep_time': self.extra_sleep_time,
+                'queue_limit': self.queue_limit,
+                'queue_sleep_time': self.queue_sleep_time,
                 'web': self.web,
                 'port': self.port,
                 'host': self.host,

@@ -86,11 +86,13 @@ class MovieEventHandler(PatternMatchingEventHandler):
     """
 
     __namer_config: NamerConfig
+    __command_queue: Queue
 
-    def __init__(self, namer_config: NamerConfig, enqueue_work_fn):
+    def __init__(self, namer_config: NamerConfig, enqueue_work_fn, command_queue: Queue):
         super().__init__(patterns=['*.*'], case_sensitive=is_fs_case_sensitive(), ignore_directories=True, ignore_patterns=None)
         self.__namer_config = namer_config
         self.__enqueue_work_fn = enqueue_work_fn
+        self.__command_queue = command_queue
 
     def on_any_event(self, event: FileSystemEvent):
         file_path = None
@@ -108,6 +110,10 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 # Extra wait time in case other files are copies in as well.
                 if self.__namer_config.del_other_files:
                     time.sleep(self.__namer_config.extra_sleep_time)
+
+                if self.__namer_config.queue_limit > 0:
+                    while self.__command_queue.qsize() >= self.__namer_config.queue_limit:
+                        time.sleep(self.__namer_config.queue_sleep_time)
 
                 self.prepare_file_for_processing(path)
 
@@ -161,9 +167,9 @@ class MovieWatcher:
         self.__src_path = namer_config.watch_dir
         self.__event_observer = PollingObserver()
         self.__webserver: Optional[NamerWebServer] = None
-        self.__command_queue: Queue = Queue()
+        self.__command_queue: Queue = Queue(maxsize=self.__namer_config.queue_limit)
         self.__worker_thread: Thread = Thread(target=self.__processing_thread, daemon=True)
-        self.__event_handler = MovieEventHandler(namer_config, self.enqueue_work)
+        self.__event_handler = MovieEventHandler(namer_config, self.enqueue_work, self.__command_queue)
         self.__background_thread: Optional[Thread] = None
 
     def get_config(self) -> NamerConfig:

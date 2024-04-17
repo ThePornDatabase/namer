@@ -264,6 +264,8 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'ignored_dir_regex': ('watchdog', to_pattern, from_pattern),
     'del_other_files': ('watchdog', to_bool, from_bool),
     'extra_sleep_time': ('watchdog', to_int, from_int),
+    'queue_limit': ('watchdog', to_int, from_int),
+    'queue_sleep_time': ('watchdog', to_int, from_int),
     'new_relative_path_name': ('watchdog', None, None),
     'watch_dir': ('watchdog', to_path, from_path),
     'work_dir': ('watchdog', to_path, from_path),
