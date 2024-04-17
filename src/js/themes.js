@@ -14,8 +14,10 @@
   const setTheme = function (theme) {
     if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.setAttribute('data-bs-theme', 'dark')
+      document.cookie = 'theme=dark'
     } else {
       document.documentElement.setAttribute('data-bs-theme', theme)
+      document.cookie = 'theme=' + theme
     }
   }
 

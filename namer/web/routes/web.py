@@ -3,7 +3,7 @@ Defines the web routes of a Flask webserver for namer.
 """
 from queue import Queue
 
-from flask import Blueprint, redirect, render_template
+from flask import Blueprint, redirect, render_template, request
 from flask.wrappers import Response
 
 from namer.configuration import NamerConfig
@@ -38,7 +38,9 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         Displays all failed to name files.
         """
         data = get_failed_files(config)
-        return render_template('pages/failed.html', data=data, config=config)
+        theme = request.cookies.get('theme', 'auto')
+
+        return render_template('pages/failed.html', data=data, config=config, theme=theme)
 
     @blueprint.route('/queue')
     def queue() -> str:
@@ -46,13 +48,17 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         Displays all queued files.
         """
         data = get_queued_files(command_queue, config)
-        return render_template('pages/queue.html', data=data, config=config)
+        theme = request.cookies.get('theme', 'auto')
+
+        return render_template('pages/queue.html', data=data, config=config, theme=theme)
 
     @blueprint.route('/settings')
     def settings() -> str:
         """
         Displays namer settings.
         """
-        return render_template('pages/settings.html', config=config)
+        theme = request.cookies.get('theme', 'auto')
+
+        return render_template('pages/settings.html', config=config, theme=theme)
 
     return blueprint
