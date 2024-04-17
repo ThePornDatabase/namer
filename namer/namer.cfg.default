@@ -231,6 +231,12 @@ del_other_files = False
 # with no movies of you have del_other_files set to True.
 extra_sleep_time = 30
 
+# Maximum amount of items in queue
+queue_limit = 0
+
+# Sleep time between queue size check
+queue_sleep_time = 5
+
 # Configured like inplace_name above, but with paths, and is relative to
 # dest_dir, which is where completed files will be moved to.
 new_relative_path_name={full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}
