@@ -4,7 +4,7 @@ A wrapper allowing shutdown of a Flask server.
 import json
 import logging
 import mimetypes
-from datetime import datetime
+import datetime
 from json import JSONEncoder
 from queue import Queue
 from threading import Thread
@@ -86,6 +86,7 @@ class GenericWebServer:
 
         filters = {
             'timestamp_to_datetime': self.timestamp_to_datetime,
+            'seconds_to_format': self.seconds_to_format,
             'strftime': self.strftime,
             'is_list': self.is_list,
             'is_dict': self.is_dict,
@@ -150,7 +151,11 @@ class GenericWebServer:
 
     @staticmethod
     def timestamp_to_datetime(item: int) -> datetime:
-        return datetime.fromtimestamp(item)
+        return datetime.datetime.fromtimestamp(item)
+
+    @staticmethod
+    def seconds_to_format(item: int) -> str:
+        return str(datetime.timedelta(seconds=item))
 
     @staticmethod
     def strftime(item: datetime, datetime_format: str) -> str:
