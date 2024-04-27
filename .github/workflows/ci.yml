@@ -130,6 +130,7 @@ jobs:
           name: unittest
           fail_ci_if_error: true
           verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   dockerbuild:
     runs-on: ubuntu-latest
