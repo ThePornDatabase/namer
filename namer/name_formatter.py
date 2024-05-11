@@ -2,6 +2,7 @@ import re
 import string
 
 from jinja2 import Template
+from jinja2.filters import FILTERS
 
 
 class PartialFormatter(string.Formatter):
@@ -42,6 +43,7 @@ class PartialFormatter(string.Formatter):
 
     def __init__(self, missing='~~', bad_fmt='!!'):
         self.missing, self.bad_fmt = missing, bad_fmt
+        FILTERS['split'] = str.split
 
     def get_field(self, field_name, args, kwargs):
         # Handle a key not found
