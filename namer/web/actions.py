@@ -78,7 +78,7 @@ def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
             if log_data.results:
                 percentage = max([100 - item.phash_distance * 2.5 if item.phash_distance is not None and item.phash_distance <= 8 else item.name_match for item in log_data.results])
 
-            if log_data.fileinfo.hashes:
+            if log_data.fileinfo and log_data.fileinfo.hashes:
                 phash = str(log_data.fileinfo.hashes.phash)
                 oshash = log_data.fileinfo.hashes.oshash
 
