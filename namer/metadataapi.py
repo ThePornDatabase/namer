@@ -355,10 +355,10 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
         elif hasattr(json_performer, 'extra'):
             performer.role = json_performer.extra.gender
 
-        if hasattr(json_performer, 'image'):
+        if hasattr(json_performer, 'parent') and hasattr(json_performer.parent, 'image'):
+            performer.image = json_performer.parent.image
+        elif hasattr(json_performer, 'image'):
             performer.image = json_performer.image
-        else:
-            performer.image = None
 
         file_info.performers.append(performer)
 
