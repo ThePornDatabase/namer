@@ -25,7 +25,7 @@ RUN apt-get update \
        systemd-sysv \
        python3-pip \
        python3-dev \
-       python3.10-venv \
+       python3-venv \
        curl \
        wget \
        gnupg2 \
@@ -78,6 +78,7 @@ ENV NAMER_CONFIG=/config/namer.cfg
 ENV BUILD_DATE=$BUILD_DATE
 ENV GIT_HASH=$GIT_HASH
 ENV PROJECT_VERSION=$PROJECT_VERSION
+
 EXPOSE 6980
 HEALTHCHECK --interval=1m --timeout=30s CMD curl -s $(python3 -m namer url)/api/healthcheck >/dev/null || exit 1
 ENTRYPOINT ["python3", "-m", "namer", "watchdog"]

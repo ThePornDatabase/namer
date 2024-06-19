@@ -103,9 +103,9 @@ You have two choices.   Do you use docker?  Pull the docker image, here's docker
         - TZ=America/Los_Angeles
         - NAMER_CONFIG=/config/namer.cfg
       volumes:
-        - /apps/namer/:/config <- this will store the namer.cfg file copied by you from the git repo ( namer/namer.cfg.default )
-        - /media:/data <- this will have the four folders namer needs to work, referenced in the namer.cfg file you create.
-    healthcheck: <- if on a qnap nas, the default health check will not work for you, domain name is the container_name
+        - /apps/namer/:/config # <- this will store the namer.cfg file copied by you from the git repo ( namer/namer.cfg.default )
+        - /media:/data # <- this will have the four folders namer needs to work, referenced in the namer.cfg file you create.
+    healthcheck: # <- if on a qnap nas, the default health check will not work for you, domain name is the container_name
       test: [ "CMD-SHELL", "curl -f http://namer:6980/<replace with your webroot>/api/healthcheck || exit 1" ]
       interval: 1m
       timeout: 30s
