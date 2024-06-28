@@ -421,10 +421,13 @@ def __metadataapi_response_to_data(json_object, url: str, json_response: str, na
     return file_infos
 
 
-def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, scene_type: Optional[SceneType] = None, phash: Optional[PerceptualHash] = None) -> Optional[str]:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, scene_type: Optional[SceneType] = None, phash: Optional[PerceptualHash] = None, add_to_collection: Optional[bool] = None) -> Optional[str]:
     query = ''
     if uuid:
         query = uuid
+
+        if add_to_collection:
+            query += '?add_to_collection=1'
     else:
         if scene_type == SceneType.SCENE:
             query = 'scenes'
@@ -500,7 +503,7 @@ def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
 
 
 def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: str, namer_config: NamerConfig) -> Optional[LookedUpFileInfo]:
-    url = __build_url(namer_config, uuid=uuid)
+    url = __build_url(namer_config, uuid=uuid, add_to_collection=namer_config.mark_collected)
     if url:
         file_infos = __get_metadataapi_net_info(url, name_parts, namer_config)
         if file_infos:
