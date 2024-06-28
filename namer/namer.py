@@ -23,7 +23,7 @@ from namer.command import make_command, move_command_files, move_to_final_locati
 from namer.database import search_file_in_database, write_file_to_database
 from namer.ffmpeg import FFProbeResults, FFMpeg
 from namer.fileinfo import FileInfo
-from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash, toggle_collected
+from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
@@ -234,9 +234,6 @@ def process_file(command: Command) -> Optional[Command]:
 
                         scene_hash = SceneHash(phash.oshash, HashType.OSHASH, phash.duration)
                         share_hash(new_metadata, scene_hash, command.config)
-
-                if command.config.mark_collected and not new_metadata.is_collected:
-                    toggle_collected(new_metadata, command.config)
 
                 log_file = command.config.failed_dir / (command.input_file.stem + '_namer.json.gz')
                 if log_file.is_file():
