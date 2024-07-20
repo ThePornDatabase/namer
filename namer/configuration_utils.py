@@ -358,13 +358,13 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    config = ConfigUpdater()
+    config = ConfigUpdater(allow_no_value=True)
     config_str = resource_file_to_str('namer', 'namer.cfg.default')
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.config_updater = config
 
-    user_config = ConfigUpdater()
+    user_config = ConfigUpdater(allow_no_value=True)
     cfg_paths = [
         user_set,
         os.environ.get('NAMER_CONFIG'),

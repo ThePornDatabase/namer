@@ -69,7 +69,7 @@ def sample_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    config = ConfigUpdater()
+    config = ConfigUpdater(allow_no_value=True)
     config_str = ''
     if hasattr(resources, 'files'):
         config_str = resources.files('namer').joinpath('namer.cfg.default').read_text()
