@@ -27,7 +27,7 @@ class ImageDownloadType(str, Enum):
 
 
 # noinspection PyDataclass
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=False, frozen=False)
 class NamerConfig:
     # pylint: disable=too-many-instance-attributes
 
@@ -496,6 +496,9 @@ class NamerConfig:
                 output.append(f'  {value}: {config[key][value]}')
 
         return '\n'.join(output)
+
+    def __hash__(self):
+        return hash(self.__str__())
 
     def to_json(self):
         config = self.to_dict()
