@@ -280,6 +280,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'add_columns_from_log': ('watchdog', to_bool, from_bool),
     'add_complete_column': ('watchdog', to_bool, from_bool),
     'debug': ('watchdog', to_bool, from_bool),
+    'console_format': ('watchdog', None, None),
     'manual_mode': ('watchdog', to_bool, from_bool),
     'diagnose_errors': ('watchdog', to_bool, from_bool),
 }

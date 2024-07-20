@@ -285,6 +285,9 @@ add_complete_column = False
 # Set logger level to debug
 debug = False
 
+# Set logger output format
+console_format = <green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}
+
 # Manual mode, successful matches will go to failed directory
 manual_mode = False
 
