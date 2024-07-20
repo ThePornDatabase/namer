@@ -78,6 +78,7 @@ def sample_config() -> NamerConfig:
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.extra_sleep_time = 0
+    namer_config.console_format = '<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <4}</level> | {message}'
     namer_config.config_updater = config
     return namer_config
 
