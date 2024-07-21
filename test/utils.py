@@ -69,7 +69,7 @@ def sample_config() -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    config = ConfigUpdater()
+    config = ConfigUpdater(allow_no_value=True)
     config_str = ''
     if hasattr(resources, 'files'):
         config_str = resources.files('namer').joinpath('namer.cfg.default').read_text()
@@ -78,6 +78,7 @@ def sample_config() -> NamerConfig:
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.extra_sleep_time = 0
+    namer_config.console_format = '<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <4}</level> | {message}'
     namer_config.config_updater = config
     return namer_config
 
@@ -167,9 +168,7 @@ class FakeTPDB(ParrotWebServer):
         self.add_evil_angel('/movies?parse=EvilAngel%20-%202022-01-03%20-%20Carmela%20Clutch%20Fabulous%20Anal%203-Way%21&limit=25')
         # Image for UI Test:
         self.add_evil_angel('/scenes?parse=EvilAngel.-.2022-01-03.-.Carmela.Clutch.Fabulous.Anal.3-Way%21.mp4&limit=25')
-        self.add_poster(
-            '/qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https://cdn.metadataapi.net/sites/3f/9f/51/cf3828d65425bca2890d53ef242d8cf/logo/evil-angel_dark[1].png,-10,-10,25,50)/https://cdn.metadataapi.net/scene/f4/ab/3e/a91d31d6dee223f4f30a57bfd83b151/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp?'
-        )
+        self.add_poster('/qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https://cdn.metadataapi.net/sites/3f/9f/51/cf3828d65425bca2890d53ef242d8cf/logo/evil-angel_dark[1].png,-10,-10,25,50)/https://cdn.metadataapi.net/scene/f4/ab/3e/a91d31d6dee223f4f30a57bfd83b151/background/bg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp?')
         # DorcelClub
         # Search Results
         self.add_dorcel_club('/scenes?parse=dorcelclub.2021-12-23.Aya%20Benetti%20Megane%20Lopez%20And%20Bella%20Tina&limit=25')
@@ -200,22 +199,8 @@ class FakeTPDB(ParrotWebServer):
         self.add_json_response('{}', '/movies?parse=goodangel.2022-01-03.&limit=25')
         self.add_json_response('{}', '/movies?parse=goodangel.&limit=25')
 
-        self.add_json_response(
-            """{
-   "data" : {
-      "favicon" : null,
-      "id" : 1309,
-      "logo" : null,
-      "name" : "Gamma Enterprises",
-      "network_id" : null,
-      "parent_id" : null,
-      "poster" : null,
-      "short_name" : "gammaenterprises",
-      "url" : "N/A"
-   }
-}""",
-            '/sites/1309?',
-        )
+        self.add_json_response('{"data":{"favicon":null,"id":1309,"logo":null,"name":"Gamma Enterprises","network_id":null,"parent_id":null,"poster":null,"short_name":"gammaenterprises","url":"N/A"}}', '/sites/1309?')
+        self.add_json_response('{"data":{"id":1,"name":"Admin"}}', '/auth/user?')
 
 
 @contextlib.contextmanager

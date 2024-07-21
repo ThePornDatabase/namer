@@ -22,6 +22,7 @@ from watchdog.observers.polling import PollingObserver
 from namer.configuration import NamerConfig
 from namer.configuration_utils import verify_configuration
 from namer.command import gather_target_files_from_dir, is_interesting_movie, make_command_relative_to, move_command_files, Command
+from namer.metadataapi import get_user_info
 from namer.name_formatter import PartialFormatter
 from namer.namer import process_file
 from namer.web.server import NamerWebServer
@@ -300,12 +301,18 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     Configure and start a watchdog looking for new Movies.
     """
     level = 'DEBUG' if namer_watchdog_config.debug else 'INFO'
-    logger.add(sys.stdout, format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}', level=level, diagnose=namer_watchdog_config.diagnose_errors)
+    logger.add(sys.stdout, format=namer_watchdog_config.console_format, level=level, diagnose=namer_watchdog_config.diagnose_errors)
 
     logger.info(namer_watchdog_config)
 
     if not verify_configuration(namer_watchdog_config, PartialFormatter()):
         sys.exit(-1)
+
+    user = get_user_info(namer_watchdog_config)
+    if not user:
+        sys.exit(-1)
+
+    logger.info(f'Logged as {user.name} ({user.id})')
 
     if namer_watchdog_config.retry_time:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))

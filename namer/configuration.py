@@ -27,7 +27,7 @@ class ImageDownloadType(str, Enum):
 
 
 # noinspection PyDataclass
-@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=True, frozen=False)
+@dataclass(init=False, repr=False, eq=True, order=False, unsafe_hash=False, frozen=False)
 class NamerConfig:
     # pylint: disable=too-many-instance-attributes
 
@@ -457,6 +457,11 @@ class NamerConfig:
     Set logger level to debug
     """
 
+    console_format: str
+    """
+    Set logger output format
+    """
+
     manual_mode: bool = False
     """
     If True, successful matches will go to failed directory
@@ -491,6 +496,9 @@ class NamerConfig:
                 output.append(f'  {value}: {config[key][value]}')
 
         return '\n'.join(output)
+
+    def __hash__(self):
+        return hash(self.__str__())
 
     def to_json(self):
         config = self.to_dict()
@@ -575,6 +583,7 @@ class NamerConfig:
                 'add_columns_from_log': self.add_columns_from_log,
                 'add_complete_column': self.add_complete_column,
                 'debug': self.debug,
+                'console_format': self.console_format,
                 'manual_mode': self.manual_mode,
                 'diagnose_errors': self.diagnose_errors,
             },

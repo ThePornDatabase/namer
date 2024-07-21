@@ -343,7 +343,7 @@ def main(arg_list: List[str]):
 
     if args.verbose is not None:
         level = 'DEBUG' if config.debug else 'INFO'
-        logger.add(sys.stdout, format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}', level=level, diagnose=config.diagnose_errors)
+        logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
 
     verify_configuration(config, PartialFormatter())
 

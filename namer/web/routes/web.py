@@ -7,6 +7,7 @@ from flask import Blueprint, redirect, render_template, request
 from flask.wrappers import Response
 
 from namer.configuration import NamerConfig
+from namer.metadataapi import get_user_info
 from namer.web.actions import get_failed_files, get_queued_files
 
 
@@ -39,8 +40,9 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         """
         data = get_failed_files(config)
         theme = request.cookies.get('theme', 'auto')
+        user = get_user_info(config)
 
-        return render_template('pages/failed.html', data=data, config=config, theme=theme)
+        return render_template('pages/failed.html', data=data, config=config, theme=theme, user=user)
 
     @blueprint.route('/queue')
     def queue() -> str:
@@ -49,8 +51,9 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         """
         data = get_queued_files(command_queue, config)
         theme = request.cookies.get('theme', 'auto')
+        user = get_user_info(config)
 
-        return render_template('pages/queue.html', data=data, config=config, theme=theme)
+        return render_template('pages/queue.html', data=data, config=config, theme=theme, user=user)
 
     @blueprint.route('/settings')
     def settings() -> str:
@@ -58,7 +61,8 @@ def get_routes(config: NamerConfig, command_queue: Queue) -> Blueprint:
         Displays namer settings.
         """
         theme = request.cookies.get('theme', 'auto')
+        user = get_user_info(config)
 
-        return render_template('pages/settings.html', config=config, theme=theme)
+        return render_template('pages/settings.html', config=config, theme=theme, user=user)
 
     return blueprint

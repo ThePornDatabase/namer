@@ -9,6 +9,7 @@ import json
 import re
 import sys
 from contextlib import suppress
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
@@ -421,13 +422,15 @@ def __metadataapi_response_to_data(json_object, url: str, json_response: str, na
     return file_infos
 
 
-def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, scene_type: Optional[SceneType] = None, phash: Optional[PerceptualHash] = None, add_to_collection: Optional[bool] = None) -> Optional[str]:
+def __build_url(namer_config: NamerConfig, site: Optional[str] = None, release_date: Optional[str] = None, name: Optional[str] = None, uuid: Optional[str] = None, page: Optional[int] = None, scene_type: Optional[SceneType] = None, phash: Optional[PerceptualHash] = None, add_to_collection: Optional[bool] = None, user: Optional[bool] = None) -> Optional[str]:
     query = ''
     if uuid:
         query = uuid
 
         if add_to_collection:
             query += '?add_to_collection=1'
+    elif user:
+        query += 'auth/user'
     else:
         if scene_type == SceneType.SCENE:
             query = 'scenes'
@@ -555,6 +558,16 @@ def share_hash(metadata: LookedUpFileInfo, scene_hash: SceneHash, config: NamerC
     __request_response_json_object(f'{config.override_tpdb_address}/{metadata.uuid}/hash', config=config, method=RequestType.POST, data=data)
 
 
+@lru_cache(maxsize=1)
+def get_user_info(config: NamerConfig):
+    url = __build_url(config, user=True)
+    response = __request_response_json_object(url, config)
+
+    data = json.loads(response, object_hook=lambda d: SimpleNamespace(**d)) if response else None
+
+    return data.data if data else None
+
+
 def main(args_list: List[str]):
     """
     Looks up metadata from theporndb.net base on file name.
@@ -574,7 +587,7 @@ def main(args_list: List[str]):
 
     if args.verbose is not None:
         level = 'DEBUG' if config.debug else 'INFO'
-        logger.add(sys.stdout, format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level.icon} {level: <8}</level> | {message}', level=level, diagnose=config.diagnose_errors)
+        logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
 
     verify_configuration(config, PartialFormatter())
 

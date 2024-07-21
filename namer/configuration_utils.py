@@ -280,6 +280,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'add_columns_from_log': ('watchdog', to_bool, from_bool),
     'add_complete_column': ('watchdog', to_bool, from_bool),
     'debug': ('watchdog', to_bool, from_bool),
+    'console_format': ('watchdog', None, None),
     'manual_mode': ('watchdog', to_bool, from_bool),
     'diagnose_errors': ('watchdog', to_bool, from_bool),
 }
@@ -357,13 +358,13 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
     """
     Attempts reading various locations to fine a namer.cfg file.
     """
-    config = ConfigUpdater()
+    config = ConfigUpdater(allow_no_value=True)
     config_str = resource_file_to_str('namer', 'namer.cfg.default')
     config.read_string(config_str)
     namer_config = from_config(config, NamerConfig())
     namer_config.config_updater = config
 
-    user_config = ConfigUpdater()
+    user_config = ConfigUpdater(allow_no_value=True)
     cfg_paths = [
         user_set,
         os.environ.get('NAMER_CONFIG'),
