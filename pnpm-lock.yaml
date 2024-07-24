@@ -18,11 +18,11 @@ importers:
         specifier: ^1.11.3
         version: 1.11.3
       datatables.net:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.2
+        version: 2.1.2
       datatables.net-bs5:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.2
+        version: 2.1.2
       datatables.net-buttons:
         specifier: ^3.1.0
         version: 3.1.0
@@ -77,7 +77,7 @@ importers:
         version: 9.7.0
       eslint-config-standard:
         specifier: ^17.1.0
-        version: 17.1.0(eslint-plugin-import@2.29.1(eslint@9.7.0))(eslint-plugin-n@17.9.0(eslint@9.7.0))(eslint-plugin-promise@6.5.1(eslint@9.7.0))(eslint@9.7.0)
+        version: 17.1.0(eslint-plugin-import@2.29.1(eslint@9.7.0))(eslint-plugin-n@17.9.0(eslint@9.7.0))(eslint-plugin-promise@7.0.0(eslint@9.7.0))(eslint@9.7.0)
       eslint-plugin-import:
         specifier: ^2.29.1
         version: 2.29.1(eslint@9.7.0)
@@ -85,8 +85,8 @@ importers:
         specifier: ^17.9.0
         version: 17.9.0(eslint@9.7.0)
       eslint-plugin-promise:
-        specifier: ^6.5.1
-        version: 6.5.1(eslint@9.7.0)
+        specifier: ^7.0.0
+        version: 7.0.0(eslint@9.7.0)
       file-loader:
         specifier: ^6.2.0
         version: 6.2.0(webpack@5.93.0(webpack-cli@5.1.4))
@@ -115,8 +115,8 @@ importers:
         specifier: ^1.77.8
         version: 1.77.8
       sass-loader:
-        specifier: ^14.2.1
-        version: 14.2.1(sass@1.77.8)(webpack@5.93.0(webpack-cli@5.1.4))
+        specifier: ^15.0.0
+        version: 15.0.0(sass@1.77.8)(webpack@5.93.0(webpack-cli@5.1.4))
       terser-webpack-plugin:
         specifier: ^5.3.10
         version: 5.3.10(webpack@5.93.0(webpack-cli@5.1.4))
@@ -963,8 +963,8 @@ packages:
     resolution: {integrity: sha512-G/M/tIiMrTAxEWRfLfQJMmGNX28IxBg4PBz8XqQhqUHLFI6TL2htpIB1iQCj144V5ee/JaKyT9/WZ0MGZWfA7A==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
 
-  '@eslint/config-array@0.17.0':
-    resolution: {integrity: sha512-A68TBu6/1mHHuc5YJL0U0VVeGNiklLAL6rRmhTCP2B5XjWLMnrX+HkO+IAXyHvks5cyyY1jjK5ITPQ1HGS2EVA==}
+  '@eslint/config-array@0.17.1':
+    resolution: {integrity: sha512-BlYOpej8AQ8Ev9xVqroV7a02JK3SkBAaN9GfMMH9W6Ch8FlQlkjGw4Ir7+FgYwfirivAf4t+GtzuAxqfukmISA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/eslintrc@3.1.0':
@@ -1045,8 +1045,8 @@ packages:
   '@types/eslint-scope@3.7.7':
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
 
-  '@types/eslint@8.56.10':
-    resolution: {integrity: sha512-Shavhk87gCtY2fhXDctcfS3e6FdxWkCx1iUZ9eEUbh7rTqlZT0/IzOkCOVt0fCjcFuZ9FPYfuezTBImfHCDBGQ==}
+  '@types/eslint@9.6.0':
+    resolution: {integrity: sha512-gi6WQJ7cHRgZxtkQEoyHMppPjq9Kxo5Tjn2prSKDSmZrCz8TZ3jSRCeTJm+WoM+oB0WG37bRqLzaaU3q7JypGg==}
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
@@ -1069,8 +1069,8 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/node@20.14.11':
-    resolution: {integrity: sha512-kprQpL8MMeszbz6ojB5/tU8PLN4kesnN8Gjzw349rDlNgsSzg90lAVj3llK99Dh7JON+t9AuscPPFW6mPbTnSA==}
+  '@types/node@20.14.12':
+    resolution: {integrity: sha512-r7wNXakLeSsGT0H1AU863vS2wa5wBOK4bWMjZz2wj+8nBx+m5PeIn0k8AloSLpRuiwdRQZwarZqHE4FNArPuJQ==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -1334,8 +1334,8 @@ packages:
   caniuse-api@3.0.0:
     resolution: {integrity: sha512-bsTwuIg/BZZK/vreVTYYbSWoe2F+71P7K5QGEX+pT250DZbfU1MQ5prOKpPR+LL6uWKK3KMwMCAS74QB3Um1uw==}
 
-  caniuse-lite@1.0.30001642:
-    resolution: {integrity: sha512-3XQ0DoRgLijXJErLSl+bLnJ+Et4KqV1PY6JJBGAFlsNsz31zeAIncyeZfLCabHK/jtSh+671RM9YMldxjUPZtA==}
+  caniuse-lite@1.0.30001643:
+    resolution: {integrity: sha512-ERgWGNleEilSrHM6iUz/zJNSQTP8Mr21wDWpdgvRwcTXGAq6jMtOUPP4dqFPTdKqZ2wKTdtB+uucZ3MRpAUSmg==}
 
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -1560,8 +1560,8 @@ packages:
     resolution: {integrity: sha512-t/Ygsytq+R995EJ5PZlD4Cu56sWa8InXySaViRzw9apusqsOO2bQP+SbYzAhR0pFKoB+43lYy8rWban9JSuXnA==}
     engines: {node: '>= 0.4'}
 
-  datatables.net-bs5@2.1.0:
-    resolution: {integrity: sha512-8eIkLVvcnTAk6rebLUD334yC96tYkARkVjeGn4ovGtmtAsgHYljiJl7ReWbCsSIoDfoBh512R7xk2x5MjvUi8g==}
+  datatables.net-bs5@2.1.2:
+    resolution: {integrity: sha512-DBkr0+yBDNJYmJ1JlPh/wYJ8h9yNMHDtNE7wznuZUP32CrKRsPF2pvLsvyzChY/j0ZvR5l2myxI6wDQFx+dFLQ==}
 
   datatables.net-buttons-bs5@3.1.0:
     resolution: {integrity: sha512-8zexUUFfeI/7hozxIQaBwIHEgkx0jroYEDXry5MJnTtbxJstqCkkU1jTb0QwDghhpYHvUVmujM4aWG1Of9Hihg==}
@@ -1587,8 +1587,8 @@ packages:
   datatables.net-responsive@3.0.2:
     resolution: {integrity: sha512-OVsrTfcYvT8YtnOeCef51veKc+DABVPWOypvID+xFzCgyBDCIgcauTk+H5zItOscXw/CwSIbGN9zD6Sxa7lZPA==}
 
-  datatables.net@2.1.0:
-    resolution: {integrity: sha512-pFfCCwbMjAY3NY947y6oNMxPwABcsK+YY18/tZdZxp5FLeluWbS93efWVBxeXoHV9mm+hq5KfhYOe6LXtVIe0g==}
+  datatables.net@2.1.2:
+    resolution: {integrity: sha512-FZMH3bVqP6pKq/LwhFRoH22xW45bWt9eAdf7hmFrZkluXId6RNOr1EnrVvwHTo/f7l/rZX4wgHvnGvtOyj9Spw==}
 
   debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
@@ -1638,8 +1638,8 @@ packages:
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
 
-  electron-to-chromium@1.4.832:
-    resolution: {integrity: sha512-cTen3SB0H2SGU7x467NRe1eVcQgcuS6jckKfWJHia2eo0cHIGOqHoAxevIYZD4eRHcWjkvFzo93bi3vJ9W+1lA==}
+  electron-to-chromium@1.5.0:
+    resolution: {integrity: sha512-Vb3xHHYnLseK8vlMJQKJYXJ++t4u1/qJ3vykuVrVjvdiOEhYyT1AuP4x03G8EnPmYvYOhe9T+dADTmthjRQMkA==}
 
   emoji-regex@10.3.0:
     resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
@@ -1648,8 +1648,8 @@ packages:
     resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==}
     engines: {node: '>= 4'}
 
-  enhanced-resolve@5.17.0:
-    resolution: {integrity: sha512-dwDPwZL0dmye8Txp2gzFmA6sxALaSvdRDjPH0viLcKrtlOL3tw62nWWweVD1SdILDTJrbrL6tdWVN58Wo6U3eA==}
+  enhanced-resolve@5.17.1:
+    resolution: {integrity: sha512-LMHl3dXhTcfv8gM4kEzIUeTQ+7fpdA0l2tUf34BddXPkz2A5xJ5L/Pchd5BL6rdccM9QGvu0sWZzK1Z1t4wwyg==}
     engines: {node: '>=10.13.0'}
 
   entities@4.5.0:
@@ -1771,9 +1771,9 @@ packages:
     peerDependencies:
       eslint: '>=8.23.0'
 
-  eslint-plugin-promise@6.5.1:
-    resolution: {integrity: sha512-KEYBjj9nCynXAquwKrYEnIJ1zK+e+O5jqwn/9Aln/FhdOXm6WwsmCVatDM6OAxkEzbigsyD79Fi3DUWWqulTEA==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+  eslint-plugin-promise@7.0.0:
+    resolution: {integrity: sha512-wb1ECT+b90ndBdAujhIdAU8oQ3Vt5gKqP/t78KOmg0ifynrvc2jGR9f6ndbOVNFpKf6jLUBlBBDF3H3Wk0JICg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
 
@@ -2042,15 +2042,15 @@ packages:
     resolution: {integrity: sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==}
     engines: {node: '>= 4'}
 
-  immutable@4.3.6:
-    resolution: {integrity: sha512-Ju0+lEMyzMVZarkTn/gqRpdqd5dOPaz1mCZ0SH3JV6iFw81PldE/PEB1hWVEA288HPt4WXW8O7AWxB10M+03QQ==}
+  immutable@4.3.7:
+    resolution: {integrity: sha512-1hqclzwYwjRDFLjcFxOM5AYkkG0rpFPpr1RLPMEuGczoS7YA8gLhy8SWXYRAA/XwfEHpfo3cw5JGioS32fnMRw==}
 
   import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
 
-  import-local@3.1.0:
-    resolution: {integrity: sha512-ASB07uLtnDs1o6EHjKpX34BKYDSqnFerfTOJL2HvMqF70LnxpjkzDB8J44oT9pu4AMPkQwf8jl6szgvNd2tRIg==}
+  import-local@3.2.0:
+    resolution: {integrity: sha512-2SPlun1JUPWoM6t3F0dw0FkCF/jWY8kttcY4f599GLTSjh2OCuuhdTkJQsEcZzBqbXZGKMK2OqW1oZsjtf/gQA==}
     engines: {node: '>=8'}
     hasBin: true
 
@@ -2373,8 +2373,8 @@ packages:
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
 
-  node-releases@2.0.17:
-    resolution: {integrity: sha512-Ww6ZlOiEQfPfXM45v17oabk77Z7mg5bOt7AjDyzy7RjK9OrLrLC8dyZQoAPEOtFX9SaNf1Tdvr5gRJWdTJj7GA==}
+  node-releases@2.0.18:
+    resolution: {integrity: sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==}
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -2978,8 +2978,8 @@ packages:
     resolution: {integrity: sha512-CdASjNJPvRa7roO6Ra/gLYBTzYzzPyyBXxIMdGW3USQLyjWEls2RgW5UBTXaQVp+OrpeCK3bLem8smtmheoRuw==}
     engines: {node: '>= 0.4'}
 
-  sass-loader@14.2.1:
-    resolution: {integrity: sha512-G0VcnMYU18a4N7VoNDegg2OuMjYtxnqzQWARVWCIVSZwJeiL9kg8QMsuIZOplsJgTzZLF6jGxI3AClj8I9nRdQ==}
+  sass-loader@15.0.0:
+    resolution: {integrity: sha512-mbXAL7sI/fgt3skXR6xHxtKkaGyxRrGf7zrU4hLLWxBDJEcAe0QsoNy92qKttCb3zfMniTkU2kD9yakUKtW7vQ==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       '@rspack/core': 0.x || 1.x
@@ -4344,7 +4344,7 @@ snapshots:
 
   '@eslint-community/regexpp@4.11.0': {}
 
-  '@eslint/config-array@0.17.0':
+  '@eslint/config-array@0.17.1':
     dependencies:
       '@eslint/object-schema': 2.1.4
       debug: 4.3.5
@@ -4383,7 +4383,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.14.11
+      '@types/node': 20.14.12
       '@types/yargs': 17.0.32
       chalk: 4.1.2
 
@@ -4431,10 +4431,10 @@ snapshots:
 
   '@types/eslint-scope@3.7.7':
     dependencies:
-      '@types/eslint': 8.56.10
+      '@types/eslint': 9.6.0
       '@types/estree': 1.0.5
 
-  '@types/eslint@8.56.10':
+  '@types/eslint@9.6.0':
     dependencies:
       '@types/estree': 1.0.5
       '@types/json-schema': 7.0.15
@@ -4457,7 +4457,7 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/node@20.14.11':
+  '@types/node@20.14.12':
     dependencies:
       undici-types: 5.26.5
 
@@ -4673,7 +4673,7 @@ snapshots:
   autoprefixer@10.4.19(postcss@8.4.39):
     dependencies:
       browserslist: 4.23.2
-      caniuse-lite: 1.0.30001642
+      caniuse-lite: 1.0.30001643
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.1
@@ -4744,9 +4744,9 @@ snapshots:
 
   browserslist@4.23.2:
     dependencies:
-      caniuse-lite: 1.0.30001642
-      electron-to-chromium: 1.4.832
-      node-releases: 2.0.17
+      caniuse-lite: 1.0.30001643
+      electron-to-chromium: 1.5.0
+      node-releases: 2.0.18
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
 
   buffer-from@1.1.2: {}
@@ -4769,11 +4769,11 @@ snapshots:
   caniuse-api@3.0.0:
     dependencies:
       browserslist: 4.23.2
-      caniuse-lite: 1.0.30001642
+      caniuse-lite: 1.0.30001643
       lodash.memoize: 4.1.2
       lodash.uniq: 4.5.0
 
-  caniuse-lite@1.0.30001642: {}
+  caniuse-lite@1.0.30001643: {}
 
   chalk@2.4.2:
     dependencies:
@@ -5013,56 +5013,56 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.1
 
-  datatables.net-bs5@2.1.0:
+  datatables.net-bs5@2.1.2:
     dependencies:
-      datatables.net: 2.1.0
+      datatables.net: 2.1.2
       jquery: 3.7.1
 
   datatables.net-buttons-bs5@3.1.0:
     dependencies:
-      datatables.net-bs5: 2.1.0
+      datatables.net-bs5: 2.1.2
       datatables.net-buttons: 3.1.0
       jquery: 3.7.1
 
   datatables.net-buttons@3.1.0:
     dependencies:
-      datatables.net: 2.1.0
+      datatables.net: 2.1.2
       jquery: 3.7.1
 
   datatables.net-colreorder-bs5@2.0.3:
     dependencies:
-      datatables.net-bs5: 2.1.0
+      datatables.net-bs5: 2.1.2
       datatables.net-colreorder: 2.0.3
       jquery: 3.7.1
 
   datatables.net-colreorder@2.0.3:
     dependencies:
-      datatables.net: 2.1.0
+      datatables.net: 2.1.2
       jquery: 3.7.1
 
   datatables.net-fixedheader-bs5@4.0.1:
     dependencies:
-      datatables.net-bs5: 2.1.0
+      datatables.net-bs5: 2.1.2
       datatables.net-fixedheader: 4.0.1
       jquery: 3.7.1
 
   datatables.net-fixedheader@4.0.1:
     dependencies:
-      datatables.net: 2.1.0
+      datatables.net: 2.1.2
       jquery: 3.7.1
 
   datatables.net-responsive-bs5@3.0.2:
     dependencies:
-      datatables.net-bs5: 2.1.0
+      datatables.net-bs5: 2.1.2
       datatables.net-responsive: 3.0.2
       jquery: 3.7.1
 
   datatables.net-responsive@3.0.2:
     dependencies:
-      datatables.net: 2.1.0
+      datatables.net: 2.1.2
       jquery: 3.7.1
 
-  datatables.net@2.1.0:
+  datatables.net@2.1.2:
     dependencies:
       jquery: 3.7.1
 
@@ -5115,13 +5115,13 @@ snapshots:
       no-case: 3.0.4
       tslib: 2.6.3
 
-  electron-to-chromium@1.4.832: {}
+  electron-to-chromium@1.5.0: {}
 
   emoji-regex@10.3.0: {}
 
   emojis-list@3.0.0: {}
 
-  enhanced-resolve@5.17.0:
+  enhanced-resolve@5.17.1:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.2.1
@@ -5224,12 +5224,12 @@ snapshots:
       eslint: 9.7.0
       semver: 7.6.3
 
-  eslint-config-standard@17.1.0(eslint-plugin-import@2.29.1(eslint@9.7.0))(eslint-plugin-n@17.9.0(eslint@9.7.0))(eslint-plugin-promise@6.5.1(eslint@9.7.0))(eslint@9.7.0):
+  eslint-config-standard@17.1.0(eslint-plugin-import@2.29.1(eslint@9.7.0))(eslint-plugin-n@17.9.0(eslint@9.7.0))(eslint-plugin-promise@7.0.0(eslint@9.7.0))(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
       eslint-plugin-import: 2.29.1(eslint@9.7.0)
       eslint-plugin-n: 17.9.0(eslint@9.7.0)
-      eslint-plugin-promise: 6.5.1(eslint@9.7.0)
+      eslint-plugin-promise: 7.0.0(eslint@9.7.0)
 
   eslint-import-resolver-node@0.3.9:
     dependencies:
@@ -5283,7 +5283,7 @@ snapshots:
   eslint-plugin-n@17.9.0(eslint@9.7.0):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.7.0)
-      enhanced-resolve: 5.17.0
+      enhanced-resolve: 5.17.1
       eslint: 9.7.0
       eslint-plugin-es-x: 7.8.0(eslint@9.7.0)
       get-tsconfig: 4.7.6
@@ -5292,7 +5292,7 @@ snapshots:
       minimatch: 9.0.5
       semver: 7.6.3
 
-  eslint-plugin-promise@6.5.1(eslint@9.7.0):
+  eslint-plugin-promise@7.0.0(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
 
@@ -5314,7 +5314,7 @@ snapshots:
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.7.0)
       '@eslint-community/regexpp': 4.11.0
-      '@eslint/config-array': 0.17.0
+      '@eslint/config-array': 0.17.1
       '@eslint/eslintrc': 3.1.0
       '@eslint/js': 9.7.0
       '@humanwhocodes/module-importer': 1.0.1
@@ -5581,14 +5581,14 @@ snapshots:
 
   ignore@5.3.1: {}
 
-  immutable@4.3.6: {}
+  immutable@4.3.7: {}
 
   import-fresh@3.3.0:
     dependencies:
       parent-module: 1.0.1
       resolve-from: 4.0.0
 
-  import-local@3.1.0:
+  import-local@3.2.0:
     dependencies:
       pkg-dir: 4.2.0
       resolve-cwd: 3.0.0
@@ -5699,7 +5699,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.14.11
+      '@types/node': 20.14.12
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -5707,13 +5707,13 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.14.11
+      '@types/node': 20.14.12
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 20.14.11
+      '@types/node': 20.14.12
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -5887,7 +5887,7 @@ snapshots:
       lower-case: 2.0.2
       tslib: 2.6.3
 
-  node-releases@2.0.17: {}
+  node-releases@2.0.18: {}
 
   normalize-path@3.0.0: {}
 
@@ -6525,7 +6525,7 @@ snapshots:
       es-errors: 1.3.0
       is-regex: 1.1.4
 
-  sass-loader@14.2.1(sass@1.77.8)(webpack@5.93.0(webpack-cli@5.1.4)):
+  sass-loader@15.0.0(sass@1.77.8)(webpack@5.93.0(webpack-cli@5.1.4)):
     dependencies:
       neo-async: 2.6.2
     optionalDependencies:
@@ -6535,7 +6535,7 @@ snapshots:
   sass@1.77.8:
     dependencies:
       chokidar: 3.6.0
-      immutable: 4.3.6
+      immutable: 4.3.7
       source-map-js: 1.2.0
 
   schema-utils@3.3.0:
@@ -6809,7 +6809,7 @@ snapshots:
       cross-spawn: 7.0.3
       envinfo: 7.13.0
       fastest-levenshtein: 1.0.16
-      import-local: 3.1.0
+      import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
       webpack: 5.93.0(webpack-cli@5.1.4)
@@ -6834,7 +6834,7 @@ snapshots:
       acorn-import-attributes: 1.9.5(acorn@8.12.1)
       browserslist: 4.23.2
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.17.0
+      enhanced-resolve: 5.17.1
       es-module-lexer: 1.5.4
       eslint-scope: 5.1.1
       events: 3.3.0
