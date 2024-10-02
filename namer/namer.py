@@ -341,7 +341,7 @@ def main(arg_list: List[str]):
     conf: Optional[Path] = args.configfile
     config: NamerConfig = default_config(conf)
 
-    if args.verbose is not None:
+    if args.verbose:
         level = 'DEBUG' if config.debug else 'INFO'
         logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
 

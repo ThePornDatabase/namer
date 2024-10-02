@@ -585,7 +585,7 @@ def main(args_list: List[str]):
 
     config = default_config(args.configfile.absolute() if args.configfile else None)
 
-    if args.verbose is not None:
+    if args.verbose:
         level = 'DEBUG' if config.debug else 'INFO'
         logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
 
