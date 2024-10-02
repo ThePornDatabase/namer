@@ -517,7 +517,7 @@ class NamerConfig:
         config = {
             'Namer Config': {
                 'porndb_token': porndb_token,
-                'inplace_name': self.inplace_name,
+                'inplace_name': self.inplace_name.encode(self.template_encoding).decode('UTF-8') if self.template_encoding else self.inplace_name,
                 'template_encoding': self.template_encoding,
                 'prefer_dir_name_if_available': self.prefer_dir_name_if_available,
                 'target_extensions': self.target_extensions,
@@ -572,7 +572,7 @@ class NamerConfig:
                 'ignored_dir_regex': self.ignored_dir_regex.pattern,
                 'min_file_size': self.min_file_size,
                 'del_other_files': self.del_other_files,
-                'new_relative_path_name': self.new_relative_path_name,
+                'new_relative_path_name': self.new_relative_path_name.encode(self.template_encoding).decode('UTF-8') if self.template_encoding else self.new_relative_path_name,
                 'watch_dir': str(self.watch_dir),
                 'work_dir': str(self.work_dir),
                 'failed_dir': str(self.failed_dir),
