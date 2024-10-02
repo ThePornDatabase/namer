@@ -121,7 +121,7 @@ def get_str(updater: ConfigUpdater, section: str, key: str) -> Optional[str]:
     """
     if updater.has_option(section, key):
         output = updater.get(section, key)
-        return str(output.value)
+        return str(output.value) if output.value else output.value
 
 
 # Ini file string converters, to and from NamerConfig type
