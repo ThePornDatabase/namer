@@ -244,6 +244,9 @@ class LookedUpFileInfo:
         """
         Constructs a new file name based on a template (describe in NamerConfig)
         """
+        if config.template_encoding:
+            template = template.encode(config.template_encoding).decode('utf-8')
+
         dictionary = self.as_dict(config)
         clean_dic = self.__cleanup_dictionary(dictionary)
         fmt = PartialFormatter(missing='', bad_fmt='---')

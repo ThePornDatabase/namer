@@ -121,7 +121,7 @@ def get_str(updater: ConfigUpdater, section: str, key: str) -> Optional[str]:
     """
     if updater.has_option(section, key):
         output = updater.get(section, key)
-        return str(output.value)
+        return str(output.value) if output.value else output.value
 
 
 # Ini file string converters, to and from NamerConfig type
@@ -220,6 +220,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'porndb_token': ('namer', None, None),
     'name_parser': ('namer', None, None),
     'inplace_name': ('namer', None, None),
+    'template_encoding': ('namer', None, None),
     'prefer_dir_name_if_available': ('namer', to_bool, from_bool),
     'min_file_size': ('namer', to_int, from_int),
     'write_namer_log': ('namer', to_bool, from_bool),

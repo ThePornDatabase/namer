@@ -24,6 +24,7 @@ import namer.watchdog
 import namer.web
 from namer.configuration_utils import default_config
 from namer.models import db
+from namer.namer import calculate_phash
 
 DESCRIPTION = (
     namer.namer.DESCRIPTION
@@ -77,6 +78,10 @@ def main():
         namer.metadataapi.main(arg_list[1:])
     elif arg1 == 'url':
         print(f'http://{config.host}:{config.port}{config.web_root}')
+    elif arg1 == 'hash':
+        file = Path(arg_list[1])
+        file_hash = calculate_phash(file, config)
+        print(file_hash.to_dict())
     elif arg1 in ['-h', 'help', None]:
         print(DESCRIPTION)
 

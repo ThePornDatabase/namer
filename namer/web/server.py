@@ -16,6 +16,7 @@ from flask_compress import Compress
 from loguru import logger
 from waitress import create_server
 from waitress.server import BaseWSGIServer, MultiSocketServer
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import from_str_list_lower
@@ -61,6 +62,7 @@ class GenericWebServer:
         self.__register_custom_processors()
 
     def __make_server(self):
+        self.__app.wsgi_app = ProxyFix(self.__app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
         self.__compress.init_app(self.__app)
         self.__server = create_server(self.__app, host=self.__host, port=self.__port, clear_untrusted_proxy_headers=True)
         self.__thread = Thread(target=self.__run, daemon=True)

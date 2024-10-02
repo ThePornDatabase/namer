@@ -112,6 +112,11 @@ class NamerConfig:
 
     """
 
+    template_encoding: str = None
+    """
+    Encoding template
+    """
+
     min_file_size: int = 300
     """
     minimum file size to process in MB, ignored if a file is to be processed
@@ -513,6 +518,7 @@ class NamerConfig:
             'Namer Config': {
                 'porndb_token': porndb_token,
                 'inplace_name': self.inplace_name,
+                'template_encoding': self.template_encoding,
                 'prefer_dir_name_if_available': self.prefer_dir_name_if_available,
                 'target_extensions': self.target_extensions,
                 'write_namer_log': self.write_namer_log,
