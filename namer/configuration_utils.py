@@ -334,7 +334,7 @@ def from_config(config: ConfigUpdater, namer_config: NamerConfig) -> NamerConfig
 def resource_file_to_str(package: str, file_name: str) -> str:
     config_str = ''
     if hasattr(resources, 'files'):
-        config_str = resources.files(package).joinpath(file_name).read_text()
+        config_str = resources.files(package).joinpath(file_name).read_text(encoding='UTF-8')
     elif hasattr(resources, 'read_text'):
         config_str = resources.read_text(package, file_name)
 
@@ -380,7 +380,7 @@ def default_config(user_set: Optional[Path] = None) -> NamerConfig:
             file = Path(file)
 
         if file.is_file():
-            user_config.read(file)
+            user_config.read(file, encoding='UTF-8')
             break
 
     return from_config(user_config, namer_config)
