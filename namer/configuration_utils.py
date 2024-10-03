@@ -220,7 +220,6 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'porndb_token': ('namer', None, None),
     'name_parser': ('namer', None, None),
     'inplace_name': ('namer', None, None),
-    'template_encoding': ('namer', None, None),
     'prefer_dir_name_if_available': ('namer', to_bool, from_bool),
     'min_file_size': ('namer', to_int, from_int),
     'write_namer_log': ('namer', to_bool, from_bool),

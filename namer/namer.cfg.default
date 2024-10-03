@@ -56,9 +56,6 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # Like {site:|lower} or {name:|title|replace(' ', '.'))}
 inplace_name={full_site} - {date} - {name} [WEBDL-{resolution}].{ext}
 
-# Encoding template
-template_encoding=
-
 # If a directory name is to be preferred over a file name.
 # Directories are calculated by taking the first part of a relative path
 # to the watch_dir location, or as input to namer via -d parameter.
