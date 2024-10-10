@@ -105,7 +105,6 @@ export class Helpers {
   static initTooltips (selector) {
     const tooltips = selector.find('[data-bs-toggle="tooltip"]')
     tooltips.each(function (index, element) {
-      // eslint-disable-next-line no-new
       new Tooltip(element, {
         boundary: selector[0]
       })

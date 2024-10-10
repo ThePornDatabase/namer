@@ -128,11 +128,8 @@ def _set_perms(target: Path, config: NamerConfig):
     file_perm: Optional[int] = int(str(config.set_file_permissions), 8) if config.set_file_permissions else None
     dir_perm: Optional[int] = int(str(config.set_dir_permissions), 8) if config.set_dir_permissions else None
 
-    if config.set_gid:
-        os.lchown(target, uid=-1, gid=config.set_gid)
-
-    if config.set_uid:
-        os.lchown(target, uid=config.set_uid, gid=-1)
+    if config.set_gid or config.set_uid:
+        os.lchown(target, uid=config.set_uid if config.set_uid else -1, gid=config.set_gid if config.set_gid else -1)
 
     if target.is_dir() and dir_perm:
         target.chmod(dir_perm)
