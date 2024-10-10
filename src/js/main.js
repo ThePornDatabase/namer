@@ -1,6 +1,6 @@
 // noinspection ES6UnusedImports
 // eslint-disable-next-line no-unused-vars
-import { Popover, Modal } from 'bootstrap'
+import { Modal, Popover } from 'bootstrap'
 
 import $ from 'jquery'
 import 'datatables.net-bs5'
