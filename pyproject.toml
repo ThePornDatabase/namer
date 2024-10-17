@@ -7,7 +7,7 @@ authors = ["4c0d3r <4c0d3r@protonmail.com>"]
 include = ["**/web/public/assets/**/*", "**/web/templates/**/*", "**/namer.cfg.default", "namer/tools/videohashes*"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.10,<3.14"
 rapidfuzz = "^3.9"
 watchdog = "^5.0"
 pathvalidate = "^3.2"
@@ -43,7 +43,7 @@ pony-stubs = "^0.5"
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init", "node_modules"]
 line-length = 320
 indent-width = 4
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.format]
 quote-style = "single"
