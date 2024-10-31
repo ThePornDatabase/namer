@@ -185,6 +185,9 @@ enabled_poster = False
 # List of which images would be downloaded options are: poster,background,performer
 download_type = poster,background,performer
 
+# Downloaded images format: png or jpg
+image_format = png
+
 # These genres are noisey and not recommend for use.  If this is false a single default
 # genre will be used.  These are called Tags on the porndb json response objects, genre's
 # in plex/jellyfin - and could be added as Tags to jellyfin.  Unfortunately jellyfin doesn't

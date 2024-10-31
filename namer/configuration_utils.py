@@ -106,7 +106,11 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     """
     success = __verify_naming_config(config, formatter)
     success = __verify_watchdog_config(config, formatter) and success
-    success: bool = __verify_ffmpeg(config.ffmpeg) and success
+    success = __verify_ffmpeg(config.ffmpeg) and success
+
+    if config.image_format not in ['jpeg', 'png'] and success:
+        logger.error('image_format should be png or jpeg')
+        success = False
 
     return success
 
@@ -255,6 +259,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'enabled_tagging': ('metadata', to_bool, from_bool),
     'enabled_poster': ('metadata', to_bool, from_bool),
     'download_type': ('metadata', to_str_list_lower, from_str_list_lower),
+    'image_format': ('metadata', None, None),
     'enable_metadataapi_genres': ('metadata', to_bool, from_bool),
     'default_genre': ('metadata', None, None),
     'language': ('metadata', None, None),

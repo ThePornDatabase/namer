@@ -299,6 +299,11 @@ class NamerConfig:
     List of which images would be downloaded
     """
 
+    image_format: str = 'png'
+    """
+    Downloaded images format: png, jpeg
+    """
+
     enable_metadataapi_genres: bool = False
     """
     Should genres pulled from the porndb be added to the file?   These genres are noisy and
@@ -557,6 +562,7 @@ class NamerConfig:
                 'enabled_tagging': self.enabled_tagging,
                 'enabled_poster': self.enabled_poster,
                 'download_type': self.download_type,
+                'image_format': self.image_format,
                 'enable_metadataapi_genres': self.enable_metadataapi_genres,
                 'default_genre': self.default_genre,
                 'language': self.language,
