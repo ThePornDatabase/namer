@@ -301,7 +301,7 @@ class NamerConfig:
 
     image_format: str = 'png'
     """
-    Downloaded images format: png, jpeg, jpg
+    Downloaded images format: png, jpeg
     """
 
     enable_metadataapi_genres: bool = False

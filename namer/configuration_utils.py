@@ -108,8 +108,8 @@ def verify_configuration(config: NamerConfig, formatter: PartialFormatter) -> bo
     success = __verify_watchdog_config(config, formatter) and success
     success = __verify_ffmpeg(config.ffmpeg) and success
 
-    if config.image_format not in ['jpg', 'jpeg', 'png'] and success:
-        logger.error('image_format should be png, jpeg or jpg')
+    if config.image_format not in ['jpeg', 'png'] and success:
+        logger.error('image_format should be png or jpeg')
         success = False
 
     return success
