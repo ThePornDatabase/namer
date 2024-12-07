@@ -1,4 +1,4 @@
-FROM ubuntu:latest as base
+FROM ubuntu:latest AS base
 
 ENV TZ=Europe/London
 ARG DEBIAN_FRONTEND=noninteractive
@@ -8,12 +8,14 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        python3-pip \
        python3 \
+       pipx \
        ffmpeg \
        tzdata \
        curl \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
-    && apt-get clean
+    && apt-get clean \
+    && pipx ensurepath
 
 FROM base AS build
 RUN apt-get update \
@@ -66,7 +68,7 @@ RUN ( Xvfb :99 & cd /work/ && poetry run poe build_all )
 
 FROM base
 COPY --from=build /work/dist/namer-*.tar.gz /
-RUN pip3 install /namer-*.tar.gz \
+RUN pipx install /namer-*.tar.gz \
     && rm /namer-*.tar.gz
 
 ARG BUILD_DATE
@@ -81,4 +83,4 @@ ENV PROJECT_VERSION=$PROJECT_VERSION
 
 EXPOSE 6980
 HEALTHCHECK --interval=1m --timeout=30s CMD curl -s $(python3 -m namer url)/api/healthcheck >/dev/null || exit 1
-ENTRYPOINT ["python3", "-m", "namer", "watchdog"]
+ENTRYPOINT ["namer", "watchdog"]
