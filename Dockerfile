@@ -1,4 +1,4 @@
-FROM ubuntu:jammy as base
+FROM ubuntu:latest as base
 
 ENV TZ=Europe/London
 ARG DEBIAN_FRONTEND=noninteractive
