@@ -1,5 +1,6 @@
 FROM ubuntu:latest AS base
 
+ENV PATH="/root/.local/bin:$PATH"
 ENV TZ=Europe/London
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -14,8 +15,7 @@ RUN apt-get update \
        curl \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
-    && apt-get clean \
-    && pipx ensurepath
+    && apt-get clean
 
 FROM base AS build
 RUN apt-get update \
@@ -59,7 +59,6 @@ RUN npm install --global pnpm
 
 RUN mkdir /work/
 COPY . /work
-ENV PATH="/root/.local/bin:$PATH"
 WORKDIR /work
 RUN rm -rf /work/namer/__pycache__/ || true \
     && rm -rf /work/test/__pycache__/ || true \

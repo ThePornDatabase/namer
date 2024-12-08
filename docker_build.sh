@@ -1,7 +1,7 @@
 #!/bin/bash
 
 repo=theporndatabase
-version=$(cat pyproject.toml | grep -m1 "version = " | sed 's/.* = //' | sed 's/"//g' | tr -d '[:space:]')
+version=v$(cat pyproject.toml | grep -m1 "version = " | sed 's/.* = //' | sed 's/"//g' | tr -d '[:space:]')
 
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 export BUILD_DATE
