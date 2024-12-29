@@ -115,8 +115,10 @@ def tag_in_place(video: Optional[Path], config: NamerConfig, new_metadata: Looke
     if new_metadata and video:
         poster = None
         if config.enabled_tagging and video.suffix.lower() == '.mp4':
-            random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
-            poster = get_image(new_metadata.poster_url, random, video, config) if new_metadata.poster_url else None
+            if config.enabled_poster:
+                random = ''.join(choices(population=string.ascii_uppercase + string.digits, k=10))
+                poster = get_image(new_metadata.poster_url, random, video, config) if new_metadata.poster_url else None
+
             logger.info('Updating file metadata (atoms): {}', video)
             update_mp4_file(video, new_metadata, poster, ffprobe_results, config)
 
