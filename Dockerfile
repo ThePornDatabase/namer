@@ -25,10 +25,8 @@ RUN apt-get update \
        libssl-dev \
        systemd \
        systemd-sysv \
-       python3-pip \
        python3-dev \
        python3-venv \
-       curl \
        wget \
        gnupg2 \
        xvfb \
@@ -81,5 +79,5 @@ ENV GIT_HASH=$GIT_HASH
 ENV PROJECT_VERSION=$PROJECT_VERSION
 
 EXPOSE 6980
-HEALTHCHECK --interval=1m --timeout=30s CMD curl -s $(python3 -m namer url)/api/healthcheck >/dev/null || exit 1
+HEALTHCHECK --interval=1m --timeout=30s CMD curl -s $(namer url)/api/healthcheck >/dev/null || exit 1
 ENTRYPOINT ["namer", "watchdog"]
