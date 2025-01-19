@@ -31,7 +31,7 @@ jobs:
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: '1.8.5'
+          poetry-version: '2.0.1'
 
       - name: Install Go
         uses: actions/setup-go@v5
@@ -52,7 +52,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 10
 
       - name: Install Node
         uses: actions/setup-node@v4
@@ -102,11 +102,11 @@ jobs:
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: '1.8.5'
+          poetry-version: '2.0.1'
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 10
 
       - name: Install Node
         uses: actions/setup-node@v4
@@ -169,7 +169,7 @@ jobs:
       - name: install poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: '1.8.5'
+          poetry-version: '2.0.1'
 
       - name: create tag from pyproject version on change.
         id: auto-tag
@@ -214,7 +214,7 @@ jobs:
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: '1.8.5'
+          poetry-version: '2.0.1'
 
       - name: Install Go
         uses: actions/setup-go@v5
@@ -235,7 +235,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
