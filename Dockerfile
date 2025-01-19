@@ -48,8 +48,8 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 
 RUN pipx install poetry
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-RUN nvm install 22
-RUN corepack enable pnpm
+RUN . /root/.bashrc && nvm install 22
+RUN . /root/.bashrc && npm i -g pnpm@latest-10
 
 RUN mkdir /work/
 COPY . /work
@@ -57,7 +57,7 @@ WORKDIR /work
 RUN rm -rf /work/namer/__pycache__/ || true \
     && rm -rf /work/test/__pycache__/ || true \
     && poetry install
-RUN ( Xvfb :99 & cd /work/ && poetry run poe build_all )
+RUN . /root/.bashrc && ( Xvfb :99 & cd /work/ && poetry run poe build_all )
 
 FROM base
 COPY --from=build /work/dist/namer-*.tar.gz /
