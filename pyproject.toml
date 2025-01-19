@@ -1,6 +1,6 @@
 [project]
 name = "namer"
-version = "1.19.7"
+version = "1.19.8"
 description = "A namer of video files based on metadata from the porndb."
 readme = "readme.rst"
 authors = [
