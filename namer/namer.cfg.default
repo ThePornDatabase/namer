@@ -40,6 +40,8 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # * 'full_network' - the network full site/studio name from porndb, unmodified, i.e: Mind Geek, Vixen, etc.
 # * 'performers' - comma seperated list of female performers
 # * 'all_performers' - comma seperated list of all performers
+# * 'performer-sites' - comma seperated list of female performer-sites
+# * 'all_performer-sites' - comma seperated list of all performer-sites
 # * 'act' - an act, parsed from original file name, don't use.
 # * 'ext' - original file's extension, you should keep this.
 # * 'source_file_name' - original file name

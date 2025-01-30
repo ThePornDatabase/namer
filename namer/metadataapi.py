@@ -351,6 +351,7 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
             performer_name = json_performer.parent.name
 
         performer = Performer(performer_name)
+        performer.alias = json_performer.name
         if hasattr(json_performer, 'parent') and hasattr(json_performer.parent, 'extras'):
             performer.role = json_performer.parent.extras.gender
         elif hasattr(json_performer, 'extra'):
