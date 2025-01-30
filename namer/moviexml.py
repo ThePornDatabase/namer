@@ -22,9 +22,9 @@ def get_all_childnode(node: Element, name: str) -> List[Element]:
     return node.getElementsByTagName(name)
 
 
-def get_childnode_text(node: Element, name: str) -> str:
+def get_childnode_text(node: Element, name: str) -> Optional[str]:
     node = node.getElementsByTagName(name)
-    return node[0].childNodes[0].data if node else ''
+    return node[0].childNodes[0].data if node else None
 
 
 def get_all_childnode_text(node: Element, name: str) -> List[str]:
