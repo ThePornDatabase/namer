@@ -18,6 +18,7 @@ class Performer:
     """
 
     name: str
+    alias: Optional[str]
     role: Optional[str]
     image: Optional[Union[Path, str]]
     """
@@ -164,7 +165,7 @@ class LookedUpFileInfo:
     """
     duration: Optional[int] = None
     """
-    Minute long run lenth of scene or movie.
+    Minute long run length of scene or movie.
     """
     resolution: Optional[int] = None
     """
