@@ -19,7 +19,7 @@ from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import FFProbeResults
 from namer.fileinfo import parse_file_name, FileInfo
-from namer.comparison_results import ComparisonResults, LookedUpFileInfo
+from namer.comparison_results import ComparisonResults, LookedUpFileInfo, SceneType
 
 
 # noinspection PyDataclass
@@ -208,14 +208,15 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     # if in_place is False we will move it to the config defined destination dir.
     # if a directory name was passed in we will rename the dir with the relative_path_name from the config
     # else we will just rename the movie in its current location (as all that was defined in the command was the movie file.)
-    name_template = command.config.inplace_name
+
+    name_template = get_inplace_name_template_by_type(command.config, new_metadata.type)
     target_dir = command.target_movie_file.parent
     if command.target_directory:
-        name_template = command.config.new_relative_path_name
+        name_template = get_new_relative_path_name_template_by_type(command.config, new_metadata.type)
         target_dir = command.target_directory.parent
 
     if not command.inplace:
-        name_template = command.config.new_relative_path_name
+        name_template = get_new_relative_path_name_template_by_type(command.config, new_metadata.type)
         target_dir = command.config.dest_dir
 
     infix = 0
@@ -401,6 +402,38 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
         if relative_path:
             target_file = relative_to / relative_path.parts[0]
             return make_command(target_file, config, nfo, inplace, uuid, is_auto=is_auto)
+
+
+def get_inplace_name_template_by_type(config: NamerConfig, scene_type: Optional[SceneType] = None):
+    name_template = None
+    if scene_type:
+        if scene_type == SceneType.SCENE:
+            name_template = config.inplace_name_scene
+        elif scene_type == SceneType.MOVIE:
+            name_template = config.inplace_name_movie
+        elif scene_type == SceneType.JAV:
+            name_template = config.inplace_name_jav
+
+    if not name_template:
+        name_template = config.inplace_name
+
+    return name_template
+
+
+def get_new_relative_path_name_template_by_type(config: NamerConfig, scene_type: Optional[SceneType] = None):
+    name_template = None
+    if scene_type:
+        if scene_type == SceneType.SCENE:
+            name_template = config.new_relative_path_name_scene
+        elif scene_type == SceneType.MOVIE:
+            name_template = config.new_relative_path_name_movie
+        elif scene_type == SceneType.JAV:
+            name_template = config.new_relative_path_name_jav
+
+    if not name_template:
+        name_template = config.new_relative_path_name
+
+    return name_template
 
 
 def main(arg_list: List[str]):

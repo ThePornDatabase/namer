@@ -112,6 +112,10 @@ class NamerConfig:
 
     """
 
+    inplace_name_scene: Optional[str] = None
+    inplace_name_movie: Optional[str] = None
+    inplace_name_jav: Optional[str] = None
+
     min_file_size: int = 300
     """
     minimum file size to process in MB, ignored if a file is to be processed
@@ -369,6 +373,10 @@ class NamerConfig:
     to the dest_dir below on successful matching/tagging.
     """
 
+    new_relative_path_name_scene: Optional[str] = None
+    new_relative_path_name_movie: Optional[str] = None
+    new_relative_path_name_jav: Optional[str] = None
+
     del_other_files: bool = False
     """
     when processing a directory in the dest dir, should extra files besides the largest video be removed?
@@ -518,6 +526,9 @@ class NamerConfig:
             'Namer Config': {
                 'porndb_token': porndb_token,
                 'inplace_name': self.inplace_name,
+                'inplace_name_scene': self.inplace_name_scene,
+                'inplace_name_movie': self.inplace_name_movie,
+                'inplace_name_jav': self.inplace_name_jav,
                 'prefer_dir_name_if_available': self.prefer_dir_name_if_available,
                 'target_extensions': self.target_extensions,
                 'write_namer_log': self.write_namer_log,
@@ -573,6 +584,9 @@ class NamerConfig:
                 'min_file_size': self.min_file_size,
                 'del_other_files': self.del_other_files,
                 'new_relative_path_name': self.new_relative_path_name,
+                'new_relative_path_name_scene': self.new_relative_path_name_scene,
+                'new_relative_path_name_movie': self.new_relative_path_name_movie,
+                'new_relative_path_name_jav': self.new_relative_path_name_jav,
                 'watch_dir': str(self.watch_dir),
                 'work_dir': str(self.work_dir),
                 'failed_dir': str(self.failed_dir),

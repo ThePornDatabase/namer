@@ -59,6 +59,10 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # Like {site:|lower} or {name:|title|replace(' ', '.'))}
 inplace_name={full_site} - {date} - {name} [WEBDL-{resolution}].{ext}
 
+inplace_name_scene=
+inplace_name_movie=
+inplace_name_jav=
+
 # If a directory name is to be preferred over a file name.
 # Directories are calculated by taking the first part of a relative path
 # to the watch_dir location, or as input to namer via -d parameter.
@@ -248,6 +252,10 @@ queue_sleep_time = 5
 # Configured like inplace_name above, but with paths, and is relative to
 # dest_dir, which is where completed files will be moved to.
 new_relative_path_name={full_site}/{full_site} - {date} - {name} [WEBDL-{resolution}].{ext}
+
+new_relative_path_name_scene=
+new_relative_path_name_movie=
+new_relative_path_name_jav=
 
 # director where new downloads go.
 watch_dir = ./test/watch

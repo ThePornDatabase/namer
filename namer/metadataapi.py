@@ -25,7 +25,7 @@ from unidecode import unidecode
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, Performer, SceneHash, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
-from namer.command import make_command, set_permissions, Command
+from namer.command import get_inplace_name_template_by_type, make_command, set_permissions, Command
 from namer.fileinfo import FileInfo
 from namer.http import Http, RequestType
 from namer.name_formatter import PartialFormatter
@@ -601,6 +601,8 @@ def main(args_list: List[str]):
     if results:
         matched = results.get_match()
         if matched:
-            print(matched.looked_up.new_file_name(config.inplace_name, config))
+            name_template = get_inplace_name_template_by_type(config, matched.looked_up.type)
+
+            print(matched.looked_up.new_file_name(name_template, config))
             if args.jsonfile and matched.looked_up and matched.looked_up.original_response:
                 Path(args.jsonfile).write_text(matched.looked_up.original_response, encoding='UTF-8')

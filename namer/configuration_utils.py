@@ -31,6 +31,15 @@ def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> 
 
     success = __verify_name_string(formatter, 'inplace_name', config.inplace_name) and success
 
+    if config.inplace_name_scene:
+        success = __verify_name_string(formatter, 'inplace_name_scene', config.inplace_name_scene) and success
+
+    if config.inplace_name_movie:
+        success = __verify_name_string(formatter, 'inplace_name_movie', config.inplace_name_movie) and success
+
+    if config.inplace_name_jav:
+        success = __verify_name_string(formatter, 'inplace_name_jav', config.inplace_name_jav) and success
+
     return success
 
 
@@ -48,6 +57,15 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
         success = __verify_dir(config, dir_name, [name for name in watchdog_dirs if dir_name != name]) and success
 
     success = __verify_name_string(formatter, 'new_relative_path_name', config.new_relative_path_name) and success
+
+    if config.new_relative_path_name_scene:
+        success = __verify_name_string(formatter, 'new_relative_path_name_scene', config.new_relative_path_name_scene) and success
+
+    if config.new_relative_path_name_movie:
+        success = __verify_name_string(formatter, 'new_relative_path_name_movie', config.new_relative_path_name_movie) and success
+
+    if config.new_relative_path_name_jav:
+        success = __verify_name_string(formatter, 'new_relative_path_name_jav', config.new_relative_path_name_jav) and success
 
     return success
 
