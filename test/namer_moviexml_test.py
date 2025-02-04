@@ -100,6 +100,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <type>Actor</type>
     <name>Carmela Clutch</name>
+    <alias>Carmela Clutch</alias>
     <role>Female</role>
     <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
     <thumb/>
@@ -107,6 +108,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <type>Actor</type>
     <name>Francesca Le</name>
+    <alias>Francesca Le</alias>
     <role>Female</role>
     <image>{fakeTPDB.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
     <thumb/>
@@ -114,6 +116,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <type>Actor</type>
     <name>Mark Wood</name>
+    <alias>Mark Wood</alias>
     <role>Male</role>
     <image>{fakeTPDB.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
     <thumb/>
@@ -182,6 +185,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <type>Actor</type>
     <name>Carmela Clutch</name>
+    <alias>Carmela Clutch</alias>
     <role>Female</role>
     <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
     <thumb/>
@@ -189,6 +193,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <type>Actor</type>
     <name>Francesca Le</name>
+    <alias>Francesca Le</alias>
     <role>Female</role>
     <image>{fakeTPDB.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
     <thumb/>
@@ -196,6 +201,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <actor>
     <type>Actor</type>
     <name>Mark Wood</name>
+    <alias>Mark Wood</alias>
     <role>Male</role>
     <image>{fakeTPDB.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
     <thumb/>

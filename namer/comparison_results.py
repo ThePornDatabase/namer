@@ -18,6 +18,7 @@ class Performer:
     """
 
     name: str
+    alias: Optional[str]
     role: Optional[str]
     image: Optional[Union[Path, str]]
     """
@@ -27,8 +28,9 @@ class Performer:
     Other performers are also used in name matching, if females are attempted first.
     """
 
-    def __init__(self, name, role=None, image=None):
+    def __init__(self, name, role=None, image=None, alias=None):
         self.name = name
+        self.alias = alias
         self.role = role
         self.image = image
 
@@ -40,7 +42,7 @@ class Performer:
         return name
 
     def __repr__(self):
-        return f'Performer[name={self.name}, role={self.role}, image={self.image}]'
+        return f'Performer[name={self.name}, role={self.role}, image={self.image}, alias={self.alias}]'
 
 
 class SceneType(str, Enum):
@@ -163,7 +165,7 @@ class LookedUpFileInfo:
     """
     duration: Optional[int] = None
     """
-    Minute long run lenth of scene or movie.
+    Minute long run length of scene or movie.
     """
     resolution: Optional[int] = None
     """
@@ -230,6 +232,8 @@ class LookedUpFileInfo:
             'full_network': self.network,
             'performers': ', '.join(map(lambda p: p.name, filter(lambda p: p.role == 'Female', self.performers))) if self.performers else None,
             'all_performers': ', '.join(map(lambda p: p.name, self.performers)) if self.performers else None,
+            'performer-sites': ', '.join(map(lambda p: p.alias, filter(lambda p: p.role == 'Female' and p.alias, self.performers))) if self.performers else None,
+            'all_performer-sites': ', '.join(map(lambda p: p.name, filter(lambda p: p.alias, self.performers))) if self.performers else None,
             'ext': self.original_parsed_filename.extension if self.original_parsed_filename else None,
             'source_file_name': self.original_parsed_filename.source_file_name if self.original_parsed_filename else None,
             'trans': self.original_parsed_filename.trans if self.original_parsed_filename else None,

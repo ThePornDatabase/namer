@@ -22,6 +22,8 @@ class PartialFormatter(string.Formatter):
         'full_network',
         'performers',
         'all_performers',
+        'performer-sites',
+        'all_performer-sites',
         'act',
         'ext',
         'trans',

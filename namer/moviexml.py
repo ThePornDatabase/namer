@@ -22,8 +22,9 @@ def get_all_childnode(node: Element, name: str) -> List[Element]:
     return node.getElementsByTagName(name)
 
 
-def get_childnode_text(node: Element, name: str) -> str:
-    return node.getElementsByTagName(name)[0].childNodes[0].data
+def get_childnode_text(node: Element, name: str) -> Optional[str]:
+    node = node.getElementsByTagName(name)
+    return node[0].childNodes[0].data if node else None
 
 
 def get_all_childnode_text(node: Element, name: str) -> List[str]:
@@ -50,6 +51,7 @@ def parse_movie_xml_file(xml_file: Path) -> LookedUpFileInfo:
         name = get_childnode_text(actor, 'name')
         if actor and name:
             performer = Performer(name)
+            performer.alias = get_childnode_text(actor, 'alias')
             performer.role = get_childnode_text(actor, 'role')
             info.performers.append(performer)
 
@@ -132,6 +134,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
         actor = add_sub_element(doc, root, 'actor')
         add_sub_element(doc, actor, 'type', 'Actor')
         add_sub_element(doc, actor, 'name', performer.name)
+        add_sub_element(doc, actor, 'alias', performer.alias)
         add_sub_element(doc, actor, 'role', performer.role)
 
         if performer.image:
