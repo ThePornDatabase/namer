@@ -77,7 +77,7 @@ class Command:
 
 def move_command_files(target: Optional[Command], new_target: Path, is_auto: bool = True) -> Optional[Command]:
     if not target:
-        return
+        return None
 
     if target.target_directory and target.input_file == target.target_directory:
         working_dir = Path(new_target) / target.target_directory.name
@@ -208,8 +208,8 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
     # if in_place is False we will move it to the config defined destination dir.
     # if a directory name was passed in we will rename the dir with the relative_path_name from the config
     # else we will just rename the movie in its current location (as all that was defined in the command was the movie file.)
-
     name_template = get_inplace_name_template_by_type(command.config, new_metadata.type)
+
     target_dir = command.target_movie_file.parent
     if command.target_directory:
         name_template = get_new_relative_path_name_template_by_type(command.config, new_metadata.type)
@@ -378,7 +378,7 @@ def make_command(input_file: Path, config: NamerConfig, nfo: bool = False, inpla
     target_dir = input_file if input_file.is_dir() else None
     target_movie = input_file if not input_file.is_dir() else find_target_file(input_file, config)
     if not target_movie:
-        return
+        return None
 
     target_file = __exact_command(target_movie, target_dir, config)
     target_file.input_file = input_file

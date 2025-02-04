@@ -172,12 +172,7 @@ def process_file(command: Command) -> Optional[Command]:
             if new_metadata is not None:
                 new_metadata.original_parsed_filename = command.parsed_file
             else:
-                logger.error(
-                    """
-                        Could not process files: {}
-                        In the file's name should start with a site, a date and end with an extension""",
-                    command.input_file,
-                )
+                logger.error('Could not process files: {}\nIn the file\'s name should start with a site, a date and end with an extension', command.input_file)
         # elif new_metadata is None and command.stashdb_id is not None and command.ff_probe_results is not None:
         #    phash = VideoPerceptualHash().get_phash(command.target_movie_file)
         #    todo use phash

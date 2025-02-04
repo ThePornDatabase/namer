@@ -265,10 +265,12 @@ def get_image(url: str, infix: str, video_file: Optional[Path], config: NamerCon
                 set_permissions(file, config)
                 return file
             else:
-                return
+                return None
 
         poster = (video_file.parent / url).resolve()
         return poster if poster.exists() and poster.is_file() else None
+
+    return None
 
 
 @logger.catch
@@ -292,10 +294,12 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
                 set_permissions(trailer_file, namer_config)
                 return trailer_file
             else:
-                return
+                return None
 
         trailer = (video_file.parent / url).resolve()
         return trailer if trailer.exists() and trailer.is_file() else None
+
+    return None
 
 
 def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> LookedUpFileInfo:
