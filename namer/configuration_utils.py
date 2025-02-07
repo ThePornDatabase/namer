@@ -31,6 +31,15 @@ def __verify_naming_config(config: NamerConfig, formatter: PartialFormatter) -> 
 
     success = __verify_name_string(formatter, 'inplace_name', config.inplace_name) and success
 
+    if config.inplace_name_scene:
+        success = __verify_name_string(formatter, 'inplace_name_scene', config.inplace_name_scene) and success
+
+    if config.inplace_name_movie:
+        success = __verify_name_string(formatter, 'inplace_name_movie', config.inplace_name_movie) and success
+
+    if config.inplace_name_jav:
+        success = __verify_name_string(formatter, 'inplace_name_jav', config.inplace_name_jav) and success
+
     return success
 
 
@@ -48,6 +57,15 @@ def __verify_watchdog_config(config: NamerConfig, formatter: PartialFormatter) -
         success = __verify_dir(config, dir_name, [name for name in watchdog_dirs if dir_name != name]) and success
 
     success = __verify_name_string(formatter, 'new_relative_path_name', config.new_relative_path_name) and success
+
+    if config.new_relative_path_name_scene:
+        success = __verify_name_string(formatter, 'new_relative_path_name_scene', config.new_relative_path_name_scene) and success
+
+    if config.new_relative_path_name_movie:
+        success = __verify_name_string(formatter, 'new_relative_path_name_movie', config.new_relative_path_name_movie) and success
+
+    if config.new_relative_path_name_jav:
+        success = __verify_name_string(formatter, 'new_relative_path_name_jav', config.new_relative_path_name_jav) and success
 
     return success
 
@@ -224,6 +242,9 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'porndb_token': ('namer', None, None),
     'name_parser': ('namer', None, None),
     'inplace_name': ('namer', None, None),
+    'inplace_name_scene': ('namer', None, None),
+    'inplace_name_movie': ('namer', None, None),
+    'inplace_name_jav': ('namer', None, None),
     'prefer_dir_name_if_available': ('namer', to_bool, from_bool),
     'min_file_size': ('namer', to_int, from_int),
     'write_namer_log': ('namer', to_bool, from_bool),
@@ -272,6 +293,9 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'queue_limit': ('watchdog', to_int, from_int),
     'queue_sleep_time': ('watchdog', to_int, from_int),
     'new_relative_path_name': ('watchdog', None, None),
+    'new_relative_path_name_scene': ('watchdog', None, None),
+    'new_relative_path_name_movie': ('watchdog', None, None),
+    'new_relative_path_name_jav': ('watchdog', None, None),
     'watch_dir': ('watchdog', to_path, from_path),
     'work_dir': ('watchdog', to_path, from_path),
     'failed_dir': ('watchdog', to_path, from_path),

@@ -156,11 +156,11 @@ class FFMpeg:
             ffprobe_out = ffmpeg.probe(file, self.__ffprobe_cmd)
 
         if not ffprobe_out:
-            return
+            return None
 
         streams = [stream for stream in ffprobe_out['streams'] if stream['codec_type'] in ('video', 'audio')]
         if not streams:
-            return
+            return None
 
         output: List[FFProbeStream] = []
         for stream in streams:

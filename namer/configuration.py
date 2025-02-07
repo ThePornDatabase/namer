@@ -112,6 +112,10 @@ class NamerConfig:
 
     """
 
+    inplace_name_scene: Optional[str] = None
+    inplace_name_movie: Optional[str] = None
+    inplace_name_jav: Optional[str] = None
+
     min_file_size: int = 300
     """
     minimum file size to process in MB, ignored if a file is to be processed
@@ -119,7 +123,7 @@ class NamerConfig:
 
     convert_container_to: Optional[str] = None
     """
-    Without modify the enconding where possible covert container (aka file types) to this
+    Without modify the encoding where possible covert container (aka file types) to this
     desired container type ("mp4", "mkv", "avi", ect), plugged in to the command:
     "ffmpeg -i input.mkv -c copy output.<type>"
     """
@@ -130,7 +134,7 @@ class NamerConfig:
     If false, duplicates will be verified with a perceptual hash, then compared via ffprobe.
     * First any movie under two minutes is ignored and presumed to be a sample,
     * then the highest resolution video is selected
-    * then the best encoding mechanism h.245, or hvec.
+    * then the best encoding mechanism H245, or HEVC.
     You can set min file size to 0 if you have set
     """
 
@@ -142,7 +146,7 @@ class NamerConfig:
 
     desired_codec: List[str]
     """
-    Listed in order, desired codecs defaults to "hvec h246", most videos are still in h246 encoding.
+    Listed in order, desired codecs defaults to "HEVC H245", most videos are still in H245 encoding.
     """
 
     prefer_dir_name_if_available: bool = True
@@ -200,7 +204,7 @@ class NamerConfig:
 
     write_nfo: bool = False
     """
-    Write an nfo file next to the directory in an emby/jellyfin readable format.
+    Write an nfo file next to the directory in an Emby/Jellyfin readable format.
     """
 
     trailer_location: Optional[str] = ''
@@ -214,20 +218,20 @@ class NamerConfig:
 
     sites_with_no_date_info: Sequence[str]
     """
-    A list of site names that do not have proper date information in them.   This is a problem with some tpdb
+    A list of site names that do not have proper date information in them.   This is a problem with some TPDB
     scrapers/storage mechanisms.
     """
 
     site_abbreviations: Dict[Pattern, str]
     """
     Configuration provided list of abbreviations, should the site of a parsed file name match the abbreviation (key),
-    it will be replaced with the value matching the key, like ["aa","Amature Allure"].   It is up to the user to provide
+    it will be replaced with the value matching the key, like ["aa","Amateur Allure"].   It is up to the user to provide
     a list of abbreviations.
     """
 
     movie_data_preferred: Sequence[str]
     """
-    Sequence of sites where movie data should be prefered (movies will be marked scenes instead of movie)
+    Sequence of sites where movie data should be preferred (movies will be marked scenes instead of movie)
     """
 
     vr_studios: Sequence[str]
@@ -273,12 +277,12 @@ class NamerConfig:
     override_tpdb_address: str = 'https://api.theporndb.net'
     """
     Used only for testing, can override the location of the porn database - usually to point at a locally
-    running server that responds like tpdb to predefined queries.
+    running server that responds like TPDB to predefined queries.
     """
 
     enabled_tagging: bool = False
     """
-    Currently metadata pulled from the porndb can be added to mp4 files.
+    Currently metadata pulled from ThePornDB can be added to mp4 files.
     This metadata will be read in fully by Plex, and Apple TV app, partially by Jellyfin (no artist support).
     Metadata includes, Title, Release Date, Scene Name, Artist, Source URL, XXX Movie rating.
     If a file is an mkv adding metadata at this time isn't supported.
@@ -306,7 +310,7 @@ class NamerConfig:
 
     enable_metadataapi_genres: bool = False
     """
-    Should genres pulled from the porndb be added to the file?   These genres are noisy and
+    Should genres pulled from ThePornDB be added to the file?   These genres are noisy and
     not recommend for use.  If this is false a single default genre will be used.
     """
 
@@ -325,12 +329,12 @@ class NamerConfig:
 
     search_phash: bool = True
     """
-    Calculate and use phashes in search for matches
+    Calculate and use PHASHes in search for matches
     """
 
     send_phash: bool = False
     """
-    If match was made via name, or user selection and not phash, send the phash (only functions if search_phash is true)
+    If match was made via name, or user selection and not PHASH, send the PHASH (only functions if search_phash is true)
     """
 
     use_alt_phash_tool: bool = False
@@ -340,22 +344,22 @@ class NamerConfig:
 
     max_ffmpeg_workers: Optional[int] = None
     """
-    Max ffmpeg processes for alternative phash generation, empty for auto select
+    Max ffmpeg processes for alternative PHASH generation, empty for auto select
     """
 
     use_gpu: Optional[bool] = False
     """
-    Use gpu for alternative phash generation
+    Use gpu for alternative PHASH generation
     """
 
     mark_collected: bool = False
     """
-    Mark any matched video as "collected" in tpdb, allowing tpdb to keep track of videos you have collected.
+    Mark any matched video as "collected" in TPDB, allowing TPDB to keep track of videos you have collected.
     """
 
     require_match_phash_top: int = 3
     """
-    If there is a phash match, require any name match be in the top N results
+    If there is a PHASH match, require any name match be in the top N results
     """
 
     ignored_dir_regex: Pattern = re.compile(r'.*_UNPACK_.*', re.IGNORECASE)
@@ -368,6 +372,10 @@ class NamerConfig:
     like inplace_name above used for local call for renaming, this instead is used to move a file/dir to a location relative
     to the dest_dir below on successful matching/tagging.
     """
+
+    new_relative_path_name_scene: Optional[str] = None
+    new_relative_path_name_movie: Optional[str] = None
+    new_relative_path_name_jav: Optional[str] = None
 
     del_other_files: bool = False
     """
@@ -454,7 +462,7 @@ class NamerConfig:
 
     cache_session: Optional[CachedSession] = None
     """
-    If use_requests_cache is true this http.session will be constructed and used for requests to tpdb.
+    If use_requests_cache is true this http.session will be constructed and used for requests to TPDB.
     """
 
     debug: bool = False
@@ -475,7 +483,7 @@ class NamerConfig:
     diagnose_errors: bool = False
     """
     Errors may be raised by the program, and when they are loguru may be used to help explain them, showing
-    values in the stack trace, potentially including the porndb token, this setting should only be turned on
+    values in the stack trace, potentially including ThePornDB token, this setting should only be turned on
     if you are going to check an logs you share for your token.
     """
 
@@ -518,6 +526,9 @@ class NamerConfig:
             'Namer Config': {
                 'porndb_token': porndb_token,
                 'inplace_name': self.inplace_name,
+                'inplace_name_scene': self.inplace_name_scene,
+                'inplace_name_movie': self.inplace_name_movie,
+                'inplace_name_jav': self.inplace_name_jav,
                 'prefer_dir_name_if_available': self.prefer_dir_name_if_available,
                 'target_extensions': self.target_extensions,
                 'write_namer_log': self.write_namer_log,
@@ -573,6 +584,9 @@ class NamerConfig:
                 'min_file_size': self.min_file_size,
                 'del_other_files': self.del_other_files,
                 'new_relative_path_name': self.new_relative_path_name,
+                'new_relative_path_name_scene': self.new_relative_path_name_scene,
+                'new_relative_path_name_movie': self.new_relative_path_name_movie,
+                'new_relative_path_name_jav': self.new_relative_path_name_jav,
                 'watch_dir': str(self.watch_dir),
                 'work_dir': str(self.work_dir),
                 'failed_dir': str(self.failed_dir),
