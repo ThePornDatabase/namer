@@ -246,6 +246,11 @@ def _read_failed_log_file(file: Path, file_size: int, file_update: float) -> Opt
                 if not hasattr(item.looked_up, 'hashes'):
                     item.looked_up.hashes = []
 
+                if item.looked_up.performers:
+                    for performer in item.looked_up.performers:
+                        if not hasattr(performer, 'alias'):
+                            performer.alias = None
+
             if not hasattr(decoded, 'fileinfo'):
                 decoded.fileinfo = FileInfo()
 
