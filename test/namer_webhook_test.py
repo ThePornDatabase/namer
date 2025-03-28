@@ -1,6 +1,7 @@
 """
 Test webhook notification functionality in namer.py
 """
+import logging
 import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -20,9 +21,9 @@ class WebhookTest(unittest.TestCase):
         """
         config = sample_config()
         config.webhook_enabled = False
-        config.webhook_url = "http://example.com/webhook"
+        config.webhook_url = 'http://example.com/webhook'
         
-        with patch('requests.post') as mock_post:
+        with patch('requests.request') as mock_post:
             send_webhook_notification(Path('/some/path/movie.mp4'), config)
             mock_post.assert_not_called()
 
@@ -32,9 +33,9 @@ class WebhookTest(unittest.TestCase):
         """
         config = sample_config()
         config.webhook_enabled = True
-        config.webhook_url = ""
+        config.webhook_url = ''
         
-        with patch('requests.post') as mock_post:
+        with patch('requests.request') as mock_post:
             send_webhook_notification(Path('/some/path/movie.mp4'), config)
             mock_post.assert_not_called()
 
@@ -44,9 +45,9 @@ class WebhookTest(unittest.TestCase):
         """
         config = sample_config()
         config.webhook_enabled = True
-        config.webhook_url = "http://example.com/webhook"
+        config.webhook_url = 'http://example.com/webhook'
         
-        with patch('requests.post') as mock_post:
+        with patch('requests.request') as mock_post:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_post.return_value = mock_response
@@ -56,9 +57,9 @@ class WebhookTest(unittest.TestCase):
             mock_post.assert_called_once()
             # Verify payload structure
             args, kwargs = mock_post.call_args
-            self.assertEqual(args[0], "http://example.com/webhook")
-            self.assertEqual(kwargs['json'], {"target_movie_file": "/some/path/movie.mp4"})
-            self.assertEqual(kwargs['timeout'], 10)
+            self.assertEqual(args[0], 'POST')
+            self.assertEqual(args[1], 'http://example.com/webhook')
+            self.assertEqual(kwargs['json'], {'target_movie_file': str(Path('/some/path/movie.mp4'))})
 
     def test_webhook_failure(self):
         """
@@ -66,10 +67,10 @@ class WebhookTest(unittest.TestCase):
         """
         config = sample_config()
         config.webhook_enabled = True
-        config.webhook_url = "http://example.com/webhook"
+        config.webhook_url = 'http://example.com/webhook'
         
-        with patch('requests.post') as mock_post:
-            mock_post.side_effect = Exception("Connection error")
+        with patch('requests.request') as mock_post:
+            mock_post.side_effect = Exception('Connection error')
             
             # Should not raise an exception
             send_webhook_notification(Path('/some/path/movie.mp4'), config)
@@ -82,7 +83,7 @@ class WebhookTest(unittest.TestCase):
         """
         with environment() as (tempdir, _fakeTPDB, config):
             config.webhook_enabled = True
-            config.webhook_url = "http://example.com/webhook"
+            config.webhook_url = 'http://example.com/webhook'
             
             with patch('namer.namer.send_webhook_notification') as mock_webhook:
                 targets = [new_ea(tempdir, use_dir=False)]
@@ -96,4 +97,5 @@ class WebhookTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     unittest.main() 

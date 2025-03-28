@@ -315,8 +315,4 @@ diagnose_errors = False
 webhook_enabled = False
 
 # URL to send HTTP POST notification to when a file is successfully renamed
-webhook_url = 
-
-[web]
-# Run webserver while running watchdog
-web = True
+webhook_url =
