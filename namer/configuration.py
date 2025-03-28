@@ -460,6 +460,16 @@ class NamerConfig:
     Add creation date from failed log to table in web interface
     """
 
+    webhook_enabled: bool = False
+    """
+    Enable webhook notification when a file is successfully renamed
+    """
+
+    webhook_url: str = ''
+    """
+    URL to send HTTP POST notification to when a file is successfully renamed
+    """
+
     cache_session: Optional[CachedSession] = None
     """
     If use_requests_cache is true this http.session will be constructed and used for requests to TPDB.

@@ -9,6 +9,7 @@ import sys
 from dataclasses import dataclass
 import pathlib
 import string
+import requests
 from pathlib import Path
 from random import choices
 from typing import List, Optional
@@ -239,7 +240,7 @@ def process_file(command: Command) -> Optional[Command]:
                 target = move_to_final_location(command, new_metadata)
                 tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
                 add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
-
+                send_webhook_notification(target.target_movie_file, command.config)
                 logger.success('Done processing file: {}, moved to {}', command.target_movie_file, target.target_movie_file)
                 return target
         elif command.inplace is False:
@@ -270,6 +271,24 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
 
         if config.write_nfo:
             write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
+
+
+def send_webhook_notification(video_file: Path, config: NamerConfig):
+    """
+    Send a webhook notification to the configured URL when a file is successfully renamed.
+    """
+    if not config.webhook_enabled or not config.webhook_url:
+        return
+    
+    try:
+        payload = {
+            "target_movie_file": str(video_file)
+        }
+        response = requests.post(config.webhook_url, json=payload, timeout=10)
+        response.raise_for_status()
+        logger.info(f"Webhook notification sent successfully to {config.webhook_url}")
+    except Exception as e:
+        logger.error(f"Failed to send webhook notification: {str(e)}")
 
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_override: Path):

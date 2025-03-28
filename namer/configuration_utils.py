@@ -308,6 +308,8 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'allow_delete_files': ('watchdog', to_bool, from_bool),
     'add_columns_from_log': ('watchdog', to_bool, from_bool),
     'add_complete_column': ('watchdog', to_bool, from_bool),
+    'webhook_enabled': ('webhook', to_bool, from_bool),
+    'webhook_url': ('webhook', None, None),
     'debug': ('watchdog', to_bool, from_bool),
     'console_format': ('watchdog', None, None),
     'manual_mode': ('watchdog', to_bool, from_bool),
