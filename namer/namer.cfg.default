@@ -309,3 +309,10 @@ manual_mode = False
 # values in the stack trace, potentially including the porndb token, this setting should only be turned on
 # if you are going to check an logs you share for your token.
 diagnose_errors = False
+
+[webhook]
+# Enable webhook notification when a file is successfully renamed
+webhook_enabled = False
+
+# URL to send HTTP POST notification to when a file is successfully renamed
+webhook_url =

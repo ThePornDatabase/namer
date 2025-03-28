@@ -23,6 +23,7 @@ from namer.command import make_command, move_command_files, move_to_final_locati
 from namer.database import search_file_in_database, write_file_to_database
 from namer.ffmpeg import FFProbeResults, FFMpeg
 from namer.fileinfo import FileInfo
+from namer.http import Http
 from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash
 from namer.moviexml import parse_movie_xml_file, write_nfo
 from namer.name_formatter import PartialFormatter
@@ -239,7 +240,7 @@ def process_file(command: Command) -> Optional[Command]:
                 target = move_to_final_location(command, new_metadata)
                 tag_in_place(target.target_movie_file, command.config, new_metadata, ffprobe_results)
                 add_extra_artifacts(target.target_movie_file, new_metadata, search_results, phash, command.config)
-
+                send_webhook_notification(target.target_movie_file, command.config)
                 logger.success('Done processing file: {}, moved to {}', command.target_movie_file, target.target_movie_file)
                 return target
         elif command.inplace is False:
@@ -270,6 +271,27 @@ def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search
 
         if config.write_nfo:
             write_nfo(video_file, new_metadata, config, trailer, poster, background, phash)
+
+
+def send_webhook_notification(video_file: Path, config: NamerConfig):
+    """
+    Send a webhook notification to the configured URL when a file is successfully renamed.
+    """
+    if not config.webhook_enabled or not config.webhook_url:
+        return
+
+    payload = {
+        'target_movie_file': str(video_file)
+    }
+
+    response = None
+    try:
+        response = Http.post(config.webhook_url, json=payload)
+    except Exception as e:
+        logger.error(f'Failed to send webhook notification: {str(e)}')
+
+    if response and response.ok:
+        logger.info(f'Webhook notification sent successfully to {config.webhook_url}')
 
 
 def check_arguments(file_to_process: Path, dir_to_process: Path, config_override: Path):
