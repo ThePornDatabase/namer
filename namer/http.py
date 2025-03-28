@@ -13,7 +13,7 @@ class RequestType(Enum):
     HEAD = 'HEAD'
 
 
-class Http:  # noqa: PIE798
+class Http:
     @staticmethod
     def request(method: RequestType, url, **kwargs):
         logger.debug(f'Requesting {method.value} "{url}"')

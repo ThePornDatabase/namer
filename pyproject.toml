@@ -44,10 +44,10 @@ scipy = "^1.13"
 pytest = "^8.0"
 pytest-cov = "^6.0"
 coverage = "^7.0"
-ruff = "^0.9"
+ruff = "^0.11"
 selenium = "^4.21"
 assertpy = "^1.1"
-poethepoet = "^0.32"
+poethepoet = "^0.33"
 pony-stubs = "^0.5"
 
 [tool.ruff]
@@ -85,5 +85,5 @@ generate-setup-file = true
 namer = "namer.__main__:main"
 
 [build-system]
-requires = ["poetry-core>=2.0"]
+requires = ["poetry-core>=2.1"]
 build-backend = "poetry.core.masonry.api"

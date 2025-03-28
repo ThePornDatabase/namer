@@ -24,6 +24,9 @@
     <div class="card-body">
         <h5 class="card-title">{{ file['looked_up']['name'] }}</h5>
         <p class="card-text">{{ file['looked_up']['site'] }}</p>
+        {% if file['looked_up']['parent'] %}
+            <p class="card-text">{{ file['looked_up']['parent'] }}</p>
+        {% endif %}
         {% if file['looked_up']['network'] %}
             <p class="card-text">{{ file['looked_up']['network'] }}</p>
         {% endif %}
