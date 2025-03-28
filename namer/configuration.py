@@ -617,6 +617,10 @@ class NamerConfig:
                 'manual_mode': self.manual_mode,
                 'diagnose_errors': self.diagnose_errors,
             },
+            'Webhook Config': {
+                'webhook_enabled': self.webhook_enabled,
+                'webhook_url': self.webhook_url,
+            }
         }
 
         return config
