@@ -1,6 +1,7 @@
 """
 Test namer_types.py
 """
+
 import logging
 import os
 import sys

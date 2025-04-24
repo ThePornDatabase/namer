@@ -2,6 +2,7 @@
 Reads movie.xml of Emby/Jellyfin format in to a LookedUpFileInfo, allowing the metadata to be written in to video
 files, or used in renaming the video file (currently only mp4s).
 """
+
 import tempfile
 import unittest
 from pathlib import Path

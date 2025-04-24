@@ -1,6 +1,7 @@
 """
 Tests namer_ffmpeg
 """
+
 import shutil
 import tempfile
 import unittest

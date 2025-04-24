@@ -1,6 +1,7 @@
 """
 Namer Configuration readers/verifier
 """
+
 import os
 import re
 import sys
@@ -620,7 +621,7 @@ class NamerConfig:
             'Webhook Config': {
                 'webhook_enabled': self.webhook_enabled,
                 'webhook_url': self.webhook_url,
-            }
+            },
         }
 
         return config

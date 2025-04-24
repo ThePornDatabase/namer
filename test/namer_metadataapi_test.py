@@ -1,6 +1,7 @@
 """
 Test namer_metadataapi_test.py
 """
+
 import io
 import unittest
 from unittest import mock

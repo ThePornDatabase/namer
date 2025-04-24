@@ -2,7 +2,6 @@
 Namer Configuration readers/verifier
 """
 
-
 import os
 import random
 import re

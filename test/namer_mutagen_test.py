@@ -1,6 +1,7 @@
 """
 Test for namer_mutagen.py
 """
+
 import shutil
 import tempfile
 import unittest

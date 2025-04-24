@@ -1,6 +1,7 @@
 """
 Test namer_watchdog.py
 """
+
 import contextlib
 import logging
 import time

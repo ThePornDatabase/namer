@@ -1,6 +1,7 @@
 """
 Helper functions to tie in to namer's functionality.
 """
+
 import gzip
 import math
 import shutil
@@ -107,7 +108,7 @@ def metadataapi_responses_to_webui_response(responses: Dict, config: NamerConfig
     for url, response in responses.items():
         if response and response.strip() != '':
             json_obj = orjson.loads(response)
-            formatted = orjson.dumps(orjson.loads(response), option=orjson.OPT_INDENT_2|orjson.OPT_SORT_KEYS).decode('UTF-8')
+            formatted = orjson.dumps(orjson.loads(response), option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS).decode('UTF-8')
             name_parts = parse_file_name(file_name, config)
             file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, name_parts, config))
 

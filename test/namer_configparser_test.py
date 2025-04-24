@@ -1,6 +1,7 @@
 """
 Tests namer_configparser
 """
+
 from configupdater import ConfigUpdater
 import unittest
 from importlib import resources
