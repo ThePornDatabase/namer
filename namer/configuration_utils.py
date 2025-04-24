@@ -2,7 +2,7 @@
 Namer Configuration readers/verifier
 """
 
-import json
+
 import os
 import random
 import re
@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
 from configupdater import ConfigUpdater
 from pathlib import Path
 
+import orjson
 from loguru import logger
 
 from namer import database
@@ -192,7 +193,7 @@ def from_regex_list(value: Optional[List[Pattern]]) -> str:
 def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str]:
     abbreviations_db = database.abbreviations.copy()
     if site_abbreviations:
-        data = json.loads(site_abbreviations)
+        data = orjson.loads(site_abbreviations)
         abbreviations_db.update(data)
 
     new_abbreviation: Dict[Pattern, str] = {}
@@ -205,7 +206,7 @@ def to_site_abbreviation(site_abbreviations: Optional[str]) -> Dict[Pattern, str
 
 def from_site_abbreviation(site_abbreviations: Optional[Dict[Pattern, str]]) -> str:
     out: Dict[str, str] = {x.pattern[1:-6]: y[0:-1] for (x, y) in site_abbreviations.items()} if site_abbreviations else {}
-    res = json.dumps(out)
+    res = orjson.dumps(out).decode('UTF-8')
 
     return res
 

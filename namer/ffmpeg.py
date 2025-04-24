@@ -5,7 +5,6 @@ only one default audio stream, and this script lets you set it with the correct 
 code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
-import json
 import subprocess
 from contextlib import suppress
 from dataclasses import dataclass
@@ -19,6 +18,7 @@ from random import choices
 from typing import Dict, List, Optional
 
 import ffmpeg
+import orjson
 from loguru import logger
 from PIL import Image
 from pathvalidate import ValidationError
@@ -45,7 +45,7 @@ class FFProbeStream:
     def __str__(self) -> str:
         data = self.to_dict()
 
-        return json.dumps(data, indent=2)
+        return orjson.dumps(data, option=orjson.OPT_INDENT_2).decode('UTF-8')
 
     def to_dict(self) -> dict:
         data = {

@@ -39,6 +39,7 @@ oshash = "^0.1"
 pony = "^0.7"
 numpy = "^2.1"
 scipy = "^1.13"
+orjson = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0"
@@ -47,7 +48,7 @@ coverage = "^7.0"
 ruff = "^0.11"
 selenium = "^4.21"
 assertpy = "^1.1"
-poethepoet = "^0.33"
+poethepoet = "^0.34"
 pony-stubs = "^0.5"
 
 [tool.ruff]

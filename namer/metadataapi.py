@@ -5,16 +5,15 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 
 import argparse
 import itertools
-import json
 import re
 import sys
 from contextlib import suppress
 from functools import lru_cache
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
 from urllib.parse import quote
 
+import orjson
 import rapidfuzz
 from loguru import logger
 from PIL import Image
@@ -220,14 +219,14 @@ def __request_response_json_object(url: str, config: NamerConfig, method: Reques
         'Accept': 'application/json',
         'User-Agent': 'namer-1',
     }
-    http = Http.request(method, url, cache_session=config.cache_session, headers=headers, json=data)
+    data = orjson.dumps(data) if data else None
+    http = Http.request(method, url, cache_session=config.cache_session, headers=headers, data=data)
     response = ''
     if http.ok:
         response = http.text
     else:
-        data = None
         with suppress(JSONDecodeError):
-            data = http.json()
+            data = orjson.loads(http.content)
 
         message = 'Unknown error'
         if data and 'message' in data:
@@ -302,40 +301,37 @@ def get_trailer(url: Optional[str], video_file: Optional[Path], namer_config: Na
     return None
 
 
-def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> LookedUpFileInfo:
+def __json_to_fileinfo(data: dict, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> LookedUpFileInfo:
     file_info = LookedUpFileInfo()
 
-    data_id = data._id  # pylint: disable=protected-access
-    file_info.type = SceneType[data.type.upper()]
+    data_id = data['_id']
+    file_info.type = SceneType[data['type'].upper()]
 
-    url_part = data.type.lower()
+    url_part = data['type'].lower()
     if file_info.type == SceneType.JAV:
         file_info.uuid = f'{url_part}/{data_id}'
     else:
         file_info.uuid = f'{url_part}s/{data_id}'
 
-    file_info.guid = data.id
-    file_info.name = data.title
-    file_info.description = data.description
-    file_info.date = data.date
-    file_info.source_url = data.url
+    file_info.guid = data['id']
+    file_info.name = data['title']
+    file_info.description = data['description']
+    file_info.date = data['date']
+    file_info.source_url = data['url']
 
-    if hasattr(data, 'external_id'):
-        file_info.external_id = data.external_id
+    if 'external_id' in data:
+        file_info.external_id = data['external_id']
 
-    file_info.poster_url = None
-    if hasattr(data, 'poster'):
-        file_info.poster_url = data.poster
+    if 'poster' in data:
+        file_info.poster_url = data['poster']
 
-    if hasattr(data, 'background') and data.background:
-        file_info.background_url = data.background.large
+    if 'background' in data and data['background']:
+        file_info.background_url = data['background']['large']
 
-    if hasattr(data, 'trailer'):
-        file_info.trailer_url = data.trailer
-    else:
-        file_info.trailer_url = None
+    if 'trailer' in data:
+        file_info.trailer_url = data['trailer']
 
-    file_info.site = data.site.name
+    file_info.site = data['site']['name']
 
     # clean up messy site metadata from adultdvdempire -> tpdb.
     if file_info.type == SceneType.MOVIE:
@@ -346,25 +342,25 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     # this gets written in to the metadata of a video and effects file hashes.
     file_info.look_up_site_id = data_id
 
-    for json_performer in data.performers:
-        if not json_performer.name:
+    for json_performer in data['performers']:
+        if not json_performer['name']:
             continue
 
-        performer_name = json_performer.name
-        if hasattr(json_performer, 'parent') and hasattr(json_performer.parent, 'name'):
-            performer_name = json_performer.parent.name
+        performer_name = json_performer['name']
+        if 'parent' in json_performer and json_performer['parent'] and 'name' in json_performer['parent']:
+            performer_name = json_performer['parent']['name']
 
         performer = Performer(performer_name)
-        performer.alias = json_performer.name
-        if hasattr(json_performer, 'parent') and hasattr(json_performer.parent, 'extras'):
-            performer.role = json_performer.parent.extras.gender
-        elif hasattr(json_performer, 'extra'):
-            performer.role = json_performer.extra.gender
+        performer.alias = json_performer['name']
+        if 'parent' in json_performer and json_performer['parent'] and 'extras' in json_performer['parent']:
+            performer.role = json_performer['parent']['extras']['gender']
+        elif 'extra' in json_performer:
+            performer.role = json_performer['extra']['gender']
 
-        if hasattr(json_performer, 'parent') and hasattr(json_performer.parent, 'image'):
-            performer.image = json_performer.parent.image
-        elif hasattr(json_performer, 'image'):
-            performer.image = json_performer.image
+        if 'parent' in json_performer and json_performer['parent'] and 'image' in json_performer['parent']:
+            performer.image = json_performer['parent']['image']
+        elif 'image' in json_performer:
+            performer.image = json_performer['image']
 
         file_info.performers.append(performer)
 
@@ -372,56 +368,56 @@ def __json_to_fileinfo(data, url: str, json_response: str, name_parts: Optional[
     file_info.original_response = json_response
     file_info.original_parsed_filename = name_parts
 
-    if hasattr(data, 'duration'):
-        file_info.duration = data.duration
+    if 'duration' in data:
+        file_info.duration = data['duration']
 
     tags = []
-    if hasattr(data, 'tags'):
-        for tag in data.tags:
-            if tag.name not in tags:
-                tags.append(tag.name)
+    if 'tags' in data:
+        for tag in data['tags']:
+            if tag['name'] not in tags:
+                tags.append(tag['name'])
 
     file_info.tags = tags
 
     hashes = []
-    if hasattr(data, 'hashes'):
-        for item in data.hashes:
-            scene_hash = SceneHash(item.hash, item.type, item.duration)
+    if 'hashes' in data:
+        for item in data['hashes']:
+            scene_hash = SceneHash(item['hash'], item['type'], item['duration'])
             hashes.append(scene_hash)
 
     file_info.hashes = hashes
 
-    if hasattr(data, 'is_collected'):
-        file_info.is_collected = data.is_collected
+    if 'is_collected' in data:
+        file_info.is_collected = data['is_collected']
 
-    if data.site.parent_id and data.site.parent_id != data.site.id:
-        if hasattr(data.site, 'parent'):
-            parent_name = data.site.parent.name
+    if data['site']['parent_id'] and data['site']['parent_id'] != data['site']['id']:
+        if 'parent' in data['site']:
+            parent_name = data['site']['parent']['name']
         else:
-            parent_name = get_site_name(data.site.parent_id, config)
+            parent_name = get_site_name(data['site']['parent_id'], config)
 
         file_info.parent = parent_name
 
-    if data.site.network_id and data.site.network_id != data.site.id:
-        if hasattr(data.site, 'network'):
-            network_name = data.site.network.name
+    if data['site']['network_id'] and data['site']['network_id'] != data['site']['id']:
+        if 'network' in data['site']:
+            network_name = data['site']['network']['name']
         else:
-            network_name = get_site_name(data.site.network_id, config)
+            network_name = get_site_name(data['site']['network_id'], config)
 
         file_info.network = network_name
 
     return file_info
 
 
-def __metadataapi_response_to_data(json_object, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> List[LookedUpFileInfo]:
+def __metadataapi_response_to_data(json_object: dict, url: str, json_response: str, name_parts: Optional[FileInfo], config: NamerConfig) -> List[LookedUpFileInfo]:
     file_infos: List[LookedUpFileInfo] = []
-    if hasattr(json_object, 'data'):
-        if isinstance(json_object.data, list):
-            for data in json_object.data:
+    if 'data' in json_object:
+        if isinstance(json_object['data'], list):
+            for data in json_object['data']:
                 found_file_info = __json_to_fileinfo(data, url, json_response, name_parts, config)
                 file_infos.append(found_file_info)
         else:
-            found_file_info: LookedUpFileInfo = __json_to_fileinfo(json_object.data, url, json_response, name_parts, config)
+            found_file_info: LookedUpFileInfo = __json_to_fileinfo(json_object['data'], url, json_response, name_parts, config)
             file_infos.append(found_file_info)
 
     return file_infos
@@ -475,8 +471,8 @@ def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_c
     file_infos = []
     if json_response and json_response.strip() != '':
         # logger.debug("json_response: \n{}", json_response)
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
-        formatted = json.dumps(json.loads(json_response), indent=4, sort_keys=True)
+        json_obj = orjson.loads(json_response)
+        formatted = orjson.dumps(orjson.loads(json_response), option=orjson.OPT_INDENT_2|orjson.OPT_SORT_KEYS).decode('UTF-8')
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts, namer_config)
 
     return file_infos
@@ -504,7 +500,7 @@ def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
     json_response = __request_response_json_object(url, namer_config)
 
     if json_response and json_response.strip() != '':
-        json_obj = json.loads(json_response, object_hook=lambda d: SimpleNamespace(**d))
+        json_obj = orjson.loads(json_response)
         site = json_obj.data.name
 
     return site
@@ -568,9 +564,9 @@ def get_user_info(config: NamerConfig):
     url = __build_url(config, user=True)
     response = __request_response_json_object(url, config)
 
-    data = json.loads(response, object_hook=lambda d: SimpleNamespace(**d)) if response else None
+    data = orjson.loads(response) if response else None
 
-    return data.data if data else None
+    return data['data'] if data else None
 
 
 def main(args_list: List[str]):

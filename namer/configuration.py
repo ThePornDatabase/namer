@@ -1,7 +1,6 @@
 """
 Namer Configuration readers/verifier
 """
-import json
 import os
 import re
 import sys
@@ -12,6 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Pattern, Sequence
 from configupdater import ConfigUpdater
 
+import orjson
 from requests_cache import CachedSession
 
 from namer import database
@@ -525,7 +525,7 @@ class NamerConfig:
 
     def to_json(self):
         config = self.to_dict()
-        return json.dumps(config, indent=2)
+        return orjson.dumps(config, option=orjson.OPT_INDENT_2).decode('UTF-8')
 
     def to_dict(self) -> dict:
         porndb_token = 'None is Set, Go to https://metadatapi.net/ to get one!'

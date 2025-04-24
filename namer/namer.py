@@ -13,6 +13,7 @@ from pathlib import Path
 from random import choices
 from typing import List, Optional
 
+import orjson
 from loguru import logger
 
 from namer.command import Command
@@ -280,13 +281,17 @@ def send_webhook_notification(video_file: Path, config: NamerConfig):
     if not config.webhook_enabled or not config.webhook_url:
         return
 
-    payload = {
-        'target_movie_file': str(video_file)
+    headers = {
+        'Content-Type': 'application/json',
     }
+
+    data = orjson.dumps({
+        'target_movie_file': str(video_file)
+    })
 
     response = None
     try:
-        response = Http.post(config.webhook_url, json=payload)
+        response = Http.post(config.webhook_url, headers=headers, data=data)
     except Exception as e:
         logger.error(f'Failed to send webhook notification: {str(e)}')
 
