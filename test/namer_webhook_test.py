@@ -1,6 +1,7 @@
 """
 Test webhook notification functionality in namer.py
 """
+import json
 import logging
 import unittest
 from pathlib import Path
@@ -59,7 +60,7 @@ class WebhookTest(unittest.TestCase):
             args, kwargs = mock_post.call_args
             self.assertEqual(args[0], 'POST')
             self.assertEqual(args[1], 'http://example.com/webhook')
-            self.assertEqual(kwargs['json'], {'target_movie_file': str(Path('/some/path/movie.mp4'))})
+            self.assertEqual(kwargs['data'].decode('UTF-8'), json.dumps({'target_movie_file': str(Path('/some/path/movie.mp4'))}, separators=(',', ':')))
 
     def test_webhook_failure(self):
         """
