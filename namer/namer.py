@@ -138,6 +138,8 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     if nfo_file.is_file() and nfo_file.exists():
         return parse_movie_xml_file(nfo_file)
 
+    return None
+
 
 def process_file(command: Command) -> Optional[Command]:
     """
@@ -248,6 +250,8 @@ def process_file(command: Command) -> Optional[Command]:
             failed = move_command_files(command, command.config.failed_dir)
             if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
                 write_log_file(failed.target_movie_file, search_results, failed.config)
+
+    return None
 
 
 def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: ComparisonResults, phash: Optional[PerceptualHash], config: NamerConfig):

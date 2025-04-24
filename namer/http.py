@@ -48,3 +48,5 @@ class Http:
                 f.write(data)
 
             return f
+
+        return None

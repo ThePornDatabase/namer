@@ -513,6 +513,8 @@ def get_complete_metadataapi_net_fileinfo(name_parts: Optional[FileInfo], uuid: 
         if file_infos:
             return file_infos[0]
 
+    return None
+
 
 def match(file_name_parts: Optional[FileInfo], namer_config: NamerConfig, phash: Optional[PerceptualHash] = None) -> ComparisonResults:
     """

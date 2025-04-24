@@ -89,15 +89,21 @@ class FFProbeResults:
             if result.is_video() and result.disposition_default:
                 return result
 
+        return None
+
     def get_default_audio_stream(self) -> Optional[FFProbeStream]:
         for result in self.__results:
             if result.is_audio() and result.disposition_default:
                 return result
 
+        return None
+
     def get_audio_stream(self, language_code: str) -> Optional[FFProbeStream]:
         for result in self.__results:
             if result.is_audio() and result.tags_language == language_code:
                 return result
+
+        return None
 
     def get_all_streams(self) -> List[FFProbeStream]:
         return self.__results
@@ -109,6 +115,8 @@ class FFProbeResults:
         stream = self.get_default_video_stream()
         if stream:
             return stream.height if stream.height else 0
+
+        return None
 
 
 class FFMpeg:

@@ -197,6 +197,8 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
 
         return selected
 
+    return None
+
 
 def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
     """
@@ -402,6 +404,8 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
         if relative_path:
             target_file = relative_to / relative_path.parts[0]
             return make_command(target_file, config, nfo, inplace, uuid, is_auto=is_auto)
+
+    return None
 
 
 def get_inplace_name_template_by_type(config: NamerConfig, scene_type: Optional[SceneType] = None):
