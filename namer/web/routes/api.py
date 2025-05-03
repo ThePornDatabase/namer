@@ -1,6 +1,7 @@
 """
 Defines the api routes of a Flask webserver for namer.
 """
+
 from pathlib import Path
 from queue import Queue
 

@@ -1,13 +1,12 @@
-import json
 import platform
 import subprocess
 from functools import lru_cache
-from json import JSONDecodeError
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Optional
 
+import orjson
 from loguru import logger
+from orjson import JSONDecodeError
 
 from namer.videophash import PerceptualHash, return_perceptual_hash
 
@@ -78,13 +77,13 @@ class StashVideoPerceptualHash:
             if success:
                 data = None
                 try:
-                    data = json.loads(stdout, object_hook=lambda d: SimpleNamespace(**d))
+                    data = orjson.loads(stdout)
                 except JSONDecodeError:
                     logger.error(stdout)
                     pass
 
                 if data:
-                    output = return_perceptual_hash(data.duration, data.phash, data.oshash)
+                    output = return_perceptual_hash(data['duration'], data['phash'], data['oshash'])
             else:
                 logger.error(stderr)
 

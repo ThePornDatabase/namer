@@ -1,6 +1,7 @@
 """
 Defines the web routes of a Flask webserver for namer.
 """
+
 from queue import Queue
 
 from flask import Blueprint, redirect, render_template, request

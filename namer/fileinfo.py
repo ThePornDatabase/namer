@@ -1,6 +1,7 @@
 """
 Parse string in to FileNamePart define in namer_types.
 """
+
 from dataclasses import dataclass
 import re
 from pathlib import PurePath

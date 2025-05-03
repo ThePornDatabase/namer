@@ -1,6 +1,7 @@
 """
 Tests for namer_file_parser.py
 """
+
 import io
 import shutil
 import unittest

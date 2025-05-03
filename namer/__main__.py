@@ -11,6 +11,7 @@ porndb for a match to be considered.  If the log file flag is enabled then a <or
 file will be written with all the potential matches sorted, descending by how closely the scene name/performer names
 match the file.
 """
+
 import sys
 from datetime import timedelta
 from pathlib import Path

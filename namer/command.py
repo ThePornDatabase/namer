@@ -72,7 +72,7 @@ class Command:
     config: NamerConfig
 
     def get_command_target(self):
-        return str(self.target_movie_file.absolute())
+        return str(self.target_movie_file.resolve())
 
 
 def move_command_files(target: Optional[Command], new_target: Path, is_auto: bool = True) -> Optional[Command]:
@@ -197,6 +197,8 @@ def selected_best_movie(movies: List[str], config: NamerConfig) -> Optional[Path
 
         return selected
 
+    return None
+
 
 def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> Command:
     """
@@ -250,7 +252,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
         selected_movie = selected_best_movie(movies, command.config)
         if selected_movie:
             movies.remove(str(selected_movie))
-            if str(selected_movie.absolute()) != str(final_location.absolute()):
+            if str(selected_movie.resolve()) != str(final_location.resolve()):
                 movies.remove(str(final_location))
                 final_location.unlink()
                 shutil.move(selected_movie, final_location)
@@ -302,7 +304,7 @@ def move_to_final_location(command: Command, new_metadata: LookedUpFileInfo) -> 
 def is_relative_to(potential_sub: Optional[Path], potential_parent: Optional[Path]) -> bool:
     try:
         if potential_sub and potential_parent:
-            potential_sub.absolute().relative_to(potential_parent.absolute())
+            potential_sub.resolve().relative_to(potential_parent.resolve())
             return True
         return False
     except ValueError:
@@ -398,10 +400,12 @@ def make_command_relative_to(input_dir: Path, relative_to: Path, config: NamerCo
     specified
     """
     if is_relative_to(input_dir, relative_to):
-        relative_path = input_dir.absolute().relative_to(relative_to.absolute())
+        relative_path = input_dir.resolve().relative_to(relative_to.resolve())
         if relative_path:
             target_file = relative_to / relative_path.parts[0]
             return make_command(target_file, config, nfo, inplace, uuid, is_auto=is_auto)
+
+    return None
 
 
 def get_inplace_name_template_by_type(config: NamerConfig, scene_type: Optional[SceneType] = None):
@@ -445,8 +449,8 @@ def main(arg_list: List[str]):
     parser.add_argument('-f', '--file', help='String to parse for name parts', required=True)
     parser.add_argument('-c', '--configfile', help='override location for a configuration file.', type=Path)
     args = parser.parse_args(arg_list)
-    target = Path(args.file).absolute()
-    config_file = Path(args.configfile).absolute()
+    target = Path(args.file).resolve()
+    config_file = Path(args.configfile).resolve()
     target_file = make_command(target, default_config(config_file))
     if target_file:
         print(target_file.parsed_file)

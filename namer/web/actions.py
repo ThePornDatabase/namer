@@ -1,17 +1,17 @@
 """
 Helper functions to tie in to namer's functionality.
 """
+
 import gzip
-import json
 import math
 import shutil
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
 from queue import Queue
-from types import SimpleNamespace
 from typing import Dict, List, Optional
 
+import orjson
 import jsonpickle
 from werkzeug.routing import Rule
 
@@ -62,7 +62,7 @@ def get_queue_size(queue: Queue) -> int:
 def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     stat = command.target_movie_file.stat()
 
-    sub_path = str(command.target_movie_file.absolute().relative_to(command.config.failed_dir.absolute())) if is_relative_to(command.target_movie_file, command.config.failed_dir) else None
+    sub_path = str(command.target_movie_file.resolve().relative_to(command.config.failed_dir.resolve())) if is_relative_to(command.target_movie_file, command.config.failed_dir) else None
     res = {
         'file': sub_path,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
@@ -107,8 +107,8 @@ def metadataapi_responses_to_webui_response(responses: Dict, config: NamerConfig
     file_infos = []
     for url, response in responses.items():
         if response and response.strip() != '':
-            json_obj = json.loads(response, object_hook=lambda d: SimpleNamespace(**d))
-            formatted = json.dumps(json.loads(response), indent=4, sort_keys=True)
+            json_obj = orjson.loads(response)
+            formatted = orjson.dumps(orjson.loads(response), option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS).decode('UTF-8')
             name_parts = parse_file_name(file_name, config)
             file_infos.extend(__metadataapi_response_to_data(json_obj, url, formatted, name_parts, config))
 

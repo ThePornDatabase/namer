@@ -22,10 +22,10 @@ def main(args_list: List[str]):
     parser.add_argument('-v', '--verbose', help='verbose, print logs', action='store_true')
     args = parser.parse_args(args=args_list)
 
-    config = default_config(args.configfile.absolute() if args.configfile else None)
+    config = default_config(args.configfile.resolve() if args.configfile else None)
     if args.verbose:
         level = 'DEBUG' if config.debug else 'INFO'
         logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
 
-    file_hash = calculate_phash(args.file.absolute(), config)
+    file_hash = calculate_phash(args.file.resolve(), config)
     print(file_hash.to_dict())

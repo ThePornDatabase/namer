@@ -292,6 +292,8 @@ class MovieWatcher:
         if self.__webserver is not None:
             return self.__webserver.get_effective_port()
 
+        return None
+
     def __schedule(self):
         self.__event_observer.schedule(self.__event_handler, str(self.__src_path), recursive=True)
 
@@ -312,7 +314,7 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     if not user:
         sys.exit(-1)
 
-    logger.info(f'Logged as {user.name} ({user.id})')
+    logger.info('Logged as {name} ({id})'.format(**user))
 
     if namer_watchdog_config.retry_time:
         schedule.every().day.at(namer_watchdog_config.retry_time).do(lambda: retry_failed(namer_watchdog_config))

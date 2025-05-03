@@ -4,6 +4,7 @@ There name, or directory name, will be analyzed, matched against
 the porndb, and used for renaming (in place), and updating a mp4
 file's metadata (poster, artists, etc.)
 """
+
 import argparse
 import sys
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ from pathlib import Path
 from random import choices
 from typing import List, Optional
 
+import orjson
 from loguru import logger
 
 from namer.command import Command
@@ -137,6 +139,8 @@ def get_local_metadata_if_requested(video_file: Path) -> Optional[LookedUpFileIn
     if nfo_file.is_file() and nfo_file.exists():
         return parse_movie_xml_file(nfo_file)
 
+    return None
+
 
 def process_file(command: Command) -> Optional[Command]:
     """
@@ -248,6 +252,8 @@ def process_file(command: Command) -> Optional[Command]:
             if failed is not None and search_results is not None and failed.config.write_namer_failed_log:
                 write_log_file(failed.target_movie_file, search_results, failed.config)
 
+    return None
+
 
 def add_extra_artifacts(video_file: Path, new_metadata: LookedUpFileInfo, search_results: ComparisonResults, phash: Optional[PerceptualHash], config: NamerConfig):
     """
@@ -280,13 +286,17 @@ def send_webhook_notification(video_file: Path, config: NamerConfig):
     if not config.webhook_enabled or not config.webhook_url:
         return
 
-    payload = {
-        'target_movie_file': str(video_file)
+    headers = {
+        'Content-Type': 'application/json',
     }
+
+    data = orjson.dumps({
+        'target_movie_file': str(video_file)
+    })
 
     response = None
     try:
-        response = Http.post(config.webhook_url, json=payload)
+        response = Http.post(config.webhook_url, headers=headers, data=data)
     except Exception as e:
         logger.error(f'Failed to send webhook notification: {str(e)}')
 
@@ -371,8 +381,8 @@ def main(arg_list: List[str]):
         target = args.dir
 
     if args.many:
-        dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
+        dir_with_sub_dirs_to_process(args.dir.resolve(), config, args.infos)
     else:
-        command = make_command(target.absolute(), config, inplace=True, nfo=args.infos)
+        command = make_command(target.resolve(), config, inplace=True, nfo=args.infos)
         if command is not None:
             process_file(command)

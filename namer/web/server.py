@@ -1,15 +1,15 @@
 """
 A wrapper allowing shutdown of a Flask server.
 """
-import json
+
 import logging
 import mimetypes
 import datetime
-from json import JSONEncoder
 from queue import Queue
 from threading import Thread
 from typing import Any, List, Optional, Union
 
+import orjson
 from flask import Blueprint, Flask
 from flask.json.provider import _default, JSONProvider
 from flask_compress import Compress
@@ -181,16 +181,15 @@ class NamerWebServer(GenericWebServer):
 
 
 class CustomJSONProvider(JSONProvider):
-    def dumps(self, obj, **kwargs):
-        return json.dumps(obj, **kwargs, cls=CustomJSONEncoder)
+    def dumps(self, obj: Any, **kwargs: Any):
+        return orjson.dumps(obj, option=orjson.OPT_PASSTHROUGH_SUBCLASS, default=default).decode('UTF-8')
 
-    def loads(self, s: Union[str, bytes], **kwargs):
-        return json.loads(s, **kwargs)
+    def loads(self, s: str | bytes, **kwargs: Any):
+        return orjson.loads(s)
 
 
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, ImageHash):
-            return str(obj)
+def default(obj):
+    if isinstance(obj, ImageHash):
+        return str(obj)
 
-        return _default(obj)
+    return _default(obj)

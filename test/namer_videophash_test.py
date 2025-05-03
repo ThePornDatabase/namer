@@ -1,6 +1,7 @@
 """
 Test namer_videophash.py
 """
+
 import logging
 import shutil
 import tempfile
