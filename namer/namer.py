@@ -381,8 +381,8 @@ def main(arg_list: List[str]):
         target = args.dir
 
     if args.many:
-        dir_with_sub_dirs_to_process(args.dir.absolute(), config, args.infos)
+        dir_with_sub_dirs_to_process(args.dir.resolve(), config, args.infos)
     else:
-        command = make_command(target.absolute(), config, inplace=True, nfo=args.infos)
+        command = make_command(target.resolve(), config, inplace=True, nfo=args.infos)
         if command is not None:
             process_file(command)

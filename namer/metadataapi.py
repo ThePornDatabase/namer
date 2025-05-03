@@ -586,7 +586,7 @@ def main(args_list: List[str]):
     parser.add_argument('-v', '--verbose', help='verbose, print logs', action='store_true')
     args = parser.parse_args(args=args_list)
 
-    config = default_config(args.configfile.absolute() if args.configfile else None)
+    config = default_config(args.configfile.resolve() if args.configfile else None)
 
     if args.verbose:
         level = 'DEBUG' if config.debug else 'INFO'
@@ -594,7 +594,7 @@ def main(args_list: List[str]):
 
     verify_configuration(config, PartialFormatter())
 
-    file_name: Optional[Command] = make_command(args.file.absolute(), config, ignore_file_restrictions=True)
+    file_name: Optional[Command] = make_command(args.file.resolve(), config, ignore_file_restrictions=True)
 
     results: Optional[ComparisonResults] = None
     if file_name and file_name.parsed_file:

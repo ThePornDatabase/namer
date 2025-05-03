@@ -62,7 +62,7 @@ def get_queue_size(queue: Queue) -> int:
 def command_to_file_info(command: Command, config: NamerConfig) -> Dict:
     stat = command.target_movie_file.stat()
 
-    sub_path = str(command.target_movie_file.absolute().relative_to(command.config.failed_dir.absolute())) if is_relative_to(command.target_movie_file, command.config.failed_dir) else None
+    sub_path = str(command.target_movie_file.resolve().relative_to(command.config.failed_dir.resolve())) if is_relative_to(command.target_movie_file, command.config.failed_dir) else None
     res = {
         'file': sub_path,
         'name': command.target_directory.stem if command.parsed_dir_name and command.target_directory else command.target_movie_file.stem,
