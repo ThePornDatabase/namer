@@ -18,7 +18,7 @@ import rapidfuzz
 from loguru import logger
 from PIL import Image
 from rapidfuzz import utils
-from requests import JSONDecodeError
+from orjson import JSONDecodeError
 from unidecode import unidecode
 
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, Performer, SceneHash, SceneType

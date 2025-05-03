@@ -1,12 +1,12 @@
 import platform
 import subprocess
 from functools import lru_cache
-from json import JSONDecodeError
 from pathlib import Path
 from typing import Optional
 
 import orjson
 from loguru import logger
+from orjson import JSONDecodeError
 
 from namer.videophash import PerceptualHash, return_perceptual_hash
 
