@@ -64,10 +64,10 @@ def default_os_browser(debug: bool) -> WebDriver:
 
 @contextlib.contextmanager  # type: ignore
 def make_test_context(config: NamerConfig):
-    with environment(config) as (tempdir, mock_tpdb, config), create_watcher(config) as watcher, default_os_browser(is_debugging()) as browser:
+    with environment(config) as (temp_dir, mock_tpdb, config), create_watcher(config) as watcher, default_os_browser(is_debugging()) as browser:
         url = f'http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed'
         browser.get(url)
-        yield tempdir, watcher, browser, mock_tpdb
+        yield temp_dir, watcher, browser, mock_tpdb
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -96,7 +96,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_failed_log = True
         config.del_other_files = True
         config.extra_sleep_time = 1
-        with make_test_context(config) as (_tempdir, _watcher, browser, _mock_tpdb):
+        with make_test_context(config) as (temp_dir, watcher, browser, mock_tpdb):
             new_ea(config.failed_dir, use_dir=False)
             (
                 FailedPage(browser)

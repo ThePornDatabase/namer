@@ -23,7 +23,7 @@ def wait_until_processed(watcher: MovieWatcher, duration: int = 60):
     Waits until all files have been moved out of watch/working dirs.
     """
     config = watcher.get_config()
-    Wait().seconds(duration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    Wait().seconds(duration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).is_false()
     watcher.stop()
 
 
@@ -32,12 +32,25 @@ def make_watchdog_context(config: NamerConfig, targets=None):
     if targets is None:
         targets = []
 
-    with environment(config) as (tempdir, mock_tpdb, config):
+    with environment(config) as (temp_dir, mock_tpdb, config):
         for target in targets:
             if target.file is None:
                 target.setup(config.watch_dir)
         with create_watcher(config) as watcher:
-            yield tempdir, watcher, mock_tpdb
+            yield temp_dir, watcher, mock_tpdb
+
+
+def remove_performer_genders(data: Any):
+    single_scene = data['data']
+    for json_performer in single_scene['performers']:
+        if not json_performer['extra']:
+            continue
+        json_performer['extra']['gender'] = None
+
+
+def remove_performers(data: Any):
+    single_scene = data['data']
+    single_scene['performers'] = []
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
@@ -68,7 +81,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.min_file_size = 0
         targets: list[ProcessingTarget] = [new_ea(), new_ea(use_dir=False)]
-        with make_watchdog_context(config, targets) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config, targets) as (temp_dir, watcher, fake_tpdb):
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
@@ -96,7 +109,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.preserve_duplicates = False
         config.max_desired_resolutions = -1
         config.desired_codec = ['hevc', 'h264']
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets: list[ProcessingTarget] = [new_ea(config.watch_dir, mp4_file_name=okay), new_ea(config.watch_dir, use_dir=False, post_stem='2', mp4_file_name=better), new_ea(config.watch_dir, use_dir=False, post_stem='1', mp4_file_name=best)]
             wait_until_processed(watcher, 120)
             self.assertFalse(targets[0].get_file().exists())
@@ -123,7 +136,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.min_file_size = 0
         config.write_namer_log = True
         config.min_file_size = 0
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [new_ea(config.watch_dir)]
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
@@ -144,7 +157,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.min_file_size = 0
         config.convert_container_to = 'mkv'
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [new_ea(config.watch_dir)]
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
@@ -161,7 +174,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.min_file_size = 0
         config.preserve_duplicates = True
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(config.watch_dir / 'deeper' / 'and_deeper', use_dir=False),
                 new_ea(config.watch_dir, post_stem='number2', use_dir=False),
@@ -188,7 +201,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.min_file_size = 0
         config.del_other_files = False
         config.new_relative_path_name = '{site}/{site} - {date} - {name}/{site} - {date} - {name}.{ext}'
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(config.watch_dir / 'deeper' / 'and_deeper', use_dir=False),
             ]
@@ -219,7 +232,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.set_dir_permissions = None
         config.set_file_permissions = None
         config.new_relative_path_name = './{network}/' + config.new_relative_path_name
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(config.watch_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way', use_dir=True),
             ]
@@ -245,7 +258,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.set_dir_permissions = None
         config.set_file_permissions = None
         config.new_relative_path_name = './{network}/' + config.new_relative_path_name
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_dorcel(config.watch_dir, use_dir=True),
             ]
@@ -270,7 +283,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.set_dir_permissions = None
         config.set_file_permissions = None
         config.new_relative_path_name = '{site} - {date} - {name}/{site} - {date} - {name} - {uuid} - {external_id} - ({resolution}).{ext}'
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(config.watch_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way', use_dir=True),
             ]
@@ -286,6 +299,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     def test_handler_deeply_nested_success_bracked(self):
         """
         Test the handle function works for a directory.
+
         """
         config = sample_config()
         config.prefer_dir_name_if_available = True
@@ -295,7 +309,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.set_dir_permissions = None
         config.set_file_permissions = None
         config.new_relative_path_name = '{site} - {date} - {name}/{site} - {date} - {name} - {uuid} - {external_id} - ({resolution}).{ext}'
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(config.watch_dir / 'EvilAngel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! XXX [XvX]', post_stem='XXX [XvX]'),
             ]
@@ -312,7 +326,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test the handle function works for a directory.
         """
-        with make_watchdog_context(sample_config()) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(sample_config()) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(watcher.get_config().watch_dir / '_UNPACK_stuff' / 'EvilAngel - Carmela Clutch Fabulous Anal 3-Way', use_dir=True),
             ]
@@ -328,7 +342,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.del_other_files = False
         config.min_file_size = 0
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [new_ea(config.watch_dir, use_dir=False, match=False)]
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
@@ -353,7 +367,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.min_file_size = 0
         config.name_parser = '{_site} - {_ts}{_name}.{_ext}'
         config.sites_with_no_date_info = ['evilangel']
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
             targets = [
                 new_ea(config.watch_dir / 'EvilAngel - Carmela Clutch Fabulous Anal 3-Way', use_dir=True),
             ]
@@ -365,13 +379,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
 
-    def remove_performer_genders(self, data: Any):
-        single_scene = data['data']
-        for json_performer in single_scene['performers']:
-            if not json_performer['extra']:
-                continue
-            json_performer['extra']['gender'] = None
-
     def test_missing_performers_gender_success(self):
         """
         Test files aren't lost when fields are missing.
@@ -382,8 +389,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.min_file_size = 0
         config.new_relative_path_name = '{performers}/{site} - {date} - {name}.{ext}'
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
-            self.remove_performer_genders(fakeTPDB._scenes['ea.full.json'])
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
+            remove_performer_genders(fake_tpdb._scenes['ea.full.json'])
             targets = [new_ea(config.watch_dir)]
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
@@ -395,10 +402,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
 
-    def remove_performers(self, data: Any):
-        single_scene = data['data']
-        single_scene['performers'] = []
-
     def test_missing_performers_success(self):
         """
         Test files aren't lost when fields are missing.
@@ -409,8 +412,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_log = True
         config.min_file_size = 0
         config.new_relative_path_name = '{performers}/{site} - {date} - {name}.{ext}'
-        with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
-            self.remove_performers(fakeTPDB._scenes['ea.full.json'])
+        with make_watchdog_context(config) as (temp_dir, watcher, fake_tpdb):
+            remove_performers(fake_tpdb._scenes['ea.full.json'])
             targets = [new_ea(config.watch_dir)]
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
@@ -434,7 +437,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         targets = [
             new_ea(relative='EvilAngel - Carmela Clutch Fabulous Anal 3-Way/', use_dir=True),
         ]
-        with make_watchdog_context(config, targets) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config, targets) as (temp_dir, watcher, fake_tpdb):
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
             output_file = config.failed_dir / 'EvilAngel - Carmela Clutch Fabulous Anal 3-Way'
@@ -458,7 +461,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.min_file_size = 0
         config.write_nfo = True
         targets = [new_ea()]
-        with make_watchdog_context(config, targets) as (tempdir, watcher, fakeTPDB):
+        with make_watchdog_context(config, targets) as (temp_dir, watcher, fake_tpdb):
             wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)

@@ -40,9 +40,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected_duration = 30
 
         with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-            tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent, tempdir / 'test')
-            file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
+            temp_dir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent, temp_dir / 'test')
+            file = temp_dir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
             res = self.__generator.get_hashes(file)
 
             self.assertIsNotNone(res)
@@ -60,9 +60,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected_duration = 30
 
         with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-            tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent, tempdir / 'test')
-            file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
+            temp_dir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent, temp_dir / 'test')
+            file = temp_dir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
             res = self.__stash_generator.get_hashes(file)
 
             self.assertIsNotNone(res)

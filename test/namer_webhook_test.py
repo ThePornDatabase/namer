@@ -91,12 +91,12 @@ class WebhookTest(unittest.TestCase):
         """
         Test that webhook is triggered when a file is successfully processed.
         """
-        with environment() as (tempdir, _fakeTPDB, config):
+        with environment() as (temp_dir, fake_tpdb, config):
             config.webhook_enabled = True
             config.webhook_url = 'http://example.com/webhook'
 
             with patch('namer.namer.send_webhook_notification') as mock_webhook:
-                targets = [new_ea(tempdir, use_dir=False)]
+                targets = [new_ea(temp_dir, use_dir=False)]
 
                 # Process the file
                 from namer.namer import main
