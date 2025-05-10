@@ -472,7 +472,7 @@ def __get_metadataapi_net_info(url: str, name_parts: Optional[FileInfo], namer_c
     if json_response and json_response.strip() != '':
         # logger.debug("json_response: \n{}", json_response)
         json_obj = orjson.loads(json_response)
-        formatted = orjson.dumps(orjson.loads(json_response), option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS).decode('UTF-8')
+        formatted = orjson.dumps(json_obj, option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS).decode('UTF-8')
         file_infos = __metadataapi_response_to_data(json_obj, url, formatted, name_parts, namer_config)
 
     return file_infos

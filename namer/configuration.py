@@ -510,6 +510,15 @@ class NamerConfig:
 
         self.re_cleanup = [re.compile(rf'\b{regex}\b', re.IGNORECASE) for regex in database.re_cleanup]
 
+        if hasattr(self, 'watch_dir'):
+            self.watch_dir = self.watch_dir.resolve()
+        if hasattr(self, 'work_dir'):
+            self.work_dir = self.work_dir.resolve()
+        if hasattr(self, 'dest_dir'):
+            self.dest_dir = self.dest_dir.resolve()
+        if hasattr(self, 'failed_dir'):
+            self.failed_dir = self.failed_dir.resolve()
+
     def __str__(self):
         config = self.to_dict()
 

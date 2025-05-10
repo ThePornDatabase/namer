@@ -103,7 +103,11 @@ class MovieEventHandler(PatternMatchingEventHandler):
             file_path = event.src_path
 
         if file_path:
-            path = Path(file_path)
+            path = Path(file_path).resolve()
+            if not path.is_relative_to(self.__namer_config.watch_dir):
+                logger.error('file should be in watch dir {}', path)
+                return
+
             relative_path = str(path.relative_to(self.__namer_config.watch_dir))
             if not self.__namer_config.ignored_dir_regex.search(relative_path) and done_copying(path) and is_interesting_movie(path, self.__namer_config):
                 logger.info('watchdog process called for {}', relative_path)
@@ -249,10 +253,14 @@ class MovieWatcher:
         # touch all existing movie files.
         with suppress(FileNotFoundError):
             for file in self.__namer_config.watch_dir.rglob('**/*.*'):
-                if file.is_file() and file.suffix.lower()[1:] in self.__namer_config.target_extensions:
-                    relative_path = str(file.relative_to(self.__namer_config.watch_dir))
-                    if not config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
-                        self.__event_handler.prepare_file_for_processing(file)
+                file = file.resolve()
+                if not file.is_relative_to(self.__namer_config.watch_dir):
+                    logger.error('file should be in watch dir {}', file)
+                    return
+
+                relative_path = str(file.relative_to(self.__namer_config.watch_dir))
+                if not self.__namer_config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
+                    self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
         """
