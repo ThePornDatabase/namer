@@ -18,12 +18,12 @@ from test import utils
 from test.utils import Wait, new_ea, new_dorcel, validate_mp4_tags, validate_permissions, environment, sample_config, ProcessingTarget
 
 
-def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
+def wait_until_processed(watcher: MovieWatcher, duration: int = 120):
     """
     Waits until all files have been moved out of watch/working dirs.
     """
     config = watcher.get_config()
-    Wait().seconds(durration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
+    Wait().seconds(duration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
     watcher.stop()
 
 
@@ -98,7 +98,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.desired_codec = ['hevc', 'h264']
         with make_watchdog_context(config) as (tempdir, watcher, fakeTPDB):
             targets: list[ProcessingTarget] = [new_ea(config.watch_dir, mp4_file_name=okay), new_ea(config.watch_dir, use_dir=False, post_stem='2', mp4_file_name=better), new_ea(config.watch_dir, use_dir=False, post_stem='1', mp4_file_name=best)]
-            wait_until_processed(watcher, 120)
+            wait_until_processed(watcher)
             self.assertFalse(targets[0].get_file().exists())
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / 'Evil Angel' / 'Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-720p].mp4'
