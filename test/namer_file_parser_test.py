@@ -8,8 +8,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from loguru import logger
+
 from namer.fileinfo import parse_file_name
 from namer.command import make_command
+from test import utils
 from test.utils import environment, sample_config
 
 REGEX_TOKEN = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
@@ -19,6 +22,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_parse_file_name(self):
         """

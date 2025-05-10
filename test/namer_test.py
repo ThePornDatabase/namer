@@ -8,11 +8,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from loguru import logger
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
 from namer.configuration_utils import to_ini
 from namer.namer import check_arguments, main, set_permissions
+from test import utils
 from test.utils import new_ea, sample_config, validate_mp4_tags, environment, FakeTPDB
 
 
@@ -20,6 +22,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_check_arguments(self):
         """

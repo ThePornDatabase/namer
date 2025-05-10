@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 import hashlib
 
+from loguru import logger
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
@@ -16,6 +17,7 @@ from namer.ffmpeg import FFMpeg
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer.comparison_results import LookedUpFileInfo
+from test import utils
 from test.utils import validate_mp4_tags
 from test.namer_metadataapi_test import environment
 
@@ -24,6 +26,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_video_size(self):
         """

@@ -2,15 +2,17 @@
 Test namer_videophash.py
 """
 
-import logging
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
+from loguru import logger
+
 from namer.videophash import imagehash
 from namer.videophash.videophashstash import StashVideoPerceptualHash
 from namer.videophash.videophash import VideoPerceptualHash
+from test import utils
 from test.utils import sample_config
 
 
@@ -18,6 +20,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     config = sample_config()
     __generator = VideoPerceptualHash(config.ffmpeg)
@@ -65,5 +73,4 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     unittest.main()

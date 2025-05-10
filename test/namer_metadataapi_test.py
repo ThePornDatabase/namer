@@ -6,10 +6,13 @@ import io
 import unittest
 from unittest import mock
 
+from loguru import logger
+
 from namer.comparison_results import SceneType
 from namer.fileinfo import parse_file_name
 from namer.command import make_command
 from namer.metadataapi import main, match
+from test import utils
 from test.utils import environment, sample_config
 
 
@@ -17,6 +20,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_parse_response_metadataapi_net_dorcel(self):
         """

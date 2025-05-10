@@ -3,18 +3,18 @@ Test namer_watchdog.py
 """
 
 import contextlib
-import logging
 import time
-import os
 from typing import Any
 import unittest
 from pathlib import Path
 
+from loguru import logger
 from mutagen.mp4 import MP4
 
 from namer.ffmpeg import FFMpeg
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher, done_copying, retry_failed, MovieWatcher
+from test import utils
 from test.utils import Wait, new_ea, new_dorcel, validate_mp4_tags, validate_permissions, environment, sample_config, ProcessingTarget
 
 
@@ -23,11 +23,8 @@ def wait_until_processed(watcher: MovieWatcher, durration: int = 60):
     Waits until all files have been moved out of watch/working dirs.
     """
     config = watcher.get_config()
-    logging.info('waiting for files to be processes')
     Wait().seconds(durration).checking(1).until(lambda: len(list(config.watch_dir.iterdir())) > 0 or len(list(config.work_dir.iterdir())) > 0).isFalse()
-    logging.info('past waiting for files')
     watcher.stop()
-    logging.info('past stopping')
 
 
 @contextlib.contextmanager
@@ -47,6 +44,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_done_copying_non_existent_file(self):
         """
@@ -78,7 +81,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output2.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_collisions_success_choose_best(self):
         """
@@ -111,7 +113,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                     self.assertEqual(stream.codec_name, 'hevc')
             output_file2 = config.dest_dir / 'Evil Angel' / 'Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-720p](1).mp4'
             self.assertFalse(output_file2.exists())
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_event_listener_success(self):
         """
@@ -132,7 +133,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_event_listener_success_conversion(self):
         """
@@ -151,7 +151,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             output_file = config.dest_dir / 'Evil Angel' / 'Evil Angel - 2022-01-03 - Carmela Clutch Fabulous Anal 3-Way! [WEBDL-240].mkv'
             self.assertTrue(output_file.exists())
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_no_dirname(self):
         """
@@ -178,7 +177,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file2, 664)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_no_dirname_extra_files(self):
         """
@@ -208,7 +206,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output_test_file.read_text(), contents)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success(self):
         """
@@ -235,7 +232,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_missing_network(self):
         """
@@ -261,7 +257,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_custom_location(self):
         """
@@ -287,7 +282,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_deeply_nested_success_bracked(self):
         """
@@ -313,7 +307,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             validate_permissions(self, output_file, 600)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_ignore(self):
         """
@@ -326,7 +319,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             time.sleep(2)
             watcher.stop()
             self.assertTrue(targets[0].get_file().exists())
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_handler_failure(self):
         """
@@ -350,7 +342,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             retry_failed(config)
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertGreater(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_name_parser_success(self):
         """
@@ -373,7 +364,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def remove_performer_genders(self, data: Any):
         single_scene = data['data']
@@ -404,7 +394,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def remove_performers(self, data: Any):
         single_scene = data['data']
@@ -432,7 +421,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(output.get('\xa9nam'), ['Carmela Clutch: Fabulous Anal 3-Way!'])
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_name_parser_failure_with_startup_processing(self):
         """
@@ -456,7 +444,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertEqual(len(list(config.work_dir.iterdir())), 0)
             self.assertEqual(len(list(config.dest_dir.iterdir())), 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
     def test_fetch_trailer_write_nfo_success(self):
         """
@@ -482,9 +469,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             self.assertEqual(len(list(config.failed_dir.iterdir())), 0)
             self.assertEqual(len(list(config.watch_dir.iterdir())), 0)
             self.assertTrue(nfo_file.exists() and nfo_file.is_file() and nfo_file.stat().st_size != 0)
-        logging.info(os.environ.get('PYTEST_CURRENT_TEST'))
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     unittest.main()

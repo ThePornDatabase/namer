@@ -3,12 +3,14 @@ Test webhook notification functionality in namer.py
 """
 
 import json
-import logging
 import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
+from loguru import logger
+
 from namer.namer import send_webhook_notification
+from test import utils
 from test.utils import sample_config, environment, new_ea
 
 
@@ -16,6 +18,12 @@ class WebhookTest(unittest.TestCase):
     """
     Test the webhook notification functionality.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_webhook_disabled(self):
         """
@@ -100,5 +108,4 @@ class WebhookTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     unittest.main()

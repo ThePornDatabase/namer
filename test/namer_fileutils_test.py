@@ -10,7 +10,10 @@ from pathlib import Path
 from platform import system
 from unittest.mock import patch
 
+from loguru import logger
+
 from namer.command import main, set_permissions
+from test import utils
 from test.utils import environment, sample_config
 
 REGEX_TOKEN = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
@@ -20,6 +23,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     @patch('sys.stdout', new_callable=io.StringIO)
     def test_main_method(self, mock_stdout):

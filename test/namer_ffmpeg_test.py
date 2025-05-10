@@ -7,13 +7,21 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from loguru import logger
+
 from namer.ffmpeg import FFMpeg
+from test import utils
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_get_resolution(self):
         """

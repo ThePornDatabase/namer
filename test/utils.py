@@ -205,7 +205,7 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = None):  # type: ignore
+def environment(config: NamerConfig = None):  # ty
     if config is None:
         config = sample_config()
 
@@ -240,7 +240,6 @@ def validate_permissions(test_self, file: Path, perm: int):
     if hasattr(os, 'chmod') and platform.system() != 'Windows':
         found = oct(file.stat().st_mode)[-3:]
         expected = str(perm)[-3:]
-        print('Found {found}, Expected {expected}')
         # test_self.assertEqual(found, "664")
         test_self.assertEqual(found, expected)
 

@@ -5,12 +5,14 @@ import warnings
 from platform import system
 
 import requests
+from loguru import logger
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.safari.service import Service as SafariService
 
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher
+from test import utils
 from test.namer_metadataapi_test import environment
 from test.namer_watchdog_test import new_ea
 from test.utils import is_debugging, sample_config
@@ -73,6 +75,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
+
     def test_webdriver_flow(self: unittest.TestCase):
         """
         Test we can start the app, install, run and control a browser and shut it all down safely.
@@ -128,7 +136,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 .select()  # returns to failed page
                 .assert_has_no_files()
             )
-        print('done')
 
     def test_parrot(self):
         with ParrotWebServer() as parrot:

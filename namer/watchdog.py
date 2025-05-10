@@ -302,9 +302,6 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     """
     Configure and start a watchdog looking for new Movies.
     """
-    level = 'DEBUG' if namer_watchdog_config.debug else 'INFO'
-    logger.add(sys.stdout, format=namer_watchdog_config.console_format, level=level, diagnose=namer_watchdog_config.diagnose_errors)
-
     logger.info(namer_watchdog_config)
 
     if not verify_configuration(namer_watchdog_config, PartialFormatter()):
@@ -322,3 +319,11 @@ def create_watcher(namer_watchdog_config: NamerConfig) -> MovieWatcher:
     movie_watcher = MovieWatcher(namer_watchdog_config)
 
     return movie_watcher
+
+
+def main(config: NamerConfig):
+    level = 'DEBUG' if config.debug else 'INFO'
+    logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
+
+    create_watcher(config).run()
+
