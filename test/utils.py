@@ -205,12 +205,12 @@ class FakeTPDB(ParrotWebServer):
 
 
 @contextlib.contextmanager
-def environment(config: NamerConfig = None):  # ty
+def environment(config: NamerConfig = None):  # type: ignore
     if config is None:
         config = sample_config()
 
     with tempfile.TemporaryDirectory(prefix='test') as tmpdir, FakeTPDB() as fakeTpdb:
-        tempdir = Path(tmpdir)
+        tempdir = Path(tmpdir).resolve()
 
         config.enabled_tagging = True
         config.enabled_poster = True
