@@ -245,7 +245,7 @@ class NamerConfig:
     a set of tags that indicates an individual video is vr.
     """
 
-    database_path: Path = Path(tempfile.gettemp_dir()) / 'namer'
+    database_path: Path = Path(tempfile.gettempdir()) / 'namer'
     """
     Path where stores namer system data.
     """
