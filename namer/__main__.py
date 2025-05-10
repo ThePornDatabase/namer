@@ -74,7 +74,7 @@ def main():
 
     arg1 = None if len(arg_list) == 0 else arg_list[0]
     if arg1 == 'watchdog':
-        namer.watchdog.create_watcher(config).run()
+        namer.watchdog.main(config)
     elif arg1 == 'rename':
         namer.namer.main(arg_list[1:])
     elif arg1 == 'suggest':

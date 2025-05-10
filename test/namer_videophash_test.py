@@ -2,15 +2,17 @@
 Test namer_videophash.py
 """
 
-import logging
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
+from loguru import logger
+
 from namer.videophash import imagehash
 from namer.videophash.videophashstash import StashVideoPerceptualHash
 from namer.videophash.videophash import VideoPerceptualHash
+from test import utils
 from test.utils import sample_config
 
 
@@ -18,6 +20,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     config = sample_config()
     __generator = VideoPerceptualHash(config.ffmpeg)
@@ -32,9 +40,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected_duration = 30
 
         with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-            tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent, tempdir / 'test')
-            file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
+            temp_dir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent, temp_dir / 'test')
+            file = temp_dir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
             res = self.__generator.get_hashes(file)
 
             self.assertIsNotNone(res)
@@ -52,9 +60,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         expected_duration = 30
 
         with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-            tempdir = Path(tmpdir)
-            shutil.copytree(Path(__file__).resolve().parent, tempdir / 'test')
-            file = tempdir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
+            temp_dir = Path(tmpdir)
+            shutil.copytree(Path(__file__).resolve().parent, temp_dir / 'test')
+            file = temp_dir / 'test' / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4'
             res = self.__stash_generator.get_hashes(file)
 
             self.assertIsNotNone(res)
@@ -65,5 +73,4 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     unittest.main()

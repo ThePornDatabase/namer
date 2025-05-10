@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 import hashlib
 
+from loguru import logger
 from mutagen.mp4 import MP4
 
 from namer.configuration import NamerConfig
@@ -16,6 +17,7 @@ from namer.ffmpeg import FFMpeg
 from namer.metadataapi import match
 from namer.mutagen import resolution_to_hdv_setting, update_mp4_file
 from namer.comparison_results import LookedUpFileInfo
+from test import utils
 from test.utils import validate_mp4_tags
 from test.namer_metadataapi_test import environment
 
@@ -24,6 +26,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_video_size(self):
         """
@@ -40,11 +48,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         verify tag in place functions.
         """
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
-            poster = tempdir / 'poster.png'
+            poster = temp_dir / 'poster.png'
             shutil.copy(test_dir / 'poster.png', poster)
-            target_file = tempdir / 'DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4'
+            target_file = temp_dir / 'DorcelClub - 2021-12-23 - Aya.Benetti.Megane.Lopez.And.Bella.Tina.XXX.1080p.mp4'
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
@@ -58,11 +66,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test writing metadata to a mp4, including tag information, which is only
         available on scene requests to the porndb using uuid to request scene information.
         """
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
-            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            target_file = temp_dir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
-            poster = tempdir / 'poster.png'
+            poster = temp_dir / 'poster.png'
             shutil.copy(test_dir / 'poster.png', poster)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
@@ -80,11 +88,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
 
         sha_1 = None
         sha_2 = None
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
-            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            target_file = temp_dir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
-            poster = tempdir / 'poster.png'
+            poster = temp_dir / 'poster.png'
             shutil.copy(test_dir / 'poster.png', poster)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
@@ -92,11 +100,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
             update_mp4_file(target_file, info.results[0].looked_up, poster, ffprobe_results, NamerConfig())
             validate_mp4_tags(self, target_file)
             sha_1 = hashlib.sha256(target_file.read_bytes()).digest().hex()
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
-            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            target_file = temp_dir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
-            poster = tempdir / 'poster.png'
+            poster = temp_dir / 'poster.png'
             shutil.copy(test_dir / 'poster.png', poster)
             name_parts = parse_file_name(target_file.name, config)
             info = match(name_parts, config)
@@ -112,9 +120,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test writing metadata to an mp4, including tag information, which is only
         available on scene requests to the porndb using uuid to request scene information.
         """
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
-            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            target_file = temp_dir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
             poster = None
             name_parts = parse_file_name(target_file.name, config)
@@ -128,8 +136,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test writing metadata to an mp4, including tag information, which is only
         available on scene requests to the porndb using uuid to request scene information.
         """
-        with environment() as (tempdir, _parrot, config):
-            targetfile = tempdir / 'test' / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+        with environment() as (temp_dir, _parrot, config):
+            targetfile = temp_dir / 'test' / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             poster = None
             name_parts = parse_file_name(targetfile.name, config)
             info = match(name_parts, config)
@@ -143,8 +151,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         available on scene requests to the porndb using uuid to request scene information.
         """
         with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-            tempdir = Path(tmpdir)
-            target_file = tempdir / 'test' / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            temp_dir = Path(tmpdir)
+            target_file = temp_dir / 'test' / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             target_file.parent.mkdir(parents=True, exist_ok=True)
             test_dir = Path(__file__).resolve().parent
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)

@@ -8,10 +8,13 @@ import unittest
 from pathlib import Path
 from shutil import copytree
 
+from loguru import logger
+
 from namer.fileinfo import parse_file_name
 from namer.metadataapi import match
 from namer.moviexml import parse_movie_xml_file, write_movie_xml_file
 from namer.comparison_results import Performer
+from test import utils
 from test.utils import environment
 
 
@@ -20,16 +23,22 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
+
     def test_parsing_xml_metadata(self):
         """
         verify tag in place functions.
         """
 
         with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-            tempdir = Path(tmpdir)
-            copytree(Path(__file__).resolve().parent, tempdir / 'test')
-            xmlfile = tempdir / 'test' / 'ea.nfo'
-            info = parse_movie_xml_file(xmlfile)
+            temp_dir = Path(tmpdir)
+            copytree(Path(__file__).resolve().parent, temp_dir / 'test')
+            xml_file = temp_dir / 'test' / 'ea.nfo'
+            info = parse_movie_xml_file(xml_file)
             self.assertEqual(info.site, 'Evil Angel')
             self.assertEqual(info.date, '2022-01-03')
             self.assertIsNotNone(info.description)
@@ -47,7 +56,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         Test parsing a stored response as a LookedUpFileInfo
         """
 
-        with environment() as (_path, fakeTPDB, config):
+        with environment() as (_path, fake_tpdb, config):
             name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', config)
             config.enable_metadataapi_genres = True
             results = match(name, config)
@@ -66,8 +75,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <releasedate>2022-01-03</releasedate>
   <mpaa>XXX</mpaa>
   <art>
-    <poster>{fakeTPDB.get_url()}qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F3f%2F9f%2F51%2Fcf3828d65425bca2890d53ef242d8cf%2Flogo%2Fevil-angel_dark%5B1%5D.png,-10,-10,25,50)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</poster>
-    <background>{fakeTPDB.get_url()}gAu-1j1ZP4f6gNMPibgAyGKoa_c=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</background>
+    <poster>{fake_tpdb.get_url()}qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F3f%2F9f%2F51%2Fcf3828d65425bca2890d53ef242d8cf%2Flogo%2Fevil-angel_dark%5B1%5D.png,-10,-10,25,50)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</poster>
+    <background>{fake_tpdb.get_url()}gAu-1j1ZP4f6gNMPibgAyGKoa_c=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</background>
   </art>
   <genre>Anal</genre>
   <genre>Ass</genre>
@@ -103,7 +112,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <name>Carmela Clutch</name>
     <alias>Carmela Clutch</alias>
     <role>Female</role>
-    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
+    <image>{fake_tpdb.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
     <thumb/>
   </actor>
   <actor>
@@ -111,7 +120,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <name>Francesca Le</name>
     <alias>Francesca Le</alias>
     <role>Female</role>
-    <image>{fakeTPDB.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
+    <image>{fake_tpdb.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
     <thumb/>
   </actor>
   <actor>
@@ -119,7 +128,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <name>Mark Wood</name>
     <alias>Mark Wood</alias>
     <role>Male</role>
-    <image>{fakeTPDB.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
+    <image>{fake_tpdb.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
     <thumb/>
   </actor>
   <fileinfo/>
@@ -131,13 +140,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test parsing a stored response as a LookedUpFileInfo
         """
-        with environment() as (_path, fakeTPDB, config):
+        with environment() as (_path, fake_tpdb, config):
             name = parse_file_name('EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4', config)
             results = match(name, config)
             self.assertEqual(len(results.results), 1)
             result = results.results[0]
             output = write_movie_xml_file(result.looked_up, config)
-            print(output)
             expected = f"""<?xml version="1.0" encoding="UTF-8"?>
 <movie>
   <plot>Cute brunette Carmela Clutch positions her big, juicy ass for famed director/cocksman Mark Wood's camera to ogle. The well-endowed babe teases, flaunting her voluptuous jugs and derriere. Mark's sexy MILF partner, Francesca Le, finds a 'nice warm place' for her tongue and serves Carmela a lesbian rim job. Francesca takes a labia-licking face ride from the busty babe. Francesca takes over the camera as Mark takes over Carmela's hairy snatch, his big cock ram-fucking her twat. Carmela sucks Mark's meat in a lewd blowjob. Carmela jerks her clit as Mark delivers a vigorous anal pounding! With Mark's prick shoved up her ass, off-screen Francesca orders, 'Keep that pussy busy!' Carmela's huge boobs jiggle as she takes a rectal reaming and buzzes a vibrator on her clit at the same time. Francesca jumps in to make it a threesome, trading ass-to-mouth flavor with the young tramp. This ribald romp reaches its climax as Mark drops a messy, open-mouth cum facial onto Carmela. She lets the jizz drip from her lips, licking the mess from her fingers and rubbing it onto her robust melons.</plot>
@@ -150,8 +158,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
   <releasedate>2022-01-03</releasedate>
   <mpaa>XXX</mpaa>
   <art>
-    <poster>{fakeTPDB.get_url()}qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F3f%2F9f%2F51%2Fcf3828d65425bca2890d53ef242d8cf%2Flogo%2Fevil-angel_dark%5B1%5D.png,-10,-10,25,50)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</poster>
-    <background>{fakeTPDB.get_url()}gAu-1j1ZP4f6gNMPibgAyGKoa_c=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</background>
+    <poster>{fake_tpdb.get_url()}qWAUIAUpBsoqKUwozc4NOTR1tPI=/1000x1500/smart/filters:sharpen():upscale():watermark(https%3A%2F%2Fcdn.metadataapi.net%2Fsites%2F3f%2F9f%2F51%2Fcf3828d65425bca2890d53ef242d8cf%2Flogo%2Fevil-angel_dark%5B1%5D.png,-10,-10,25,50)/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</poster>
+    <background>{fake_tpdb.get_url()}gAu-1j1ZP4f6gNMPibgAyGKoa_c=/fit-in/3000x3000/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fscene%2Ff4%2Fab%2F3e%2Fa91d31d6dee223f4f30a57bfd83b151%2Fbackground%2Fbg-evil-angel-carmela-clutch-fabulous-anal-3-way.webp</background>
   </art>
   <tag>Anal</tag>
   <tag>Ass</tag>
@@ -188,7 +196,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <name>Carmela Clutch</name>
     <alias>Carmela Clutch</alias>
     <role>Female</role>
-    <image>{fakeTPDB.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
+    <image>{fake_tpdb.get_url()}flLf1pecTlKcpJCki30l5iWXNdQ=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fd3%2F47%2Fcd%2Fde8cbe2fd9f73dec8c985d2d69b67ac%2Fposter%2Fcarmela-clutch.webp</image>
     <thumb/>
   </actor>
   <actor>
@@ -196,7 +204,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <name>Francesca Le</name>
     <alias>Francesca Le</alias>
     <role>Female</role>
-    <image>{fakeTPDB.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
+    <image>{fake_tpdb.get_url()}r8g92zymZ6SduikMTwcXMojRxik=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2F71%2F51%2Fdc%2F4b09a05007ba30c041e474c2b398a51%2Fposter%2Ffrancesca-le.png</image>
     <thumb/>
   </actor>
   <actor>
@@ -204,7 +212,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     <name>Mark Wood</name>
     <alias>Mark Wood</alias>
     <role>Male</role>
-    <image>{fakeTPDB.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
+    <image>{fake_tpdb.get_url()}V7F3bvj0YDEr3_qrKqyaJ5fKxd0=/1000x1500/smart/filters:sharpen():upscale()/https%3A%2F%2Fcdn.metadataapi.net%2Fperformer%2Fa3%2F48%2Fcd%2Ffcd5cd6cecf1f7ae3af587286e9fccf%2Fposter%2Fmark-wood.webp</image>
     <thumb/>
   </actor>
   <fileinfo/>

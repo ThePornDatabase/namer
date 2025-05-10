@@ -6,10 +6,13 @@ import io
 import unittest
 from unittest import mock
 
+from loguru import logger
+
 from namer.comparison_results import SceneType
 from namer.fileinfo import parse_file_name
 from namer.command import make_command
 from namer.metadataapi import main, match
+from test import utils
 from test.utils import environment, sample_config
 
 
@@ -17,6 +20,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_parse_response_metadataapi_net_dorcel(self):
         """
@@ -163,11 +172,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         verify an empty response from porndb is properly handled.
         """
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             filename: str = 'GoodAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
-            with open((tempdir / filename), 'w'):
+            with open((temp_dir / filename), 'w'):
                 pass
-            command = make_command((tempdir / filename), config)
+            command = make_command((temp_dir / filename), config)
             self.assertIsNotNone(command)
             if command is not None:
                 results = match(command.parsed_file, config)
@@ -179,11 +188,11 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         config = sample_config()
         config.min_file_size = 0
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             filename: str = 'OkAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
-            with open((tempdir / filename), 'w'):
+            with open((temp_dir / filename), 'w'):
                 pass
-            command = make_command((tempdir / filename), config)
+            command = make_command((temp_dir / filename), config)
             self.assertIsNotNone(command)
             if command is not None:
                 results = match(command.parsed_file, config)
@@ -194,9 +203,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Test parsing a full stored response (with tags) as a LookedUpFileInfo
         """
-        with environment() as (tempdir, _parrot, config):
+        with environment() as (temp_dir, _parrot, config):
             filename: str = 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
-            tmp_file = tempdir / filename
+            tmp_file = temp_dir / filename
             with open(tmp_file, 'w'):
                 pass
             main(['-f', str(tmp_file), '-c', str(config.config_file)])

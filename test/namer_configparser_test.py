@@ -5,14 +5,24 @@ Tests namer_configparser
 from configupdater import ConfigUpdater
 import unittest
 from importlib import resources
+
+from loguru import logger
+
 from namer.configuration import NamerConfig
 from namer.configuration_utils import from_config, to_ini
+from test import utils
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_configuration(self) -> None:
         updater = ConfigUpdater(allow_no_value=True)
@@ -44,6 +54,3 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         updated.read_string(files_no_sites_with_no_date_info)
         double_read = from_config(updated, double_read)
         self.assertIn('badsite', double_read.sites_with_no_date_info)
-
-        print(namer_config)
-        print(to_ini(namer_config))

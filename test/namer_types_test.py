@@ -2,22 +2,30 @@
 Test namer_types.py
 """
 
-import logging
 import os
 import sys
 import unittest
 from pathlib import Path
 
+from loguru import logger
+
 from namer.configuration import NamerConfig
 from namer.configuration_utils import verify_configuration
 from namer.name_formatter import PartialFormatter
 from namer.comparison_results import Performer
+from test import utils
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_performer(self):
         """
@@ -97,7 +105,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         Verify config verification.
         """
-        logging.basicConfig(level=logging.INFO)
         config = NamerConfig()
         success = verify_configuration(config, PartialFormatter())
         self.assertEqual(success, True)

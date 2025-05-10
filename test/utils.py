@@ -59,10 +59,10 @@ class Wait:
             sleep(self._checking)
         raise RuntimeError(f'Timed out waiting for predicate {self._predicate} to return {state}')
 
-    def isTrue(self):
+    def is_true(self):
         self.__wait(True)
 
-    def isFalse(self):
+    def is_false(self):
         self.__wait(False)
 
 
@@ -209,28 +209,28 @@ def environment(config: NamerConfig = None):  # type: ignore
     if config is None:
         config = sample_config()
 
-    with tempfile.TemporaryDirectory(prefix='test') as tmpdir, FakeTPDB() as fakeTpdb:
-        tempdir = Path(tmpdir)
+    with tempfile.TemporaryDirectory(prefix='test') as tmp_dir, FakeTPDB() as fake_tpdb:
+        temp_dir = Path(tmp_dir).resolve()
 
         config.enabled_tagging = True
         config.enabled_poster = True
-        config.override_tpdb_address = fakeTpdb.get_url()
-        config.watch_dir = tempdir / 'watch'
+        config.override_tpdb_address = fake_tpdb.get_url()
+        config.watch_dir = temp_dir / 'watch'
         config.watch_dir.mkdir(parents=True, exist_ok=True)
-        config.dest_dir = tempdir / 'dest'
+        config.dest_dir = temp_dir / 'dest'
         config.dest_dir.mkdir(parents=True, exist_ok=True)
-        config.work_dir = tempdir / 'work'
+        config.work_dir = temp_dir / 'work'
         config.work_dir.mkdir(parents=True, exist_ok=True)
-        config.failed_dir = tempdir / 'failed'
+        config.failed_dir = temp_dir / 'failed'
         config.failed_dir.mkdir(parents=True, exist_ok=True)
         config.porndb_token = 'notarealtoken'
-        cfgfile = tempdir / 'test_namer.cfg'
+        cfgfile = temp_dir / 'test_namer.cfg'
         config.min_file_size = 0
         with open(cfgfile, 'w') as file:
             content = to_ini(config)
             file.write(content)
         config.config_file = cfgfile
-        yield tempdir, fakeTpdb, config
+        yield temp_dir, fake_tpdb, config
 
 
 def validate_permissions(test_self, file: Path, perm: int):
@@ -240,7 +240,6 @@ def validate_permissions(test_self, file: Path, perm: int):
     if hasattr(os, 'chmod') and platform.system() != 'Windows':
         found = oct(file.stat().st_mode)[-3:]
         expected = str(perm)[-3:]
-        print('Found {found}, Expected {expected}')
         # test_self.assertEqual(found, "664")
         test_self.assertEqual(found, expected)
 

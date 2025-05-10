@@ -10,7 +10,10 @@ from pathlib import Path
 from platform import system
 from unittest.mock import patch
 
+from loguru import logger
+
 from namer.command import main, set_permissions
+from test import utils
 from test.utils import environment, sample_config
 
 REGEX_TOKEN = '{_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}'
@@ -21,6 +24,12 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
     Always test first.
     """
 
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
+
     @patch('sys.stdout', new_callable=io.StringIO)
     def test_main_method(self, mock_stdout):
         """
@@ -28,9 +37,9 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         config = sample_config()
         config.min_file_size = 0
-        with environment(config) as (tempdir, _parrot, config):
+        with environment(config) as (temp_dir, _parrot, config):
             test_dir = Path(__file__).resolve().parent
-            target_file = tempdir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
+            target_file = temp_dir / 'EvilAngel.22.01.03.Carmela.Clutch.Fabulous.Anal.3-Way.XXX.mp4'
             shutil.copy(test_dir / 'Site.22.01.01.painful.pun.XXX.720p.xpost.mp4', target_file)
             main(arg_list=['-f', str(target_file), '-c', str(config.config_file)])
             self.assertIn('site: EvilAngel', mock_stdout.getvalue())
@@ -41,8 +50,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         if system() != 'Windows':
             with tempfile.TemporaryDirectory(prefix='test') as tmpdir:
-                tempdir = Path(tmpdir)
-                target_dir = tempdir / 'target_dir'
+                temp_dir = Path(tmpdir)
+                target_dir = temp_dir / 'target_dir'
                 target_dir.mkdir()
                 testfile = target_dir / 'test_file.txt'
                 with open(testfile, 'w', encoding='utf-8') as file:

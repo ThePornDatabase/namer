@@ -5,12 +5,14 @@ import warnings
 from platform import system
 
 import requests
+from loguru import logger
 from selenium.webdriver import Chrome, ChromeOptions, Edge, EdgeOptions, Safari
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.safari.service import Service as SafariService
 
 from namer.configuration import NamerConfig
 from namer.watchdog import create_watcher
+from test import utils
 from test.namer_metadataapi_test import environment
 from test.namer_watchdog_test import new_ea
 from test.utils import is_debugging, sample_config
@@ -62,16 +64,22 @@ def default_os_browser(debug: bool) -> WebDriver:
 
 @contextlib.contextmanager  # type: ignore
 def make_test_context(config: NamerConfig):
-    with environment(config) as (tempdir, mock_tpdb, config), create_watcher(config) as watcher, default_os_browser(is_debugging()) as browser:
+    with environment(config) as (temp_dir, mock_tpdb, config), create_watcher(config) as watcher, default_os_browser(is_debugging()) as browser:
         url = f'http://{config.host}:{watcher.get_web_port()}{config.web_root}/failed'
         browser.get(url)
-        yield tempdir, watcher, browser, mock_tpdb
+        yield temp_dir, watcher, browser, mock_tpdb
 
 
 class UnitTestAsTheDefaultExecution(unittest.TestCase):
     """
     Always test first.
     """
+
+    def __init__(self, method_name='runTest'):
+        super().__init__(method_name)
+
+        if not utils.is_debugging():
+            logger.remove()
 
     def test_webdriver_flow(self: unittest.TestCase):
         """
@@ -88,7 +96,7 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         config.write_namer_failed_log = True
         config.del_other_files = True
         config.extra_sleep_time = 1
-        with make_test_context(config) as (_tempdir, _watcher, browser, _mock_tpdb):
+        with make_test_context(config) as (temp_dir, watcher, browser, mock_tpdb):
             new_ea(config.failed_dir, use_dir=False)
             (
                 FailedPage(browser)
@@ -128,7 +136,6 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
                 .select()  # returns to failed page
                 .assert_has_no_files()
             )
-        print('done')
 
     def test_parrot(self):
         with ParrotWebServer() as parrot:
