@@ -1,14 +1,14 @@
 """
 A file watching service to rename movie files and move them
-to relevant locations after match the file against the porndb.
+to relevant locations after match the file against the theporndb.
 """
 
-from contextlib import suppress
 import os
 import shutil
 import sys
 import tempfile
 import time
+from contextlib import suppress
 from pathlib import Path
 from platform import system
 from queue import Queue
@@ -20,9 +20,9 @@ from loguru import logger
 from watchdog.events import EVENT_TYPE_MODIFIED, EVENT_TYPE_MOVED, FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers.polling import PollingObserver
 
+from namer.command import Command, gather_target_files_from_dir, is_interesting_movie, make_command_relative_to, move_command_files
 from namer.configuration import NamerConfig
 from namer.configuration_utils import verify_configuration
-from namer.command import gather_target_files_from_dir, is_interesting_movie, make_command_relative_to, move_command_files, Command
 from namer.metadataapi import get_user_info
 from namer.name_formatter import PartialFormatter
 from namer.namer import process_file
@@ -134,7 +134,7 @@ class MovieEventHandler(PatternMatchingEventHandler):
                 return
 
             relative_path = str(path.relative_to(self.__namer_config.watch_dir))
-            if not self.__namer_config.ignored_dir_regex.search(relative_path) and done_copying(path) and is_interesting_movie(path, self.__namer_config):
+            if not self.__namer_config.ignored_dir_regex.search(relative_path) and is_interesting_movie(path, self.__namer_config) and done_copying(path):
                 logger.info('watchdog process called for {}', relative_path)
 
                 # Extra wait time in case other files are copies in as well.
@@ -284,7 +284,7 @@ class MovieWatcher:
                     return
 
                 relative_path = str(file.relative_to(self.__namer_config.watch_dir))
-                if not self.__namer_config.ignored_dir_regex.search(relative_path) and done_copying(file) and is_interesting_movie(file, self.__namer_config):
+                if not self.__namer_config.ignored_dir_regex.search(relative_path) and is_interesting_movie(file, self.__namer_config) and done_copying(file):
                     self.__event_handler.prepare_file_for_processing(file)
 
     def stop(self):
@@ -359,4 +359,3 @@ def main(config: NamerConfig):
     logger.add(sys.stdout, format=config.console_format, level=level, diagnose=config.diagnose_errors)
 
     create_watcher(config).run()
-
