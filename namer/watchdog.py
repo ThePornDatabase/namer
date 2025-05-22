@@ -49,7 +49,7 @@ def __is_file_in_use_unix(file: Path):
         return False
 
 
-def is_file_in_use(file: Path):
+def is_file_in_use(file: Optional[Path]):
     if not file or not file.exists():
         return False
 
