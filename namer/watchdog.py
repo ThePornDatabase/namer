@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from platform import system
 from queue import Queue
 from threading import Thread
 from typing import Optional
@@ -28,6 +29,36 @@ from namer.namer import process_file
 from namer.web.server import NamerWebServer
 
 
+def __is_file_in_use_windows(file: Path):
+    try:
+        file.rename(file)
+    except PermissionError:
+        return True
+    else:
+        return False
+
+
+def __is_file_in_use_unix(file: Path):
+    try:
+        # pylint: disable=consider-using-with
+        buffered_reader = open(file, mode='rb')  # noqa: SIM115
+        buffered_reader.close()
+    except PermissionError:
+        return True
+    else:
+        return False
+
+
+def is_file_in_use(file: Path):
+    if not file or not file.exists():
+        return False
+
+    if system() == 'Windows':
+        return __is_file_in_use_windows(file)
+    else:
+        return __is_file_in_use_unix(file)
+
+
 def done_copying(file: Optional[Path]) -> bool:
     """
     Determines if a file is being copied by checking its size in 2 second
@@ -36,14 +67,8 @@ def done_copying(file: Optional[Path]) -> bool:
     if not file or not file.exists():
         return False
 
-    while True:
-        try:
-            # pylint: disable=consider-using-with
-            buffered_reader = open(file, mode='rb')  # noqa: SIM115
-            buffered_reader.close()
-            break
-        except PermissionError:
-            time.sleep(0.2)
+    while is_file_in_use(file):
+        time.sleep(2)
 
     return True
 
