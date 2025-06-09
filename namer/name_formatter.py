@@ -28,6 +28,7 @@ class PartialFormatter(string.Formatter):
         'ext',
         'trans',
         'source_file_name',
+        'source_file_stem',
         'uuid',
         'vr',
         'type',

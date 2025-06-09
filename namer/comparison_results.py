@@ -236,6 +236,7 @@ class LookedUpFileInfo:
             'all_performer-sites': ', '.join(map(lambda p: p.name, filter(lambda p: p.alias, self.performers))) if self.performers else None,
             'ext': self.original_parsed_filename.extension if self.original_parsed_filename else None,
             'source_file_name': self.original_parsed_filename.source_file_name if self.original_parsed_filename else None,
+            'source_file_stem': self.original_parsed_filename.source_file_stem if self.original_parsed_filename else None,
             'trans': self.original_parsed_filename.trans if self.original_parsed_filename else None,
             'vr': vr,
             'resolution': res_str,

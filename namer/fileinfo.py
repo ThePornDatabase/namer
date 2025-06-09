@@ -52,6 +52,10 @@ class FileInfo:
     """
     What was originally parsed.
     """
+    source_file_stem: Optional[str] = None
+    """
+    What was originally parsed without parsed extension.
+    """
     hashes: Optional[PerceptualHash] = None
     """
     File hashes.
@@ -64,6 +68,7 @@ class FileInfo:
         name: {self.name}
         extension: {self.extension}
         original full name: {self.source_file_name}
+        original full stem: {self.source_file_stem}
         hashes: {self.hashes.to_dict() if self.hashes else None}
         """
 
@@ -130,8 +135,9 @@ def parse_file_name(filename: str, namer_config: NamerConfig) -> FileInfo:
     """
     filename = replace_abbreviations(filename, namer_config)
     regex = parser_config_to_regex(namer_config.name_parser)
+    path = PurePath(filename)
     file_name_parts = FileInfo()
-    file_name_parts.extension = PurePath(filename).suffix[1:]
+    file_name_parts.extension = path.suffix[1:]
     match = regex.search(filename)
     if match:
         if match.groupdict().get('year'):
@@ -150,6 +156,7 @@ def parse_file_name(filename: str, namer_config: NamerConfig) -> FileInfo:
 
         file_name_parts.extension = match.group('ext')
         file_name_parts.source_file_name = filename
+        file_name_parts.source_file_stem = path.stem
     else:
         logger.debug('Could not parse target name which may be a file (or directory) name depending on settings and input: {}', filename)
 
