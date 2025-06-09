@@ -45,6 +45,7 @@ name_parser = {_site}{_sep}{_optional_date}{_ts}{_name}{_dot}{_ext}
 # * 'act' - an act, parsed from original file name, don't use.
 # * 'ext' - original file's extension, you should keep this.
 # * 'source_file_name' - original file name
+# * 'source_file_stem' - What was originally parsed without parsed extension
 # * 'video_codec' - video codec of file, like h264
 # * 'audio_codec' - audio codec of file, like acc
 # * 'trans' - 'TS', or 'ts' if detected in original file name.
