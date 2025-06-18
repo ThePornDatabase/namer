@@ -603,6 +603,17 @@ def main(args_list: List[str]):
     if results:
         matched = results.get_match()
         if matched:
+            if file_name.input_file.is_file():
+                ffprobe_results = config.ffmpeg.ffprobe(file_name.input_file)
+                if ffprobe_results:
+                    matched.looked_up.resolution = ffprobe_results.get_resolution()
+
+                    video = ffprobe_results.get_default_video_stream()
+                    matched.looked_up.video_codec = video.codec_name if video else None
+
+                    audio = ffprobe_results.get_default_audio_stream()
+                    matched.looked_up.audio_codec = audio.codec_name if audio else None
+
             name_template = get_inplace_name_template_by_type(config, matched.looked_up.type)
 
             print(matched.looked_up.new_file_name(name_template, config))
