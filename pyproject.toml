@@ -50,6 +50,7 @@ selenium = "^4.21"
 assertpy = "^1.1"
 poethepoet = "^0.34"
 pony-stubs = "^0.5"
+scipy-stubs = "^1.13"
 
 [tool.ruff]
 exclude = [".git", "__pycache__", "docs/source/conf.py", "old", "build", "dist", "*migrations*", "init", "node_modules"]
