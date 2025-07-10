@@ -2,13 +2,14 @@
 A wrapper allowing shutdown of a Flask server.
 """
 
+import datetime
 import logging
 import mimetypes
-import datetime
 from queue import Queue
 from threading import Thread
 from typing import Any, List, Optional, Union
 
+import numpy
 import orjson
 from flask import Blueprint, Flask
 from flask.json.provider import _default, JSONProvider
@@ -191,5 +192,26 @@ class CustomJSONProvider(JSONProvider):
 def default(obj):
     if isinstance(obj, ImageHash):
         return str(obj)
+
+    if isinstance(obj, (numpy.int_, numpy.intc, numpy.intp, numpy.int8, numpy.int16, numpy.int32, numpy.int64, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64)):
+        return int(obj)
+
+    elif isinstance(obj, (numpy.float_, numpy.float16, numpy.float32, numpy.float64)):
+        return float(obj)
+
+    elif isinstance(obj, (numpy.complex_, numpy.complex64, numpy.complex128)):
+        return {
+            'real': obj.real,
+            'imag': obj.imag
+        }
+
+    elif isinstance(obj, (numpy.ndarray,)):
+        return obj.tolist()
+
+    elif isinstance(obj, (numpy.bool_)):
+        return bool(obj)
+
+    elif isinstance(obj, (numpy.void)):
+        return None
 
     return _default(obj)
