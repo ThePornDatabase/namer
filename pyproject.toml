@@ -8,7 +8,7 @@ authors = [
     { name = "DirtyRacer", email = "DirtyRacer@ya.ru" }
 ]
 dynamic = ["dependencies"]
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.11,<3.15"
 
 [tool.poetry]
 include = [
@@ -45,10 +45,10 @@ orjson = "^3.10"
 pytest = "^8.0"
 pytest-cov = "^6.0"
 coverage = "^7.0"
-ruff = "^0.11"
+ruff = "^0.12"
 selenium = "^4.21"
 assertpy = "^1.1"
-poethepoet = "^0.34"
+poethepoet = "^0.37"
 pony-stubs = "^0.5"
 scipy-stubs = "^1.13"
 
