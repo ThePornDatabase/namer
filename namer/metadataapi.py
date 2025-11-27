@@ -260,6 +260,9 @@ def get_image(url: str, infix: str, video_file: Optional[Path], config: NamerCon
             file.parent.mkdir(parents=True, exist_ok=True)
             if download_file(url, file, config):
                 with Image.open(file) as img:
+                    if config.image_format == 'jpeg' and img.mode in ('RGBA', 'P'):
+                        img = img.convert('RGB')
+
                     img.save(file, config.image_format)
                 set_permissions(file, config)
                 return file
