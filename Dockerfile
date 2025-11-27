@@ -47,8 +47,8 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 RUN pipx install poetry
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-RUN . /root/.bashrc && nvm install 22
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+RUN . /root/.bashrc && nvm install 24
 RUN . /root/.bashrc && npm i -g pnpm@latest-10
 
 RUN mkdir /work/
