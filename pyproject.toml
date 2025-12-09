@@ -42,13 +42,13 @@ scipy = "^1.13"
 orjson = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0"
+pytest = "^9.0"
 pytest-cov = "^7.0"
 coverage = "^7.0"
 ruff = "^0.14"
 selenium = "^4.21"
 assertpy = "^1.1"
-poethepoet = "^0.37"
+poethepoet = "^0.38"
 pony-stubs = "^0.5"
 scipy-stubs = "^1.13"
 
