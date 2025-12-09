@@ -504,7 +504,7 @@ def get_site_name(site_id: str, namer_config: NamerConfig) -> Optional[str]:
 
     if json_response and json_response.strip() != '':
         json_obj = orjson.loads(json_response)
-        site = json_obj.data.name
+        site = json_obj['data']['name']
 
     return site
 
