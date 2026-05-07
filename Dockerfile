@@ -5,8 +5,6 @@ ENV PATH="/root/.local/bin:$PATH"
 # Install dependencies.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       python3-pip \
-       python3 \
        pipx \
        ffmpeg \
        tzdata \
@@ -23,8 +21,6 @@ RUN apt-get update \
        libssl-dev \
        systemd \
        systemd-sysv \
-       python3-dev \
-       python3-venv \
        wget \
        gnupg2 \
        xvfb \
