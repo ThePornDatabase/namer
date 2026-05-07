@@ -1,8 +1,6 @@
-FROM ubuntu:latest AS base
+FROM python:3.14-trixie AS base
 
 ENV PATH="/root/.local/bin:$PATH"
-ENV TZ=Europe/London
-ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies.
 RUN apt-get update \
@@ -32,22 +30,13 @@ RUN apt-get update \
        xvfb \
        golang \
        git \
+       chromium \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
     && apt-get clean
 
-ENV DISPLAY=:99
-ARG CHROME_VERSION="google-chrome-stable"
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-  && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
-  && apt-get update -qqy \
-  && apt-get -qqy install \
-    ${CHROME_VERSION:-google-chrome-stable} \
-  && rm /etc/apt/sources.list.d/google-chrome.list \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
 RUN pipx install poetry
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 RUN . /root/.bashrc && nvm install 24
 RUN . /root/.bashrc && npm i -g pnpm@latest-10
 
