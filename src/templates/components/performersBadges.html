@@ -12,6 +12,7 @@
 
 {% set file = file['looked_up'] %}
 {% if file['performers'] %}
+    {% set performers_limit = performers_limit + 1 if file['performers']|count == performers_limit + 1 else performers_limit %}
     {% set scene_performers = file['performers'][:performers_limit] %}
     {% set other_performer = file['performers'][performers_limit:] %}
 
