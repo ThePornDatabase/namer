@@ -363,7 +363,7 @@ def __json_to_fileinfo(data: dict, url: str, json_response: str, name_parts: Opt
         performer_name = json_performer['name']
         if 'parent' in json_performer and json_performer['parent'] and 'name' in json_performer['parent']:
             performer_name = json_performer['parent']['name']
-            performer_disambiguation = json_performer['parent']['disambiguation']
+            performer_disambiguation = json_performer['parent']['disambiguation'] if 'disambiguation' in json_performer['parent'] else None
             if config.use_disambiguation and performer_disambiguation:
                 performer_name += f" ({performer_disambiguation})"
 
