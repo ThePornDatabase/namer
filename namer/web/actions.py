@@ -11,15 +11,15 @@ from pathlib import Path
 from queue import Queue
 from typing import Dict, List, Optional
 
-import orjson
 import jsonpickle
+import orjson
 from werkzeug.routing import Rule
 
+from namer.command import Command, gather_target_files_from_dir, is_interesting_movie, is_relative_to
 from namer.comparison_results import ComparisonResults, SceneType
 from namer.configuration import NamerConfig
-from namer.command import gather_target_files_from_dir, is_interesting_movie, is_relative_to, Command
 from namer.fileinfo import FileInfo, parse_file_name
-from namer.metadataapi import __build_url, __evaluate_match, __request_response_json_object, __metadataapi_response_to_data
+from namer.metadataapi import __build_url, __evaluate_match, __metadataapi_response_to_data, __request_response_json_object
 from namer.namer import calculate_phash
 from namer.videophash import PerceptualHash
 

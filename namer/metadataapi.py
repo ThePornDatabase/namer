@@ -17,15 +17,15 @@ from urllib.parse import quote
 import orjson
 import rapidfuzz
 from loguru import logger
+from orjson import JSONDecodeError
 from PIL import Image
 from rapidfuzz import utils
-from orjson import JSONDecodeError
 from unidecode import unidecode
 
+from namer.command import Command, get_inplace_name_template_by_type, make_command, set_permissions
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, Performer, SceneHash, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
-from namer.command import get_inplace_name_template_by_type, make_command, set_permissions, Command
 from namer.fileinfo import FileInfo
 from namer.http import Http, RequestType
 from namer.name_formatter import PartialFormatter

@@ -6,12 +6,12 @@ code if there are more than one audio streams and if they are correctly labeled.
 See:  https://iso639-3.sil.org/code_tables/639/data/ for language codes.
 """
 
+import re
+import shutil
+import string
 import subprocess
 from contextlib import suppress
 from dataclasses import dataclass
-import shutil
-import string
-import re
 from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
@@ -21,8 +21,8 @@ from typing import Dict, List, Optional
 import ffmpeg
 import orjson
 from loguru import logger
-from PIL import Image
 from pathvalidate import ValidationError
+from PIL import Image
 
 from namer.videophash.videophashstash import StashVideoPerceptualHash
 

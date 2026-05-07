@@ -8,9 +8,9 @@ from typing import Any, List, Optional
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
+from namer.comparison_results import LookedUpFileInfo
 from namer.configuration import NamerConfig
 from namer.ffmpeg import FFMpeg, FFProbeResults
-from namer.comparison_results import LookedUpFileInfo
 
 
 def resolution_to_hdv_setting(resolution: Optional[int]) -> int:

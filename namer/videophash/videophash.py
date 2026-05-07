@@ -9,8 +9,7 @@ from loguru import logger
 from PIL import Image
 
 from namer.ffmpeg import FFMpeg
-from namer.videophash import PerceptualHash, return_perceptual_hash
-from namer.videophash import imagehash
+from namer.videophash import imagehash, PerceptualHash, return_perceptual_hash
 
 
 class VideoPerceptualHash:

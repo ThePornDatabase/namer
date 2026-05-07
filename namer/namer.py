@@ -6,10 +6,10 @@ file's metadata (poster, artists, etc.)
 """
 
 import argparse
-import sys
-from dataclasses import dataclass
 import pathlib
 import string
+import sys
+from dataclasses import dataclass
 from pathlib import Path
 from random import choices
 from typing import List, Optional
@@ -17,19 +17,18 @@ from typing import List, Optional
 import orjson
 from loguru import logger
 
-from namer.command import Command
+from namer.command import Command, make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, SceneHash
 from namer.configuration import ImageDownloadType, NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
-from namer.command import make_command, move_command_files, move_to_final_location, set_permissions, write_log_file
 from namer.database import search_file_in_database, write_file_to_database
-from namer.ffmpeg import FFProbeResults, FFMpeg
+from namer.ffmpeg import FFMpeg, FFProbeResults
 from namer.fileinfo import FileInfo
 from namer.http import Http
 from namer.metadataapi import get_complete_metadataapi_net_fileinfo, get_image, get_trailer, match, share_hash
 from namer.moviexml import parse_movie_xml_file, write_nfo
-from namer.name_formatter import PartialFormatter
 from namer.mutagen import update_mp4_file
+from namer.name_formatter import PartialFormatter
 from namer.videophash import PerceptualHash, return_perceptual_hash
 
 DESCRIPTION = """

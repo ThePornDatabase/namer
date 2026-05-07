@@ -5,13 +5,12 @@ or used in renaming the video file.
 """
 
 from pathlib import Path
+from typing import Any, List, Optional
+from xml.dom.minidom import Document, Element, parseString
 
-from typing import Any, Optional, List
-from xml.dom.minidom import parseString, Document, Element
-
-from namer.configuration import NamerConfig
 from namer.command import set_permissions
 from namer.comparison_results import LookedUpFileInfo, Performer
+from namer.configuration import NamerConfig
 from namer.videophash import PerceptualHash
 
 

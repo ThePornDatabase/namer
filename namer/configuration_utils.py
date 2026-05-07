@@ -7,11 +7,11 @@ import random
 import re
 import shutil
 from importlib import resources
-from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
-from configupdater import ConfigUpdater
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple
 
 import orjson
+from configupdater import ConfigUpdater
 from loguru import logger
 
 from namer import database

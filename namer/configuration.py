@@ -10,9 +10,9 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Pattern, Sequence
-from configupdater import ConfigUpdater
 
 import orjson
+from configupdater import ConfigUpdater
 from requests_cache import CachedSession
 
 from namer import database
