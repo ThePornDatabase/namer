@@ -5,6 +5,7 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 
 import argparse
 import itertools
+import random
 import re
 import sys
 from contextlib import suppress
@@ -29,6 +30,16 @@ from namer.fileinfo import FileInfo
 from namer.http import Http, RequestType
 from namer.name_formatter import PartialFormatter
 from namer.videophash import imagehash, PerceptualHash
+
+DEFAULT_BACKGROUNDS = [
+    'https://cdn.theporndb.net/images/scene/default_1.png',
+    'https://cdn.theporndb.net/images/scene/default_2.png',
+    'https://cdn.theporndb.net/images/scene/default_3.png',
+]
+
+
+def __get_default_background():
+    return random.choice(DEFAULT_BACKGROUNDS)
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
@@ -326,10 +337,10 @@ def __json_to_fileinfo(data: dict, url: str, json_response: str, name_parts: Opt
         file_info.external_id = data['external_id']
 
     if 'poster' in data:
-        file_info.poster_url = data['poster']
+        file_info.poster_url = data['poster'] if data['poster'] else __get_default_background()
 
     if 'background' in data and data['background']:
-        file_info.background_url = data['background']['large']
+        file_info.background_url = data['background']['large'] if data['background']['large'] else __get_default_background()
 
     if 'trailer' in data:
         file_info.trailer_url = data['trailer']
