@@ -134,7 +134,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     for performer in info.performers:
         actor = add_sub_element(doc, root, 'actor')
         add_sub_element(doc, actor, 'type', 'Actor')
-        add_sub_element(doc, actor, 'name', performer.name)
+        add_sub_element(doc, actor, 'name', f'{performer.name} ({performer.disambiguation})' if config.use_disambiguation and performer.disambiguation else performer.name)
         add_sub_element(doc, actor, 'alias', performer.alias)
         add_sub_element(doc, actor, 'role', performer.role)
 

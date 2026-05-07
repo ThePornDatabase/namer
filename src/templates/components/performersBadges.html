@@ -19,7 +19,7 @@
         {% set gender = performer['role'] if performer['role'] in background_colours else 'default' %}
         {% set background_colour, gender_icon = background_colours[gender] %}
 
-        {% with name = performer['name'] %}
+        {% with name = performer['name'] ~ ' (' ~ performer['disambiguation'] ~ ')' if performer['disambiguation'] else performer['name'] %}
             {% set background_colour, gender_icon = background_colours[gender] %}
             {% include 'render/performerBadge.html' %}
         {% endwith %}

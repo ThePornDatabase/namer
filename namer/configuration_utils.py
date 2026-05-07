@@ -278,6 +278,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'max_ffmpeg_workers': ('Phash', to_int, from_int),
     'use_gpu': ('Phash', to_bool, from_bool),
     'mark_collected': ('metadata', to_bool, from_bool),
+    'use_disambiguation': ('metadata', to_bool, from_bool),
     'write_nfo': ('metadata', to_bool, from_bool),
     'enabled_tagging': ('metadata', to_bool, from_bool),
     'enabled_poster': ('metadata', to_bool, from_bool),
