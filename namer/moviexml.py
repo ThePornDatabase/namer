@@ -5,13 +5,12 @@ or used in renaming the video file.
 """
 
 from pathlib import Path
+from typing import Any, List, Optional
+from xml.dom.minidom import Document, Element, parseString
 
-from typing import Any, Optional, List
-from xml.dom.minidom import parseString, Document, Element
-
-from namer.configuration import NamerConfig
 from namer.command import set_permissions
 from namer.comparison_results import LookedUpFileInfo, Performer
+from namer.configuration import NamerConfig
 from namer.videophash import PerceptualHash
 
 
@@ -134,7 +133,7 @@ def write_movie_xml_file(info: LookedUpFileInfo, config: NamerConfig, trailer: O
     for performer in info.performers:
         actor = add_sub_element(doc, root, 'actor')
         add_sub_element(doc, actor, 'type', 'Actor')
-        add_sub_element(doc, actor, 'name', performer.name)
+        add_sub_element(doc, actor, 'name', f'{performer.name} ({performer.disambiguation})' if config.use_disambiguation and performer.disambiguation else performer.name)
         add_sub_element(doc, actor, 'alias', performer.alias)
         add_sub_element(doc, actor, 'role', performer.role)
 

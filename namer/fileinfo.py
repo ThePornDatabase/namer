@@ -2,8 +2,8 @@
 Parse string in to FileNamePart define in namer_types.
 """
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from pathlib import PurePath
 from typing import List, Optional, Pattern
 

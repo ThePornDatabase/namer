@@ -18,6 +18,7 @@ class Performer:
     """
 
     name: str
+    disambiguation: Optional[str]
     alias: Optional[str]
     role: Optional[str]
     image: Optional[Union[Path, str]]
@@ -28,21 +29,22 @@ class Performer:
     Other performers are also used in name matching, if females are attempted first.
     """
 
-    def __init__(self, name, role=None, image=None, alias=None):
+    def __init__(self, name, role=None, image=None, alias=None, disambiguation=None):
         self.name = name
+        self.disambiguation = disambiguation
         self.alias = alias
         self.role = role
         self.image = image
 
     def __str__(self):
         name = 'Unknown' if self.name is None else self.name
-        if self.role:
-            return name + ' (' + self.role + ')'
+        if self.disambiguation:
+            return name + ' (' + self.disambiguation + ')'
 
         return name
 
     def __repr__(self):
-        return f'Performer[name={self.name}, role={self.role}, image={self.image}, alias={self.alias}]'
+        return f'Performer[name={self.name}, role={self.role}, image={self.image}, alias={self.alias}, disambiguation={self.disambiguation}]'
 
 
 class SceneType(str, Enum):

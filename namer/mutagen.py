@@ -8,9 +8,9 @@ from typing import Any, List, Optional
 from loguru import logger
 from mutagen.mp4 import MP4, MP4Cover, MP4StreamInfoError
 
+from namer.comparison_results import LookedUpFileInfo
 from namer.configuration import NamerConfig
 from namer.ffmpeg import FFMpeg, FFProbeResults
-from namer.comparison_results import LookedUpFileInfo
 
 
 def resolution_to_hdv_setting(resolution: Optional[int]) -> int:
@@ -116,7 +116,9 @@ def update_mp4_file(mp4: Path, looked_up: LookedUpFileInfo, poster: Optional[Pat
 
         for performer in looked_up.performers:
             if performer.name:
-                itunes_movie += f'<dict> <key>name</key> <string>{performer.name}</string>'
+                performer_name = f'{performer.name} ({performer.disambiguation})' if config.use_disambiguation and performer.disambiguation else performer.name
+
+                itunes_movie += f'<dict> <key>name</key> <string>{performer_name}</string>'
                 if performer.role:
                     itunes_movie += f'<key>role</key> <string>{performer.role}</string>'
                 itunes_movie += '</dict>'

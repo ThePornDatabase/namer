@@ -10,9 +10,9 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Pattern, Sequence
-from configupdater import ConfigUpdater
 
 import orjson
+from configupdater import ConfigUpdater
 from requests_cache import CachedSession
 
 from namer import database
@@ -358,6 +358,11 @@ class NamerConfig:
     Mark any matched video as "collected" in TPDB, allowing TPDB to keep track of videos you have collected.
     """
 
+    use_disambiguation: bool = False
+    """
+    Use disambiguation for performer names?
+    """
+
     require_match_phash_top: int = 3
     """
     If there is a PHASH match, require any name match be in the top N results
@@ -598,6 +603,7 @@ class NamerConfig:
                 'default_genre': self.default_genre,
                 'language': self.language,
                 'mark_collected': self.mark_collected,
+                'use_disambiguation': self.use_disambiguation,
             },
             'Watchdog Config': {
                 'ignored_dir_regex': self.ignored_dir_regex.pattern,

@@ -7,11 +7,11 @@ import random
 import re
 import shutil
 from importlib import resources
-from typing import Dict, List, Optional, Callable, Pattern, Any, Tuple
-from configupdater import ConfigUpdater
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple
 
 import orjson
+from configupdater import ConfigUpdater
 from loguru import logger
 
 from namer import database
@@ -278,6 +278,7 @@ field_info: Dict[str, Tuple[str, Optional[Callable[[Optional[str]], Any]], Optio
     'max_ffmpeg_workers': ('Phash', to_int, from_int),
     'use_gpu': ('Phash', to_bool, from_bool),
     'mark_collected': ('metadata', to_bool, from_bool),
+    'use_disambiguation': ('metadata', to_bool, from_bool),
     'write_nfo': ('metadata', to_bool, from_bool),
     'enabled_tagging': ('metadata', to_bool, from_bool),
     'enabled_poster': ('metadata', to_bool, from_bool),

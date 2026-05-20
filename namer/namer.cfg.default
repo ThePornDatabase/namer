@@ -216,6 +216,9 @@ language = eng
 # Should tpdb be used to keep track of which videos you've collected?
 mark_collected = False
 
+# Use disambiguation for performer names?
+use_disambiguation = False
+
 [duplicates]
 
 # If this is set to false duplicates will be discarded, and a rough selection criteria can be configured below

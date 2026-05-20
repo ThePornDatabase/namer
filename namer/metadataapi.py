@@ -5,6 +5,7 @@ look up metadata (actors, studio, creation data, posters, etc) from the porndb.
 
 import argparse
 import itertools
+import random
 import re
 import sys
 from contextlib import suppress
@@ -16,19 +17,29 @@ from urllib.parse import quote
 import orjson
 import rapidfuzz
 from loguru import logger
+from orjson import JSONDecodeError
 from PIL import Image
 from rapidfuzz import utils
-from orjson import JSONDecodeError
 from unidecode import unidecode
 
+from namer.command import Command, get_inplace_name_template_by_type, make_command, set_permissions
 from namer.comparison_results import ComparisonResult, ComparisonResults, HashType, LookedUpFileInfo, Performer, SceneHash, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config, verify_configuration
-from namer.command import get_inplace_name_template_by_type, make_command, set_permissions, Command
 from namer.fileinfo import FileInfo
 from namer.http import Http, RequestType
 from namer.name_formatter import PartialFormatter
 from namer.videophash import imagehash, PerceptualHash
+
+DEFAULT_BACKGROUNDS = [
+    'https://cdn.theporndb.net/images/scene/default_1.png',
+    'https://cdn.theporndb.net/images/scene/default_2.png',
+    'https://cdn.theporndb.net/images/scene/default_3.png',
+]
+
+
+def __get_default_background():
+    return random.choice(DEFAULT_BACKGROUNDS)
 
 
 def __find_best_match(query: Optional[str], match_terms: List[str], config: NamerConfig) -> Tuple[str, float]:
@@ -326,10 +337,10 @@ def __json_to_fileinfo(data: dict, url: str, json_response: str, name_parts: Opt
         file_info.external_id = data['external_id']
 
     if 'poster' in data:
-        file_info.poster_url = data['poster']
+        file_info.poster_url = data['poster'] if data['poster'] else __get_default_background()
 
     if 'background' in data and data['background']:
-        file_info.background_url = data['background']['large']
+        file_info.background_url = data['background']['large'] if data['background']['large'] else __get_default_background()
 
     if 'trailer' in data:
         file_info.trailer_url = data['trailer']
@@ -352,6 +363,9 @@ def __json_to_fileinfo(data: dict, url: str, json_response: str, name_parts: Opt
         performer_name = json_performer['name']
         if 'parent' in json_performer and json_performer['parent'] and 'name' in json_performer['parent']:
             performer_name = json_performer['parent']['name']
+            performer_disambiguation = json_performer['parent']['disambiguation'] if 'disambiguation' in json_performer['parent'] else None
+            if config.use_disambiguation and performer_disambiguation:
+                performer_name += f" ({performer_disambiguation})"
 
         performer = Performer(performer_name)
         performer.alias = json_performer['name']

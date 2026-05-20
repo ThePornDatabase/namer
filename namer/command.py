@@ -4,10 +4,10 @@ Tools for working with files and directories in namer.
 
 import argparse
 import gzip
-from dataclasses import dataclass
 import os
 import shutil
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from platform import system
 from typing import Iterable, List, Optional, Sequence, Tuple
@@ -15,11 +15,11 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 import jsonpickle
 from loguru import logger
 
+from namer.comparison_results import ComparisonResults, LookedUpFileInfo, SceneType
 from namer.configuration import NamerConfig
 from namer.configuration_utils import default_config
 from namer.ffmpeg import FFProbeResults
-from namer.fileinfo import parse_file_name, FileInfo
-from namer.comparison_results import ComparisonResults, LookedUpFileInfo, SceneType
+from namer.fileinfo import FileInfo, parse_file_name
 
 
 # noinspection PyDataclass

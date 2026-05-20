@@ -33,8 +33,8 @@ class UnitTestAsTheDefaultExecution(unittest.TestCase):
         """
         self.assertEqual(str(Performer(None, None)), 'Unknown')
         self.assertEqual(str(Performer('Name', None)), 'Name')
-        self.assertEqual(str(Performer(None, 'Role')), 'Unknown (Role)')
-        self.assertEqual(str(Performer('Name', 'Role')), 'Name (Role)')
+        self.assertEqual(str(Performer(None, disambiguation='Disambiguation')), 'Unknown (Disambiguation)')
+        self.assertEqual(str(Performer('Name', disambiguation='Disambiguation')), 'Name (Disambiguation)')
 
     def test_default_no_config(self):
         """
