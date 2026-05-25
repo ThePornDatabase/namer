@@ -52,7 +52,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11
 
       - name: Install Node
         uses: actions/setup-node@v6
@@ -106,7 +106,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11
 
       - name: Install Node
         uses: actions/setup-node@v6
@@ -235,7 +235,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11
 
       - uses: actions/setup-node@v6
         with:

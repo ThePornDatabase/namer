@@ -34,7 +34,7 @@ RUN apt-get update \
 RUN pipx install poetry
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 RUN . /root/.bashrc && nvm install 24
-RUN . /root/.bashrc && npm i -g pnpm@latest-10
+RUN . /root/.bashrc && npm i -g pnpm@latest-11
 
 RUN mkdir /work/
 COPY . /work
