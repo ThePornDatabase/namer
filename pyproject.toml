@@ -37,7 +37,7 @@ jsonpickle = "^4.0"
 ConfigUpdater = "^3.2"
 oshash = "^0.1"
 pony = "^0.7"
-numpy = "^2.1"
+numpy = "^2.1, <2.4"
 scipy = "^1.13"
 orjson = "^3.10"
 
