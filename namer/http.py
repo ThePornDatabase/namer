@@ -1,10 +1,39 @@
+import http.cookiejar
 from enum import Enum
 from io import BytesIO
 from typing import Optional
 
 import requests
+import requests.adapters
+import requests.cookies
+import requests.models
 from loguru import logger
 from requests_cache import CachedSession
+
+
+def patch_requests_type_annotations():
+    """
+    Workaround for requests 2.34.0+ runtime bug (psf/requests#7456) where types referenced
+    in class annotations (RequestsCookieJar, HTTPAdapter, CookieJar, Self) were only imported
+    under TYPE_CHECKING in requests.models, causing typing.get_type_hints() and cattrs/attrs
+    serialization in requests-cache to fail with NameError.
+    """
+    try:
+        from typing import Self
+    except ImportError:
+        from typing_extensions import Self
+
+    for name, target in (
+        ('RequestsCookieJar', requests.cookies.RequestsCookieJar),
+        ('HTTPAdapter', requests.adapters.HTTPAdapter),
+        ('CookieJar', http.cookiejar.CookieJar),
+        ('Self', Self),
+    ):
+        if not hasattr(requests.models, name):
+            setattr(requests.models, name, target)
+
+
+patch_requests_type_annotations()
 
 
 class RequestType(Enum):
